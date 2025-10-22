@@ -10,4 +10,4 @@ See the [LICENSE](LICENSE) file for the full text of the license.
 
 **Supervisors:**  
 - Dr. Peilong Li — Associate Professor of Computer Science, *Elizabethtown College*  
-- Dr. Su Man — Assistant Professor of Computer Science, *Penn State University*
+- Dr. Suman Saha — Assistant Professor of Computer Science, *Penn State University*
