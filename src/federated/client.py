@@ -62,27 +62,36 @@ class KerasClient(fl.client.NumPyClient):
         loss, acc = self.model.evaluate(self.x_test, self.y_test, verbose=0)
         
         # 예측 결과 계산 (상세 통계용)
-        y_pred = self.model.predict(self.x_test, verbose=0)
+        y_prob = self.model.predict(self.x_test, verbose=0)
+        if y_prob.ndim == 2 and y_prob.shape[1] == 1:
+            y_prob = y_prob.ravel()
         
-        # 이진 분류인 경우 (출력 shape이 (None, 1))
-        if y_pred.shape[1] == 1:
-            y_pred_classes = (y_pred > 0.5).astype(int).flatten()
+        if self.num_classes == 2:
+            if y_prob.ndim > 1:
+                # 안전장치 - sigmoid 출력이 2D일 경우 첫 번째 컬럼만 사용
+                y_prob_flat = y_prob[:, 0]
+            else:
+                y_prob_flat = y_prob
+            y_pred_classes = (y_prob_flat >= 0.5).astype(int)
         else:
             # 다중 분류
-            y_pred_classes = np.argmax(y_pred, axis=1)
+            if y_prob.ndim == 1:
+                raise ValueError("Expected 2D probabilities for multi-class output.")
+            y_pred_classes = np.argmax(y_prob, axis=1)
         
+        y_true = self.y_test.astype(int)
         # 상세 통계
-        total = len(self.y_test)
-        attack_actual = int(np.sum(self.y_test == 1))
-        normal_actual = int(np.sum(self.y_test == 0))
+        total = len(y_true)
+        attack_actual = int(np.sum(y_true == 1))
+        normal_actual = int(np.sum(y_true == 0))
         attack_predicted = int(np.sum(y_pred_classes == 1))
         normal_predicted = int(np.sum(y_pred_classes == 0))
         
         # Confusion matrix 계산
-        true_positives = int(np.sum((self.y_test == 1) & (y_pred_classes == 1)))
-        true_negatives = int(np.sum((self.y_test == 0) & (y_pred_classes == 0)))
-        false_positives = int(np.sum((self.y_test == 0) & (y_pred_classes == 1)))
-        false_negatives = int(np.sum((self.y_test == 1) & (y_pred_classes == 0)))
+        true_positives = int(np.sum((y_true == 1) & (y_pred_classes == 1)))
+        true_negatives = int(np.sum((y_true == 0) & (y_pred_classes == 0)))
+        false_positives = int(np.sum((y_true == 0) & (y_pred_classes == 1)))
+        false_negatives = int(np.sum((y_true == 1) & (y_pred_classes == 0)))
         
         metrics = {
             "accuracy": float(acc),
@@ -101,8 +110,21 @@ class KerasClient(fl.client.NumPyClient):
         return float(loss), total, metrics
 
 def simulate_clients() -> Dict[str, Any]:
-    x_train, y_train, x_test, y_test = load_dataset(CFG["data"]["name"])
-    parts = partition_non_iid(x_train, y_train, num_clients=CFG["data"]["num_clients"])
+    data_cfg = CFG["data"]
+    test_size = 1.0 - data_cfg.get("train_split", 0.8)
+    x_train, y_train, x_test, y_test = load_dataset(
+        data_cfg["name"],
+        data_path=data_cfg.get("path", "data/raw/Bot-IoT"),
+        max_samples=data_cfg.get("max_samples"),
+        test_size=test_size,
+        random_state=data_cfg.get("random_state", 42),
+    )
+    parts = partition_non_iid(
+        x_train,
+        y_train,
+        num_clients=data_cfg["num_clients"],
+        seed=data_cfg.get("random_state", 42),
+    )
     metadata = {
         "num_classes": int(len(np.unique(y_train))),
         "input_shape": x_train.shape[1:],

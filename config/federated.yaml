@@ -8,7 +8,9 @@ client:
   batch_size: 64
 
 data:
-  name: "placeholder_mnist"   # replace with bot-iot/ton-iot in later phases
+  name: "bot_iot"
+  path: "data/raw/Bot-IoT"
   train_split: 0.8
   num_clients: 4
   max_samples: 10000
+  random_state: 42
