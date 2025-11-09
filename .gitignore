@@ -1,1 +1,17 @@
+# macOS
+.DS_Store
+
+# Python venv
 .venv/
+
+# Raw data
+data/raw/
+data/*.csv
+*.csv
+
+# 기타 캐시
+__pycache__/
+.ipynb_checkpoints/
+src/.DS_Store
+src/data/.DS_Store
+data/.DS_Store
