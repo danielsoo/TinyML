@@ -5,7 +5,6 @@
 .venv/
 
 # Raw data
-data/raw/
 data/*.csv
 *.csv
 
