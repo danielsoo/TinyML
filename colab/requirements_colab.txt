@@ -1,10 +1,8 @@
 # /colab/requirements_colab.txt
-tensorflow==2.12.*
+# Generated dynamically via train_colab.ipynb; excludes tensorflow/numpy as they ship with Colab.
 flwr<2
-numpy<2.0
 pandas
 scikit-learn
 matplotlib
 jupyter
 adversarial-robustness-toolbox>=1,<2
-
