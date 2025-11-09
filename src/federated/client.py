@@ -116,10 +116,30 @@ def simulate_clients() -> Dict[str, Any]:
 def client_fn(context: Context):
     cid_value = getattr(context, "client_id", None)
     if cid_value is None:
+        cid_value = getattr(context, "node_id", None)
+    if cid_value is None:
         cid_value = context.node_config.get("cid")
     if cid_value is None:
+        cid_value = context.node_config.get("client_id")
+    if cid_value is None:
+        cid_value = context.node_config.get("partition-id")
+    if cid_value is None:
+        props = getattr(context, "properties", None)
+        if isinstance(props, dict):
+            cid_value = props.get("cid") or props.get("partition-id")
+    if cid_value is None:
         raise ValueError("Unable to determine client id from Flower context.")
-    cid_int = int(cid_value)
+    try:
+        cid_int = int(cid_value)
+    except (TypeError, ValueError):
+        if isinstance(cid_value, str):
+            digits = "".join(ch for ch in cid_value if ch.isdigit())
+            if digits:
+                cid_int = int(digits)
+            else:
+                raise ValueError(f"Unrecognized client id format: {cid_value!r}")
+        else:
+            raise ValueError(f"Unrecognized client id type: {type(cid_value)}")
     parts = SIM_STATE["partitions"]
     x_test, y_test = SIM_STATE["evaluation"]
     num_classes = SIM_STATE["metadata"]["num_classes"]
