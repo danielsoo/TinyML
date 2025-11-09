@@ -1,3 +1,4 @@
+# /config/federated.yaml
 server:
   rounds: 3
   min_available_clients: 2

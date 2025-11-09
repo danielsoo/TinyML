@@ -76,6 +76,38 @@ TinyML/
 
 ---
 
+## Running on Google Colab
+
+Use the separate `requirements_colab.txt` to avoid macOS-specific packages when installing on Linux-based runtimes such as Google Colab.
+
+1. **Clone the repo and install dependencies**
+   ```python
+   !git clone https://github.com/danielsoo/TinyML.git
+   %cd TinyML
+   !pip install -r requirements_colab.txt
+   ```
+
+2. **Access the dataset**
+   - Option A: Upload the Kaggle ZIP to Google Drive and mount it
+     ```python
+     from google.colab import drive
+     drive.mount("/content/drive")
+     ```
+     Then point `load_bot_iot(data_path="/content/drive/MyDrive/…")` to the mounted directory.
+     
+   - Option B: Download directly inside Colab using the Kaggle CLI (requires uploading `kaggle.json` just like on macOS).
+
+3. **Run the notebook or simulation**
+   ```python
+   !python -m src.federated.client
+   ```
+   Adjust `config/federated.yaml` (e.g., `max_samples`) for the available GPU/CPU quota. Exported models (e.g., `.h5`, `.tflite`) can be saved to Drive or downloaded via `google.colab.files.download`.
+
+4. **End-to-end Colab workflow**
+   - Open `colab/train_colab.ipynb` in Colab to walk through GPU checks, repo sync, dependency installation, dataset prep, training, and Drive backup of exported models.
+
+---
+
 ## Federated Learning Simulation
 
 The Flower simulation spins up multiple virtual IoT clients, each training on a partition of the Bot-IoT dataset. Results include detailed metrics (accuracy, precision/recall, confusion matrix) per round.
@@ -105,9 +137,9 @@ data:
 ### 2. Launch the simulation
 
 ```bash
-make run-fl
-# or
-python -m src.federated.client
+make run-fl                             # default run without saving a model
+# or specify an export path
+python -m src.federated.client --save-model models/global_model.h5
 ```
 
 **During execution you will see logs similar to:**
@@ -156,6 +188,7 @@ Loss: 0.1421
 Once a model is trained centrally (or after FL aggregation), it can be exported to TFLite:
 
 ```bash
+# Use the saved .h5 from the federated run or generate a fresh one
 python -m src.tinyml.export_tflite
 ```
 

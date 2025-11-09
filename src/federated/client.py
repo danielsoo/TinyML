@@ -1,14 +1,31 @@
+# /src/federated/client.py
 from __future__ import annotations
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Optional
+import argparse
 import numpy as np
 import flwr as fl
 import yaml
 from pathlib import Path
 from src.data.loader import load_dataset, partition_non_iid
 from src.models.nets import make_small_cnn, make_mlp
+from flwr.common import parameters_to_ndarrays
+from src.tinyml.export_tflite import export_tflite
 
 CFG = yaml.safe_load(Path("config/federated.yaml").read_text())
 SIM_STATE: Tuple[Tuple[np.ndarray, ...], Dict[int, Dict[str, np.ndarray]]]
+
+class SaveModelStrategy(fl.server.strategy.FedAvg):
+    """FedAvg strategy that keeps the latest aggregated parameters."""
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.latest_parameters: Optional[fl.common.Parameters] = None
+
+    def aggregate_fit(self, server_round, results, failures):
+        aggregated_parameters, aggregated_metrics = super().aggregate_fit(server_round, results, failures)
+        if aggregated_parameters is not None:
+            self.latest_parameters = aggregated_parameters
+        return aggregated_parameters, aggregated_metrics
 
 class KerasClient(fl.client.NumPyClient):
     def __init__(self, x_train, y_train, x_test, y_test):
@@ -94,7 +111,7 @@ def client_fn(cid: str):
     data = parts[cid_int]
     return KerasClient(data["x"], data["y"], x_test, y_test)
 
-def start_simulation():
+def start_simulation(save_path: Optional[str] = None):
     def evaluate_metrics_aggregation_fn(results):
         """평가 결과를 집계하고 상세 정보 출력"""
         if not results:
@@ -170,10 +187,10 @@ def start_simulation():
         
         return aggregated
     
-    strategy = fl.server.strategy.FedAvg(
+    strategy = SaveModelStrategy(
         evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation_fn
     )
-    fl.simulation.start_simulation(
+    history = fl.simulation.start_simulation(
         client_fn=client_fn,
         num_clients=CFG["data"]["num_clients"],
         config=fl.server.ServerConfig(num_rounds=CFG["server"]["rounds"]),
@@ -181,10 +198,42 @@ def start_simulation():
         client_resources={"num_cpus": 1},
     )
 
+    if save_path and strategy.latest_parameters is not None:
+        (x_test, y_test), parts = SIM_STATE
+        sample_client = next(iter(parts.values()))
+        input_shape = sample_client["x"].shape[1:]
+        num_classes = len(np.unique(sample_client["y"]))
+
+        if len(input_shape) > 1:
+            model = make_small_cnn(input_shape=input_shape, num_classes=num_classes)
+        else:
+            model = make_mlp(input_shape=input_shape, num_classes=num_classes)
+
+        weights = parameters_to_ndarrays(strategy.latest_parameters)
+        model.set_weights(weights)
+
+        save_path = Path(save_path)
+        save_path.parent.mkdir(parents=True, exist_ok=True)
+
+        if save_path.suffix == ".tflite":
+            export_tflite(model, str(save_path))
+        elif save_path.suffix == ".h5":
+            model.save(str(save_path))
+            print(f"✅ Saved global model to {save_path}")
+        else:
+            np.savez(str(save_path), *weights)
+            print(f"✅ Saved raw weights (NumPy .npz) to {save_path}")
+
+    return history
+
 def main():
+    parser = argparse.ArgumentParser(description="Flower Federated Simulation")
+    parser.add_argument("--save-model", type=str, default=None, help="Path to export the aggregated global model (.h5, .tflite, or .npz).")
+    args = parser.parse_args()
+
     global SIM_STATE
     SIM_STATE = simulate_clients()
-    start_simulation()
+    start_simulation(save_path=args.save_model)
 
 
 if __name__ == "__main__":

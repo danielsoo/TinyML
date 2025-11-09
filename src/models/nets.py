@@ -1,3 +1,4 @@
+# /src/models/nets.py
 from __future__ import annotations
 import tensorflow as tf
 
@@ -19,7 +20,6 @@ def make_small_cnn(input_shape=(28, 28, 1), num_classes=10) -> tf.keras.Model:
 def make_mlp(input_shape: tuple, num_classes: int, hidden_units: list = [64, 32]) -> tf.keras.Model:
     """
     MLP (Multi-Layer Perceptron) 모델 - Tabular 데이터용 (Bot-IoT 등)
-    
     읽는 것: input_shape (예: (35,) - 35개 특징)
     반환하는 것: 학습 가능한 모델
     목적: Bot-IoT 같은 표 형식 데이터를 분류하는 모델 생성

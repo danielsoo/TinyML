@@ -1,0 +1,10 @@
+# /colab/requirements_colab.txt
+tensorflow==2.12.*
+flwr<2
+numpy<2.0
+pandas
+scikit-learn
+matplotlib
+jupyter
+adversarial-robustness-toolbox>=1,<2
+
