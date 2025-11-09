@@ -12,9 +12,16 @@ def make_small_cnn(input_shape=(28, 28, 1), num_classes=10) -> tf.keras.Model:
     x = tf.keras.layers.Conv2D(32, 3, activation="relu", padding="same")(x)
     x = tf.keras.layers.GlobalAveragePooling2D()(x)
     x = tf.keras.layers.Dense(32, activation="relu")(x)
-    outputs = tf.keras.layers.Dense(num_classes, activation="softmax")(x)
+
+    if num_classes <= 2:
+        outputs = tf.keras.layers.Dense(1, activation="sigmoid")(x)
+        loss = "binary_crossentropy"
+    else:
+        outputs = tf.keras.layers.Dense(num_classes, activation="softmax")(x)
+        loss = "sparse_categorical_crossentropy"
+
     model = tf.keras.Model(inputs, outputs)
-    model.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"])
+    model.compile(optimizer="adam", loss=loss, metrics=["accuracy"])
     return model
 
 def make_mlp(input_shape: tuple, num_classes: int, hidden_units: list = [64, 32]) -> tf.keras.Model:
@@ -33,7 +40,7 @@ def make_mlp(input_shape: tuple, num_classes: int, hidden_units: list = [64, 32]
         x = tf.keras.layers.Dropout(0.2)(x)  # 과적합 방지
     
     # Output layer
-    if num_classes == 2:
+    if num_classes <= 2:
         # 이진 분류 (정상/공격)
         outputs = tf.keras.layers.Dense(1, activation="sigmoid")(x)
         loss = "binary_crossentropy"

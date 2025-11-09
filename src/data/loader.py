@@ -103,9 +103,21 @@ def load_dataset(
     """
     if name == "bot_iot":
         return load_bot_iot(**kwargs)
+<<<<<<< HEAD
     raise ValueError(f"Unknown dataset: {name}")
 
 
+=======
+    if name == "placeholder_mnist":
+        import tensorflow as tf
+
+        (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
+        x_train = (x_train.astype("float32") / 255.0)[..., None]
+        x_test = (x_test.astype("float32") / 255.0)[..., None]
+        return x_train, y_train, x_test, y_test
+    raise ValueError(f"Unknown dataset: {name}")
+
+>>>>>>> ebb5a31 (Change settings)
 def partition_non_iid(
     x: np.ndarray,
     y: np.ndarray,
@@ -114,13 +126,19 @@ def partition_non_iid(
     seed: int = 42,
 ) -> Dict[int, Dict[str, np.ndarray]]:
     """
+<<<<<<< HEAD
     Simple partitioning helper.
     Currently: shuffle indices and split into `num_clients` contiguous shards.
+=======
+    Stratified partitioning to ensure each client receives samples from each label.
+    Returns {client_id: {'x':..., 'y':...}}.
+>>>>>>> ebb5a31 (Change settings)
     """
     if num_clients <= 0:
         raise ValueError("num_clients must be positive")
 
     rng = np.random.default_rng(seed)
+<<<<<<< HEAD
     indices = np.arange(len(y))
     rng.shuffle(indices)
 
@@ -128,4 +146,27 @@ def partition_non_iid(
     clients: Dict[int, Dict[str, np.ndarray]] = {}
     for cid, idx in enumerate(splits):
         clients[cid] = {"x": x[idx], "y": y[idx]}
+=======
+    clients: Dict[int, Dict[str, np.ndarray]] = {cid: {"x": [], "y": []} for cid in range(num_clients)}
+
+    unique_labels = np.unique(y)
+    idx_by_lbl = {lbl: rng.permutation(np.where(y == lbl)[0]) for lbl in unique_labels}
+
+    for lbl, indices in idx_by_lbl.items():
+        splits = np.array_split(indices, num_clients)
+        for cid, split in enumerate(splits):
+            if split.size == 0:
+                continue
+            clients[cid]["x"].append(x[split])
+            clients[cid]["y"].append(y[split])
+
+    for cid in range(num_clients):
+        if clients[cid]["x"]:
+            clients[cid]["x"] = np.concatenate(clients[cid]["x"], axis=0)
+            clients[cid]["y"] = np.concatenate(clients[cid]["y"], axis=0)
+        else:
+            clients[cid]["x"] = np.empty((0, x.shape[1]), dtype=x.dtype)
+            clients[cid]["y"] = np.empty((0,), dtype=y.dtype)
+
+>>>>>>> ebb5a31 (Change settings)
     return clients

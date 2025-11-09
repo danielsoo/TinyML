@@ -1,16 +1,34 @@
-# /config/federated.yaml
-server:
-  rounds: 3
-  min_available_clients: 2
-
-client:
-  local_epochs: 1
-  batch_size: 64
+# config/federated.yaml
 
 data:
-  name: "bot_iot"
-  path: "data/raw/Bot-IoT"
-  train_split: 0.8
+  # bot_iot 또는 mnist 선택
+  name: bot_iot
+
+  # Bot-IoT CSV 올려둔 경로 (Colab 기준: /content/TinyML/data/raw/Bot-IoT)
+  path: "/content/TinyML/data/raw/Bot-IoT"
+
+  # 클라이언트 수
   num_clients: 4
-  max_samples: 10000
-  random_state: 42
+
+  # 너무 크면 학습 오래 걸리니까 샘플 수 제한 (원하면 늘려도 됨)
+  max_samples: 200000
+
+model:
+  # mlp 또는 cnn (Bot-IoT면 보통 mlp)
+  name: mlp
+
+federated:
+  num_rounds: 3
+
+  # 각 라운드에 학습에 참여할 비율 (전부 쓰면 1.0)
+  fraction_fit: 1.0
+  fraction_evaluate: 1.0
+
+  # 로컬 학습 설정
+  local_epochs: 2
+  batch_size: 128
+
+  # 전략 내부에서 쓸 수 있도록 남겨둠
+  min_fit_clients: 4
+  min_evaluate_clients: 4
+  min_available_clients: 4

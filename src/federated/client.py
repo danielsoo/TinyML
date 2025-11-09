@@ -61,22 +61,37 @@ class KerasClient(fl.client.NumPyClient):
         self.model.set_weights(parameters)
         loss, acc = self.model.evaluate(self.x_test, self.y_test, verbose=0)
         
+<<<<<<< HEAD
         # 예측 결과 계산 (상세 통계용)
+=======
+        y_true = self.y_test.astype(int)
+>>>>>>> ebb5a31 (Change settings)
         y_prob = self.model.predict(self.x_test, verbose=0)
         if y_prob.ndim == 2 and y_prob.shape[1] == 1:
             y_prob = y_prob.ravel()
         
+<<<<<<< HEAD
         if self.num_classes == 2:
             if y_prob.ndim > 1:
                 # 안전장치 - sigmoid 출력이 2D일 경우 첫 번째 컬럼만 사용
+=======
+        if self.num_classes <= 2:
+            # 이진 분류
+            if y_prob.ndim > 1:
+>>>>>>> ebb5a31 (Change settings)
                 y_prob_flat = y_prob[:, 0]
             else:
                 y_prob_flat = y_prob
             y_pred_classes = (y_prob_flat >= 0.5).astype(int)
         else:
+<<<<<<< HEAD
             # 다중 분류
             if y_prob.ndim == 1:
                 raise ValueError("Expected 2D probabilities for multi-class output.")
+=======
+            if y_prob.ndim == 1:
+                raise ValueError("Expected 2D probability array for multi-class output.")
+>>>>>>> ebb5a31 (Change settings)
             y_pred_classes = np.argmax(y_prob, axis=1)
         
         y_true = self.y_test.astype(int)
@@ -110,6 +125,7 @@ class KerasClient(fl.client.NumPyClient):
         return float(loss), total, metrics
 
 def simulate_clients() -> Dict[str, Any]:
+<<<<<<< HEAD
     data_cfg = CFG["data"]
     test_size = 1.0 - data_cfg.get("train_split", 0.8)
     x_train, y_train, x_test, y_test = load_dataset(
@@ -125,9 +141,17 @@ def simulate_clients() -> Dict[str, Any]:
         num_clients=data_cfg["num_clients"],
         seed=data_cfg.get("random_state", 42),
     )
+=======
+    x_train, y_train, x_test, y_test = load_dataset(CFG["data"]["name"])
+    parts = partition_non_iid(x_train, y_train, num_clients=CFG["data"]["num_clients"])
+    unique_labels = np.unique(y_train)
+    is_binary = set(unique_labels).issubset({0, 1})
+    num_classes = 2 if is_binary else len(unique_labels)
+>>>>>>> ebb5a31 (Change settings)
     metadata = {
-        "num_classes": int(len(np.unique(y_train))),
+        "num_classes": int(num_classes),
         "input_shape": x_train.shape[1:],
+        "is_binary": is_binary,
     }
     return {
         "evaluation": (x_test, y_test),
