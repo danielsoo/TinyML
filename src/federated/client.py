@@ -114,37 +114,68 @@ def simulate_clients() -> Dict[str, Any]:
     }
 
 def client_fn(context: Context):
-    cid_value = getattr(context, "client_id", None)
-    if cid_value is None:
-        cid_value = getattr(context, "node_id", None)
-    if cid_value is None:
-        cid_value = context.node_config.get("cid")
-    if cid_value is None:
-        cid_value = context.node_config.get("client_id")
-    if cid_value is None:
-        cid_value = context.node_config.get("partition-id")
-    if cid_value is None:
-        props = getattr(context, "properties", None)
-        if isinstance(props, dict):
-            cid_value = props.get("cid") or props.get("partition-id")
-    if cid_value is None:
-        raise ValueError("Unable to determine client id from Flower context.")
-    try:
-        cid_int = int(cid_value)
-    except (TypeError, ValueError):
-        if isinstance(cid_value, str):
-            digits = "".join(ch for ch in cid_value if ch.isdigit())
-            if digits:
-                cid_int = int(digits)
-            else:
-                raise ValueError(f"Unrecognized client id format: {cid_value!r}")
-        else:
-            raise ValueError(f"Unrecognized client id type: {type(cid_value)}")
+    """Create a client instance for a given Flower context.
+
+    Flower 버전에 따라 context 안에서 cid를 주는 방식이 달라져서,
+    방어적으로 꺼내고, 우리 쪽 파티션 개수 안으로 매핑해서 사용한다.
+    """
+
+    # 시뮬레이션 상태에서 데이터/메타데이터 가져오기
     parts = SIM_STATE["partitions"]
     x_test, y_test = SIM_STATE["evaluation"]
     num_classes = SIM_STATE["metadata"]["num_classes"]
+
+    # 1) 여러 후보 위치에서 cid 시도
+    cid_value = getattr(context, "client_id", None)
+
+    if cid_value is None:
+        cid_value = getattr(context, "node_id", None)
+
+    if cid_value is None and hasattr(context, "node_config"):
+        cid_value = (
+            context.node_config.get("cid")
+            or context.node_config.get("client_id")
+            or context.node_config.get("partition-id")
+        )
+
+    if cid_value is None:
+        props = getattr(context, "properties", None)
+        if isinstance(props, dict):
+            cid_value = (
+                props.get("cid")
+                or props.get("client_id")
+                or props.get("partition-id")
+            )
+
+    # 2) cid를 정수로 변환 (안 되면 0으로)
+    cid_int = 0
+    if cid_value is not None:
+        try:
+            cid_int = int(cid_value)
+        except (TypeError, ValueError):
+            if isinstance(cid_value, str):
+                digits = "".join(ch for ch in cid_value if ch.isdigit())
+                if digits:
+                    cid_int = int(digits)
+            # 그래도 안 되면 그냥 0 유지
+
+    # 3) 현재 파티션 개수 범위 안으로 매핑
+    num_clients = len(parts)
+    if num_clients == 0:
+        raise RuntimeError("No client partitions available in SIM_STATE['partitions'].")
+
+    cid_int = cid_int % num_clients  # 핵심: 이상한 큰 숫자도 0~num_clients-1로 변환
+
+    # 4) 해당 파티션으로 KerasClient 생성
     data = parts[cid_int]
-    client = KerasClient(data["x"], data["y"], x_test, y_test, num_classes=num_classes)
+    client = KerasClient(
+        data["x"],
+        data["y"],
+        x_test,
+        y_test,
+        num_classes=num_classes,
+    )
+
     return client.to_client()
 
 def start_simulation(save_path: Optional[str] = None):
