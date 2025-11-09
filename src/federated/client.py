@@ -1,6 +1,6 @@
 # /src/federated/client.py
 from __future__ import annotations
-from typing import Dict, Tuple, Optional
+from typing import Dict, Tuple, Optional, Any
 import argparse
 import numpy as np
 import flwr as fl
@@ -8,11 +8,11 @@ import yaml
 from pathlib import Path
 from src.data.loader import load_dataset, partition_non_iid
 from src.models.nets import make_small_cnn, make_mlp
-from flwr.common import parameters_to_ndarrays
+from flwr.common import parameters_to_ndarrays, Context
 from src.tinyml.export_tflite import export_tflite
 
 CFG = yaml.safe_load(Path("config/federated.yaml").read_text())
-SIM_STATE: Tuple[Tuple[np.ndarray, ...], Dict[int, Dict[str, np.ndarray]]]
+SIM_STATE: Dict[str, Any]
 
 class SaveModelStrategy(fl.server.strategy.FedAvg):
     """FedAvg strategy that keeps the latest aggregated parameters."""
@@ -28,9 +28,8 @@ class SaveModelStrategy(fl.server.strategy.FedAvg):
         return aggregated_parameters, aggregated_metrics
 
 class KerasClient(fl.client.NumPyClient):
-    def __init__(self, x_train, y_train, x_test, y_test):
+    def __init__(self, x_train, y_train, x_test, y_test, num_classes: int):
         input_shape = x_train.shape[1:]
-        num_classes = len(np.unique(y_train))
         
         # 데이터 형태에 따라 모델 선택
         # 2D/3D shape (이미지): CNN 사용
@@ -41,6 +40,7 @@ class KerasClient(fl.client.NumPyClient):
             # Tabular 데이터 (Bot-IoT 등)
             self.model = make_mlp(input_shape=input_shape, num_classes=num_classes)
         
+        self.num_classes = num_classes
         self.x_train, self.y_train = x_train, y_train
         self.x_test, self.y_test = x_test, y_test
 
@@ -100,16 +100,32 @@ class KerasClient(fl.client.NumPyClient):
         
         return float(loss), total, metrics
 
-def simulate_clients() -> Tuple[Tuple[np.ndarray, ...], Dict[int, Dict[str, np.ndarray]]]:
+def simulate_clients() -> Dict[str, Any]:
     x_train, y_train, x_test, y_test = load_dataset(CFG["data"]["name"])
     parts = partition_non_iid(x_train, y_train, num_clients=CFG["data"]["num_clients"])
-    return (x_test, y_test), parts
+    metadata = {
+        "num_classes": int(len(np.unique(y_train))),
+        "input_shape": x_train.shape[1:],
+    }
+    return {
+        "evaluation": (x_test, y_test),
+        "partitions": parts,
+        "metadata": metadata,
+    }
 
-def client_fn(cid: str):
-    (x_test, y_test), parts = SIM_STATE
-    cid_int = int(cid)
+def client_fn(context: Context):
+    cid_value = getattr(context, "client_id", None)
+    if cid_value is None:
+        cid_value = context.node_config.get("cid")
+    if cid_value is None:
+        raise ValueError("Unable to determine client id from Flower context.")
+    cid_int = int(cid_value)
+    parts = SIM_STATE["partitions"]
+    x_test, y_test = SIM_STATE["evaluation"]
+    num_classes = SIM_STATE["metadata"]["num_classes"]
     data = parts[cid_int]
-    return KerasClient(data["x"], data["y"], x_test, y_test)
+    client = KerasClient(data["x"], data["y"], x_test, y_test, num_classes=num_classes)
+    return client.to_client()
 
 def start_simulation(save_path: Optional[str] = None):
     def evaluate_metrics_aggregation_fn(results):
@@ -187,8 +203,15 @@ def start_simulation(save_path: Optional[str] = None):
         
         return aggregated
     
+    def fit_config_fn(server_round: int):
+        return {
+            "local_epochs": CFG["client"]["local_epochs"],
+            "batch_size": CFG["client"]["batch_size"],
+        }
+
     strategy = SaveModelStrategy(
-        evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation_fn
+        evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation_fn,
+        on_fit_config_fn=fit_config_fn,
     )
     history = fl.simulation.start_simulation(
         client_fn=client_fn,
@@ -199,10 +222,9 @@ def start_simulation(save_path: Optional[str] = None):
     )
 
     if save_path and strategy.latest_parameters is not None:
-        (x_test, y_test), parts = SIM_STATE
-        sample_client = next(iter(parts.values()))
-        input_shape = sample_client["x"].shape[1:]
-        num_classes = len(np.unique(sample_client["y"]))
+        metadata = SIM_STATE["metadata"]
+        input_shape = metadata["input_shape"]
+        num_classes = metadata["num_classes"]
 
         if len(input_shape) > 1:
             model = make_small_cnn(input_shape=input_shape, num_classes=num_classes)
