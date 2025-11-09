@@ -1,0 +1,13 @@
+server:
+  rounds: 3
+  min_available_clients: 2
+
+client:
+  local_epochs: 1
+  batch_size: 64
+
+data:
+  name: "placeholder_mnist"   # replace with bot-iot/ton-iot in later phases
+  train_split: 0.8
+  num_clients: 4
+  max_samples: 10000
