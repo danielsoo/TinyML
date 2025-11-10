@@ -140,16 +140,32 @@ def load_bot_iot(
     feature_df = df.drop(columns=[label_col])
 
     numeric_df = feature_df.apply(pd.to_numeric, errors="coerce")
-    valid_mask = ~numeric_df.isna().any(axis=1)
-    if not np.all(valid_mask):
-        dropped = int((~valid_mask).sum())
+
+    # 전부 NaN인 컬럼은 사용 불가하므로 제외
+    all_nan_cols = numeric_df.columns[numeric_df.isna().all()]
+    if len(all_nan_cols) > 0:
         print(
-            f"[load_bot_iot] 숫자로 변환되지 않은 행 {dropped}개를 제거했습니다 "
-            f"(예: 문자열 값, 공백 등)."
+            f"[load_bot_iot] 완전히 숫자로 변환되지 않는 컬럼 {len(all_nan_cols)}개를 제거했습니다: "
+            f"{list(all_nan_cols)}"
+        )
+        numeric_df = numeric_df.drop(columns=all_nan_cols)
+
+    # NaN이 남아 있으면 각 컬럼 중앙값으로 채우고, 중앙값이 NaN이면 0으로 대체
+    if numeric_df.isna().any().any():
+        nan_rows = int(numeric_df.isna().any(axis=1).sum())
+        print(
+            f"[load_bot_iot] 숫자 변환 후 NaN이 남은 행 {nan_rows}개를 중앙값으로 채웁니다."
+        )
+        medians = numeric_df.median(skipna=True)
+        medians = medians.fillna(0.0)
+        numeric_df = numeric_df.fillna(medians)
+
+    if numeric_df.empty:
+        raise ValueError(
+            "[load_bot_iot] 모든 특징 컬럼을 사용할 수 없습니다. "
+            "CSV에 순수 숫자형 특징이 있는지 확인하세요."
         )
 
-    numeric_df = numeric_df.loc[valid_mask]
-    y = y[valid_mask]
     X = numeric_df.values
 
     # 정수 인코딩 보정
