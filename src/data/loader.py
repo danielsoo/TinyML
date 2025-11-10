@@ -108,8 +108,33 @@ def load_bot_iot(
     dfs = [pd.read_csv(p) for p in csv_files]
     df = pd.concat(dfs, axis=0, ignore_index=True)
 
-    if label_col not in df.columns:
-        raise KeyError(f"'{label_col}' 컬럼을 찾을 수 없습니다. CSV에 라벨 컬럼 이름을 확인하세요.")
+    label_candidates = []
+    if label_col is not None:
+        label_candidates.append(label_col)
+    label_candidates.extend([
+        "attack",
+        "label",
+        "Label",
+        "y",
+        "target",
+        "class",
+    ])
+
+    resolved_label_col = None
+    for candidate in label_candidates:
+        if candidate in df.columns:
+            resolved_label_col = candidate
+            break
+
+    if resolved_label_col is None:
+        raise KeyError(
+            f"라벨 컬럼을 찾을 수 없습니다. candidates={label_candidates}. CSV에 라벨 컬럼 이름을 확인하세요."
+        )
+
+    if resolved_label_col != label_col:
+        print(f"[load_bot_iot] 라벨 컬럼을 '{label_col}' 대신 '{resolved_label_col}'로 사용합니다.")
+
+    label_col = resolved_label_col
 
     y = df[label_col].values
     X = df.drop(columns=[label_col]).values
