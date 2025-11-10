@@ -137,7 +137,20 @@ def load_bot_iot(
     label_col = resolved_label_col
 
     y = df[label_col].values
-    X = df.drop(columns=[label_col]).values
+    feature_df = df.drop(columns=[label_col])
+
+    numeric_df = feature_df.apply(pd.to_numeric, errors="coerce")
+    valid_mask = ~numeric_df.isna().any(axis=1)
+    if not np.all(valid_mask):
+        dropped = int((~valid_mask).sum())
+        print(
+            f"[load_bot_iot] 숫자로 변환되지 않은 행 {dropped}개를 제거했습니다 "
+            f"(예: 문자열 값, 공백 등)."
+        )
+
+    numeric_df = numeric_df.loc[valid_mask]
+    y = y[valid_mask]
+    X = numeric_df.values
 
     # 정수 인코딩 보정
     # (0/1이 아니어도 고유값을 0..C-1로 매핑)
