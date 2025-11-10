@@ -59,13 +59,14 @@ def _build_model(model_name: str, input_shape: Tuple[int, ...], num_classes: int
 # ------------------------------------------------
 
 class KerasClient(fl.client.NumPyClient):
-    def __init__(self, model, x_train, y_train, x_test, y_test, cid: int):
+    def __init__(self, model, x_train, y_train, x_test, y_test, cid: int, num_classes: int):
         self.model = model
         self.x_train = x_train
         self.y_train = y_train
         self.x_test = x_test
         self.y_test = y_test
         self.cid = cid
+        self.num_classes = num_classes
 
     def get_parameters(self, config: Dict[str, Any]):
         return self.model.get_weights()
@@ -89,7 +90,66 @@ class KerasClient(fl.client.NumPyClient):
     def evaluate(self, parameters, config: Dict[str, Any]):
         self.model.set_weights(parameters)
         loss, acc = self.model.evaluate(self.x_test, self.y_test, verbose=0)
-        return float(loss), len(self.x_test), {"accuracy": float(acc)}
+        y_true = self.y_test.astype(int)
+        y_prob = self.model.predict(self.x_test, verbose=0)
+
+        if y_prob.ndim == 2 and y_prob.shape[1] == 1:
+            y_prob = y_prob.ravel()
+
+        if self.num_classes <= 2:
+            if y_prob.ndim > 1:
+                y_prob = y_prob[:, 0]
+            y_pred = (y_prob >= 0.5).astype(int)
+        else:
+            if y_prob.ndim == 1:
+                raise ValueError("Expected 2D probability array for multi-class output.")
+            y_pred = np.argmax(y_prob, axis=1)
+
+        total = len(y_true)
+        attack_actual = int(np.sum(y_true == 1))
+        normal_actual = int(np.sum(y_true == 0))
+        attack_predicted = int(np.sum(y_pred == 1))
+        normal_predicted = int(np.sum(y_pred == 0))
+
+        true_positives = int(np.sum((y_true == 1) & (y_pred == 1)))
+        true_negatives = int(np.sum((y_true == 0) & (y_pred == 0)))
+        false_positives = int(np.sum((y_true == 0) & (y_pred == 1)))
+        false_negatives = int(np.sum((y_true == 1) & (y_pred == 0)))
+
+        precision = (
+            true_positives / (true_positives + false_positives)
+            if (true_positives + false_positives) > 0
+            else 0.0
+        )
+        recall = (
+            true_positives / (true_positives + false_negatives)
+            if (true_positives + false_negatives) > 0
+            else 0.0
+        )
+        f1 = (
+            2 * precision * recall / (precision + recall)
+            if (precision + recall) > 0
+            else 0.0
+        )
+
+        metrics = {
+            "accuracy": float(acc),
+            "loss": float(loss),
+            "total_samples": total,
+            "actual_attack": attack_actual,
+            "actual_normal": normal_actual,
+            "predicted_attack": attack_predicted,
+            "predicted_normal": normal_predicted,
+            "true_positives": true_positives,
+            "true_negatives": true_negatives,
+            "false_positives": false_positives,
+            "false_negatives": false_negatives,
+            "precision": float(precision),
+            "recall": float(recall),
+            "f1_score": float(f1),
+        }
+
+        return float(loss), len(self.x_test), metrics
 
 
 # ------------------------------------------------
@@ -187,6 +247,7 @@ def simulate_clients():
             part_te["x"],
             part_te["y"],
             cid=idx,
+            num_classes=state["num_classes"],
         )
 
         return client.to_client()
@@ -206,6 +267,63 @@ def main(save_path: str = "src/models/global_model.h5"):
     batch_size = int(fed_cfg.get("batch_size", 32))
     local_epochs = int(fed_cfg.get("local_epochs", 1))
 
+    def evaluate_metrics_aggregation_fn(results):
+        if not results:
+            return {}
+
+        metrics_list = [m[1] for m in results if m[1] is not None]
+        if not metrics_list:
+            return {}
+
+        mean_accuracy = float(np.mean([m.get("accuracy", 0.0) for m in metrics_list]))
+        mean_loss = float(np.mean([m.get("loss", 0.0) for m in metrics_list]))
+
+        aggregated = {"accuracy": mean_accuracy, "loss": mean_loss}
+
+        first = metrics_list[0]
+        for key in [
+            "total_samples",
+            "actual_attack",
+            "actual_normal",
+            "predicted_attack",
+            "predicted_normal",
+            "true_positives",
+            "true_negatives",
+            "false_positives",
+            "false_negatives",
+            "precision",
+            "recall",
+            "f1_score",
+        ]:
+            if key in first:
+                aggregated[key] = first[key]
+
+        print("\n" + "=" * 60)
+        print("📊 Evaluation Summary")
+        print("=" * 60)
+        print(f"Accuracy: {aggregated['accuracy']:.4f} ({aggregated['accuracy']*100:.2f}%)")
+        print(f"Loss: {aggregated['loss']:.4f}")
+        if "total_samples" in aggregated:
+            print(f"Total samples: {aggregated['total_samples']}")
+        if "actual_attack" in aggregated and "actual_normal" in aggregated:
+            print(f"Ground truth - Attack: {aggregated['actual_attack']}, Normal: {aggregated['actual_normal']}")
+        if "predicted_attack" in aggregated and "predicted_normal" in aggregated:
+            print(f"Predicted - Attack: {aggregated['predicted_attack']}, Normal: {aggregated['predicted_normal']}")
+        if {"true_positives", "true_negatives", "false_positives", "false_negatives"} <= aggregated.keys():
+            print("\nConfusion Matrix")
+            print(f"TP: {aggregated['true_positives']}")
+            print(f"TN: {aggregated['true_negatives']}")
+            print(f"FP: {aggregated['false_positives']}")
+            print(f"FN: {aggregated['false_negatives']}")
+        if "precision" in aggregated and "recall" in aggregated:
+            print(f"\nPrecision: {aggregated['precision']:.4f}")
+            print(f"Recall: {aggregated['recall']:.4f}")
+        if "f1_score" in aggregated:
+            print(f"F1-score: {aggregated['f1_score']:.4f}")
+        print("=" * 60 + "\n")
+
+        return aggregated
+
     strategy = SaveModelStrategy(
         fraction_fit=fed_cfg.get("fraction_fit", 1.0),
         fraction_evaluate=fed_cfg.get("fraction_evaluate", 1.0),
@@ -216,6 +334,7 @@ def main(save_path: str = "src/models/global_model.h5"):
             "batch_size": batch_size,
             "local_epochs": local_epochs,
         },
+        evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation_fn,
     )
 
     history = fl.simulation.start_simulation(
