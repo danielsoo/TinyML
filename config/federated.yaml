@@ -5,7 +5,8 @@ data:
   name: bot_iot
 
   # Bot-IoT CSV 올려둔 경로 (Colab 기준: /content/TinyML/data/raw/Bot-IoT)
-  path: "/content/TinyML/data/raw/Bot-IoT"
+  # path: "/content/TinyML/data/raw/Bot-IoT"
+  path: "/content/drive/MyDrive/TinyML_models"
 
   # 클라이언트 수
   num_clients: 4
