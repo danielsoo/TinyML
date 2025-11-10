@@ -1,54 +1,66 @@
-# /src/models/nets.py
-from __future__ import annotations
+from typing import Tuple
+
 import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras import layers
 
-def make_small_cnn(input_shape=(28, 28, 1), num_classes=10) -> tf.keras.Model:
-    """
-    CNN 모델 (이미지 데이터용 - MNIST 등)
-    """
-    inputs = tf.keras.Input(shape=input_shape)
-    x = tf.keras.layers.Conv2D(16, 3, activation="relu", padding="same")(inputs)
-    x = tf.keras.layers.MaxPool2D()(x)
-    x = tf.keras.layers.Conv2D(32, 3, activation="relu", padding="same")(x)
-    x = tf.keras.layers.GlobalAveragePooling2D()(x)
-    x = tf.keras.layers.Dense(32, activation="relu")(x)
 
+def _compile_for_classes(model: keras.Model, num_classes: int) -> keras.Model:
+    """num_classes에 맞게 마지막 레이어/로스 설정."""
     if num_classes <= 2:
-        outputs = tf.keras.layers.Dense(1, activation="sigmoid")(x)
-        loss = "binary_crossentropy"
+        # 이진 분류: 출력 1, sigmoid + binary_crossentropy
+        if not isinstance(model.layers[-1], layers.Dense) or model.layers[-1].units != 1:
+            model.pop() if hasattr(model, "pop") else None
+            model.add(layers.Dense(1, activation="sigmoid"))
+        model.compile(
+            optimizer="adam",
+            loss="binary_crossentropy",
+            metrics=["accuracy"],
+        )
     else:
-        outputs = tf.keras.layers.Dense(num_classes, activation="softmax")(x)
-        loss = "sparse_categorical_crossentropy"
-
-    model = tf.keras.Model(inputs, outputs)
-    model.compile(optimizer="adam", loss=loss, metrics=["accuracy"])
+        # 다중 분류: 출력 C, softmax + sparse_categorical_crossentropy
+        if not isinstance(model.layers[-1], layers.Dense) or model.layers[-1].units != num_classes:
+            model.pop() if hasattr(model, "pop") else None
+            model.add(layers.Dense(num_classes, activation="softmax"))
+        model.compile(
+            optimizer="adam",
+            loss="sparse_categorical_crossentropy",
+            metrics=["accuracy"],
+        )
     return model
 
-def make_mlp(input_shape: tuple, num_classes: int, hidden_units: list = [64, 32]) -> tf.keras.Model:
-    """
-    MLP (Multi-Layer Perceptron) 모델 - Tabular 데이터용 (Bot-IoT 등)
-    읽는 것: input_shape (예: (35,) - 35개 특징)
-    반환하는 것: 학습 가능한 모델
-    목적: Bot-IoT 같은 표 형식 데이터를 분류하는 모델 생성
-    """
-    inputs = tf.keras.Input(shape=input_shape)
-    x = inputs
-    
-    # Hidden layers
-    for units in hidden_units:
-        x = tf.keras.layers.Dense(units, activation="relu")(x)
-        x = tf.keras.layers.Dropout(0.2)(x)  # 과적합 방지
-    
-    # Output layer
-    if num_classes <= 2:
-        # 이진 분류 (정상/공격)
-        outputs = tf.keras.layers.Dense(1, activation="sigmoid")(x)
-        loss = "binary_crossentropy"
+
+def make_mlp(input_shape: Tuple[int, ...], num_classes: int) -> keras.Model:
+    model = keras.Sequential(
+        [
+            keras.Input(shape=input_shape),
+            layers.Dense(256, activation="relu"),
+            layers.Dense(128, activation="relu"),
+            layers.Dense(64, activation="relu"),
+        ]
+    )
+    return _compile_for_classes(model, num_classes)
+
+
+def make_small_cnn(input_shape: Tuple[int, ...], num_classes: int) -> keras.Model:
+    model = keras.Sequential(
+        [
+            keras.Input(shape=input_shape),
+            layers.Conv2D(32, 3, activation="relu"),
+            layers.MaxPooling2D(),
+            layers.Conv2D(64, 3, activation="relu"),
+            layers.MaxPooling2D(),
+            layers.Flatten(),
+            layers.Dense(64, activation="relu"),
+        ]
+    )
+    return _compile_for_classes(model, num_classes)
+
+
+def get_model(model_name: str, input_shape: Tuple[int, ...], num_classes: int) -> keras.Model:
+    model_name = (model_name or "mlp").lower()
+    if model_name in ["cnn", "small_cnn"]:
+        return make_small_cnn(input_shape, num_classes)
     else:
-        # 다중 분류
-        outputs = tf.keras.layers.Dense(num_classes, activation="softmax")(x)
-        loss = "sparse_categorical_crossentropy"
-    
-    model = tf.keras.Model(inputs, outputs)
-    model.compile(optimizer="adam", loss=loss, metrics=["accuracy"])
-    return model
+        # 기본은 MLP
+        return make_mlp(input_shape, num_classes)
