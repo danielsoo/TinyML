@@ -1,12 +1,12 @@
 from pathlib import Path
-from typing import Dict, Any
+from typing import Dict, Any, Tuple
 
+import flwr as fl
 import numpy as np
 import yaml
-import flwr as fl
 
 from src.data.loader import load_dataset, partition_non_iid
-from src.models.nets import get_model
+from src.models import nets
 
 
 # ------------------------------------------------
@@ -19,6 +19,22 @@ if not CFG_PATH.exists():
 
 with CFG_PATH.open() as f:
     CFG = yaml.safe_load(f)
+
+
+def _build_model(model_name: str, input_shape: Tuple[int, ...], num_classes: int):
+    """모델 이름에 따라 생성. nets 모듈에 get_model이 없으면 기본 함수로 대체."""
+    if hasattr(nets, "get_model"):
+        return nets.get_model(model_name, input_shape, num_classes)
+
+    name = (model_name or "mlp").lower()
+    if name in ["cnn", "small_cnn"] and hasattr(nets, "make_small_cnn"):
+        return nets.make_small_cnn(input_shape, num_classes)
+    if hasattr(nets, "make_mlp"):
+        return nets.make_mlp(input_shape, num_classes)
+
+    raise AttributeError(
+        "모델 생성 함수를 찾을 수 없습니다. 'get_model' 또는 'make_mlp' 정의를 확인하세요."
+    )
 
 
 # ------------------------------------------------
@@ -141,7 +157,7 @@ def simulate_clients():
         part_tr = state["train_parts"][idx]
         part_te = state["test_parts"][idx]
 
-        model = get_model(
+        model = _build_model(
             state["model_name"],
             state["input_shape"],
             state["num_classes"],
@@ -193,7 +209,7 @@ def main(save_path: str = "src/models/global_model.h5"):
     # 글로벌 모델 저장
     # 마지막 round weight 사용
     # start_simulation이 strategy.parameters 에 최종값 채워놨다고 가정
-    global_model = get_model(
+    global_model = _build_model(
         state["model_name"],
         state["input_shape"],
         state["num_classes"],
