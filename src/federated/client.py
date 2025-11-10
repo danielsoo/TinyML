@@ -1,9 +1,10 @@
 from pathlib import Path
-from typing import Dict, Any, Tuple
+from typing import Dict, Any, Tuple, Optional
 
 import flwr as fl
 import numpy as np
 import yaml
+from flwr.common import parameters_to_ndarrays
 
 from src.data.loader import load_dataset, partition_non_iid
 from src.models import nets
@@ -19,6 +20,22 @@ if not CFG_PATH.exists():
 
 with CFG_PATH.open() as f:
     CFG = yaml.safe_load(f)
+
+
+class SaveModelStrategy(fl.server.strategy.FedAvg):
+    """FedAvg strategy that 저장을 위해 최신 파라미터를 보관."""
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.latest_parameters: Optional[fl.common.Parameters] = None
+
+    def aggregate_fit(self, server_round, results, failures):
+        aggregated_parameters, aggregated_metrics = super().aggregate_fit(
+            server_round, results, failures
+        )
+        if aggregated_parameters is not None:
+            self.latest_parameters = aggregated_parameters
+        return aggregated_parameters, aggregated_metrics
 
 
 def _build_model(model_name: str, input_shape: Tuple[int, ...], num_classes: int):
@@ -163,7 +180,7 @@ def simulate_clients():
             state["num_classes"],
         )
 
-        return KerasClient(
+        client = KerasClient(
             model,
             part_tr["x"],
             part_tr["y"],
@@ -171,6 +188,8 @@ def simulate_clients():
             part_te["y"],
             cid=idx,
         )
+
+        return client.to_client()
 
     return state, client_fn
 
@@ -187,7 +206,7 @@ def main(save_path: str = "src/models/global_model.h5"):
     batch_size = int(fed_cfg.get("batch_size", 32))
     local_epochs = int(fed_cfg.get("local_epochs", 1))
 
-    strategy = fl.server.strategy.FedAvg(
+    strategy = SaveModelStrategy(
         fraction_fit=fed_cfg.get("fraction_fit", 1.0),
         fraction_evaluate=fed_cfg.get("fraction_evaluate", 1.0),
         min_fit_clients=fed_cfg.get("min_fit_clients", state["num_clients"]),
@@ -214,14 +233,14 @@ def main(save_path: str = "src/models/global_model.h5"):
         state["input_shape"],
         state["num_classes"],
     )
-    if strategy.parameters is not None:
-        from flwr.common import parameters_to_ndarrays
-
-        weights = parameters_to_ndarrays(strategy.parameters)
+    if getattr(strategy, "latest_parameters", None) is not None:
+        weights = parameters_to_ndarrays(strategy.latest_parameters)
         global_model.set_weights(weights)
         Path(save_path).parent.mkdir(parents=True, exist_ok=True)
         global_model.save(save_path)
         print(f"✅ Saved global model to {save_path}")
+    else:
+        print("⚠️ Federated strategy에서 저장 가능한 파라미터를 찾지 못했습니다.")
 
 
 if __name__ == "__main__":
