@@ -27,6 +27,108 @@ This repository hosts the capstone project exploring how **Federated Learning (F
 
 ---
 
+## Project Progress
+
+### Phase 1: Foundation and Setup (Weeks 1-3) - ✅ **Mostly Complete**
+
+**Objective:** Build foundational knowledge and prepare the project environment
+
+| Task | Status | Details |
+|------|--------|---------|
+| Literature review & requirements analysis | ✅ Complete | Project proposal and literature review completed |
+| Bot-IoT dataset ingestion & preprocessing | ✅ Complete | `load_bot_iot()` implemented in `src/data/loader.py`, CSV parsing and preprocessing pipeline completed |
+| Flower-based FL simulation scaffold | ✅ Complete | `src/federated/server.py` and `src/federated/client.py` implemented with FedAvg strategy |
+| GitHub repository setup | ✅ Complete | Project structure and configuration files set up |
+| TinyML "Hello World" deployment | ⏳ In Progress | Basic TFLite export (`src/tinyml/export_tflite.py`) implemented, actual microcontroller deployment testing not completed |
+
+**Completion: ~85%**
+
+---
+
+### Phase 2: Federated Learning Framework (Weeks 4-7) - ✅ **Complete**
+
+**Objective:** Develop and simulate the privacy-preserving training framework
+
+| Task | Status | Details |
+|------|--------|---------|
+| Central server with FedAvg algorithm | ✅ Complete | FedAvg strategy implemented in `src/federated/server.py` with configuration-based round management |
+| FL client-side training logic | ✅ Complete | Local training/evaluation implemented via `KerasClient` class in `src/federated/client.py` |
+| Data loaders & partitioning | ✅ Complete | Non-IID partitioning (`partition_non_iid`) implemented in `src/data/loader.py` |
+| FL simulation with virtual clients | ✅ Complete | Multi-client training and global model generation possible via Flower simulation |
+| Model export & saving | ✅ Complete | Trained global model saving functionality implemented in `.h5` format |
+| Evaluation metrics | ✅ Complete | Detailed metrics output including Accuracy, Precision, Recall, F1-Score, Confusion Matrix |
+
+**Completion: 100%**
+
+---
+
+### Phase 3: TinyML Model Miniaturization (Weeks 8-11) - ⏳ **Partially Complete**
+
+**Objective:** Compress the global model to fit on microcontrollers
+
+| Task | Status | Details |
+|------|--------|---------|
+| Knowledge Distillation | ❌ Not Started | Teacher-Student model architecture and training logic not implemented |
+| Structured Pruning | ❌ Not Started | Model reduction functionality via filter/neuron removal not implemented |
+| Quantization | ⏳ Basic Implementation | Only basic TFLite conversion implemented in `src/tinyml/export_tflite.py`, 8-bit quantization not applied |
+| TFLite model export | ⏳ Basic Implementation | Only basic conversion functionality available, optimization options not applied |
+| Size vs. Accuracy trade-off analysis | ❌ Not Started | Performance analysis across compression stages not completed |
+
+**Completion: ~20%**
+
+---
+
+### Phase 4: Adversarial Hardening & Deployment (Weeks 12-14) - ⏳ **Preparation Stage**
+
+**Objective:** Integrate adversarial training and deploy the final model
+
+| Task | Status | Details |
+|------|--------|---------|
+| FGSM attack implementation | ⏳ Basic Utilities Only | Only basic perturbation function implemented in `src/adversarial/fgsm_hook.py` |
+| FGSM integration into FL training loop | ❌ Not Started | Adversarial example generation integration into client training loop not completed |
+| Adversarial training in FL | ❌ Not Started | Full FL process re-run with adversarial training not completed |
+| Re-compression of robust model | ❌ Not Started | Compression pipeline re-run on hardened model not completed |
+| Microcontroller deployment | ❌ Not Started | Actual hardware deployment (ESP32/Raspberry Pi Pico) and performance measurement not completed |
+
+**Completion: ~5%**
+
+---
+
+### Phase 5: Final Evaluation & Reporting (Week 15) - ❌ **Not Started**
+
+**Objective:** Quantify project success and deliver final results
+
+| Task | Status | Details |
+|------|--------|---------|
+| Comprehensive experiments | ❌ Not Started | Comparative experiments between final model and baselines not completed |
+| Performance metrics (accuracy, F1-score) | ⏳ Partially Implemented | Metric collection possible in FL simulation, but comprehensive analysis not completed |
+| Efficiency metrics (size, latency) | ❌ Not Started | Model size and latency measurement not completed |
+| Final project report | ❌ Not Started | Final report writing not started |
+| Final presentation & demonstration | ❌ Not Started | Final presentation and demo preparation not started |
+
+**Completion: 0%**
+
+---
+
+### Overall Project Progress Summary
+
+| Phase | Completion | Key Achievements |
+|-------|------------|------------------|
+| Phase 1: Foundation and Setup | ~85% | Dataset preprocessing and FL basic structure completed |
+| Phase 2: Federated Learning Framework | 100% | Complete FL simulation system built |
+| Phase 3: TinyML Model Miniaturization | ~20% | Only basic TFLite export implemented |
+| Phase 4: Adversarial Hardening & Deployment | ~5% | Only FGSM utilities prepared |
+| Phase 5: Final Evaluation & Reporting | 0% | Not started |
+
+**Overall Project Completion: ~42%**
+
+**Next Priorities:**
+1. Complete Phase 3: Implement Knowledge Distillation, Pruning, and Quantization
+2. Start Phase 4: Integrate FGSM and adversarial training
+3. Prepare Phase 5: Design experiments and evaluation framework
+
+---
+
 ## Repository Layout
 
 ```
