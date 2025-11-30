@@ -81,8 +81,10 @@ class CompressionAnalyzer:
         elif model_path.endswith(".tflite"):
             interpreter = tf.lite.Interpreter(model_path=model_path)
             interpreter.allocate_tensors()
+            # get_tensor_details() returns a list of dicts, each with 'shape' key
             param_count = sum(
-                np.prod(tensor.shape) for tensor in interpreter.get_tensor_details()
+                np.prod(tensor['shape']) for tensor in interpreter.get_tensor_details()
+                if 'shape' in tensor and tensor['shape'] is not None
             )
         else:
             param_count = 0
