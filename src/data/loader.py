@@ -7,13 +7,13 @@ from sklearn.model_selection import train_test_split
 
 
 # -------------------------
-# 공통 유틸
+# Common Utilities
 # -------------------------
 
 def _ensure_dir(path: str) -> Path:
     p = Path(path)
     if not p.exists():
-        raise FileNotFoundError(f"경로를 찾을 수 없습니다: {p.resolve()}")
+        raise FileNotFoundError(f"Path not found: {p.resolve()}")
     return p
 
 
@@ -22,7 +22,7 @@ def partition_non_iid(
     y: np.ndarray,
     num_clients: int,
 ) -> List[Dict[str, np.ndarray]]:
-    """라벨 분포를 최대한 유지하면서 num_clients개로 나누기."""
+    """Partition data into num_clients while preserving label distribution as much as possible."""
     rng = np.random.default_rng(42)
     labels = np.unique(y)
 
@@ -48,7 +48,7 @@ def partition_non_iid(
             x_c = np.concatenate(xs[cid], axis=0)
             y_c = np.concatenate(ys[cid], axis=0)
         else:
-            # 혹시 비면 랜덤 샘플 조금 넣어줌
+            # If empty, add some random samples
             ridx = rng.choice(len(x), size=len(x) // num_clients, replace=False)
             x_c = x[ridx]
             y_c = y[ridx]
@@ -59,7 +59,7 @@ def partition_non_iid(
 
 
 # -------------------------
-# MNIST (테스트용)
+# MNIST (for testing)
 # -------------------------
 
 def load_mnist(max_samples: int = None, **_) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
@@ -69,7 +69,7 @@ def load_mnist(max_samples: int = None, **_) -> Tuple[np.ndarray, np.ndarray, np
     x_train = x_train.astype("float32") / 255.0
     x_test = x_test.astype("float32") / 255.0
 
-    # CNN용 채널 차원 추가
+    # Add channel dimension for CNN
     x_train = np.expand_dims(x_train, -1)
     x_test = np.expand_dims(x_test, -1)
 
@@ -81,7 +81,7 @@ def load_mnist(max_samples: int = None, **_) -> Tuple[np.ndarray, np.ndarray, np
 
 
 # -------------------------
-# Bot-IoT (CSV 기반, 이진 분류 가정)
+# Bot-IoT (CSV-based, assumes binary classification)
 # -------------------------
 
 def load_bot_iot(
@@ -92,18 +92,18 @@ def load_bot_iot(
     label_col: str = "label",
     **_,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    """Bot-IoT CSV들을 읽어서 (x_train, y_train, x_test, y_test) 반환.
+    """Load Bot-IoT CSV files and return (x_train, y_train, x_test, y_test).
 
-    전제:
-    - data_path 아래에 .csv 파일들이 있음
-    - label_col 컬럼에 0/1 또는 정수 라벨이 들어 있음
-      (0=정상, 1=공격 형태로 쓰면 됨)
+    Assumptions:
+    - .csv files exist under data_path
+    - label_col column contains 0/1 or integer labels
+      (0=normal, 1=attack format)
     """
 
     root = _ensure_dir(data_path)
     csv_files = sorted([p for p in root.glob("*.csv")])
     if not csv_files:
-        raise FileNotFoundError(f"Bot-IoT CSV 파일을 찾을 수 없습니다: {root.resolve()}")
+        raise FileNotFoundError(f"Bot-IoT CSV files not found: {root.resolve()}")
 
     dfs = [pd.read_csv(p) for p in csv_files]
     df = pd.concat(dfs, axis=0, ignore_index=True)
@@ -128,11 +128,11 @@ def load_bot_iot(
 
     if resolved_label_col is None:
         raise KeyError(
-            f"라벨 컬럼을 찾을 수 없습니다. candidates={label_candidates}. CSV에 라벨 컬럼 이름을 확인하세요."
+            f"Label column not found. candidates={label_candidates}. Please check the label column name in CSV."
         )
 
     if resolved_label_col != label_col:
-        print(f"[load_bot_iot] 라벨 컬럼을 '{label_col}' 대신 '{resolved_label_col}'로 사용합니다.")
+        print(f"[load_bot_iot] Using '{resolved_label_col}' instead of '{label_col}' as label column.")
 
     label_col = resolved_label_col
 
@@ -141,20 +141,20 @@ def load_bot_iot(
 
     numeric_df = feature_df.apply(pd.to_numeric, errors="coerce")
 
-    # 전부 NaN인 컬럼은 사용 불가하므로 제외
+    # Exclude columns that are all NaN (unusable)
     all_nan_cols = numeric_df.columns[numeric_df.isna().all()]
     if len(all_nan_cols) > 0:
         print(
-            f"[load_bot_iot] 완전히 숫자로 변환되지 않는 컬럼 {len(all_nan_cols)}개를 제거했습니다: "
+            f"[load_bot_iot] Removed {len(all_nan_cols)} columns that could not be converted to numeric: "
             f"{list(all_nan_cols)}"
         )
         numeric_df = numeric_df.drop(columns=all_nan_cols)
 
-    # NaN이 남아 있으면 각 컬럼 중앙값으로 채우고, 중앙값이 NaN이면 0으로 대체
+    # Fill remaining NaN with column median, replace with 0 if median is NaN
     if numeric_df.isna().any().any():
         nan_rows = int(numeric_df.isna().any(axis=1).sum())
         print(
-            f"[load_bot_iot] 숫자 변환 후 NaN이 남은 행 {nan_rows}개를 중앙값으로 채웁니다."
+            f"[load_bot_iot] Filling {nan_rows} rows with NaN (after numeric conversion) using median values."
         )
         medians = numeric_df.median(skipna=True)
         medians = medians.fillna(0.0)
@@ -162,14 +162,14 @@ def load_bot_iot(
 
     if numeric_df.empty:
         raise ValueError(
-            "[load_bot_iot] 모든 특징 컬럼을 사용할 수 없습니다. "
-            "CSV에 순수 숫자형 특징이 있는지 확인하세요."
+            "[load_bot_iot] All feature columns are unusable. "
+            "Please check if CSV contains pure numeric features."
         )
 
     X = numeric_df.values
 
-    # 정수 인코딩 보정
-    # (0/1이 아니어도 고유값을 0..C-1로 매핑)
+    # Integer encoding correction
+    # (Map unique values to 0..C-1 even if not 0/1)
     uniq = np.unique(y)
     mapping = {v: i for i, v in enumerate(uniq)}
     y = np.vectorize(mapping.get)(y)
@@ -196,13 +196,13 @@ def load_bot_iot(
 
 
 # -------------------------
-# public API
+# Public API
 # -------------------------
 
 def load_dataset(name: str, **kwargs) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    """config에서 온 name과 인자로 실제 로더 호출."""
+    """Call actual loader with name from config and arguments."""
 
-    # path -> data_path로 매핑 (yaml이 path로 적혀 있어도 동작하도록)
+    # Map path -> data_path (works even if yaml uses path)
     if "path" in kwargs and "data_path" not in kwargs:
         kwargs["data_path"] = kwargs.pop("path")
 
@@ -211,5 +211,5 @@ def load_dataset(name: str, **kwargs) -> Tuple[np.ndarray, np.ndarray, np.ndarra
     elif name.lower() in ["bot_iot", "bot-iot", "botiot"]:
         return load_bot_iot(**kwargs)
     else:
-        raise ValueError(f"지원하지 않는 데이터셋입니다: {name}")
+        raise ValueError(f"Unsupported dataset: {name}")
 

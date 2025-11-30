@@ -6,9 +6,9 @@ from tensorflow.keras import layers
 
 
 def _compile_for_classes(model: keras.Model, num_classes: int) -> keras.Model:
-    """num_classes에 맞게 마지막 레이어/로스 설정."""
+    """Configure final layer and loss based on num_classes."""
     if num_classes <= 2:
-        # 이진 분류: 출력 1, sigmoid + binary_crossentropy
+        # Binary classification: output 1, sigmoid + binary_crossentropy
         if not isinstance(model.layers[-1], layers.Dense) or model.layers[-1].units != 1:
             model.pop() if hasattr(model, "pop") else None
             model.add(layers.Dense(1, activation="sigmoid"))
@@ -18,7 +18,7 @@ def _compile_for_classes(model: keras.Model, num_classes: int) -> keras.Model:
             metrics=["accuracy"],
         )
     else:
-        # 다중 분류: 출력 C, softmax + sparse_categorical_crossentropy
+        # Multi-class classification: output C, softmax + sparse_categorical_crossentropy
         if not isinstance(model.layers[-1], layers.Dense) or model.layers[-1].units != num_classes:
             model.pop() if hasattr(model, "pop") else None
             model.add(layers.Dense(num_classes, activation="softmax"))
@@ -62,5 +62,5 @@ def get_model(model_name: str, input_shape: Tuple[int, ...], num_classes: int) -
     if model_name in ["cnn", "small_cnn"]:
         return make_small_cnn(input_shape, num_classes)
     else:
-        # 기본은 MLP
+        # Default is MLP
         return make_mlp(input_shape, num_classes)

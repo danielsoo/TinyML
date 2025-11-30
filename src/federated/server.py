@@ -15,15 +15,15 @@ def on_fit_config(server_round: int):
 def main():
     strategy = fl.server.strategy.FedAvg(
         fraction_fit=1.0,
-        # 모든 클라이언트에서 훈련
+        # Train on all clients
         fraction_evaluate=1.0,
-        # 모든 클라이언트에서 평가
+        # Evaluate on all clients
         min_fit_clients=CFG["server"]["min_available_clients"],
-        # 최소 클라이언트 수
+        # Minimum number of clients
         min_available_clients=CFG["server"]["min_available_clients"],
-        # 훈련 설정 함수
+        # Training configuration function
         on_fit_config_fn=on_fit_config,
-        # 평가 설정 함수
+        # Evaluation configuration function
     )
     fl.server.start_server(
         server_address="0.0.0.0:8080",

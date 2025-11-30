@@ -134,6 +134,8 @@ This repository hosts the capstone project exploring how **Federated Learning (F
 ```
 TinyML/
 ├── config/                 # YAML configs (e.g., FL hyperparameters)
+│   ├── federated_local.yaml  # Local/macOS configuration
+│   └── federated_colab.yaml  # Google Colab configuration
 ├── data/
 │   ├── raw/                # Raw datasets (Bot-IoT ZIP extracts go here)
 │   └── processed/          # Exported TFLite / intermediate artifacts
@@ -182,6 +184,10 @@ TinyML/
 
 Use the separate `requirements_colab.txt` to avoid macOS-specific packages when installing on Linux-based runtimes such as Google Colab.
 
+**Note:** The project now uses separate configuration files for local and Colab environments:
+- `config/federated_local.yaml` - For local/macOS execution (uses `data/raw/Bot-IoT`)
+- `config/federated_colab.yaml` - For Google Colab execution (uses `/content/drive/MyDrive/TinyML_models`)
+
 1. **Clone the repo and install dependencies**
    ```python
    !git clone https://github.com/danielsoo/TinyML.git
@@ -201,12 +207,13 @@ Use the separate `requirements_colab.txt` to avoid macOS-specific packages when 
 
 3. **Run the notebook or simulation**
    ```python
-   !python -m src.federated.client
+   !python -m src.federated.client --config config/federated_colab.yaml
    ```
-   Adjust `config/federated.yaml` (e.g., `max_samples`) for the available GPU/CPU quota. Exported models (e.g., `.h5`, `.tflite`) can be saved to Drive or downloaded via `google.colab.files.download`.
+   The Colab config file (`federated_colab.yaml`) is pre-configured for Google Drive paths. Adjust `max_samples` in the config for the available GPU/CPU quota. Exported models (e.g., `.h5`, `.tflite`) can be saved to Drive or downloaded via `google.colab.files.download`.
 
 4. **End-to-end Colab workflow**
    - Open `colab/train_colab.ipynb` in Colab to walk through GPU checks, repo sync, dependency installation, dataset prep, training, and Drive backup of exported models.
+   - The notebook automatically uses `config/federated_colab.yaml` for Colab-specific paths.
 
 ---
 
@@ -216,32 +223,51 @@ The Flower simulation spins up multiple virtual IoT clients, each training on a 
 
 ### 1. Configure the run
 
-`config/federated.yaml`
+**For Local Execution:**
+`config/federated_local.yaml` (default for local runs)
 ```yaml
-server:
-  rounds: 3
-  min_available_clients: 2
-
-client:
-  local_epochs: 1
-  batch_size: 64
-
 data:
   name: "bot_iot"
-  train_split: 0.8
+  path: "data/raw/Bot-IoT"  # Local path
   num_clients: 4
-  max_samples: 10000  # Reduce if running on limited hardware
+  max_samples: 200000
+
+federated:
+  num_rounds: 3
+  local_epochs: 2
+  batch_size: 128
+```
+
+**For Google Colab:**
+`config/federated_colab.yaml` (used in Colab notebook)
+```yaml
+data:
+  name: "bot_iot"
+  path: "/content/drive/MyDrive/TinyML_models"  # Colab Google Drive path
+  num_clients: 4
+  max_samples: 200000
+
+federated:
+  num_rounds: 3
+  local_epochs: 2
+  batch_size: 128
 ```
 
 - `max_samples` caps the number of rows loaded from Bot-IoT to prevent OOM on laptops. Increase gradually (e.g., 50000, then full dataset) once running on lab hardware.
-- Switch back to `"placeholder_mnist"` if you need to smoke-test without the large dataset.
+- Switch back to `"mnist"` if you need to smoke-test without the large dataset.
 
 ### 2. Launch the simulation
 
+**Local execution (uses `federated_local.yaml` by default):**
 ```bash
-make run-fl                             # default run without saving a model
-# or specify an export path
-python -m src.federated.client --save-model models/global_model.h5
+make run-fl                             # Uses config/federated_local.yaml
+# or specify config explicitly
+python -m src.federated.client --config config/federated_local.yaml --save-model src/models/global_model.h5
+```
+
+**Colab execution:**
+```bash
+python -m src.federated.client --config config/federated_colab.yaml --save-model src/models/global_model.h5
 ```
 
 **During execution you will see logs similar to:**
