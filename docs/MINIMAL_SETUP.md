@@ -23,7 +23,10 @@ data/raw/Bot-IoT/
 
 **위치:**
 - **로컬**: `TinyML/data/raw/Bot-IoT/` 폴더 안
-- **Colab**: Google Drive 또는 `/content/TinyML/data/raw/Bot-IoT/`
+- **Colab**: Google Drive의 `TinyML_models/` 폴더 안에 **직접** (`/content/drive/MyDrive/TinyML_models`)
+  - CSV 파일들이 `TinyML_models/` 폴더 바로 아래에 있어야 함
+  - ❌ `TinyML_models/data/raw/Bot-IoT/` (X)
+  - ✅ `TinyML_models/reduced_data_1.csv` (O)
 
 ---
 
@@ -130,8 +133,9 @@ python -m src.federated.client \
 ### Colab 환경
 
 **1. 데이터 업로드**
-- Google Drive에 CSV 4개 업로드
-- 또는 Colab에 직접 업로드
+- Google Drive의 `TinyML_models/` 폴더에 CSV 4개를 **직접** 업로드
+  - 경로: `/content/drive/MyDrive/TinyML_models/`
+  - CSV 파일들이 폴더 바로 아래에 있어야 함
 
 **2. 저장소 클론**
 ```python

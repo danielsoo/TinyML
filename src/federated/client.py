@@ -278,6 +278,9 @@ def main(save_path: str = "src/models/global_model.h5", config_path: str = None)
     # Load configuration file
     CFG = load_config(config_path)
     
+    # Ensure model directory exists
+    Path(save_path).parent.mkdir(parents=True, exist_ok=True)
+    
     (state, client_fn) = simulate_clients(CFG)
     fed_cfg = CFG.get("federated", {})
 

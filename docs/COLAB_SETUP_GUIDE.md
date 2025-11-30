@@ -572,7 +572,7 @@ os.chdir('/content/TinyML')
 ```
 /content/TinyML/                    # 프로젝트 루트
 /content/TinyML/src/models/         # 모델 저장 위치
-/content/TinyML/data/raw/Bot-IoT/   # 데이터 위치
+/content/drive/MyDrive/TinyML_models/   # 데이터 위치 (CSV 파일들이 직접 있음)
 /content/TinyML/config/            # 설정 파일
 /content/drive/MyDrive/             # Google Drive
 ```

@@ -300,8 +300,13 @@ federated:
 **Local execution (uses `federated_local.yaml` by default):**
 ```bash
 make run-fl                             # Uses config/federated_local.yaml
-# or specify config explicitly
-python -m src.federated.client --config config/federated_local.yaml --save-model src/models/global_model.h5
+# Automatically saves with timestamp: global_model_YYYYMMDD_HHMMSS.h5
+# Also saves as latest: global_model.h5
+
+# Or specify custom path
+python -m src.federated.client \
+    --config config/federated_local.yaml \
+    --save-model src/models/my_model.h5
 ```
 
 **Colab execution:**
