@@ -240,6 +240,64 @@ data:
 !pip install --force-reinstall package_name
 ```
 
+### 5.7 Protobuf 호환성 오류
+
+**증상**: `AttributeError: 'MessageFactory' object has no attribute 'GetPrototype'`
+
+**원인**: TensorFlow와 protobuf 버전 간 호환성 문제
+
+**해결 방법:**
+
+**방법 1: Protobuf 버전 다운그레이드 (권장)**
+```python
+# Protobuf 3.20.x로 다운그레이드
+!pip install protobuf==3.20.3
+
+# 런타임 재시작 필요
+# Runtime → Restart runtime
+```
+
+**방법 2: Protobuf 4.x로 업그레이드**
+```python
+# Protobuf 4.x로 업그레이드
+!pip install --upgrade protobuf>=4.21.0
+
+# 런타임 재시작
+# Runtime → Restart runtime
+```
+
+**방법 3: TensorFlow 버전 다운그레이드**
+```python
+# TensorFlow 2.12.0 사용 (더 안정적)
+!pip install tensorflow==2.12.0
+
+# 런타임 재시작
+# Runtime → Restart runtime
+```
+
+**방법 4: 경고 무시 (임시 해결책)**
+```python
+# 경고를 무시하고 계속 진행
+import warnings
+warnings.filterwarnings('ignore')
+
+import tensorflow as tf
+# TensorFlow는 정상 작동하지만 경고가 계속 표시됨
+```
+
+**확인:**
+```python
+import tensorflow as tf
+import google.protobuf
+print(f"TensorFlow: {tf.__version__}")
+print(f"Protobuf: {google.protobuf.__version__}")
+
+# 정상 작동 확인
+print("GPU devices:", tf.config.list_physical_devices('GPU'))
+```
+
+**참고**: 이 경고는 TensorFlow가 정상 작동하는데도 나타날 수 있습니다. GPU가 인식되고 학습이 진행되면 무시해도 됩니다.
+
 ### 5.4 파일 경로 오류
 
 **증상**: "FileNotFoundError"
