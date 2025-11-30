@@ -9,9 +9,16 @@ Generates reports in CSV/JSON format and visualizations.
 import argparse
 import json
 import os
+import sys
 import time
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
+
+# Add project root to Python path (for Colab compatibility)
+script_dir = Path(__file__).parent
+project_root = script_dir.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
 
 import numpy as np
 import pandas as pd
