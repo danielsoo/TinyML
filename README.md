@@ -188,6 +188,8 @@ Use the separate `requirements_colab.txt` to avoid macOS-specific packages when 
 - `config/federated_local.yaml` - For local/macOS execution (uses `data/raw/Bot-IoT`)
 - `config/federated_colab.yaml` - For Google Colab execution (uses `/content/drive/MyDrive/TinyML_models`)
 
+> 📖 **Complete Colab Setup Guide**: See [`docs/COLAB_SETUP_GUIDE.md`](docs/COLAB_SETUP_GUIDE.md) for detailed step-by-step instructions from runtime setup to terminal usage.
+
 1. **Clone the repo and install dependencies**
    ```python
    !git clone https://github.com/danielsoo/TinyML.git
@@ -213,6 +215,41 @@ Use the separate `requirements_colab.txt` to avoid macOS-specific packages when 
 
 4. **End-to-end Colab workflow**
    - Open `colab/train_colab.ipynb` in Colab to walk through GPU checks, repo sync, dependency installation, dataset prep, training, and Drive backup of exported models.
+   - **Quick Start**: Runtime → Change runtime type → GPU, then Runtime → Run all
+
+### Quick Colab Setup (Terminal Commands)
+
+If you prefer using terminal commands directly in Colab:
+
+```python
+# 1. Setup
+!git clone https://github.com/danielsoo/TinyML.git /content/TinyML
+%cd /content/TinyML
+
+# 2. Install dependencies
+!pip install -r requirements.txt
+!pip install flwr[simulation]
+
+# 3. Mount Google Drive (if data is there)
+from google.colab import drive
+drive.mount('/content/drive')
+
+# 4. Update config
+import yaml
+with open('config/federated_colab.yaml') as f:
+    cfg = yaml.safe_load(f)
+cfg['data']['path'] = '/content/drive/MyDrive/TinyML_models'
+with open('config/federated_colab.yaml', 'w') as f:
+    yaml.dump(cfg, f)
+
+# 5. Run training
+!python -m src.federated.client --config config/federated_colab.yaml
+
+# 6. Run analysis
+!python scripts/analyze_compression.py \
+    --models "Baseline:src/models/global_model.h5" \
+    --config config/federated_colab.yaml
+```
    - The notebook automatically uses `config/federated_colab.yaml` for Colab-specific paths.
 
 ---
