@@ -320,7 +320,131 @@ Once a model is trained centrally (or after FL aggregation), it can be exported 
 python -m src.tinyml.export_tflite
 ```
 
-Output appears in `data/processed/tiny_model.tflite`. A dedicated TinyML “Hello World” deployment script (e.g., Raspberry Pi Pico / ESP32) is scheduled for Phase 1 completion.
+Output appears in `data/processed/tiny_model.tflite`. A dedicated TinyML "Hello World" deployment script (e.g., Raspberry Pi Pico / ESP32) is scheduled for Phase 1 completion.
+
+---
+
+## Compression Analysis
+
+The compression analysis tools measure model size, accuracy, and inference speed at each compression stage, and visualize size vs accuracy trade-offs.
+
+### 1. Analyze Compression Stages
+
+Analyze multiple model files (baseline, quantized, pruned, etc.) and generate comprehensive reports:
+
+```bash
+# Analyze multiple models with stage names
+python scripts/analyze_compression.py \
+    --models "Baseline:src/models/global_model.h5" \
+             "Quantized:data/processed/model_quantized.tflite" \
+             "Pruned:data/processed/model_pruned.tflite" \
+    --baseline src/models/global_model.h5 \
+    --config config/federated_local.yaml \
+    --output-dir data/processed/analysis
+
+# Or use Makefile (set MODELS variable)
+make analyze-compression MODELS="Baseline:src/models/global_model.h5 Quantized:model.tflite"
+```
+
+**Output:**
+- `compression_analysis.csv` - Tabular results
+- `compression_analysis.json` - JSON format for programmatic access
+- `compression_analysis.md` - Markdown report with comparison tables
+
+**Metrics Collected:**
+- Model file size (MB, bytes)
+- Parameter count
+- Compression ratio (if baseline provided)
+- Accuracy, Precision, Recall, F1-Score
+- Inference latency (avg/min/max in ms)
+- Samples per second
+
+### 2. Visualize Results
+
+Generate visualizations from analysis results:
+
+```bash
+# Generate all visualizations
+python scripts/visualize_results.py \
+    --results data/processed/analysis/compression_analysis.csv \
+    --output-dir data/processed/analysis
+
+# Or generate specific plots
+python scripts/visualize_results.py \
+    --results data/processed/analysis/compression_analysis.csv \
+    --plot size-accuracy  # or: metrics, compression-ratio, all
+
+# Or use Makefile
+make visualize-results
+```
+
+**Generated Plots:**
+- `size_vs_accuracy.png` - Size vs accuracy trade-off with trend line
+- `compression_metrics.png` - Comprehensive metrics comparison (4 subplots)
+- `compression_ratio.png` - Compression ratio visualization
+
+### 3. Local Environment Usage
+
+**Basic workflow:**
+```bash
+# 1. Train federated model (if not already done)
+make run-fl
+
+# 2. Analyze baseline model
+python scripts/analyze_compression.py \
+    --models "Baseline:src/models/global_model.h5" \
+    --config config/federated_local.yaml
+
+# 3. (Optional) Export to TFLite and analyze
+python -m src.tinyml.export_tflite
+python scripts/analyze_compression.py \
+    --models "Baseline:src/models/global_model.h5" \
+             "TFLite:data/processed/tiny_model.tflite" \
+    --baseline src/models/global_model.h5
+
+# 4. Visualize results
+python scripts/visualize_results.py \
+    --results data/processed/analysis/compression_analysis.csv
+```
+
+### 4. Google Colab Usage
+
+**Option A: Use the notebook (Recommended)**
+
+The `colab/train_colab.ipynb` notebook now includes compression analysis cells (Section 8️⃣). Simply run all cells sequentially.
+
+**Option B: Manual execution in Colab**
+
+```python
+# In Colab notebook cells:
+
+# 1. Export to TFLite (optional)
+import tensorflow as tf
+model = tf.keras.models.load_model("src/models/global_model.h5")
+converter = tf.lite.TFLiteConverter.from_keras_model(model)
+tflite_model = converter.convert()
+with open("src/models/global_model.tflite", "wb") as f:
+    f.write(tflite_model)
+
+# 2. Run analysis
+!python scripts/analyze_compression.py \
+    --models "Baseline:src/models/global_model.h5" \
+             "TFLite:src/models/global_model.tflite" \
+    --baseline src/models/global_model.h5 \
+    --config config/federated_colab.yaml \
+    --output-dir data/processed/analysis
+
+# 3. Visualize
+!python scripts/visualize_results.py \
+    --results data/processed/analysis/compression_analysis.csv \
+    --output-dir data/processed/analysis
+
+# 4. Display plots inline
+from IPython.display import Image, display
+display(Image("data/processed/analysis/size_vs_accuracy.png"))
+```
+
+**For detailed Colab instructions, see:** `docs/COMPRESSION_ANALYSIS_GUIDE.md`
 
 ---
 

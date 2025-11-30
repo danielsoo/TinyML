@@ -14,3 +14,9 @@ run-fl:
 
 download-data:
 	bash scripts/download_dataset.sh
+
+analyze-compression:
+	python scripts/analyze_compression.py --models $(MODELS) --config config/federated_local.yaml
+
+visualize-results:
+	python scripts/visualize_results.py --results data/processed/analysis/compression_analysis.csv
