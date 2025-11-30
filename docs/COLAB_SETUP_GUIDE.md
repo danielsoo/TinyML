@@ -338,6 +338,63 @@ drive.mount('/content/drive')
 !git clone https://github.com/danielsoo/TinyML.git /content/TinyML
 ```
 
+### 5.8 ModuleNotFoundError: No module named 'src'
+
+**증상**: `ModuleNotFoundError: No module named 'src'` 또는 `ModuleNotFoundError: No module named 'src.data'`
+
+**원인**: Python이 프로젝트 디렉토리를 모듈 경로에서 찾지 못함
+
+**해결 방법:**
+
+**방법 1: sys.path에 프로젝트 디렉토리 추가 (권장)**
+```python
+import os
+import sys
+
+PROJECT_DIR = "/content/TinyML"
+os.chdir(PROJECT_DIR)
+
+# 프로젝트 디렉토리를 Python 경로에 추가
+if PROJECT_DIR not in sys.path:
+    sys.path.insert(0, PROJECT_DIR)
+
+# 이제 스크립트 실행 가능
+!python scripts/analyze_compression.py --help
+```
+
+**방법 2: PYTHONPATH 환경 변수 설정**
+```python
+import os
+os.environ['PYTHONPATH'] = '/content/TinyML'
+
+# 또는 셸에서
+!export PYTHONPATH=/content/TinyML:$PYTHONPATH
+!python scripts/analyze_compression.py --help
+```
+
+**방법 3: -m 옵션 사용 (프로젝트 루트에서)**
+```python
+import os
+os.chdir('/content/TinyML')
+
+# Python 모듈로 실행
+!python -m scripts.analyze_compression --help
+```
+
+**방법 4: 절대 경로로 실행**
+```python
+# 프로젝트 루트에서 실행
+!cd /content/TinyML && python scripts/analyze_compression.py --help
+```
+
+**확인:**
+```python
+import sys
+print("Python path:")
+for p in sys.path[:5]:  # 처음 5개만 출력
+    print(f"  {p}")
+```
+
 ---
 
 ## 6. 실전 예제
