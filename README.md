@@ -157,6 +157,8 @@ TinyML/
 
 > macOS 15 with Apple Silicon is the reference development environment.
 
+> 📖 **Minimal Setup Guide**: See [`docs/MINIMAL_SETUP.md`](docs/MINIMAL_SETUP.md) for the minimum files/folders needed to start training.
+
 1. **Create and populate a virtual environment**
    ```bash
    make setup
