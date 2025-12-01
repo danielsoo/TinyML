@@ -18,7 +18,7 @@ CFG_PATH = Path("config/federated.yaml")
 if not CFG_PATH.exists():
     raise FileNotFoundError(f"설정 파일을 찾을 수 없습니다: {CFG_PATH.resolve()}")
 
-with CFG_PATH.open() as f:
+with CFG_PATH.open(encoding='utf-8') as f:
     CFG = yaml.safe_load(f)
 
 

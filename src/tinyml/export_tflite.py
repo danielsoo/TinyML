@@ -11,5 +11,7 @@ def export_tflite(model: tf.keras.Model, out_path: str):
     print(f"Saved: {out_path}")
 
 if __name__ == "__main__":
-    model = make_small_cnn()
+    input_shape = (28, 28, 1)
+    num_classes = 2
+    model = make_small_cnn(input_shape, num_classes)
     export_tflite(model, "tiny_model.tflite")

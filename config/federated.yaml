@@ -4,9 +4,9 @@ data:
   # bot_iot 또는 mnist 선택
   name: bot_iot
 
-  # Bot-IoT CSV 올려둔 경로 (Colab 기준: /content/TinyML/data/raw/Bot-IoT)
-  # path: "/content/TinyML/data/raw/Bot-IoT"
-  path: "/content/drive/MyDrive/TinyML_models"
+  # Bot-IoT CSV 올려둔 경로 (로컬 Windows 경로)
+  path: "data/raw/Bot-IoT"
+  # Colab 사용 시: /content/drive/MyDrive/TinyML_models
 
   # 클라이언트 수
   num_clients: 4
@@ -15,7 +15,7 @@ data:
   max_samples: 200000
 
 model:
-  # mlp 또는 cnn (Bot-IoT면 보통 mlp)
+  # mlp 또는 cnn (Bot-IoT면 보통 mlp, MNIST면 cnn)
   name: mlp
 
 federated:
