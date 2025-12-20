@@ -121,8 +121,10 @@ class CompressionAnalyzer:
             input_details = interpreter.get_input_details()
             output_details = interpreter.get_output_details()
 
+            # TFLite models typically support batch size 1 only
+            # Process samples one at a time
             y_pred_list = []
-            batch_size = 32
+            batch_size = 1
 
             for i in range(0, len(self.x_test), batch_size):
                 batch_x = self.x_test[i : i + batch_size]
