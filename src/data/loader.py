@@ -94,6 +94,9 @@ def load_bot_iot(
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """Load Bot-IoT CSV files and return (x_train, y_train, x_test, y_test).
 
+    Now includes IP addresses and categorical features (protocol, flags, state)
+    by encoding them for machine learning compatibility.
+
     Assumptions:
     - .csv files exist under data_path
     - label_col column contains 0/1 or integer labels
@@ -139,13 +142,64 @@ def load_bot_iot(
     y = df[label_col].values
     feature_df = df.drop(columns=[label_col])
 
+    # Convert IP addresses to integers
+    def ip_to_int(ip_str):
+        """Convert IP address string to integer using ipaddress module."""
+        try:
+            import ipaddress
+            if pd.isna(ip_str) or ip_str == '':
+                return 0
+            return int(ipaddress.IPv4Address(str(ip_str)))
+        except (ValueError, AttributeError, TypeError):
+            # Invalid IP or NaN, return 0
+            return 0
+
+    # Process IP address columns (source/destination IPs)
+    ip_columns = ['saddr', 'daddr', 'srcip', 'dstip', 'src_ip', 'dst_ip']
+    for col in ip_columns:
+        if col in feature_df.columns:
+            print(f"[load_bot_iot] Converting IP addresses in column '{col}' to integers.")
+            feature_df[col] = feature_df[col].apply(ip_to_int)
+
+    # Encode categorical columns using Label Encoding
+    from sklearn.preprocessing import LabelEncoder
+    
+    categorical_columns = ['proto', 'flgs', 'state', 'service']
+    encoders = {}
+    
+    for col in categorical_columns:
+        if col in feature_df.columns:
+            print(f"[load_bot_iot] Encoding categorical column '{col}' using Label Encoding.")
+            le = LabelEncoder()
+            # Handle NaN values by replacing with 'unknown' before encoding
+            feature_df[col] = feature_df[col].fillna('unknown').astype(str)
+            feature_df[col] = le.fit_transform(feature_df[col])
+            encoders[col] = le
+
+    # Category and subcategory columns are label information, so exclude them
+    # (they are redundant with the label_col)
+    # Uncomment below if you want to use them as features:
+    # label_columns_to_exclude = ['category', 'subcategory']
+    # for col in label_columns_to_exclude:
+    #     if col in feature_df.columns:
+    #         feature_df = feature_df.drop(columns=[col])
+    #         print(f"[load_bot_iot] Removed label column '{col}' (redundant with label_col).")
+
+    # Encode any remaining string columns
+    for col in feature_df.columns:
+        if feature_df[col].dtype == 'object':
+            print(f"[load_bot_iot] Encoding remaining string column '{col}' using Label Encoding.")
+            le = LabelEncoder()
+            feature_df[col] = le.fit_transform(feature_df[col].fillna('unknown').astype(str))
+
+    # Convert all columns to numeric
     numeric_df = feature_df.apply(pd.to_numeric, errors="coerce")
 
     # Exclude columns that are all NaN (unusable)
     all_nan_cols = numeric_df.columns[numeric_df.isna().all()]
     if len(all_nan_cols) > 0:
         print(
-            f"[load_bot_iot] Removed {len(all_nan_cols)} columns that could not be converted to numeric: "
+            f"[load_bot_iot] Removed {len(all_nan_cols)} columns that are all NaN: "
             f"{list(all_nan_cols)}"
         )
         numeric_df = numeric_df.drop(columns=all_nan_cols)
@@ -154,7 +208,7 @@ def load_bot_iot(
     if numeric_df.isna().any().any():
         nan_rows = int(numeric_df.isna().any(axis=1).sum())
         print(
-            f"[load_bot_iot] Filling {nan_rows} rows with NaN (after numeric conversion) using median values."
+            f"[load_bot_iot] Filling {nan_rows} rows with NaN using median values."
         )
         medians = numeric_df.median(skipna=True)
         medians = medians.fillna(0.0)
@@ -163,7 +217,7 @@ def load_bot_iot(
     if numeric_df.empty:
         raise ValueError(
             "[load_bot_iot] All feature columns are unusable. "
-            "Please check if CSV contains pure numeric features."
+            "Please check if CSV contains usable features."
         )
 
     X = numeric_df.values
@@ -191,6 +245,8 @@ def load_bot_iot(
 
     x_train = x_train.astype("float32")
     x_test = x_test.astype("float32")
+
+    print(f"[load_bot_iot] Final feature shape: {x_train.shape[1]} features (includes IP addresses and categorical features)")
 
     return x_train, y_train, x_test, y_test
 
