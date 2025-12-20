@@ -104,6 +104,22 @@ class CompressionAnalyzer:
         # Load model
         if model_path.endswith(".h5"):
             model = tf.keras.models.load_model(model_path)
+            
+            # Check input shape compatibility
+            model_input_shape = model.input_shape
+            data_feature_count = self.x_test.shape[1]
+            expected_feature_count = model_input_shape[1] if model_input_shape and len(model_input_shape) > 1 else None
+            
+            if expected_feature_count and expected_feature_count != data_feature_count:
+                raise ValueError(
+                    f"Model input shape mismatch: "
+                    f"Model expects {expected_feature_count} features, "
+                    f"but data has {data_feature_count} features. "
+                    f"Please retrain the model with the updated data loader that includes "
+                    f"IP addresses and categorical features, or use a model trained with "
+                    f"the same feature set as the current data."
+                )
+            
             y_pred_proba = model.predict(self.x_test, verbose=0)
 
             # Convert probabilities to predictions
@@ -120,6 +136,21 @@ class CompressionAnalyzer:
 
             input_details = interpreter.get_input_details()
             output_details = interpreter.get_output_details()
+            
+            # Check input shape compatibility
+            tflite_input_shape = input_details[0]["shape"]
+            data_feature_count = self.x_test.shape[1]
+            expected_feature_count = tflite_input_shape[1] if len(tflite_input_shape) > 1 else None
+            
+            if expected_feature_count and expected_feature_count != data_feature_count:
+                raise ValueError(
+                    f"TFLite model input shape mismatch: "
+                    f"Model expects {expected_feature_count} features, "
+                    f"but data has {data_feature_count} features. "
+                    f"Please retrain the model with the updated data loader that includes "
+                    f"IP addresses and categorical features, or use a model trained with "
+                    f"the same feature set as the current data."
+                )
 
             # TFLite models typically support batch size 1 only
             # Process samples one at a time
