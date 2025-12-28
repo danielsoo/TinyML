@@ -14,16 +14,17 @@ This repository hosts the capstone project exploring how **Federated Learning (F
 | Pillar | Goal | Current Status |
 |--------|------|----------------|
 | **Federated Learning** | Train IDS models across distributed IoT clients without sharing raw data | ✅ Flower simulation skeleton implemented |
-| **TinyML** | Compress the global model to fit on microcontrollers (≤ few 100 KB) | ⏳ Baseline MLP ready for export; TinyML pipeline in progress |
+| **TinyML** | Compress the global model to fit on microcontrollers (≤ few 100 KB) | ✅ Basic TFLite export implemented; compression analysis tools completed |
 | **Adversarial Robustness** | Harden the model against evasion/poisoning attacks | ⏳ FGSM utilities scaffolded; integration scheduled for Phase 4 |
 
 **Phase 1 Milestones (Weeks 1–3)**
 
 - ✅ Literature review & requirements analysis  
 - ✅ Bot-IoT dataset ingestion + preprocessing pipeline (`load_bot_iot`)  
+- ✅ Enhanced preprocessing: IP addresses and categorical features encoding
 - ✅ Flower-based FL simulation scaffold  
-- ⏳ TinyML "Hello World" deployment test  
-- ⏳ README + architecture diagram (this document)  
+- ✅ Basic TFLite export functionality
+- ✅ README + architecture diagram (this document)  
 
 ---
 
@@ -36,12 +37,12 @@ This repository hosts the capstone project exploring how **Federated Learning (F
 | Task | Status | Details |
 |------|--------|---------|
 | Literature review & requirements analysis | ✅ Complete | Project proposal and literature review completed |
-| Bot-IoT dataset ingestion & preprocessing | ✅ Complete | `load_bot_iot()` implemented in `src/data/loader.py`, CSV parsing and preprocessing pipeline completed |
+| Bot-IoT dataset ingestion & preprocessing | ✅ Complete | `load_bot_iot()` implemented in `src/data/loader.py` with IP address conversion and categorical feature encoding (45 features), CSV parsing and preprocessing pipeline completed |
 | Flower-based FL simulation scaffold | ✅ Complete | `src/federated/server.py` and `src/federated/client.py` implemented with FedAvg strategy |
 | GitHub repository setup | ✅ Complete | Project structure and configuration files set up |
-| TinyML "Hello World" deployment | ⏳ In Progress | Basic TFLite export (`src/tinyml/export_tflite.py`) implemented, actual microcontroller deployment testing not completed |
+| TinyML basic export | ✅ Complete | Basic TFLite export (`src/tinyml/export_tflite.py`) implemented, compression analysis tools available |
 
-**Completion: ~85%**
+**Completion: ~95%**
 
 ---
 
@@ -70,11 +71,11 @@ This repository hosts the capstone project exploring how **Federated Learning (F
 |------|--------|---------|
 | Knowledge Distillation | ❌ Not Started | Teacher-Student model architecture and training logic not implemented |
 | Structured Pruning | ❌ Not Started | Model reduction functionality via filter/neuron removal not implemented |
-| Quantization | ⏳ Basic Implementation | Only basic TFLite conversion implemented in `src/tinyml/export_tflite.py`, 8-bit quantization not applied |
-| TFLite model export | ⏳ Basic Implementation | Only basic conversion functionality available, optimization options not applied |
-| Size vs. Accuracy trade-off analysis | ❌ Not Started | Performance analysis across compression stages not completed |
+| Quantization | ⏳ Basic Implementation | Basic TFLite conversion implemented, 8-bit quantization (INT8) not yet applied |
+| TFLite model export | ✅ Complete | Basic TFLite conversion implemented in `src/tinyml/export_tflite.py`, supports H5 → TFLite conversion |
+| Size vs. Accuracy trade-off analysis | ✅ Complete | Comprehensive analysis tools implemented: `scripts/analyze_compression.py` and `scripts/visualize_results.py` with CSV/JSON/Markdown reports and visualization plots |
 
-**Completion: ~20%**
+**Completion: ~50%**
 
 ---
 
@@ -100,13 +101,14 @@ This repository hosts the capstone project exploring how **Federated Learning (F
 
 | Task | Status | Details |
 |------|--------|---------|
-| Comprehensive experiments | ❌ Not Started | Comparative experiments between final model and baselines not completed |
-| Performance metrics (accuracy, F1-score) | ⏳ Partially Implemented | Metric collection possible in FL simulation, but comprehensive analysis not completed |
-| Efficiency metrics (size, latency) | ❌ Not Started | Model size and latency measurement not completed |
+| Comprehensive experiments | ⏳ In Progress | Compression analysis framework implemented, ready for multi-stage comparisons |
+| Performance metrics (accuracy, F1-score) | ✅ Complete | Metric collection implemented in FL simulation and compression analysis (Accuracy, Precision, Recall, F1-Score, Confusion Matrix) |
+| Efficiency metrics (size, latency) | ✅ Complete | Model size (MB, bytes, parameters), inference latency (avg/min/max), and compression ratios measurement implemented in `scripts/analyze_compression.py` |
+| Analysis reports & visualizations | ✅ Complete | Comprehensive reports in CSV/JSON/Markdown formats with baseline comparisons, visualization plots (size vs accuracy, metrics comparison, compression ratios) |
 | Final project report | ❌ Not Started | Final report writing not started |
 | Final presentation & demonstration | ❌ Not Started | Final presentation and demo preparation not started |
 
-**Completion: 0%**
+**Completion: ~40%**
 
 ---
 
@@ -114,18 +116,18 @@ This repository hosts the capstone project exploring how **Federated Learning (F
 
 | Phase | Completion | Key Achievements |
 |-------|------------|------------------|
-| Phase 1: Foundation and Setup | ~85% | Dataset preprocessing and FL basic structure completed |
-| Phase 2: Federated Learning Framework | 100% | Complete FL simulation system built |
-| Phase 3: TinyML Model Miniaturization | ~20% | Only basic TFLite export implemented |
+| Phase 1: Foundation and Setup | ~95% | Enhanced dataset preprocessing (IP addresses, categorical features), FL simulation, basic TFLite export completed |
+| Phase 2: Federated Learning Framework | 100% | Complete FL simulation system built with detailed metrics |
+| Phase 3: TinyML Model Miniaturization | ~50% | Basic TFLite export and comprehensive compression analysis tools completed |
 | Phase 4: Adversarial Hardening & Deployment | ~5% | Only FGSM utilities prepared |
-| Phase 5: Final Evaluation & Reporting | 0% | Not started |
+| Phase 5: Final Evaluation & Reporting | ~40% | Performance and efficiency metrics collection, analysis reports, and visualizations completed |
 
-**Overall Project Completion: ~42%**
+**Overall Project Completion: ~58%**
 
 **Next Priorities:**
-1. Complete Phase 3: Implement Knowledge Distillation, Pruning, and Quantization
-2. Start Phase 4: Integrate FGSM and adversarial training
-3. Prepare Phase 5: Design experiments and evaluation framework
+1. Complete Phase 3: Implement Knowledge Distillation, Structured Pruning, and 8-bit Quantization (INT8)
+2. Start Phase 4: Integrate FGSM into FL training loop and implement adversarial training
+3. Prepare Phase 5: Conduct comprehensive experiments and finalize reporting
 
 ---
 
@@ -348,10 +350,14 @@ Loss: 0.1421
 ```
 
 ### 3. What happens under the hood?
-- `src/data/loader.py` → `load_bot_iot()` ingests & normalizes Bot-IoT (numeric features only, label = intrusion).
+- `src/data/loader.py` → `load_bot_iot()` ingests & preprocesses Bot-IoT dataset:
+  - Converts IP addresses (src/dst IPs) to integers
+  - Encodes categorical features (`proto`, `flgs`, `state`, `service`) using Label Encoding
+  - Normalizes numeric features (45 total features after encoding)
+  - Labels: binary classification (intrusion vs normal)
 - `partition_non_iid()` scatters data across `num_clients`, creating label-skewed partitions to mimic heterogeneous IoT fleets.
-- `src/models/nets.make_mlp()` builds a lightweight MLP tailored for tabular data.
-- `src/federated/client.KerasClient` manages Flower’s fit/evaluate cycle and prints detailed metrics each round.
+- `src/models/nets.make_mlp()` builds a lightweight MLP tailored for tabular data (45 input features).
+- `src/federated/client.KerasClient` manages Flower's fit/evaluate cycle and prints detailed metrics each round.
 
 ---
 
@@ -364,7 +370,7 @@ Once a model is trained centrally (or after FL aggregation), it can be exported 
 python -m src.tinyml.export_tflite
 ```
 
-Output appears in `data/processed/tiny_model.tflite`. A dedicated TinyML "Hello World" deployment script (e.g., Raspberry Pi Pico / ESP32) is scheduled for Phase 1 completion.
+Output appears in `data/processed/tiny_model.tflite`. For comprehensive analysis of compression stages (size, accuracy, latency), see the **Compression Analysis** section below.
 
 ---
 
@@ -398,10 +404,16 @@ make analyze-compression MODELS="Baseline:src/models/global_model.h5 Quantized:m
 **Metrics Collected:**
 - Model file size (MB, bytes)
 - Parameter count
-- Compression ratio (if baseline provided)
+- Compression ratio vs baseline (with size reduction percentage)
 - Accuracy, Precision, Recall, F1-Score
 - Inference latency (avg/min/max in ms)
 - Samples per second
+
+**Report Features:**
+- Quantitative comparison with baseline (percentage changes for size, accuracy, F1-score, latency)
+- Visual indicators (↑ improvement, ↓ degradation, → no change)
+- Overall status summary for each compression stage
+- Detailed markdown report with comparison tables
 
 ### 2. Visualize Results
 
@@ -505,6 +517,9 @@ display(Image("data/processed/analysis/size_vs_accuracy.png"))
 - **Dataset missing?** Ensure `make download-data` completed, and `data/raw/Bot-IoT/` contains four `reduced_data_*.csv` files.
 - **Kaggle CLI “command not found”?** Reactivate the virtual environment (`source .venv/bin/activate`) before running the download script.
 - **Long training times?** Prefer lab hardware for full Bot-IoT runs; keep laptop tests to ≤ 10 k samples.
+- **Protobuf version errors in Colab?** The notebook automatically installs `protobuf==3.20.3` for TensorFlow compatibility.
+- **Model input shape mismatch?** Ensure your model was trained with the current dataset (45 features including IP addresses and categorical encodings). Retrain if needed.
+- **TFLite evaluation errors?** TFLite models use batch size 1 by default; the compression analysis script handles this automatically.
 
 ---
 
