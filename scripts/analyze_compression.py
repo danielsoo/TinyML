@@ -11,8 +11,15 @@ import json
 import os
 import sys
 import time
+import warnings
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
+
+# Suppress unnecessary warnings before importing libraries
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # Suppress TensorFlow INFO and WARNING messages
+warnings.filterwarnings('ignore', category=UserWarning)
+warnings.filterwarnings('ignore', category=FutureWarning)
+warnings.filterwarnings('ignore', message='.*DtypeWarning.*')
 
 # Add project root to Python path (for Colab compatibility)
 script_dir = Path(__file__).parent
@@ -24,6 +31,9 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
+
+# Suppress TensorFlow warnings after import
+tf.get_logger().setLevel('ERROR')
 
 from src.data.loader import load_dataset
 from src.models import nets
@@ -55,9 +65,12 @@ class CompressionAnalyzer:
             k: v for k, v in data_cfg.items() if k not in {"name", "num_clients"}
         }
 
-        print(f"Loading dataset: {dataset_name}")
+        print(f"\n{'='*60}")
+        print(f"📊 COMPRESSION ANALYSIS")
+        print(f"{'='*60}")
+        print(f"\n📁 Loading dataset: {dataset_name}")
         _, _, self.x_test, self.y_test = load_dataset(dataset_name, **dataset_kwargs)
-        print(f"Test set size: {len(self.x_test)} samples")
+        print(f"✅ Test set loaded: {len(self.x_test):,} samples")
 
         # Get model config
         model_cfg = self.config.get("model", {})
@@ -99,7 +112,10 @@ class CompressionAnalyzer:
         self, model_path: str, stage_name: str
     ) -> Dict[str, float]:
         """Evaluate model accuracy and other metrics on test set."""
-        print(f"\nEvaluating {stage_name}...")
+        # Suppress output during evaluation
+        import warnings
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
 
         # Load model
         if model_path.endswith(".h5"):
@@ -193,7 +209,10 @@ class CompressionAnalyzer:
         self, model_path: str, num_runs: int = 10
     ) -> Dict[str, float]:
         """Measure inference speed (latency) in milliseconds."""
-        print(f"Measuring inference speed ({num_runs} runs)...")
+        # Suppress output during speed measurement
+        import warnings
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
 
         # Load model
         if model_path.endswith(".h5"):
@@ -243,29 +262,37 @@ class CompressionAnalyzer:
     ) -> Dict:
         """Analyze a single compression stage."""
         print(f"\n{'='*60}")
-        print(f"Analyzing stage: {stage_name}")
-        print(f"Model: {model_path}")
+        print(f"🔍 Analyzing: {stage_name}")
+        print(f"📦 Model: {model_path}")
         print(f"{'='*60}")
 
         # Measure size
         size_metrics = self.measure_model_size(model_path)
-        print(f"File size: {size_metrics['file_size_mb']:.4f} MB")
-        print(f"Parameters: {size_metrics['parameter_count']:,}")
+        print(f"\n📏 Model Size:")
+        print(f"   • File size: {size_metrics['file_size_mb']:.4f} MB")
+        print(f"   • Parameters: {size_metrics['parameter_count']:,}")
 
         # Evaluate accuracy
         accuracy_metrics = self.evaluate_model(model_path, stage_name)
-        print(f"Accuracy: {accuracy_metrics['accuracy']:.4f}")
-        print(f"F1-Score: {accuracy_metrics['f1_score']:.4f}")
+        print(f"\n🎯 Performance:")
+        print(f"   • Accuracy: {accuracy_metrics['accuracy']:.4f} ({accuracy_metrics['accuracy']*100:.2f}%)")
+        print(f"   • F1-Score: {accuracy_metrics['f1_score']:.4f} ({accuracy_metrics['f1_score']*100:.2f}%)")
 
         # Measure inference speed
         speed_metrics = self.measure_inference_speed(model_path)
+        print(f"\n⚡ Inference Speed:")
+        print(f"   • Avg latency: {speed_metrics['avg_latency_ms']:.2f} ms")
+        print(f"   • Min latency: {speed_metrics['min_latency_ms']:.2f} ms")
+        print(f"   • Max latency: {speed_metrics['max_latency_ms']:.2f} ms")
 
         # Calculate compression ratio if baseline provided
         compression_ratio = None
         if baseline_path and Path(baseline_path).exists():
             baseline_size = self.measure_model_size(baseline_path)
             compression_ratio = baseline_size["file_size_mb"] / size_metrics["file_size_mb"]
-            print(f"Compression ratio: {compression_ratio:.2f}x")
+            print(f"\n📊 Compression:")
+            print(f"   • Ratio: {compression_ratio:.2f}x")
+            print(f"   • Size reduction: {(1 - 1/compression_ratio)*100:.1f}%")
 
         # Combine all metrics
         result = {
@@ -305,10 +332,14 @@ class CompressionAnalyzer:
 
         df = pd.DataFrame(self.results)
 
+        print(f"\n{'='*60}")
+        print(f"💾 Saving Results")
+        print(f"{'='*60}")
+        
         if format in ["csv", "all"]:
             csv_path = self.output_dir / "compression_analysis.csv"
             df.to_csv(csv_path, index=False)
-            print(f"\n✅ Saved CSV: {csv_path}")
+            print(f"✅ CSV: {csv_path}")
 
         if format in ["json", "all"]:
             json_path = self.output_dir / "compression_analysis.json"
@@ -316,12 +347,12 @@ class CompressionAnalyzer:
             serializable_results = self._convert_to_serializable(self.results)
             with open(json_path, "w") as f:
                 json.dump(serializable_results, f, indent=2)
-            print(f"✅ Saved JSON: {json_path}")
+            print(f"✅ JSON: {json_path}")
 
         if format in ["markdown", "all"]:
             md_path = self.output_dir / "compression_analysis.md"
             self._generate_markdown_report(df, md_path)
-            print(f"✅ Saved Markdown: {md_path}")
+            print(f"✅ Markdown: {md_path}")
 
     def _generate_markdown_report(self, df: pd.DataFrame, output_path: Path):
         """Generate markdown report with comparison tables."""
@@ -443,7 +474,9 @@ def main():
         )
 
     analyzer.save_results(format=args.format)
-    print("\n✅ Analysis complete!")
+    print(f"\n{'='*60}")
+    print(f"✨ Analysis Complete!")
+    print(f"{'='*60}\n")
 
 
 if __name__ == "__main__":

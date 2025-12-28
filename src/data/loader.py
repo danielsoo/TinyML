@@ -1,9 +1,14 @@
 from pathlib import Path
 from typing import Tuple, Dict, List
+import warnings
 
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
+
+# Suppress pandas DtypeWarning
+warnings.filterwarnings('ignore', category=pd.errors.DtypeWarning)
+pd.options.mode.chained_assignment = None
 
 
 # -------------------------
@@ -108,7 +113,10 @@ def load_bot_iot(
     if not csv_files:
         raise FileNotFoundError(f"Bot-IoT CSV files not found: {root.resolve()}")
 
-    dfs = [pd.read_csv(p) for p in csv_files]
+    # Suppress DtypeWarning during CSV reading
+    with warnings.catch_warnings():
+        warnings.filterwarnings('ignore', category=pd.errors.DtypeWarning)
+        dfs = [pd.read_csv(p, low_memory=False) for p in csv_files]
     df = pd.concat(dfs, axis=0, ignore_index=True)
 
     label_candidates = []

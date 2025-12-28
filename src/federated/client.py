@@ -1,5 +1,12 @@
 from pathlib import Path
 from typing import Dict, Any, Tuple, Optional
+import os
+import warnings
+
+# Suppress TensorFlow warnings
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+warnings.filterwarnings('ignore', category=UserWarning)
+warnings.filterwarnings('ignore', message='.*protobuf.*')
 
 import flwr as fl
 import numpy as np
@@ -8,6 +15,13 @@ from flwr.common import parameters_to_ndarrays
 
 from src.data.loader import load_dataset, partition_non_iid
 from src.models import nets
+
+# Suppress TensorFlow logging after import
+try:
+    import tensorflow as tf
+    tf.get_logger().setLevel('ERROR')
+except ImportError:
+    pass
 
 
 # ------------------------------------------------
