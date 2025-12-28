@@ -363,6 +363,15 @@ class CompressionAnalyzer:
             f.write("## Summary\n\n")
             f.write(f"Total stages analyzed: {len(df)}\n\n")
 
+            # Find baseline (first row or row with stage name "Baseline")
+            baseline_row = None
+            if len(df) > 0:
+                baseline_candidates = df[df['stage'].str.lower() == 'baseline']
+                if len(baseline_candidates) > 0:
+                    baseline_row = baseline_candidates.iloc[0]
+                else:
+                    baseline_row = df.iloc[0]
+
             # Comparison table
             f.write("## Comparison Table\n\n")
             f.write("| Stage | Size (MB) | Parameters | Accuracy | F1-Score | Latency (ms) |\n")
@@ -375,14 +384,62 @@ class CompressionAnalyzer:
                     f"{row['f1_score']:.4f} | {row['avg_latency_ms']:.2f} |\n"
                 )
 
+            # Improvements vs Baseline section
+            if baseline_row is not None and len(df) > 1:
+                f.write("\n## 📊 Improvements vs Baseline\n\n")
+                f.write(f"**Baseline:** {baseline_row['stage']}\n\n")
+                f.write("| Stage | Size Change | Accuracy Change | F1-Score Change | Latency Change | Overall Status |\n")
+                f.write("|-------|-------------|-----------------|-----------------|----------------|----------------|\n")
+                
+                for _, row in df.iterrows():
+                    if row['stage'] == baseline_row['stage']:
+                        f.write(f"| {row['stage']} | - | - | - | - | **Baseline** |\n")
+                        continue
+                    
+                    # Calculate changes
+                    size_change = ((row['file_size_mb'] - baseline_row['file_size_mb']) / baseline_row['file_size_mb']) * 100
+                    acc_change = (row['accuracy'] - baseline_row['accuracy']) * 100
+                    f1_change = (row['f1_score'] - baseline_row['f1_score']) * 100
+                    latency_change = ((row['avg_latency_ms'] - baseline_row['avg_latency_ms']) / baseline_row['avg_latency_ms']) * 100 if baseline_row['avg_latency_ms'] > 0 else 0
+                    
+                    # Format changes with arrows (↓ = good, ↑ = bad for size/latency, but good for accuracy/f1)
+                    size_str = f"{size_change:+.2f}%" + (" ↓" if size_change < 0 else " ↑" if size_change > 0 else " →")
+                    acc_str = f"{acc_change:+.4f}%" + (" ↑" if acc_change > 0 else " ↓" if acc_change < 0 else " →")
+                    f1_str = f"{f1_change:+.4f}%" + (" ↑" if f1_change > 0 else " ↓" if f1_change < 0 else " →")
+                    # Latency: negative change is good (faster), positive is bad (slower)
+                    latency_str = f"{latency_change:+.2f}%" + (" ↓" if latency_change < 0 else " ↑" if latency_change > 0 else " →")
+                    
+                    # Overall status (count improvements)
+                    improvements = 0
+                    if size_change < 0:  # Smaller is better
+                        improvements += 1
+                    if acc_change >= 0:  # Higher or same is better
+                        improvements += 1
+                    if f1_change >= 0:  # Higher or same is better
+                        improvements += 1
+                    if latency_change < 0:  # Lower latency is better
+                        improvements += 1
+                    
+                    if improvements == 4:
+                        status = "✅ All Improved"
+                    elif improvements >= 2:
+                        status = "✅ Mostly Better"
+                    elif improvements == 1:
+                        status = "⚠️ Mixed Results"
+                    else:
+                        status = "❌ Degraded"
+                    
+                    f.write(f"| {row['stage']} | {size_str} | {acc_str} | {f1_str} | {latency_str} | {status} |\n")
+
             # Compression ratios if available
             if "compression_ratio" in df.columns:
                 f.write("\n## Compression Ratios\n\n")
-                f.write("| Stage | Compression Ratio |\n")
-                f.write("|-------|------------------|\n")
+                f.write("| Stage | Compression Ratio | Size Reduction |\n")
+                f.write("|-------|------------------|----------------|\n")
                 for _, row in df.iterrows():
                     if pd.notna(row.get("compression_ratio")):
-                        f.write(f"| {row['stage']} | {row['compression_ratio']:.2f}x |\n")
+                        reduction = (1 - 1/row['compression_ratio']) * 100
+                        f.write(f"| {row['stage']} | {row['compression_ratio']:.2f}x | {reduction:.1f}% |\n")
 
             # Detailed metrics
             f.write("\n## Detailed Metrics\n\n")
