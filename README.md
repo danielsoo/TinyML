@@ -158,14 +158,17 @@ TinyML/
 ## Environment Setup
 
 > macOS 15 with Apple Silicon is the reference development environment.
+> The project now supports both local and Colab environments with automatic detection.
 
 > 📖 **Minimal Setup Guide**: See [`docs/MINIMAL_SETUP.md`](docs/MINIMAL_SETUP.md) for the minimum files/folders needed to start training.
 
-1. **Create and populate a virtual environment**
+1. **Create and populate a virtual environment** (Local only)
    ```bash
    make setup
    source .venv/bin/activate
    ```
+   
+   **Note:** In Colab, dependencies are automatically installed by the unified training script.
 
 2. **Authenticate with Kaggle (one-time)**
    ```bash
@@ -186,19 +189,38 @@ TinyML/
 
 ## Running on Google Colab
 
-Use the separate `requirements_colab.txt` to avoid macOS-specific packages when installing on Linux-based runtimes such as Google Colab.
+The project automatically detects the environment (local vs Colab) and uses the appropriate configuration.
 
-**Note:** The project now uses separate configuration files for local and Colab environments:
+**Note:** The project uses separate configuration files for local and Colab environments:
 - `config/federated_local.yaml` - For local/macOS execution (uses `data/raw/Bot-IoT`)
 - `config/federated_colab.yaml` - For Google Colab execution (uses `/content/drive/MyDrive/TinyML_models`)
 
+**Environment Auto-Detection:**
+- The unified training script (`scripts/train.py`) automatically detects whether you're running locally or in Colab
+- Configuration files are selected automatically based on the environment
+- No need to manually specify config files in most cases
+
 > 📖 **Complete Colab Setup Guide**: See [`docs/COLAB_SETUP_GUIDE.md`](docs/COLAB_SETUP_GUIDE.md) for detailed step-by-step instructions from runtime setup to terminal usage.
 
-1. **Clone the repo and install dependencies**
+1. **Clone the repo and run training (unified script)**
    ```python
    !git clone https://github.com/danielsoo/TinyML.git
    %cd TinyML
-   !pip install -r requirements_colab.txt
+   !python scripts/train.py
+   ```
+   
+   The unified script automatically:
+   - Detects Colab environment
+   - Installs dependencies (including protobuf fix)
+   - Uses `config/federated_colab.yaml`
+   - Checks GPU availability
+   
+   **Or use traditional approach:**
+   ```python
+   !git clone https://github.com/danielsoo/TinyML.git
+   %cd TinyML
+   !pip install -r colab/requirements_colab.txt
+   !python -m src.federated.client --config config/federated_colab.yaml --save-model src/models/global_model.h5
    ```
 
 2. **Access the dataset**
@@ -223,38 +245,43 @@ Use the separate `requirements_colab.txt` to avoid macOS-specific packages when 
 
 ### Quick Colab Setup (Terminal Commands)
 
-If you prefer using terminal commands directly in Colab:
+**Recommended: Use unified training script (auto-detects Colab environment)**
+```python
+# 1. Clone and setup
+!git clone https://github.com/danielsoo/TinyML.git /content/TinyML
+%cd /content/TinyML
 
+# 2. Mount Google Drive (if data is there)
+from google.colab import drive
+drive.mount('/content/drive')
+
+# 3. Run training (auto-detects Colab, installs deps, uses correct config)
+!python scripts/train.py
+```
+
+**Alternative: Manual setup**
 ```python
 # 1. Setup
 !git clone https://github.com/danielsoo/TinyML.git /content/TinyML
 %cd /content/TinyML
 
 # 2. Install dependencies
-!pip install -r requirements.txt
+!pip install -r colab/requirements_colab.txt
 !pip install flwr[simulation]
 
 # 3. Mount Google Drive (if data is there)
 from google.colab import drive
 drive.mount('/content/drive')
 
-# 4. Update config
-import yaml
-with open('config/federated_colab.yaml') as f:
-    cfg = yaml.safe_load(f)
-cfg['data']['path'] = '/content/drive/MyDrive/TinyML_models'
-with open('config/federated_colab.yaml', 'w') as f:
-    yaml.dump(cfg, f)
+# 4. Run training
+!python -m src.federated.client --config config/federated_colab.yaml --save-model src/models/global_model.h5
 
-# 5. Run training
-!python -m src.federated.client --config config/federated_colab.yaml
-
-# 6. Run analysis
+# 5. Run analysis
 !python scripts/analyze_compression.py \
     --models "Baseline:src/models/global_model.h5" \
     --config config/federated_colab.yaml
 ```
-   - The notebook automatically uses `config/federated_colab.yaml` for Colab-specific paths.
+   - The unified script automatically uses `config/federated_colab.yaml` for Colab-specific paths.
 
 ---
 
@@ -299,16 +326,29 @@ federated:
 
 ### 2. Launch the simulation
 
-**Local execution (uses `federated_local.yaml` by default):**
+**Local execution (auto-detects environment and uses appropriate config):**
 ```bash
+# Option 1: Use unified training script (recommended)
+make train                              # Auto-detects environment, uses appropriate config
+# or
+python scripts/train.py                 # Same as above
+
+# Option 2: Use shell script (legacy, local only)
 make run-fl                             # Uses config/federated_local.yaml
 # Automatically saves with timestamp: global_model_YYYYMMDD_HHMMSS.h5
 # Also saves as latest: global_model.h5
 
-# Or specify custom path
+# Option 3: Direct Python execution
 python -m src.federated.client \
     --config config/federated_local.yaml \
     --save-model src/models/my_model.h5
+
+# The unified script automatically:
+# - Detects local vs Colab environment
+# - Selects appropriate config file (federated_local.yaml or federated_colab.yaml)
+# - Checks GPU availability
+# - Verifies data paths
+# - Handles dependency installation (in Colab)
 ```
 
 **Colab execution:**

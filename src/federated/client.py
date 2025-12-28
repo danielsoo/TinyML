@@ -29,11 +29,23 @@ except ImportError:
 # ------------------------------------------------
 
 def load_config(config_path: str = None):
-    """Load configuration file. Defaults to environment variable or default path."""
+    """Load configuration file. Defaults to environment variable or auto-detected path.
+    
+    If config_path is None, automatically detects environment (Colab vs local)
+    and selects appropriate config file.
+    """
     if config_path is None:
-        # Check environment variable for config file path
-        import os
-        config_path = os.getenv("FEDERATED_CONFIG", "config/federated_local.yaml")
+        # Try environment variable first
+        config_path = os.getenv("FEDERATED_CONFIG", None)
+        
+        # If not set, auto-detect environment
+        if config_path is None:
+            try:
+                from src.utils.env_utils import get_default_config_path
+                config_path = get_default_config_path()
+            except ImportError:
+                # Fallback to local config if env_utils not available
+                config_path = "config/federated_local.yaml"
     
     cfg_path = Path(config_path)
     if not cfg_path.exists():

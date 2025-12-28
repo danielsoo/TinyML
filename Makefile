@@ -12,6 +12,9 @@ lint:
 run-fl:
 	bash scripts/run_fl_sim.sh
 
+train:
+	python scripts/train.py
+
 download-data:
 	bash scripts/download_dataset.sh
 
