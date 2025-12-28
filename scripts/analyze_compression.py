@@ -282,6 +282,21 @@ class CompressionAnalyzer:
         self.results.append(result)
         return result
 
+    def _convert_to_serializable(self, obj):
+        """Convert NumPy types to Python native types for JSON serialization."""
+        if isinstance(obj, (np.integer, np.int64, np.int32)):
+            return int(obj)
+        elif isinstance(obj, (np.floating, np.float64, np.float32)):
+            return float(obj)
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        elif isinstance(obj, dict):
+            return {key: self._convert_to_serializable(value) for key, value in obj.items()}
+        elif isinstance(obj, list):
+            return [self._convert_to_serializable(item) for item in obj]
+        else:
+            return obj
+
     def save_results(self, format: str = "all"):
         """Save analysis results to CSV, JSON, and/or Markdown."""
         if not self.results:
@@ -297,8 +312,10 @@ class CompressionAnalyzer:
 
         if format in ["json", "all"]:
             json_path = self.output_dir / "compression_analysis.json"
+            # Convert NumPy types to Python native types for JSON serialization
+            serializable_results = self._convert_to_serializable(self.results)
             with open(json_path, "w") as f:
-                json.dump(self.results, f, indent=2)
+                json.dump(serializable_results, f, indent=2)
             print(f"✅ Saved JSON: {json_path}")
 
         if format in ["markdown", "all"]:
