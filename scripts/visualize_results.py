@@ -8,6 +8,7 @@ Creates size vs accuracy trade-off visualizations and other analysis plots.
 import argparse
 import json
 from pathlib import Path
+from typing import Optional
 
 import matplotlib.pyplot as plt
 import pandas as pd
