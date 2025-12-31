@@ -1,19 +1,27 @@
 """
-End-to-end integration test for the complete pruning pipeline.
-Tests pruning on your actual Bot-IoT dataset and models.
+End-to-end integration test for the complete TinyML pipeline.
+Tests FL/TL → Pruning → Quantization → TFLite on Bot-IoT dataset.
 """
 import yaml
 import numpy as np
 from pathlib import Path
 from tensorflow import keras
+import tensorflow as tf
 
 from src.data.loader import load_dataset
 from src.models.nets import get_model
 from src.modelcompression.pruning import (
     apply_structured_pruning,
     compare_models,
-    fine_tune_pruned_model
+    fine_tune_pruned_model,
+    get_model_size
 )
+from src.modelcompression.quantization import (
+    quantize_model,
+    compare_model_sizes,
+    evaluate_quantization_accuracy
+)
+from src.tinyml.export_tflite import export_tflite
 
 
 def safe_evaluate(model, x, y, verbose=0):
@@ -26,9 +34,13 @@ def safe_evaluate(model, x, y, verbose=0):
 
 
 def test_full_pipeline_mlp():
-    """Test complete pruning pipeline with MLP on Bot-IoT data."""
+    """
+    Test complete TinyML pipeline with MLP on Bot-IoT data.
+
+    Pipeline: Training → Pruning → Fine-tuning → Quantization → TFLite Export
+    """
     print("\n" + "="*80)
-    print(" "*20 + "🧪 FULL PIPELINE TEST (MLP)")
+    print(" "*20 + "🧪 FULL TINYML PIPELINE TEST")
     print("="*80 + "\n")
 
     # Load config
@@ -145,9 +157,103 @@ def test_full_pipeline_mlp():
             'vs_original': final_acc - orig_acc
         }
 
+    # Step 6: Apply Quantization (using 0.5 ratio model)
+    print(f"\n🔢 Step 6: Applying Quantization (ratio=0.5)")
+    print("-" * 60)
+
+    # Use the 0.5 ratio pruned model for quantization
+    if 0.5 in results:
+        # Re-create the pruned model for quantization
+        pruned_model_50 = apply_structured_pruning(
+            model,
+            pruning_ratio=0.5,
+            skip_last_layer=True,
+            verbose=False
+        )
+        pruned_model_50 = fine_tune_pruned_model(
+            pruned_model_50,
+            x_train, y_train,
+            x_test, y_test,
+            epochs=2,
+            batch_size=fed_cfg.get("batch_size", 128),
+            learning_rate=0.0001,
+            verbose=False
+        )
+
+        # Quantize
+        print("\nQuantizing pruned model (50% ratio)...")
+        quantized_layers = quantize_model(
+            pruned_model_50,
+            symmetric=True,
+            verbose=True
+        )
+
+        # Compare sizes
+        compare_model_sizes(pruned_model_50, quantized_layers)
+
+        # Evaluate quantization accuracy
+        print("\nEvaluating quantization accuracy impact...")
+        evaluate_quantization_accuracy(
+            pruned_model_50,
+            quantized_layers,
+            x_test,
+            y_test,
+            verbose=True
+        )
+
+        # Step 7: Export to TFLite
+        print(f"\n💾 Step 7: Exporting to TFLite")
+        print("-" * 60)
+
+        output_dir = Path("outputs/test_pipeline")
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        # Export original model (float32)
+        print("\nExporting original model (float32)...")
+        tflite_orig_size = export_tflite(
+            model,
+            str(output_dir / "original_float32.tflite"),
+            quantize=False
+        )
+
+        # Export pruned model (float32)
+        print("\nExporting pruned model (float32)...")
+        tflite_pruned_size = export_tflite(
+            pruned_model_50,
+            str(output_dir / "pruned_float32.tflite"),
+            quantize=False
+        )
+
+        # Export pruned + quantized model (int8)
+        print("\nExporting pruned + quantized model (int8)...")
+        tflite_quant_size = export_tflite(
+            pruned_model_50,
+            str(output_dir / "pruned_quantized_int8.tflite"),
+            quantize=True,
+            representative_data=x_train
+        )
+
+        # Calculate compression ratios
+        pruned_compression = tflite_orig_size / tflite_pruned_size
+        quant_compression = tflite_orig_size / tflite_quant_size
+
+        print("\n" + "="*80)
+        print(" "*20 + "📊 TFLITE EXPORT SUMMARY")
+        print("="*80)
+        print(f"\n{'Model':<40} {'Size (KB)':<15} {'Compression':<15}")
+        print("-"*80)
+        print(f"{'Original (float32)':<40} {tflite_orig_size/1024:<15.2f} {'1.00x':<15}")
+        print(f"{'Pruned (float32)':<40} {tflite_pruned_size/1024:<15.2f} {pruned_compression:<15.2f}x")
+        print(f"{'Pruned + Quantized (int8) ⭐':<40} {tflite_quant_size/1024:<15.2f} {quant_compression:<15.2f}x")
+        print("="*80)
+
+        print(f"\n✅ All TFLite models saved to: {output_dir.absolute()}")
+        print(f"✅ Final compression: {quant_compression:.2f}x smaller")
+        print(f"✅ Deployment ready: {output_dir / 'pruned_quantized_int8.tflite'}")
+
     # Summary
     print("\n" + "="*80)
-    print(" "*25 + "📊 RESULTS SUMMARY")
+    print(" "*25 + "📊 PRUNING RESULTS SUMMARY")
     print("="*80)
     print(f"\n{'Pruning Ratio':<15} {'Before FT':<15} {'After FT':<15} {'Recovery':<15} {'vs Original':<15}")
     print("-"*80)
@@ -186,9 +292,13 @@ def test_full_pipeline_mlp():
 
 
 def test_saved_model_pruning():
-    """Test pruning on a pre-trained saved model (if exists)."""
+    """
+    Test complete pipeline on a pre-trained saved model (if exists).
+
+    Pipeline: Load Model → Pruning → Quantization → TFLite Export
+    """
     print("\n" + "="*80)
-    print(" "*20 + "🧪 SAVED MODEL PRUNING TEST")
+    print(" "*20 + "🧪 SAVED MODEL COMPRESSION TEST")
     print("="*80 + "\n")
 
     model_path = Path("models/global_model.h5")
@@ -245,31 +355,80 @@ def test_saved_model_pruning():
     print(f"✅ Loss: {pruned_loss:.4f}")
     print(f"⚠️  Accuracy change: {(pruned_acc - orig_acc)*100:+.2f}%\n")
 
+    # Apply quantization
+    print("🔢 Applying quantization...")
+    quantized_layers = quantize_model(
+        pruned_model,
+        symmetric=True,
+        verbose=True
+    )
+
+    compare_model_sizes(pruned_model, quantized_layers)
+
+    # Export to TFLite
+    print("\n💾 Exporting to TFLite...")
+    output_dir = Path("models/tflite")
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    # Load some training data for representative dataset
+    _, _, x_train, _ = load_dataset(dataset_name, **dataset_kwargs)
+    x_train = x_train[:1000]  # Use subset
+
+    # Export original (float32)
+    tflite_orig_size = export_tflite(
+        model,
+        str(output_dir / "saved_model_original.tflite"),
+        quantize=False
+    )
+
+    # Export pruned + quantized (int8)
+    tflite_quant_size = export_tflite(
+        pruned_model,
+        str(output_dir / "saved_model_pruned_quantized.tflite"),
+        quantize=True,
+        representative_data=x_train
+    )
+
+    compression_ratio = tflite_orig_size / tflite_quant_size
+
+    print(f"\n✅ TFLite compression: {compression_ratio:.2f}x")
+    print(f"✅ Original size: {tflite_orig_size/1024:.2f} KB")
+    print(f"✅ Compressed size: {tflite_quant_size/1024:.2f} KB")
+
     # Save pruned model
-    output_path = Path("models/test_pruned_model.h5")
-    pruned_model.save(output_path)
-    print(f"💾 Pruned model saved to {output_path}\n")
+    pruned_model.save(Path("models/test_pruned_model.h5"))
+    print(f"✅ Pruned model saved to models/test_pruned_model.h5\n")
 
     print("="*80 + "\n")
 
-    return {'original_acc': orig_acc, 'pruned_acc': pruned_acc}
+    return {
+        'original_acc': orig_acc,
+        'pruned_acc': pruned_acc,
+        'compression_ratio': compression_ratio
+    }
 
 
 def main():
-    """Run all integration tests."""
+    """
+    Run all integration tests for the complete TinyML pipeline.
+
+    Tests:
+    1. Full pipeline: Training → Pruning → Fine-tuning → Quantization → TFLite
+    2. Saved model: Load → Prune → Quantize → TFLite
+    """
     print("\n" + "🔬 "*30)
-    print(" "*15 + "FULL PIPELINE INTEGRATION TEST SUITE")
+    print(" "*15 + "TINYML PIPELINE INTEGRATION TEST SUITE")
     print("🔬 "*30 + "\n")
 
     results = {}
 
     try:
-        # Test 1: Full pipeline with MLP
-        print("Running Test 1: Full Pipeline (MLP on Bot-IoT)")
+        # Test 1: Full TinyML pipeline with MLP
+        print("Running Test 1: Full TinyML Pipeline (Train → Prune → Quantize → TFLite)")
         results['mlp_pipeline'] = test_full_pipeline_mlp()
 
-        # Test 2: Saved model pruning
-        print("\nRunning Test 2: Saved Model Pruning")
+        # Test 2: Saved model compression
+        print("\nRunning Test 2: Saved Model Compression (Load → Prune → Quantize → TFLite)")
         results['saved_model'] = test_saved_model_pruning()
 
         print("\n" + "="*80)
