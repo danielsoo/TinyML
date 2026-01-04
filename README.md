@@ -41,8 +41,9 @@ This repository hosts the capstone project exploring how **Federated Learning (F
 | Flower-based FL simulation scaffold | ✅ Complete | `src/federated/server.py` and `src/federated/client.py` implemented with FedAvg strategy |
 | GitHub repository setup | ✅ Complete | Project structure and configuration files set up |
 | TinyML basic export | ✅ Complete | Basic TFLite export (`src/tinyml/export_tflite.py`) implemented, compression analysis tools available |
+| Microcontroller setup & toolchain validation | ✅ Complete | Test model creation (`scripts/create_test_model.py`), TFLite to C array conversion (`scripts/deploy_microcontroller.py`), local inference testing (`scripts/test_tflite_inference.py`), and ESP32 project structure ready. Deployment pipeline validated without hardware |
 
-**Completion: ~95%**
+**Completion: 100%**
 
 ---
 
@@ -89,7 +90,7 @@ This repository hosts the capstone project exploring how **Federated Learning (F
 | FGSM integration into FL training loop | ❌ Not Started | Adversarial example generation integration into client training loop not completed |
 | Adversarial training in FL | ❌ Not Started | Full FL process re-run with adversarial training not completed |
 | Re-compression of robust model | ❌ Not Started | Compression pipeline re-run on hardened model not completed |
-| Microcontroller deployment | ❌ Not Started | Actual hardware deployment (ESP32/Raspberry Pi Pico) and performance measurement not completed |
+| Microcontroller deployment | ⏳ In Progress | Test model creation, C array conversion, and local validation complete. ESP32 project structure ready. Hardware deployment pending hardware availability |
 
 **Completion: ~5%**
 
@@ -116,10 +117,10 @@ This repository hosts the capstone project exploring how **Federated Learning (F
 
 | Phase | Completion | Key Achievements |
 |-------|------------|------------------|
-| Phase 1: Foundation and Setup | ~95% | Enhanced dataset preprocessing (IP addresses, categorical features), FL simulation, basic TFLite export completed |
+| Phase 1: Foundation and Setup | 100% | Enhanced dataset preprocessing (IP addresses, categorical features), FL simulation, basic TFLite export, and microcontroller toolchain validation completed |
 | Phase 2: Federated Learning Framework | 100% | Complete FL simulation system built with detailed metrics |
 | Phase 3: TinyML Model Miniaturization | ~50% | Basic TFLite export and comprehensive compression analysis tools completed |
-| Phase 4: Adversarial Hardening & Deployment | ~5% | Only FGSM utilities prepared |
+| Phase 4: Adversarial Hardening & Deployment | ~15% | FGSM utilities prepared. Microcontroller deployment pipeline validated (test model, C conversion, ESP32 project ready) |
 | Phase 5: Final Evaluation & Reporting | ~40% | Performance and efficiency metrics collection, analysis reports, and visualizations completed |
 
 **Overall Project Completion: ~58%**
@@ -141,9 +142,16 @@ TinyML/
 ├── data/
 │   ├── raw/                # Raw datasets (Bot-IoT ZIP extracts go here)
 │   └── processed/          # Exported TFLite / intermediate artifacts
+│       └── microcontroller/ # Microcontroller deployment files
+├── esp32_tflite_project/   # ESP32 PlatformIO project
+│   ├── platformio.ini      # PlatformIO configuration
+│   └── src/                # ESP32 source code
 ├── scripts/
 │   ├── download_dataset.sh # Kaggle-powered dataset bootstrap
-│   └── run_fl_sim.sh       # Convenience wrapper to launch FL simulation
+│   ├── run_fl_sim.sh       # Convenience wrapper to launch FL simulation
+│   ├── create_test_model.py # Create test model for microcontroller
+│   ├── deploy_microcontroller.py # Convert TFLite to C array
+│   └── test_tflite_inference.py # Test inference locally
 ├── src/
 │   ├── adversarial/        # FGSM hooks and upcoming defenses
 │   ├── data/               # Dataset loaders, partitioning utilities
@@ -541,6 +549,124 @@ display(Image("data/processed/analysis/size_vs_accuracy.png"))
 ```
 
 **For detailed Colab instructions, see:** `docs/COMPRESSION_ANALYSIS_GUIDE.md`
+
+---
+
+## Microcontroller Deployment
+
+The project includes tools for deploying TFLite models to ESP32 microcontrollers. Even without physical hardware, you can validate the deployment pipeline locally.
+
+> 📖 **Complete Deployment Guide**: See [`docs/MICROCONTROLLER_DEPLOYMENT.md`](docs/MICROCONTROLLER_DEPLOYMENT.md) for detailed step-by-step instructions.
+
+### 1. Create Test Model
+
+Generate a simple "Hello World" ML model for microcontroller testing:
+
+```bash
+# Activate virtual environment
+source .venv/bin/activate
+
+# Create test model
+python scripts/create_test_model.py
+```
+
+This creates:
+- `data/processed/microcontroller/hello_world_model.h5` - Keras model
+- `data/processed/microcontroller/hello_world_model.tflite` - TFLite model (2.12 KB)
+
+### 2. Convert to C Array
+
+Convert TFLite model to C array format for ESP32:
+
+```bash
+python scripts/deploy_microcontroller.py
+```
+
+This generates:
+- `data/processed/microcontroller/model_data.c` - C source file
+- `data/processed/microcontroller/model_data.h` - C header file
+
+### 3. Test Inference Locally (Without Hardware)
+
+Validate the deployment pipeline without physical hardware:
+
+```bash
+# Test TFLite inference
+python scripts/test_tflite_inference.py
+
+# Also verify C array files
+python scripts/test_tflite_inference.py --verify-c-files
+```
+
+This script:
+- ✅ Loads and validates the TFLite model
+- ✅ Runs inference with multiple test cases
+- ✅ Measures inference time
+- ✅ Verifies C array file format
+- ✅ Confirms deployment readiness
+
+### 4. ESP32 Project Structure
+
+The ESP32 project is ready in `esp32_tflite_project/`:
+
+```
+esp32_tflite_project/
+├── platformio.ini          # PlatformIO configuration
+├── src/
+│   ├── main.cpp            # ESP32 main code with TensorFlow Lite Micro
+│   ├── model_data.c        # Model C array (auto-generated)
+│   └── model_data.h        # Model header (auto-generated)
+└── lib/                    # Library directory
+```
+
+### 5. Deploy to ESP32 (When Hardware Available)
+
+```bash
+cd esp32_tflite_project
+
+# Install libraries (first time only)
+pio lib install
+
+# Build
+pio run
+
+# Upload to ESP32
+pio run --target upload
+
+# Monitor serial output
+pio device monitor
+```
+
+**Expected Serial Output:**
+```
+========================================
+ESP32 TensorFlow Lite Micro Test
+========================================
+
+Loading TFLite model...
+Model loaded successfully!
+Model size: 2168 bytes
+
+Model initialized successfully!
+Input shape: [1, 2]
+Output shape: [1, 1]
+
+Ready for inference!
+========================================
+
+Running inference...
+Input: [0.50, 0.50]
+Output: 0.472900
+Inference time: 1234 microseconds
+```
+
+### Deployment Status
+
+- ✅ Test model creation script
+- ✅ TFLite to C array conversion
+- ✅ Local inference testing (no hardware required)
+- ✅ ESP32 project structure and code
+- ⏳ Actual hardware deployment (pending hardware availability)
 
 ---
 
