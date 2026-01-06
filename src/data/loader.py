@@ -237,17 +237,27 @@ def load_bot_iot(
     y = np.vectorize(mapping.get)(y)
 
     if max_samples is not None and len(X) > max_samples:
+        # Check if stratify is safe (each class needs at least 2 samples)
+        unique, counts = np.unique(y, return_counts=True)
+        min_class_count = counts.min()
+        use_stratify = min_class_count >= 2
+        
         X, _, y, _ = train_test_split(
             X, y,
             train_size=max_samples,
-            stratify=y,
+            stratify=y if use_stratify else None,
             random_state=random_state,
         )
 
+    # Check if stratify is safe for final split
+    unique, counts = np.unique(y, return_counts=True)
+    min_class_count = counts.min()
+    use_stratify = min_class_count >= 2
+    
     x_train, x_test, y_train, y_test = train_test_split(
         X, y,
         test_size=test_size,
-        stratify=y,
+        stratify=y if use_stratify else None,
         random_state=random_state,
     )
 
