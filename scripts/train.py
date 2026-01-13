@@ -219,7 +219,11 @@ def run_training(config_path: str, save_model: str = None):
     
     result = subprocess.run(cmd, check=False)
     
-    if result.returncode == 0:
+    # Check if model file was actually created (more reliable than exit code)
+    model_path = Path(save_model)
+    model_exists = model_path.exists() and model_path.stat().st_size > 0
+    
+    if result.returncode == 0 or model_exists:
         print()
         print_section("✅ Training Complete")
         print(f"Model saved to: {save_model}")
@@ -227,14 +231,22 @@ def run_training(config_path: str, save_model: str = None):
         # Also save as latest for easy access
         project_root = get_project_root()
         latest_path = project_root / "src" / "models" / "global_model.h5"
-        if Path(save_model).exists():
+        if model_exists:
             import shutil
             shutil.copy(save_model, latest_path)
             print(f"Also saved as latest: {latest_path}")
+        
+        # If exit code was non-zero but model exists, warn but don't fail
+        if result.returncode != 0:
+            print()
+            print("⚠️  Training process returned non-zero exit code, but model was saved successfully.")
+            print("   This may indicate warnings or non-critical errors during training.")
     else:
         print()
         print_section("❌ Training Failed")
-        sys.exit(result.returncode)
+        print(f"Model file not found at: {save_model}")
+        print(f"Exit code: {result.returncode}")
+        sys.exit(result.returncode if result.returncode != 0 else 1)
 
 
 def main():

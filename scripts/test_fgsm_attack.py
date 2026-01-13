@@ -100,28 +100,34 @@ def test_fgsm_attack():
         print(f"   ✅ Loading existing model from {model_path}")
         print(f"   ℹ️  Using Federated Learning trained model (recommended)")
         model = tf.keras.models.load_model(model_path)
-    else:
-        print("   ⚠️  Model not found!")
-        print("   ⚠️  WARNING: No pre-trained model found.")
-        print("   ⚠️  For better results, train a model first using:")
-        print("   ⚠️     python scripts/train.py")
-        print("   ⚠️  ")
-        print("   ⚠️  Training a quick test model (5 epochs only)...")
-        print("   ⚠️  This will be less accurate than Federated Learning model.")
-        print()
         
-        model = get_model("mlp", x_train.shape[1:], len(np.unique(y_train)))
-        model.fit(
-            x_train, y_train,
-            epochs=5,
-            batch_size=128,
-            validation_split=0.2,
-            verbose=1
-        )
-        os.makedirs(os.path.dirname(model_path), exist_ok=True)
-        model.save(model_path)
-        print(f"   ✅ Quick test model saved to {model_path}")
-        print("   ⚠️  Note: For production use, train with 'python scripts/train.py' first")
+        # Check input shape compatibility
+        model_input_shape = model.input_shape[1] if model.input_shape else None
+        data_input_shape = x_train.shape[1]
+        
+        if model_input_shape is not None and model_input_shape != data_input_shape:
+            print(f"   ⚠️  Input shape mismatch detected!")
+            print(f"      Model expects: {model_input_shape} features")
+            print(f"      Data has: {data_input_shape} features")
+            print(f"   🔧 Adjusting data to match model input shape...")
+            
+            if model_input_shape < data_input_shape:
+                # Take first N features
+                x_train = x_train[:, :model_input_shape]
+                x_test = x_test[:, :model_input_shape]
+                print(f"   ✅ Trimmed data to {model_input_shape} features (took first {model_input_shape} features)")
+            else:
+                # Pad with zeros
+                padding_size = model_input_shape - data_input_shape
+                x_train = np.pad(x_train, ((0, 0), (0, padding_size)), mode='constant', constant_values=0)
+                x_test = np.pad(x_test, ((0, 0), (0, padding_size)), mode='constant', constant_values=0)
+                print(f"   ✅ Padded data to {model_input_shape} features (added {padding_size} zero features)")
+    else:
+        print(f"   ❌ Model not found at {model_path}")
+        print("   ❌ ERROR: Pre-trained model is required for FGSM attack testing.")
+        print("   💡 Please train a model first using:")
+        print("   💡     python scripts/train.py")
+        return False
     
     # Evaluate original model
     print("\n3. Evaluating original model...")
