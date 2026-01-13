@@ -69,7 +69,21 @@ def test_full_pipeline_mlp():
     # Load config
     print("📋 Step 1: Loading Configuration")
     print("-" * 60)
-    with open("config/federated.yaml", encoding='utf-8') as f:
+    
+    # Auto-detect environment and use appropriate config
+    try:
+        from src.utils.env_utils import get_default_config_path
+        config_path = get_default_config_path()
+    except ImportError:
+        # Fallback: check if in Colab
+        import os
+        if os.path.exists("/content") or os.getenv("COLAB_GPU") is not None:
+            config_path = "config/federated_colab.yaml"
+        else:
+            config_path = "config/federated.yaml"
+    
+    print(f"Using config: {config_path}")
+    with open(config_path, encoding='utf-8') as f:
         cfg = yaml.safe_load(f)
 
     data_cfg = cfg.get("data", {})
@@ -412,12 +426,24 @@ def test_saved_model_pruning():
     print(" "*20 + "🧪 SAVED MODEL COMPRESSION TEST")
     print("="*80 + "\n")
 
-    model_path = Path("models/global_model.h5")
-
-    if not model_path.exists():
-        print(f"⚠️  No saved model found at {model_path}")
+    # Try multiple possible paths
+    possible_paths = [
+        Path("src/models/global_model.h5"),  # train.py saves here
+        Path("models/global_model.h5"),       # Alternative location
+    ]
+    
+    model_path = None
+    for path in possible_paths:
+        if path.exists():
+            model_path = path
+            break
+    
+    if model_path is None:
+        print(f"⚠️  No saved model found. Checked paths:")
+        for path in possible_paths:
+            print(f"   - {path}")
         print(f"   Skipping this test. Train a model first with:")
-        print(f"   python train_windows.py\n")
+        print(f"   python scripts/train.py\n")
         return None
 
     print(f"📦 Loading saved model from {model_path}...")
@@ -426,7 +452,20 @@ def test_saved_model_pruning():
 
     # Load test data
     print("📂 Loading test dataset...")
-    with open("config/federated.yaml", encoding='utf-8') as f:
+    
+    # Auto-detect environment and use appropriate config
+    try:
+        from src.utils.env_utils import get_default_config_path
+        config_path = get_default_config_path()
+    except ImportError:
+        # Fallback: check if in Colab
+        import os
+        if os.path.exists("/content") or os.getenv("COLAB_GPU") is not None:
+            config_path = "config/federated_colab.yaml"
+        else:
+            config_path = "config/federated.yaml"
+    
+    with open(config_path, encoding='utf-8') as f:
         cfg = yaml.safe_load(f)
 
     data_cfg = cfg.get("data", {})
@@ -524,8 +563,8 @@ def main():
     Run all integration tests for the complete TinyML pipeline.
 
     Tests:
-    1. Full pipeline: Training → Pruning → Fine-tuning → Quantization → TFLite
-    2. Saved model: Load → Prune → Quantize → TFLite
+    1. Full pipeline: Self-training → Distillation → Pruning → Fine-tuning → Quantization → TFLite
+    2. Saved model: Load train.py model → Prune → Quantize → TFLite
     """
     print("\n" + "🔬 "*30)
     print(" "*15 + "TINYML PIPELINE INTEGRATION TEST SUITE")
@@ -534,17 +573,64 @@ def main():
     results = {}
 
     try:
-        # Test 1: Full TinyML pipeline with MLP
-        print("Running Test 1: Full TinyML Pipeline (Train → distillation → Prune → Quantize → TFLite)")
+        # Test 1: Compression pipeline with self-training
+        print("Running Test 1: Full TinyML Pipeline (Self-Trained → Distillation → Prune → Quantize → TFLite)")
         results['mlp_pipeline'] = test_full_pipeline_mlp()
+        print("✅ Test 1 completed: Self-trained model compressed\n")
 
-        # Test 2: Saved model compression
-        print("\nRunning Test 2: Saved Model Compression (Load → Prune → Quantize → TFLite)")
+        # Test 2: Saved model compression (from train.py)
+        print("Running Test 2: Saved Model Compression (Train.py → Prune → Quantize → TFLite)")
         results['saved_model'] = test_saved_model_pruning()
+        
+        if results['saved_model']:
+            print("✅ Test 2 completed: Train.py model compressed\n")
+        else:
+            print("⚠️  Test 2 skipped: Train.py model not found\n")
+            print("   Note: Run 'python scripts/train.py' first to train a model\n")
 
+        # Summary
         print("\n" + "="*80)
-        print("✅ ALL INTEGRATION TESTS COMPLETED SUCCESSFULLY!")
+        print(" "*20 + "📊 COMPRESSION SUMMARY")
         print("="*80 + "\n")
+        
+        print("Compressed Models:")
+        print("-" * 80)
+        
+        # Model 1: Self-trained
+        if results.get('mlp_pipeline'):
+            print("✅ Model 1: Self-Trained (compression.py)")
+            print("   Location: outputs/test_pipeline/")
+            print("   - original_float32.tflite")
+            print("   - pruned_float32.tflite")
+            print("   - pruned_quantized_int8.tflite")
+        else:
+            print("❌ Model 1: Self-Trained - FAILED")
+        
+        print()
+        
+        # Model 2: Train.py
+        if results.get('saved_model'):
+            print("✅ Model 2: Train.py (Federated Learning)")
+            print("   Location: models/tflite/")
+            print("   - saved_model_original.tflite")
+            print("   - saved_model_pruned_quantized.tflite")
+        else:
+            print("⚠️  Model 2: Train.py - NOT FOUND")
+            print("   Run 'python scripts/train.py' first")
+        
+        print("\n" + "="*80)
+        print("✅ ALL INTEGRATION TESTS COMPLETED!")
+        print("="*80 + "\n")
+        
+        # Check if both models are ready for analysis
+        if results.get('mlp_pipeline') and results.get('saved_model'):
+            print("🎯 Both models compressed successfully!")
+            print("   Ready for analyze_compression.py comparison\n")
+        elif results.get('mlp_pipeline'):
+            print("ℹ️  Only self-trained model compressed")
+            print("   Run train.py first for full comparison\n")
+        else:
+            print("⚠️  Compression pipeline had issues\n")
 
         return results
 

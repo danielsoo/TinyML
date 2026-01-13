@@ -12,7 +12,7 @@ from pathlib import Path
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src.modelcompression.pruning import (
+from src.compression.pruning import (
     calculate_neuron_importance,
     prune_dense_layer,
     prune_conv2d_layer,
