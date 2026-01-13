@@ -102,9 +102,33 @@ def test_fgsm_attack():
         model = tf.keras.models.load_model(model_path)
         
         # Check input shape compatibility
-        model_input_shape = model.input_shape[1] if model.input_shape else None
+        # Get model input shape - try multiple methods
+        model_input_shape = None
+        try:
+            # Method 1: Try model.inputs[0].shape (most reliable)
+            if hasattr(model, 'inputs') and model.inputs and len(model.inputs) > 0:
+                input_shape = model.inputs[0].shape
+                if input_shape and len(input_shape) > 1:
+                    model_input_shape = int(input_shape[1])
+        except:
+            pass
+        
+        # Method 2: Try model.input_shape
+        if model_input_shape is None:
+            try:
+                if model.input_shape:
+                    if isinstance(model.input_shape, (list, tuple)) and len(model.input_shape) > 0:
+                        shape_val = model.input_shape[0] if isinstance(model.input_shape[0], (list, tuple)) else model.input_shape
+                        if isinstance(shape_val, (list, tuple)) and len(shape_val) > 1:
+                            model_input_shape = int(shape_val[1])
+                    elif hasattr(model.input_shape, '__len__') and len(model.input_shape) > 1:
+                        model_input_shape = int(model.input_shape[1])
+            except:
+                pass
+        
         data_input_shape = x_train.shape[1]
         
+        # Adjust data if shape mismatch detected
         if model_input_shape is not None and model_input_shape != data_input_shape:
             print(f"   ⚠️  Input shape mismatch detected!")
             print(f"      Model expects: {model_input_shape} features")
