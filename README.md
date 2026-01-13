@@ -1,3 +1,69 @@
+📊 Evaluation Summary
+Accuracy: 0.9450 (94.50%)
+Loss: 0.1421
+
+📈 Ground Truth:
+  - Attack samples: 150
+  - Normal samples: 50
+  - Total samples: 200
+
+🔮 Predictions:
+  - Predicted Attack: 147
+  - Predicted Normal: 53
+
+✅ Confusion Matrix:
+  - True Positives (TP): 144
+  - True Negatives (TN): 48
+  - False Positives (FP): 5
+  - False Negatives (FN): 6
+
+📏 Metrics:
+  - Precision: 0.9664 (96.64%)
+  - Recall: 0.9600 (96.00%)
+  - F1-Score: 0.9632 (96.32%)
+```
+
+### 3. What happens under the hood?
+- `src/data/loader.py` → `load_bot_iot()` ingests & normalizes Bot-IoT (numeric features only, label = intrusion).
+- `partition_non_iid()` scatters data across `num_clients`, creating label-skewed partitions to mimic heterogeneous IoT fleets.
+- `src/models/nets.make_mlp()` builds a lightweight MLP tailored for tabular data.
+- `src/federated/client.KerasClient` manages Flower’s fit/evaluate cycle and prints detailed metrics each round.
+
+---
+
+## TinyML Export (Baseline)
+
+Once a model is trained centrally (or after FL aggregation), it can be exported to TFLite:
+
+```bash
+# Use the saved .h5 from the federated run or generate a fresh one
+python -m src.tinyml.export_tflite
+```
+
+Output appears in `data/processed/tiny_model.tflite`. A dedicated TinyML “Hello World” deployment script (e.g., Raspberry Pi Pico / ESP32) is scheduled for Phase 1 completion.
+
+---
+
+## Adversarial Robustness (Preview)
+
+- `src/adversarial/fgsm_hook.py` contains primitive FGSM perturbation utilities.
+- Phase 4 will integrate adversarial example generation into the FL training loop and re-run the TinyML compression stage on the hardened global model.
+
+---
+
+## Troubleshooting & Tips
+
+- **MacBook memory pressure?** Lower `max_samples`, or temporarily switch to `placeholder_mnist`.
+- **Dataset missing?** Ensure `make download-data` completed, and `data/raw/Bot-IoT/` contains four `reduced_data_*.csv` files.
+- **Kaggle CLI “command not found”?** Reactivate the virtual environment (`source .venv/bin/activate`) before running the download script.
+- **Long training times?** Prefer lab hardware for full Bot-IoT runs; keep laptop tests to ≤ 10 k samples.
+
+---
+
+## License
+
+This project is licensed under the **Apache License 2.0**.  
+See the [LICENSE](LICENSE) file for the complete text.
 ## Federated & Adversarially Robust TinyML for IoT Security
 
 This repository hosts the capstone project exploring how **Federated Learning (FL)**, **TinyML model compression**, and **Adversarial Training** can be combined to deliver privacy-preserving and attack-resilient intrusion detection on extremely resource-constrained IoT hardware.
@@ -369,9 +435,7 @@ python -m src.federated.client --config config/federated_colab.yaml --save-model
 📂 Loading Bot-IoT data from 4 files...
   Loaded reduced_data_1.csv: 1000000 samples
   ...
-============================================================
 📊 Evaluation Summary
-============================================================
 Accuracy: 0.9450 (94.50%)
 Loss: 0.1421
 
@@ -394,7 +458,6 @@ Loss: 0.1421
   - Precision: 0.9664 (96.64%)
   - Recall: 0.9600 (96.00%)
   - F1-Score: 0.9632 (96.32%)
-============================================================
 ```
 
 ### 3. What happens under the hood?
@@ -639,9 +702,7 @@ pio device monitor
 
 **Expected Serial Output:**
 ```
-========================================
 ESP32 TensorFlow Lite Micro Test
-========================================
 
 Loading TFLite model...
 Model loaded successfully!
@@ -652,7 +713,6 @@ Input shape: [1, 2]
 Output shape: [1, 1]
 
 Ready for inference!
-========================================
 
 Running inference...
 Input: [0.50, 0.50]
