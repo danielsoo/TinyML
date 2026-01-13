@@ -1,6 +1,15 @@
 """
-End-to-end integration test for the complete TinyML pipeline.
-Tests FL/TL → Pruning → Quantization → TFLite on Bot-IoT dataset.
+End-to-end integration test for the complete TinyML compression pipeline.
+Tests Training → Distillation → Pruning → Quantization → TFLite on Bot-IoT dataset.
+
+Pipeline stages:
+1. Train teacher model (full size)
+2. Knowledge distillation (compress to 50% student)
+3. Structured pruning (remove 30-70% of neurons)
+4. INT8 quantization (4x weight compression)
+5. TFLite export (deployment ready)
+
+Expected compression: 8-12x smaller model with minimal accuracy loss.
 """
 import yaml
 import numpy as np
@@ -10,6 +19,11 @@ import tensorflow as tf
 
 from src.data.loader import load_dataset
 from src.models.nets import get_model
+from src.modelcompression.distillation import (
+    create_student_model,
+    train_with_distillation,
+    compare_models as compare_distillation
+)
 from src.modelcompression.pruning import (
     apply_structured_pruning,
     compare_models,
@@ -35,9 +49,18 @@ def safe_evaluate(model, x, y, verbose=0):
 
 def test_full_pipeline_mlp():
     """
-    Test complete TinyML pipeline with MLP on Bot-IoT data.
+    Test complete TinyML compression pipeline with MLP on Bot-IoT data.
 
-    Pipeline: Training → Pruning → Fine-tuning → Quantization → TFLite Export
+    Pipeline:
+        Training → Knowledge Distillation → Pruning → Fine-tuning →
+        Quantization → TFLite Export
+
+    Compression techniques:
+        1. Knowledge Distillation: Teacher → Student (50% compression)
+        2. Structured Pruning: Remove neurons (30-70% reduction)
+        3. INT8 Quantization: Float32 → INT8 (4x compression)
+
+    Expected total compression: 8-12x smaller with 1-3% accuracy drop
     """
     print("\n" + "="*80)
     print(" "*20 + "🧪 FULL TINYML PIPELINE TEST")
@@ -101,15 +124,81 @@ def test_full_pipeline_mlp():
     )
     print("✅ Training complete\n")
 
-    # Evaluate original
-    print("📊 Step 4: Evaluating Original Model")
+    # Evaluate original (teacher model)
+    print("📊 Step 4: Evaluating Original Model (Teacher)")
     print("-" * 60)
     orig_loss, orig_acc = safe_evaluate(model, x_test, y_test, verbose=0)
+    teacher_params = model.count_params()
+    teacher_size_kb = (teacher_params * 4) / 1024
     print(f"✅ Accuracy: {orig_acc:.2%}")
-    print(f"✅ Loss: {orig_loss:.4f}\n")
+    print(f"✅ Loss: {orig_loss:.4f}")
+    print(f"✅ Parameters: {teacher_params:,}")
+    print(f"✅ Size: {teacher_size_kb:.2f} KB\n")
+
+    # Knowledge Distillation
+    print("🎓 Step 5: Knowledge Distillation")
+    print("-" * 60)
+    print("Creating student model (50% of teacher size)...")
+
+    # Create student model
+    student_model = create_student_model(
+        teacher_model=model,
+        compression_ratio=0.5,
+        num_classes=num_classes
+    )
+
+    student_params = student_model.count_params()
+    print(f"✅ Teacher parameters: {teacher_params:,}")
+    print(f"✅ Student parameters: {student_params:,}")
+    print(f"✅ Compression ratio: {teacher_params/student_params:.2f}x\n")
+
+    # Split data for distillation
+    val_split = int(0.8 * len(x_train))
+    x_train_dist = x_train[:val_split]
+    y_train_dist = y_train[:val_split]
+    x_val_dist = x_train[val_split:]
+    y_val_dist = y_train[val_split:]
+
+    print("Training student with knowledge distillation...")
+    student_model, distill_history = train_with_distillation(
+        teacher_model=model,
+        student_model=student_model,
+        x_train=x_train_dist,
+        y_train=y_train_dist,
+        x_val=x_val_dist,
+        y_val=y_val_dist,
+        temperature=3.0,
+        alpha=0.3,
+        epochs=10,
+        batch_size=fed_cfg.get("batch_size", 128),
+        learning_rate=0.001,
+        verbose=True
+    )
+
+    # Compile student for evaluation
+    student_model.compile(
+        optimizer='adam',
+        loss='sparse_categorical_crossentropy',
+        metrics=['accuracy']
+    )
+
+    # Evaluate distilled student
+    student_loss, student_acc = safe_evaluate(student_model, x_test, y_test, verbose=0)
+    student_size_kb = (student_params * 4) / 1024
+
+    print(f"\n📊 Distillation Results:")
+    print(f"✅ Student accuracy: {student_acc:.2%}")
+    print(f"✅ Student loss: {student_loss:.4f}")
+    print(f"✅ Accuracy drop: {(orig_acc - student_acc)*100:.2f}%")
+    print(f"✅ Size: {student_size_kb:.2f} KB")
+    print(f"✅ Compression: {teacher_size_kb/student_size_kb:.2f}x\n")
+
+    # Use student model for further compression
+    model = student_model
+    orig_acc = student_acc  # Update baseline for comparison
 
     # Apply pruning at different ratios
-    print("✂️  Step 5: Testing Multiple Pruning Ratios")
+    print("✂️  Step 6: Testing Multiple Pruning Ratios (on distilled model)")
     print("-" * 60)
 
     results = {}
@@ -238,13 +327,18 @@ def test_full_pipeline_mlp():
         quant_compression = tflite_orig_size / tflite_quant_size
 
         print("\n" + "="*80)
-        print(" "*20 + "📊 TFLITE EXPORT SUMMARY")
+        print(" "*15 + "📊 FULL COMPRESSION PIPELINE SUMMARY")
         print("="*80)
-        print(f"\n{'Model':<40} {'Size (KB)':<15} {'Compression':<15}")
+        print(f"\n{'Stage':<40} {'Size (KB)':<15} {'Compression':<15}")
         print("-"*80)
-        print(f"{'Original (float32)':<40} {tflite_orig_size/1024:<15.2f} {'1.00x':<15}")
-        print(f"{'Pruned (float32)':<40} {tflite_pruned_size/1024:<15.2f} {pruned_compression:<15.2f}x")
-        print(f"{'Pruned + Quantized (int8) ⭐':<40} {tflite_quant_size/1024:<15.2f} {quant_compression:<15.2f}x")
+        print(f"{'1. Teacher Model (original)':<40} {teacher_size_kb:<15.2f} {'1.00x':<15}")
+        print(f"{'2. Student Model (distilled)':<40} {student_size_kb:<15.2f} {teacher_size_kb/student_size_kb:<15.2f}x")
+        print(f"{'3. Pruned Student (50% pruning)':<40} {tflite_pruned_size/1024:<15.2f} {pruned_compression:<15.2f}x")
+        print(f"{'4. Quantized (INT8) ⭐':<40} {tflite_quant_size/1024:<15.2f} {quant_compression:<15.2f}x")
+        print("="*80)
+        print(f"\n🎯 Final Compression: {teacher_size_kb / (tflite_quant_size/1024):.2f}x smaller than teacher")
+        print(f"📦 Final Size: {tflite_quant_size/1024:.2f} KB (from {teacher_size_kb:.2f} KB)")
+        print(f"🎓 Pipeline: Distillation → Pruning → Quantization")
         print("="*80)
 
         print(f"\n✅ All TFLite models saved to: {output_dir.absolute()}")
