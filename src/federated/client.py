@@ -1,5 +1,12 @@
 from pathlib import Path
 from typing import Dict, Any, Tuple, Optional
+import os
+import warnings
+
+# Suppress TensorFlow warnings
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+warnings.filterwarnings('ignore', category=UserWarning)
+warnings.filterwarnings('ignore', message='.*protobuf.*')
 
 import flwr as fl
 import numpy as np
@@ -9,21 +16,50 @@ from flwr.common import parameters_to_ndarrays
 from src.data.loader import load_dataset, partition_non_iid
 from src.models import nets
 
+# Suppress TensorFlow logging after import
+try:
+    import tensorflow as tf
+    tf.get_logger().setLevel('ERROR')
+except ImportError:
+    pass
+
 
 # ------------------------------------------------
-# 설정 불러오기
+# Configuration Loading
 # ------------------------------------------------
 
-CFG_PATH = Path("config/federated.yaml")
-if not CFG_PATH.exists():
-    raise FileNotFoundError(f"설정 파일을 찾을 수 없습니다: {CFG_PATH.resolve()}")
+def load_config(config_path: str = None):
+    """Load configuration file. Defaults to environment variable or auto-detected path.
+    
+    If config_path is None, automatically detects environment (Colab vs local)
+    and selects appropriate config file.
+    """
+    if config_path is None:
+        # Try environment variable first
+        config_path = os.getenv("FEDERATED_CONFIG", None)
+        
+        # If not set, auto-detect environment
+        if config_path is None:
+            try:
+                from src.utils.env_utils import get_default_config_path
+                config_path = get_default_config_path()
+            except ImportError:
+                # Fallback to local config if env_utils not available
+                config_path = "config/federated_local.yaml"
+    
+    cfg_path = Path(config_path)
+    if not cfg_path.exists():
+        raise FileNotFoundError(f"Configuration file not found: {cfg_path.resolve()}")
+    
+    with cfg_path.open() as f:
+        return yaml.safe_load(f)
 
-with CFG_PATH.open(encoding='utf-8') as f:
-    CFG = yaml.safe_load(f)
+# Default config load (can be reloaded in main)
+CFG = None
 
 
 class SaveModelStrategy(fl.server.strategy.FedAvg):
-    """FedAvg strategy that 저장을 위해 최신 파라미터를 보관."""
+    """FedAvg strategy that stores latest parameters for saving."""
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -39,7 +75,7 @@ class SaveModelStrategy(fl.server.strategy.FedAvg):
 
 
 def _build_model(model_name: str, input_shape: Tuple[int, ...], num_classes: int):
-    """모델 이름에 따라 생성. nets 모듈에 get_model이 없으면 기본 함수로 대체."""
+    """Build model based on model name. Falls back to default functions if get_model is not available in nets module."""
     if hasattr(nets, "get_model"):
         return nets.get_model(model_name, input_shape, num_classes)
 
@@ -50,7 +86,7 @@ def _build_model(model_name: str, input_shape: Tuple[int, ...], num_classes: int
         return nets.make_mlp(input_shape, num_classes)
 
     raise AttributeError(
-        "모델 생성 함수를 찾을 수 없습니다. 'get_model' 또는 'make_mlp' 정의를 확인하세요."
+        "Model creation function not found. Please check if 'get_model' or 'make_mlp' is defined."
     )
 
 
@@ -153,17 +189,20 @@ class KerasClient(fl.client.NumPyClient):
 
 
 # ------------------------------------------------
-# 시뮬레이션 준비
+# Simulation Preparation
 # ------------------------------------------------
 
-def simulate_clients():
-    data_cfg = CFG.get("data", {})
-    fed_cfg = CFG.get("federated", {})
-    model_cfg = CFG.get("model", {})
+def simulate_clients(config: dict = None):
+    """Prepare client simulation."""
+    if config is None:
+        config = CFG
+    data_cfg = config.get("data", {})
+    fed_cfg = config.get("federated", {})
+    model_cfg = config.get("model", {})
 
     dataset_name = data_cfg.get("name", "bot_iot")
 
-    # federated.yaml에서 name, num_clients 제외한 나머지는 그대로 데이터 로더에 전달
+    # Pass all config except name and num_clients to data loader
     dataset_kwargs = {
         k: v
         for k, v in data_cfg.items()
@@ -176,33 +215,33 @@ def simulate_clients():
         x_train, y_train, x_test, y_test = load_dataset(dataset_name, **dataset_kwargs)
     except FileNotFoundError as err:
         data_path = dataset_kwargs.get("data_path") or dataset_kwargs.get("path")
-        hint = f" (확인한 경로: {data_path})" if data_path else ""
+        hint = f" (checked path: {data_path})" if data_path else ""
         raise FileNotFoundError(
-            f"데이터셋 '{dataset_name}'을(를) 불러오지 못했습니다{hint}. "
-            f"Colab이라면 해당 경로에 CSV 파일이 있는지 확인해 주세요."
+            f"Failed to load dataset '{dataset_name}'{hint}. "
+            f"If using Colab, please check if CSV files exist in the specified path."
         ) from err
 
-    # num_classes 계산
+    # Calculate num_classes
     unique_labels = np.unique(np.concatenate([y_train, y_test]))
     num_classes = len(unique_labels)
 
-    # 0/1 이진 분류인데 실수로 한쪽만 있는 경우 방어 코드
+    # Defense code for binary classification (0/1) when only one class exists
     if num_classes == 1 and 0 in unique_labels:
         num_classes = 2
 
-    # 입력 shape 정리 (2D면 MLP용)
+    # Normalize input shape (2D for MLP)
     if x_train.ndim == 2:
         input_shape = (x_train.shape[1],)
     else:
         input_shape = x_train.shape[1:]
 
-    # 데이터 파티션 나누기
+    # Partition data
     train_parts = partition_non_iid(x_train, y_train, num_clients)
     test_parts = partition_non_iid(x_test, y_test, num_clients)
 
     model_name = model_cfg.get("name", "mlp")
 
-    # client_fn 안에서 쓸 상태
+    # State to use in client_fn
     state = {
         "num_clients": num_clients,
         "input_shape": input_shape,
@@ -213,14 +252,14 @@ def simulate_clients():
     }
 
     def client_fn(context: fl.common.Context) -> fl.client.Client:
-        # Flower/Ray가 주는 cid를 안전하게 인덱스로 매핑
+        # Safely map cid from Flower/Ray to index
         raw_cid = None
 
-        # VCE / 새로운 API
+        # VCE / New API
         if hasattr(context, "node_config") and isinstance(context.node_config, dict):
             raw_cid = context.node_config.get("cid", None)
 
-        # 레거시
+        # Legacy
         if raw_cid is None and hasattr(context, "cid"):
             raw_cid = context.cid
 
@@ -256,11 +295,19 @@ def simulate_clients():
 
 
 # ------------------------------------------------
-# 실행
+# Execution
 # ------------------------------------------------
 
-def main(save_path: str = "src/models/global_model.h5"):
-    (state, client_fn) = simulate_clients()
+def main(save_path: str = "src/models/global_model.h5", config_path: str = None):
+    """Main execution function."""
+    global CFG
+    # Load configuration file
+    CFG = load_config(config_path)
+    
+    # Ensure model directory exists
+    Path(save_path).parent.mkdir(parents=True, exist_ok=True)
+    
+    (state, client_fn) = simulate_clients(CFG)
     fed_cfg = CFG.get("federated", {})
 
     num_rounds = int(fed_cfg.get("num_rounds", 3))
@@ -355,9 +402,9 @@ def main(save_path: str = "src/models/global_model.h5"):
         strategy=strategy,
     )
 
-    # 글로벌 모델 저장
-    # 마지막 round weight 사용
-    # start_simulation이 strategy.parameters 에 최종값 채워놨다고 가정
+    # Save global model
+    # Use weights from last round
+    # Assume start_simulation has filled strategy.parameters with final values
     global_model = _build_model(
         state["model_name"],
         state["input_shape"],
@@ -370,7 +417,7 @@ def main(save_path: str = "src/models/global_model.h5"):
         global_model.save(save_path)
         print(f"✅ Saved global model to {save_path}")
     else:
-        print("⚠️ Federated strategy에서 저장 가능한 파라미터를 찾지 못했습니다.")
+        print("⚠️ Could not find saveable parameters in Federated strategy.")
 
 
 if __name__ == "__main__":
@@ -383,6 +430,12 @@ if __name__ == "__main__":
         default="src/models/global_model.h5",
         help="Path to save the global model",
     )
+    parser.add_argument(
+        "--config",
+        type=str,
+        default=None,
+        help="Path to config file (default: FEDERATED_CONFIG env var or config/federated_local.yaml)",
+    )
     args = parser.parse_args()
-    main(save_path=args.save_model)
+    main(save_path=args.save_model, config_path=args.config)
 
