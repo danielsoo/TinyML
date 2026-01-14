@@ -20,9 +20,30 @@ from tensorflow import keras
 import tensorflow as tf
 
 # Add project root to path
-project_root = Path(__file__).resolve().parent
+# Handle both script execution and module execution
+try:
+    if __file__:
+        project_root = Path(__file__).resolve().parent
+    else:
+        project_root = Path.cwd()
+except NameError:
+    # __file__ not available (e.g., in interactive mode)
+    project_root = Path.cwd()
+
+# Always add project root to sys.path
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
+
+# Also add current working directory as fallback
+cwd = Path.cwd()
+if str(cwd) not in sys.path and str(cwd) != str(project_root):
+    sys.path.insert(0, str(cwd))
+
+# Debug: Print paths for troubleshooting (can be removed later)
+if os.getenv("DEBUG_PYTHONPATH"):
+    print(f"[DEBUG] Project root: {project_root}")
+    print(f"[DEBUG] Current working directory: {cwd}")
+    print(f"[DEBUG] sys.path: {sys.path[:3]}...")
 
 from src.data.loader import load_dataset
 from src.models.nets import get_model
