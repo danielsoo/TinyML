@@ -11,11 +11,18 @@ Pipeline stages:
 
 Expected compression: 8-12x smaller model with minimal accuracy loss.
 """
+import os
+import sys
 import yaml
 import numpy as np
 from pathlib import Path
 from tensorflow import keras
 import tensorflow as tf
+
+# Add project root to path
+project_root = Path(__file__).resolve().parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
 
 from src.data.loader import load_dataset
 from src.models.nets import get_model
