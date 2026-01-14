@@ -21,29 +21,45 @@ import tensorflow as tf
 
 # Add project root to path
 # Handle both script execution and module execution
+project_root = None
+
+# Method 1: Try to get from __file__ (most reliable)
 try:
-    if __file__:
+    if '__file__' in globals() and __file__:
         project_root = Path(__file__).resolve().parent
-    else:
-        project_root = Path.cwd()
-except NameError:
-    # __file__ not available (e.g., in interactive mode)
+except (NameError, TypeError):
+    pass
+
+# Method 2: Try to find project root by looking for src/ directory
+if project_root is None:
+    cwd = Path.cwd()
+    # Check current directory and parent directories
+    for path in [cwd] + list(cwd.parents):
+        if (path / "src" / "compression").exists():
+            project_root = path
+            break
+
+# Method 3: Fallback to current working directory
+if project_root is None:
     project_root = Path.cwd()
 
 # Always add project root to sys.path
-if str(project_root) not in sys.path:
-    sys.path.insert(0, str(project_root))
+project_root_str = str(project_root)
+if project_root_str not in sys.path:
+    sys.path.insert(0, project_root_str)
 
 # Also add current working directory as fallback
 cwd = Path.cwd()
-if str(cwd) not in sys.path and str(cwd) != str(project_root):
-    sys.path.insert(0, str(cwd))
+cwd_str = str(cwd)
+if cwd_str not in sys.path and cwd_str != project_root_str:
+    sys.path.insert(0, cwd_str)
 
 # Debug: Print paths for troubleshooting (can be removed later)
 if os.getenv("DEBUG_PYTHONPATH"):
     print(f"[DEBUG] Project root: {project_root}")
     print(f"[DEBUG] Current working directory: {cwd}")
-    print(f"[DEBUG] sys.path: {sys.path[:3]}...")
+    print(f"[DEBUG] sys.path (first 3): {sys.path[:3]}")
+    print(f"[DEBUG] Checking src/compression exists: {(project_root / 'src' / 'compression').exists()}")
 
 from src.data.loader import load_dataset
 from src.models.nets import get_model
