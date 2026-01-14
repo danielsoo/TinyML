@@ -217,7 +217,19 @@ def run_training(config_path: str, save_model: str = None):
         "--save-model", save_model,
     ]
     
-    result = subprocess.run(cmd, check=False)
+    result = subprocess.run(
+        cmd,
+        check=False,
+        capture_output=True,
+        text=True
+    )
+    
+    # Print output and errors for debugging
+    if result.stdout:
+        print(result.stdout)
+    if result.stderr:
+        print("⚠️  Errors/Warnings:", file=sys.stderr)
+        print(result.stderr, file=sys.stderr)
     
     # Check if model file was actually created (more reliable than exit code)
     model_path = Path(save_model)

@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Dict, Any, Tuple, Optional
 import os
+import sys
 import warnings
 
 # Suppress TensorFlow warnings
@@ -418,6 +419,7 @@ def main(save_path: str = "src/models/global_model.h5", config_path: str = None)
         print(f"✅ Saved global model to {save_path}")
     else:
         print("⚠️ Could not find saveable parameters in Federated strategy.")
+        raise RuntimeError("Failed to save model: No parameters available in strategy.")
 
 
 if __name__ == "__main__":
@@ -437,5 +439,12 @@ if __name__ == "__main__":
         help="Path to config file (default: FEDERATED_CONFIG env var or config/federated_local.yaml)",
     )
     args = parser.parse_args()
-    main(save_path=args.save_model, config_path=args.config)
+    try:
+        main(save_path=args.save_model, config_path=args.config)
+    except Exception as e:
+        import traceback
+        print(f"\n❌ Training failed with error: {type(e).__name__}: {e}", file=sys.stderr)
+        print("\nFull traceback:", file=sys.stderr)
+        traceback.print_exc(file=sys.stderr)
+        sys.exit(1)
 
