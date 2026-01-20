@@ -133,27 +133,26 @@ def distillation_loss_fn(
             - Result: same gradient magnitude regardless of T
     """
     # Detect binary vs multi-class classification based on output shape
-    student_shape = tf.shape(student_predictions)
-    teacher_shape = tf.shape(teacher_predictions)
-    is_binary = (student_shape[-1] == 1)
-    
-    if is_binary:
-        # Binary classification: use sigmoid and binary_crossentropy
-        # Both teacher and student have shape (batch, 1) with sigmoid activation
-        # Convert probabilities to logits, then to 2-class logits for softmax
-        
+    # Use tf.cond to handle conditional logic in graph mode (required for TensorFlow)
+    def binary_case():
+        """Handle binary classification case."""
         # Teacher: convert sigmoid probabilities to 2-class logits
-        if teacher_shape[-1] == 1:
+        teacher_shape_dyn = tf.shape(teacher_predictions)
+        teacher_is_binary = tf.equal(teacher_shape_dyn[-1], 1)
+        
+        def teacher_binary():
             # Teacher output is probabilities (from sigmoid activation), convert to logits
-            # Clamp to avoid log(0) or log(1)
             teacher_probs = tf.clip_by_value(teacher_predictions, 1e-8, 1.0 - 1e-8)
-            teacher_logits_2d = tf.concat([
+            return tf.concat([
                 tf.math.log(1 - teacher_probs),  # log(P(class=0))
                 tf.math.log(teacher_probs)       # log(P(class=1))
             ], axis=-1)
-        else:
-            # Teacher already has 2-class logits (from softmax model)
-            teacher_logits_2d = teacher_predictions
+        
+        def teacher_multi():
+            # Teacher already has multi-class logits (from softmax model)
+            return teacher_predictions
+        
+        teacher_logits_2d = tf.cond(teacher_is_binary, teacher_binary, teacher_multi)
         
         # Student: convert probabilities to 2-class logits
         # Student output is probabilities (from sigmoid activation)
@@ -172,21 +171,29 @@ def distillation_loss_fn(
             teacher_soft, student_soft
         ) * (temperature ** 2)
         
-        # Student loss: binary cross-entropy (y_true should be 0 or 1)
-        # Student output is probabilities (from sigmoid), so from_logits=False
+        # Student loss: binary cross-entropy
         # Ensure y_true is float32 and has correct shape
         y_true_float = tf.cast(y_true, tf.float32)
-        if tf.rank(y_true_float) == 0:
-            y_true_float = tf.expand_dims(y_true_float, 0)
-        # y_true should be (batch,) shape for binary_crossentropy
-        if tf.rank(y_true_float) > 1:
-            y_true_float = tf.squeeze(y_true_float, axis=-1)
+        y_true_rank = tf.rank(y_true_float)
+        y_true_float = tf.cond(
+            tf.equal(y_true_rank, 0),
+            lambda: tf.expand_dims(y_true_float, 0),
+            lambda: y_true_float
+        )
+        y_true_float = tf.cond(
+            tf.greater(y_true_rank, 1),
+            lambda: tf.squeeze(y_true_float, axis=-1),
+            lambda: y_true_float
+        )
         
         student_loss = tf.keras.losses.binary_crossentropy(
             y_true_float, student_predictions, from_logits=False
         )
-    else:
-        # Multi-class classification: use softmax and categorical_crossentropy
+        
+        return distillation_loss, student_loss
+    
+    def multiclass_case():
+        """Handle multi-class classification case."""
         # Soften teacher predictions with temperature
         teacher_soft = tf.nn.softmax(teacher_predictions / temperature)
 
@@ -203,6 +210,19 @@ def distillation_loss_fn(
         student_loss = tf.keras.losses.sparse_categorical_crossentropy(
             y_true, student_predictions, from_logits=True
         )
+        
+        return distillation_loss, student_loss
+    
+    # Use tf.cond to select the appropriate case
+    # Check if binary using dynamic shape
+    student_shape_dyn = tf.shape(student_predictions)
+    is_binary_dyn = tf.equal(student_shape_dyn[-1], 1)
+    
+    distillation_loss, student_loss = tf.cond(
+        is_binary_dyn,
+        binary_case,
+        multiclass_case
+    )
 
     # Combine losses
     total_loss = alpha * distillation_loss + (1 - alpha) * student_loss
