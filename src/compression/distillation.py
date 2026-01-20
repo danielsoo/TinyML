@@ -132,22 +132,77 @@ def distillation_loss_fn(
             - Multiplying loss by T² compensates for this
             - Result: same gradient magnitude regardless of T
     """
-    # Soften teacher predictions with temperature
-    teacher_soft = tf.nn.softmax(teacher_predictions / temperature)
+    # Detect binary vs multi-class classification based on output shape
+    student_shape = tf.shape(student_predictions)
+    teacher_shape = tf.shape(teacher_predictions)
+    is_binary = (student_shape[-1] == 1)
+    
+    if is_binary:
+        # Binary classification: use sigmoid and binary_crossentropy
+        # Both teacher and student have shape (batch, 1) with sigmoid activation
+        # Convert probabilities to logits, then to 2-class logits for softmax
+        
+        # Teacher: convert sigmoid probabilities to 2-class logits
+        if teacher_shape[-1] == 1:
+            # Teacher output is probabilities (from sigmoid activation), convert to logits
+            # Clamp to avoid log(0) or log(1)
+            teacher_probs = tf.clip_by_value(teacher_predictions, 1e-8, 1.0 - 1e-8)
+            teacher_logits_2d = tf.concat([
+                tf.math.log(1 - teacher_probs),  # log(P(class=0))
+                tf.math.log(teacher_probs)       # log(P(class=1))
+            ], axis=-1)
+        else:
+            # Teacher already has 2-class logits (from softmax model)
+            teacher_logits_2d = teacher_predictions
+        
+        # Student: convert probabilities to 2-class logits
+        # Student output is probabilities (from sigmoid activation)
+        student_probs = tf.clip_by_value(student_predictions, 1e-8, 1.0 - 1e-8)
+        student_logits_2d = tf.concat([
+            tf.math.log(1 - student_probs),  # log(P(class=0))
+            tf.math.log(student_probs)       # log(P(class=1))
+        ], axis=-1)
+        
+        # Apply temperature scaling and softmax
+        teacher_soft = tf.nn.softmax(teacher_logits_2d / temperature)
+        student_soft = tf.nn.softmax(student_logits_2d / temperature)
+        
+        # Distillation loss: KL divergence between soft predictions
+        distillation_loss = tf.keras.losses.categorical_crossentropy(
+            teacher_soft, student_soft
+        ) * (temperature ** 2)
+        
+        # Student loss: binary cross-entropy (y_true should be 0 or 1)
+        # Student output is probabilities (from sigmoid), so from_logits=False
+        # Ensure y_true is float32 and has correct shape
+        y_true_float = tf.cast(y_true, tf.float32)
+        if tf.rank(y_true_float) == 0:
+            y_true_float = tf.expand_dims(y_true_float, 0)
+        # y_true should be (batch,) shape for binary_crossentropy
+        if tf.rank(y_true_float) > 1:
+            y_true_float = tf.squeeze(y_true_float, axis=-1)
+        
+        student_loss = tf.keras.losses.binary_crossentropy(
+            y_true_float, student_predictions, from_logits=False
+        )
+    else:
+        # Multi-class classification: use softmax and categorical_crossentropy
+        # Soften teacher predictions with temperature
+        teacher_soft = tf.nn.softmax(teacher_predictions / temperature)
 
-    # Soften student predictions with temperature
-    student_soft = tf.nn.softmax(student_predictions / temperature)
+        # Soften student predictions with temperature
+        student_soft = tf.nn.softmax(student_predictions / temperature)
 
-    # Distillation loss: KL divergence between soft predictions
-    # Scale by temperature^2 to maintain gradient magnitude
-    distillation_loss = tf.keras.losses.categorical_crossentropy(
-        teacher_soft, student_soft
-    ) * (temperature ** 2)
+        # Distillation loss: KL divergence between soft predictions
+        # Scale by temperature^2 to maintain gradient magnitude
+        distillation_loss = tf.keras.losses.categorical_crossentropy(
+            teacher_soft, student_soft
+        ) * (temperature ** 2)
 
-    # Student loss: standard cross-entropy with true labels
-    student_loss = tf.keras.losses.sparse_categorical_crossentropy(
-        y_true, student_predictions, from_logits=True
-    )
+        # Student loss: standard cross-entropy with true labels
+        student_loss = tf.keras.losses.sparse_categorical_crossentropy(
+            y_true, student_predictions, from_logits=True
+        )
 
     # Combine losses
     total_loss = alpha * distillation_loss + (1 - alpha) * student_loss
@@ -213,9 +268,8 @@ class Distiller(keras.Model):
             distillation_loss_fn: Custom distillation loss function
         """
         super().compile(optimizer=optimizer, metrics=metrics)
-        self.student_loss_fn = student_loss_fn or keras.losses.SparseCategoricalCrossentropy(
-            from_logits=True
-        )
+        # Default loss will be determined dynamically based on output shape
+        self.student_loss_fn = student_loss_fn
         self.distillation_loss_fn = distillation_loss_fn
 
     def train_step(self, data):
