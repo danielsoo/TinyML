@@ -12,7 +12,7 @@
 #include "tensorflow/lite/schema/schema_generated.h"
 #include "model_data.h"
 
-// 전역 변수
+// Global variables
 tflite::MicroErrorReporter micro_error_reporter;
 tflite::AllOpsResolver resolver;
 
@@ -21,8 +21,8 @@ tflite::MicroInterpreter* interpreter = nullptr;
 TfLiteTensor* input = nullptr;
 TfLiteTensor* output = nullptr;
 
-// 메모리 버퍼 (모델 크기에 따라 조정)
-// Hello World 모델은 작으므로 2000 bytes면 충분
+// Memory buffer (adjust based on model size)
+// Hello World model is small, so 2000 bytes is sufficient
 constexpr int kTensorArenaSize = 2000;
 uint8_t tensor_arena[kTensorArenaSize];
 
@@ -34,7 +34,7 @@ void setup() {
   Serial.println("ESP32 TensorFlow Lite Micro Test");
   Serial.println("========================================\n");
   
-  // 모델 로드
+  // Load model
   Serial.println("Loading TFLite model...");
   model = tflite::GetModel(hello_world_model);
   
@@ -51,20 +51,20 @@ void setup() {
   Serial.print(hello_world_model_len);
   Serial.println(" bytes\n");
   
-  // 인터프리터 생성
+  // Create interpreter
   static tflite::MicroInterpreter static_interpreter(
       model, resolver, tensor_arena, kTensorArenaSize,
       &micro_error_reporter);
   interpreter = &static_interpreter;
   
-  // 텐서 할당
+  // Allocate tensors
   TfLiteStatus allocate_status = interpreter->AllocateTensors();
   if (allocate_status != kTfLiteOk) {
     Serial.println("AllocateTensors() failed!");
     return;
   }
   
-  // 입력/출력 텐서 가져오기
+  // Get input/output tensors
   input = interpreter->input(0);
   output = interpreter->output(0);
   
@@ -88,8 +88,8 @@ void setup() {
 }
 
 void loop() {
-  // 테스트 입력 데이터
-  // 입력: [0.5, 0.5]
+  // Test input data
+  // Input: [0.5, 0.5]
   float test_input[2] = {0.5, 0.5};
   
   Serial.println("Running inference...");
@@ -99,12 +99,12 @@ void loop() {
   Serial.print(test_input[1], 2);
   Serial.println("]");
   
-  // 입력 데이터 복사
+  // Copy input data
   for (int i = 0; i < input->dims->data[1]; i++) {
     input->data.f[i] = test_input[i];
   }
   
-  // 추론 실행
+  // Run inference
   unsigned long start_time = micros();
   TfLiteStatus invoke_status = interpreter->Invoke();
   unsigned long end_time = micros();
@@ -114,7 +114,7 @@ void loop() {
     return;
   }
   
-  // 결과 출력
+  // Print results
   Serial.print("Output: ");
   Serial.println(output->data.f[0], 6);
   Serial.print("Inference time: ");
@@ -122,6 +122,6 @@ void loop() {
   Serial.println(" microseconds");
   Serial.println("----------------------------------------\n");
   
-  delay(2000);  // 2초마다 반복
+  delay(2000);  // Repeat every 2 seconds
 }
 

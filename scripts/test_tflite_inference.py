@@ -1,6 +1,6 @@
 """
-TFLite 모델 추론 테스트 스크립트
-실제 하드웨어 없이 로컬에서 TFLite 모델이 제대로 작동하는지 검증
+TFLite model inference test script
+Validates that TFLite models work correctly locally without hardware
 """
 import os
 import sys
@@ -16,10 +16,10 @@ if str(project_root) not in sys.path:
 
 def test_tflite_inference(model_path: str):
     """
-    TFLite 모델 추론 테스트
+    Test TFLite model inference
     
     Args:
-        model_path: TFLite 모델 파일 경로
+        model_path: Path to TFLite model file
     """
     try:
         import tensorflow as tf
@@ -43,9 +43,9 @@ def test_tflite_inference(model_path: str):
         print(f"  Output shape: {output_details[0]['shape']}")
         print(f"  Output type: {output_details[0]['dtype']}")
         
-        # 테스트 입력 데이터 생성
+        # Generate test input data
         input_shape = input_details[0]['shape']
-        # 배치 크기 제거 (첫 번째 차원)
+        # Remove batch size (first dimension)
         actual_input_shape = input_shape[1:] if len(input_shape) > 1 else input_shape
         
         print("\n" + "=" * 60)
@@ -93,7 +93,7 @@ def test_tflite_inference(model_path: str):
             print(f"  Output: {output_data[0]}")
             print(f"  Inference time: {inference_time:.3f} ms")
         
-        # 요약
+        # Summary
         print("\n" + "=" * 60)
         print("Summary")
         print("=" * 60)
@@ -128,7 +128,7 @@ def verify_c_array_files(c_file: str, h_file: str):
     print("=" * 60)
     
     try:
-        # 헤더 파일 확인
+        # Check header file
         if os.path.exists(h_file):
             print(f"✅ Header file exists: {h_file}")
             with open(h_file, 'r') as f:
@@ -141,7 +141,7 @@ def verify_c_array_files(c_file: str, h_file: str):
             print(f"❌ Header file not found: {h_file}")
             return False
         
-        # 소스 파일 확인
+        # Check source file
         if os.path.exists(c_file):
             print(f"✅ Source file exists: {c_file}")
             file_size = os.path.getsize(c_file)
@@ -191,10 +191,10 @@ if __name__ == "__main__":
         print("   python scripts/create_test_model.py")
         sys.exit(1)
     
-    # 추론 테스트
+    # Test inference
     success = test_tflite_inference(args.model)
     
-    # C 파일 검증 (선택사항)
+    # Verify C files (optional)
     if args.verify_c_files:
         c_file = "data/processed/microcontroller/model_data.c"
         h_file = "data/processed/microcontroller/model_data.h"
