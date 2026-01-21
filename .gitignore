@@ -8,7 +8,7 @@
 data/*.csv
 *.csv
 
-# 기타 캐시
+# Other caches
 __pycache__/
 .ipynb_checkpoints/
 src/.DS_Store
