@@ -176,37 +176,18 @@ def distillation_loss_fn(
         # y_true should be (batch,) shape, student_predictions is (batch, 1)
         y_true_float = tf.cast(y_true, tf.float32)
         
-        # Handle shape: ensure y_true is 1D (batch,)
-        # Use tf.rank to get rank safely
-        y_true_rank = tf.rank(y_true_float)
+        # Flatten y_true to 1D (batch,) - use reshape which handles unknown shapes better
+        y_true_flat = tf.reshape(y_true_float, [-1])
         
-        # Flatten y_true to 1D if needed
-        # If rank is 0 (scalar), expand to 1D
-        # If rank > 1, flatten to 1D
-        y_true_float = tf.cond(
-            tf.equal(y_true_rank, 0),
-            lambda: tf.expand_dims(y_true_float, 0),
-            lambda: tf.cond(
-                tf.greater(y_true_rank, 1),
-                lambda: tf.reshape(y_true_float, [-1]),  # Flatten to 1D
-                lambda: y_true_float  # Already 1D
-            )
-        )
+        # Ensure student_predictions is (batch,) - squeeze if needed
+        # First get the batch size from y_true
+        batch_size = tf.shape(y_true_flat)[0]
         
-        # Ensure student_predictions is (batch, 1) or (batch,)
-        # binary_crossentropy can handle both shapes
-        # Squeeze the last dimension if it's 1 to match y_true shape
-        student_pred_rank = tf.rank(student_predictions)
-        
-        # If predictions are (batch, 1), squeeze to (batch,)
-        student_pred_final = tf.cond(
-            tf.greater(student_pred_rank, 1),
-            lambda: tf.squeeze(student_predictions, axis=-1),
-            lambda: student_predictions
-        )
+        # Reshape student_predictions to (batch,) - this handles both (batch, 1) and (batch,) cases
+        student_pred_flat = tf.reshape(student_predictions, [batch_size])
         
         student_loss = tf.keras.losses.binary_crossentropy(
-            y_true_float, student_pred_final, from_logits=False
+            y_true_flat, student_pred_flat, from_logits=False
         )
         
         return distillation_loss, student_loss
