@@ -177,9 +177,8 @@ def distillation_loss_fn(
         y_true_float = tf.cast(y_true, tf.float32)
         
         # Handle shape: ensure y_true is 1D (batch,)
-        # Use tf.shape to get dynamic shape safely
-        y_true_shape = tf.shape(y_true_float)
-        y_true_rank = tf.size(y_true_shape)
+        # Use tf.rank to get rank safely
+        y_true_rank = tf.rank(y_true_float)
         
         # Flatten y_true to 1D if needed
         # If rank is 0 (scalar), expand to 1D
@@ -197,8 +196,7 @@ def distillation_loss_fn(
         # Ensure student_predictions is (batch, 1) or (batch,)
         # binary_crossentropy can handle both shapes
         # Squeeze the last dimension if it's 1 to match y_true shape
-        student_pred_shape = tf.shape(student_predictions)
-        student_pred_rank = tf.size(student_pred_shape)
+        student_pred_rank = tf.rank(student_predictions)
         
         # If predictions are (batch, 1), squeeze to (batch,)
         student_pred_final = tf.cond(
