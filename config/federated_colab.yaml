@@ -9,10 +9,14 @@ data:
   path: "/content/drive/MyDrive/TinyML_models"
 
   # Number of clients
-  num_clients: 4
+  # Original: num_clients: 4
+  # Reduced for memory efficiency
+  num_clients: 2
 
-  # Limit sample size if too large (can be increased if needed)
-  max_samples: 200000
+  # Limit sample size if too large
+  # Original: max_samples: 200000
+  # Reduced for Colab memory constraints
+  max_samples: 50000
 
 model:
   # mlp or cnn (usually mlp for Bot-IoT)
@@ -27,10 +31,14 @@ federated:
 
   # Local training settings
   local_epochs: 2
-  batch_size: 128
+  # Original: batch_size: 128
+  # Reduced for memory efficiency
+  batch_size: 64
 
   # Reserved for strategy internal use
-  min_fit_clients: 4
-  min_evaluate_clients: 4
-  min_available_clients: 4
+  # Original: min_fit_clients: 4, min_evaluate_clients: 4, min_available_clients: 4
+  # Reduced to match num_clients
+  min_fit_clients: 2
+  min_evaluate_clients: 2
+  min_available_clients: 2
 
