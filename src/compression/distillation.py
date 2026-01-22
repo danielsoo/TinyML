@@ -179,12 +179,36 @@ def distillation_loss_fn(
         # Flatten y_true to 1D (batch,) - use reshape which handles unknown shapes better
         y_true_flat = tf.reshape(y_true_float, [-1])
         
-        # Ensure student_predictions is (batch,) - squeeze if needed
-        # First get the batch size from y_true
-        batch_size = tf.shape(y_true_flat)[0]
+        # Get batch size from student_predictions (more reliable)
+        student_pred_shape = tf.shape(student_predictions)
+        student_batch_size = student_pred_shape[0]
         
-        # Reshape student_predictions to (batch,) - this handles both (batch, 1) and (batch,) cases
-        student_pred_flat = tf.reshape(student_predictions, [batch_size])
+        # Ensure student_predictions is (batch,) - squeeze if needed
+        student_pred_rank = tf.rank(student_predictions)
+        student_pred_flat = tf.cond(
+            tf.greater(student_pred_rank, 1),
+            lambda: tf.squeeze(student_predictions, axis=-1),
+            lambda: student_predictions
+        )
+        
+        # Ensure y_true matches student_predictions batch size
+        y_true_batch_size = tf.shape(y_true_flat)[0]
+        
+        # Use the batch size from student_predictions (should be the actual batch size)
+        # Slice y_true to match if needed
+        y_true_flat = tf.cond(
+            tf.not_equal(y_true_batch_size, student_batch_size),
+            lambda: y_true_flat[:student_batch_size],
+            lambda: y_true_flat
+        )
+        
+        # Also ensure distillation_loss matches the batch size
+        distillation_batch_size = tf.shape(distillation_loss)[0]
+        distillation_loss = tf.cond(
+            tf.not_equal(distillation_batch_size, student_batch_size),
+            lambda: distillation_loss[:student_batch_size],
+            lambda: distillation_loss
+        )
         
         student_loss = tf.keras.losses.binary_crossentropy(
             y_true_flat, student_pred_flat, from_logits=False
@@ -223,6 +247,18 @@ def distillation_loss_fn(
         binary_case,
         multiclass_case
     )
+
+    # Ensure both losses have the same batch size (safety check)
+    # Get batch sizes
+    distillation_batch_size = tf.shape(distillation_loss)[0]
+    student_batch_size = tf.shape(student_loss)[0]
+    
+    # Use the minimum batch size to ensure compatibility
+    min_batch_size = tf.minimum(distillation_batch_size, student_batch_size)
+    
+    # Slice both losses to match the minimum batch size
+    distillation_loss = distillation_loss[:min_batch_size]
+    student_loss = student_loss[:min_batch_size]
 
     # Combine losses
     total_loss = alpha * distillation_loss + (1 - alpha) * student_loss
