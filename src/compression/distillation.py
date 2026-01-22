@@ -184,24 +184,15 @@ def distillation_loss_fn(
         # This handles both (batch, 1) and (batch,) cases and avoids shape extraction issues
         student_pred_flat = tf.reshape(student_predictions, [-1])
         
-        # Get actual batch sizes after reshape
-        y_true_batch_size = tf.shape(y_true_flat)[0]
-        student_batch_size = tf.shape(student_pred_flat)[0]
-        distillation_batch_size = tf.shape(distillation_loss)[0]
-        
-        # Use the minimum batch size to ensure all tensors have compatible shapes
-        # This handles cases where batch sizes might differ slightly
-        min_batch_size = tf.minimum(tf.minimum(y_true_batch_size, student_batch_size), distillation_batch_size)
-        
-        # Slice all tensors to the minimum batch size to ensure compatibility
-        y_true_flat = y_true_flat[:min_batch_size]
-        student_pred_flat = student_pred_flat[:min_batch_size]
-        distillation_loss = distillation_loss[:min_batch_size]
-        
+        # Calculate student_loss directly
+        # binary_crossentropy returns (batch,) shape, same as distillation_loss
         student_loss = tf.keras.losses.binary_crossentropy(
             y_true_flat, student_pred_flat, from_logits=False
         )
         
+        # Both distillation_loss and student_loss should have the same shape (batch,)
+        # They are computed from the same batch, so shapes should match
+        # No need to extract batch sizes - TensorFlow will handle shape compatibility
         return distillation_loss, student_loss
     
     def multiclass_case():
@@ -237,34 +228,10 @@ def distillation_loss_fn(
     )
 
     # Ensure both losses have the same batch size (safety check)
-    # Get batch sizes safely
-    distillation_batch_size = tf.shape(distillation_loss)[0]
-    student_batch_size = tf.shape(student_loss)[0]
-    
-    # Use the minimum batch size to ensure compatibility
-    min_batch_size = tf.minimum(distillation_batch_size, student_batch_size)
-    
-    # Only slice if batch sizes differ and min_batch_size is valid (> 0)
-    # This prevents errors when batch_size is 0 or unknown
-    distillation_loss = tf.cond(
-        tf.logical_and(
-            tf.not_equal(distillation_batch_size, student_batch_size),
-            tf.greater(min_batch_size, 0)
-        ),
-        lambda: distillation_loss[:min_batch_size],
-        lambda: distillation_loss
-    )
-    
-    student_loss = tf.cond(
-        tf.logical_and(
-            tf.not_equal(distillation_batch_size, student_batch_size),
-            tf.greater(min_batch_size, 0)
-        ),
-        lambda: student_loss[:min_batch_size],
-        lambda: student_loss
-    )
-
-    # Combine losses
+    # Combine losses directly
+    # TensorFlow will handle shape broadcasting automatically
+    # If shapes don't match, it will raise an error, but that's better than
+    # trying to extract batch sizes which can fail with unknown shapes
     total_loss = alpha * distillation_loss + (1 - alpha) * student_loss
 
     return total_loss
