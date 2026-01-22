@@ -176,33 +176,18 @@ def distillation_loss_fn(
         # y_true should be (batch,) shape, student_predictions is (batch, 1)
         y_true_float = tf.cast(y_true, tf.float32)
         
-        # Flatten y_true to 1D (batch,) - use reshape which handles unknown shapes better
-        y_true_flat = tf.reshape(y_true_float, [-1])
-        
-        # Get batch size from student_predictions (more reliable)
+        # Get batch size from student_predictions first (most reliable)
         student_pred_shape = tf.shape(student_predictions)
         student_batch_size = student_pred_shape[0]
         
-        # Ensure student_predictions is (batch,) - squeeze if needed
-        student_pred_rank = tf.rank(student_predictions)
-        student_pred_flat = tf.cond(
-            tf.greater(student_pred_rank, 1),
-            lambda: tf.squeeze(student_predictions, axis=-1),
-            lambda: student_predictions
-        )
+        # Flatten y_true to 1D (batch,) using explicit batch size
+        y_true_flat = tf.reshape(y_true_float, [student_batch_size])
         
-        # Ensure y_true matches student_predictions batch size
-        y_true_batch_size = tf.shape(y_true_flat)[0]
+        # Reshape student_predictions to (batch,) - handle both (batch, 1) and (batch,) cases
+        # Use reshape instead of squeeze to avoid unknown rank issues
+        student_pred_flat = tf.reshape(student_predictions, [student_batch_size])
         
-        # Use the batch size from student_predictions (should be the actual batch size)
-        # Slice y_true to match if needed
-        y_true_flat = tf.cond(
-            tf.not_equal(y_true_batch_size, student_batch_size),
-            lambda: y_true_flat[:student_batch_size],
-            lambda: y_true_flat
-        )
-        
-        # Also ensure distillation_loss matches the batch size
+        # Ensure distillation_loss matches the batch size
         distillation_batch_size = tf.shape(distillation_loss)[0]
         distillation_loss = tf.cond(
             tf.not_equal(distillation_batch_size, student_batch_size),
