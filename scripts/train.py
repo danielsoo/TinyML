@@ -137,18 +137,19 @@ def install_dependencies():
                 check=False
             )
         
-        # Fix protobuf compatibility
+        # Fix protobuf compatibility - MUST stay at 3.20.3
         print("   Fixing protobuf compatibility...")
         subprocess.run(
-            ["pip", "install", "--force-reinstall", "protobuf==3.20.3"],
+            ["pip", "uninstall", "-y", "protobuf"],
+            check=False
+        )
+        subprocess.run(
+            ["pip", "install", "protobuf==3.20.3"],
             check=False
         )
         
-        # Install Flower if needed
-        subprocess.run(
-            ["pip", "install", "flwr[simulation]"],
-            check=False
-        )
+        # NOTE: flwr dependencies already in requirements_colab.txt
+        # Do NOT install flwr[simulation] here as it upgrades protobuf to 6.x
         
         print("✅ Dependencies installed")
     else:
