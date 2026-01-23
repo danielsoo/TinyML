@@ -11,7 +11,7 @@ LATEST_MODEL="${MODEL_DIR}/global_model.h5"
 # Create models directory if it doesn't exist
 mkdir -p "${MODEL_DIR}"
 
-# 로컬 환경용 설정 파일 사용, 타임스탬프가 포함된 파일명으로 저장
+# Use local environment config file, save with timestamped filename
 echo "🚀 Starting federated learning..."
 echo "📁 Model will be saved as: ${TIMESTAMPED_MODEL}"
 python -m src.federated.client \

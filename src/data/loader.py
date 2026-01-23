@@ -114,10 +114,29 @@ def load_bot_iot(
         raise FileNotFoundError(f"Bot-IoT CSV files not found: {root.resolve()}")
 
     # Suppress DtypeWarning during CSV reading
+    # Use low_memory=True to reduce memory usage during loading
     with warnings.catch_warnings():
         warnings.filterwarnings('ignore', category=pd.errors.DtypeWarning)
-        dfs = [pd.read_csv(p, low_memory=False) for p in csv_files]
+        dfs = [pd.read_csv(p, low_memory=True) for p in csv_files]
     df = pd.concat(dfs, axis=0, ignore_index=True)
+    
+    # Apply max_samples early to reduce memory usage for subsequent operations
+    # This is critical: sample BEFORE expensive transformations
+    if max_samples is not None and len(df) > max_samples:
+        # Quick check for label column before sampling
+        label_candidates = [label_col] if label_col else []
+        label_candidates.extend(["attack", "label", "Label", "y", "target", "class"])
+        resolved_label_col = None
+        for candidate in label_candidates:
+            if candidate in df.columns:
+                resolved_label_col = candidate
+                break
+        
+        if resolved_label_col:
+            # Sample before expensive transformations
+            sample_frac = min(1.0, (max_samples * 1.1) / len(df))  # Sample 10% more than needed
+            df = df.sample(frac=sample_frac, random_state=random_state).reset_index(drop=True)
+            print(f"[load_bot_iot] Sampled {len(df)} rows (target: {max_samples}) to reduce memory usage.")
 
     label_candidates = []
     if label_col is not None:
@@ -236,6 +255,8 @@ def load_bot_iot(
     mapping = {v: i for i, v in enumerate(uniq)}
     y = np.vectorize(mapping.get)(y)
 
+    # Final sampling with stratification if still needed
+    # (Early sampling above may not be perfectly stratified)
     if max_samples is not None and len(X) > max_samples:
         # Check if stratify is safe (each class needs at least 2 samples)
         unique, counts = np.unique(y, return_counts=True)

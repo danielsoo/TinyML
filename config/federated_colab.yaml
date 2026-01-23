@@ -1,36 +1,44 @@
 # config/federated_colab.yaml
-# Google Colab 환경 전용 설정 파일
+# Configuration file for Google Colab environment
 
 data:
-  # bot_iot 또는 mnist 선택
+  # Choose bot_iot or mnist
   name: bot_iot
 
-  # Bot-IoT CSV 경로 (Colab 환경: Google Drive)
+  # Bot-IoT CSV path (Colab environment: Google Drive)
   path: "/content/drive/MyDrive/TinyML_models"
 
-  # 클라이언트 수
-  num_clients: 4
+  # Number of clients
+  # Original: num_clients: 4
+  # Reduced for memory efficiency
+  num_clients: 2
 
-  # 너무 크면 학습 오래 걸리니까 샘플 수 제한 (원하면 늘려도 됨)
-  max_samples: 200000
+  # Limit sample size if too large
+  # Original: max_samples: 200000
+  # Reduced for Colab memory constraints
+  max_samples: 50000
 
 model:
-  # mlp 또는 cnn (Bot-IoT면 보통 mlp)
+  # mlp or cnn (usually mlp for Bot-IoT)
   name: mlp
 
 federated:
   num_rounds: 3
 
-  # 각 라운드에 학습에 참여할 비율 (전부 쓰면 1.0)
+  # Fraction of clients participating in each round (1.0 = all clients)
   fraction_fit: 1.0
   fraction_evaluate: 1.0
 
-  # 로컬 학습 설정
+  # Local training settings
   local_epochs: 2
-  batch_size: 128
+  # Original: batch_size: 128
+  # Reduced for memory efficiency
+  batch_size: 64
 
-  # 전략 내부에서 쓸 수 있도록 남겨둠
-  min_fit_clients: 4
-  min_evaluate_clients: 4
-  min_available_clients: 4
+  # Reserved for strategy internal use
+  # Original: min_fit_clients: 4, min_evaluate_clients: 4, min_available_clients: 4
+  # Reduced to match num_clients
+  min_fit_clients: 2
+  min_evaluate_clients: 2
+  min_available_clients: 2
 

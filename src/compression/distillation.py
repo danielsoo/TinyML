@@ -132,24 +132,106 @@ def distillation_loss_fn(
             - Multiplying loss by T² compensates for this
             - Result: same gradient magnitude regardless of T
     """
-    # Soften teacher predictions with temperature
-    teacher_soft = tf.nn.softmax(teacher_predictions / temperature)
+    # Detect binary vs multi-class classification based on output shape
+    # Use tf.cond to handle conditional logic in graph mode (required for TensorFlow)
+    def binary_case():
+        """Handle binary classification case."""
+        # Teacher: convert sigmoid probabilities to 2-class logits
+        teacher_shape_dyn = tf.shape(teacher_predictions)
+        teacher_is_binary = tf.equal(teacher_shape_dyn[-1], 1)
+        
+        def teacher_binary():
+            # Teacher output is probabilities (from sigmoid activation), convert to logits
+            teacher_probs = tf.clip_by_value(teacher_predictions, 1e-8, 1.0 - 1e-8)
+            return tf.concat([
+                tf.math.log(1 - teacher_probs),  # log(P(class=0))
+                tf.math.log(teacher_probs)       # log(P(class=1))
+            ], axis=-1)
+        
+        def teacher_multi():
+            # Teacher already has multi-class logits (from softmax model)
+            return teacher_predictions
+        
+        teacher_logits_2d = tf.cond(teacher_is_binary, teacher_binary, teacher_multi)
+        
+        # Student: convert probabilities to 2-class logits
+        # Student output is probabilities (from sigmoid activation)
+        student_probs = tf.clip_by_value(student_predictions, 1e-8, 1.0 - 1e-8)
+        student_logits_2d = tf.concat([
+            tf.math.log(1 - student_probs),  # log(P(class=0))
+            tf.math.log(student_probs)       # log(P(class=1))
+        ], axis=-1)
+        
+        # Apply temperature scaling and softmax
+        teacher_soft = tf.nn.softmax(teacher_logits_2d / temperature)
+        student_soft = tf.nn.softmax(student_logits_2d / temperature)
+        
+        # Distillation loss: KL divergence between soft predictions
+        distillation_loss = tf.keras.losses.categorical_crossentropy(
+            teacher_soft, student_soft
+        ) * (temperature ** 2)
+        
+        # Student loss: binary cross-entropy
+        # Ensure y_true is float32 and has correct shape for binary_crossentropy
+        # y_true should be (batch,) shape, student_predictions is (batch, 1)
+        y_true_float = tf.cast(y_true, tf.float32)
+        
+        # Flatten y_true to 1D (batch,) - use -1 to auto-detect batch size
+        # This is safer than trying to extract batch size from shape which might be [0]
+        y_true_flat = tf.reshape(y_true_float, [-1])
+        
+        # Reshape student_predictions to (batch,) - use -1 to auto-detect batch size
+        # This handles both (batch, 1) and (batch,) cases and avoids shape extraction issues
+        student_pred_flat = tf.reshape(student_predictions, [-1])
+        
+        # Calculate student_loss directly
+        # binary_crossentropy returns (batch,) shape, same as distillation_loss
+        student_loss = tf.keras.losses.binary_crossentropy(
+            y_true_flat, student_pred_flat, from_logits=False
+        )
+        
+        # Both distillation_loss and student_loss should have the same shape (batch,)
+        # They are computed from the same batch, so shapes should match
+        # No need to extract batch sizes - TensorFlow will handle shape compatibility
+        return distillation_loss, student_loss
+    
+    def multiclass_case():
+        """Handle multi-class classification case."""
+        # Soften teacher predictions with temperature
+        teacher_soft = tf.nn.softmax(teacher_predictions / temperature)
 
-    # Soften student predictions with temperature
-    student_soft = tf.nn.softmax(student_predictions / temperature)
+        # Soften student predictions with temperature
+        student_soft = tf.nn.softmax(student_predictions / temperature)
 
-    # Distillation loss: KL divergence between soft predictions
-    # Scale by temperature^2 to maintain gradient magnitude
-    distillation_loss = tf.keras.losses.categorical_crossentropy(
-        teacher_soft, student_soft
-    ) * (temperature ** 2)
+        # Distillation loss: KL divergence between soft predictions
+        # Scale by temperature^2 to maintain gradient magnitude
+        distillation_loss = tf.keras.losses.categorical_crossentropy(
+            teacher_soft, student_soft
+        ) * (temperature ** 2)
 
-    # Student loss: standard cross-entropy with true labels
-    student_loss = tf.keras.losses.sparse_categorical_crossentropy(
-        y_true, student_predictions, from_logits=True
+        # Student loss: standard cross-entropy with true labels
+        student_loss = tf.keras.losses.sparse_categorical_crossentropy(
+            y_true, student_predictions, from_logits=True
+        )
+        
+        return distillation_loss, student_loss
+    
+    # Use tf.cond to select the appropriate case
+    # Check if binary using dynamic shape
+    student_shape_dyn = tf.shape(student_predictions)
+    is_binary_dyn = tf.equal(student_shape_dyn[-1], 1)
+    
+    distillation_loss, student_loss = tf.cond(
+        is_binary_dyn,
+        binary_case,
+        multiclass_case
     )
 
-    # Combine losses
+    # Ensure both losses have the same batch size (safety check)
+    # Combine losses directly
+    # TensorFlow will handle shape broadcasting automatically
+    # If shapes don't match, it will raise an error, but that's better than
+    # trying to extract batch sizes which can fail with unknown shapes
     total_loss = alpha * distillation_loss + (1 - alpha) * student_loss
 
     return total_loss
@@ -213,9 +295,8 @@ class Distiller(keras.Model):
             distillation_loss_fn: Custom distillation loss function
         """
         super().compile(optimizer=optimizer, metrics=metrics)
-        self.student_loss_fn = student_loss_fn or keras.losses.SparseCategoricalCrossentropy(
-            from_logits=True
-        )
+        # Default loss will be determined dynamically based on output shape
+        self.student_loss_fn = student_loss_fn
         self.distillation_loss_fn = distillation_loss_fn
 
     def train_step(self, data):

@@ -1,35 +1,35 @@
 # config/federated.yaml
 
 data:
-  # bot_iot 또는 mnist 선택
+  # Choose bot_iot or mnist
   name: bot_iot
 
-  # Bot-IoT CSV 올려둔 경로 (로컬 Windows 경로)
+  # Bot-IoT CSV file path (local Windows path)
   path: "data/raw/Bot-IoT"
-  # Colab 사용 시: /content/drive/MyDrive/TinyML_models
+  # For Colab: /content/drive/MyDrive/TinyML_models
 
-  # 클라이언트 수
+  # Number of clients
   num_clients: 4
 
-  # 너무 크면 학습 오래 걸리니까 샘플 수 제한 (원하면 늘려도 됨)
+  # Limit sample size if too large (can be increased if needed)
   max_samples: 200000
 
 model:
-  # mlp 또는 cnn (Bot-IoT면 보통 mlp, MNIST면 cnn)
+  # mlp or cnn (usually mlp for Bot-IoT, cnn for MNIST)
   name: mlp
 
 federated:
   num_rounds: 3
 
-  # 각 라운드에 학습에 참여할 비율 (전부 쓰면 1.0)
+  # Fraction of clients participating in each round (1.0 = all clients)
   fraction_fit: 1.0
   fraction_evaluate: 1.0
 
-  # 로컬 학습 설정
+  # Local training settings
   local_epochs: 2
   batch_size: 128
 
-  # 전략 내부에서 쓸 수 있도록 남겨둠
+  # Reserved for strategy internal use
   min_fit_clients: 4
   min_evaluate_clients: 4
   min_available_clients: 4
