@@ -76,6 +76,7 @@ class CompressionAnalyzer:
         print(f"📊 COMPRESSION ANALYSIS")
         print(f"{'='*60}")
         print(f"\n📁 Loading dataset: {dataset_name}")
+        print(f"📋 Dataset config: {dataset_kwargs}")
         _, _, self.x_test, self.y_test = load_dataset(dataset_name, **dataset_kwargs)
         print(f"✅ Test set loaded: {len(self.x_test):,} samples")
 
