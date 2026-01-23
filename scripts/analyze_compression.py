@@ -44,10 +44,17 @@ class CompressionAnalyzer:
 
     def __init__(
         self,
-        config_path: str = "config/federated_local.yaml",
+        config_path: str = None,
         output_dir: str = "data/processed/analysis",
     ):
         """Initialize analyzer with config and output directory."""
+        # Use federated_colab.yaml as default if exists, otherwise federated_local.yaml
+        if config_path is None:
+            if os.path.exists("config/federated_colab.yaml"):
+                config_path = "config/federated_colab.yaml"
+            else:
+                config_path = "config/federated_local.yaml"
+        
         self.config_path = config_path
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)

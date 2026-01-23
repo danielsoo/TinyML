@@ -11,8 +11,8 @@ data:
   # 클라이언트 수
   num_clients: 4
 
-  # 너무 크면 학습 오래 걸리니까 샘플 수 제한 (원하면 늘려도 됨)
-  max_samples: 200000
+  # 전체 데이터 사용 (max_samples 제한 없음)
+  # max_samples: 200000
 
 model:
   # mlp 또는 cnn (Bot-IoT면 보통 mlp)
