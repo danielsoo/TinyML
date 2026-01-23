@@ -1,7 +1,8 @@
 # /colab/requirements_colab.txt
 # Generated dynamically via train_colab.ipynb; excludes tensorflow/numpy as they ship with Colab.
 protobuf==3.20.3
-flwr<2
+flwr==1.6.0
+numpy==1.26.4
 pandas
 scikit-learn
 matplotlib
