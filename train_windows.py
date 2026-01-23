@@ -8,7 +8,7 @@ import numpy as np
 from src.data.loader import load_dataset
 from src.models.nets import get_model
 
-def main():
+def train():
     # Load config
     with open("config/federated.yaml", encoding='utf-8') as f:
         cfg = yaml.safe_load(f)
@@ -139,4 +139,4 @@ def main():
         print(f"⚠️  Could not convert to TFLite: {e}")
 
 if __name__ == "__main__":
-    main()
+    train()

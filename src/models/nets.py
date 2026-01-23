@@ -6,27 +6,28 @@ from tensorflow.keras import layers
 
 
 def _compile_for_classes(model: keras.Model, num_classes: int) -> keras.Model:
-    """Configure final layer and loss based on num_classes."""
-    if num_classes <= 2:
-        # Binary classification: output 1, sigmoid + binary_crossentropy
-        if not isinstance(model.layers[-1], layers.Dense) or model.layers[-1].units != 1:
-            model.pop() if hasattr(model, "pop") else None
-            model.add(layers.Dense(1, activation="sigmoid"))
-        model.compile(
-            optimizer="adam",
-            loss="binary_crossentropy",
-            metrics=["accuracy"],
-        )
-    else:
-        # Multi-class classification: output C, softmax + sparse_categorical_crossentropy
-        if not isinstance(model.layers[-1], layers.Dense) or model.layers[-1].units != num_classes:
-            model.pop() if hasattr(model, "pop") else None
-            model.add(layers.Dense(num_classes, activation="softmax"))
-        model.compile(
-            optimizer="adam",
-            loss="sparse_categorical_crossentropy",
-            metrics=["accuracy"],
-        )
+    """Configure final layer and loss based on num_classes.
+
+    IMPORTANT: For distillation compatibility, we ALWAYS use num_classes outputs
+    (even for binary: 2 outputs, not 1) with sparse_categorical_crossentropy.
+    This ensures teacher and student models have matching output shapes.
+    """
+    # Ensure num_classes is at least 2 (for binary classification)
+    if num_classes <= 1:
+        num_classes = 2
+
+    # Always use num_classes outputs with softmax activation
+    # This works for both binary (2 outputs) and multi-class (C outputs)
+    if not isinstance(model.layers[-1], layers.Dense) or model.layers[-1].units != num_classes:
+        model.pop() if hasattr(model, "pop") else None
+        model.add(layers.Dense(num_classes, activation="softmax"))
+
+    # Always use sparse_categorical_crossentropy (works for binary and multi-class)
+    model.compile(
+        optimizer="adam",
+        loss="sparse_categorical_crossentropy",
+        metrics=["accuracy"],
+    )
     return model
 
 

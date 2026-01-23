@@ -250,6 +250,9 @@ class Distiller(keras.Model):
                     self.temperature, self.alpha
                 )
 
+            # CRITICAL FIX: Reduce loss to scalar for metrics
+            loss = tf.reduce_mean(loss)
+
         # Compute gradients
         trainable_vars = self.student.trainable_variables
         gradients = tape.gradient(loss, trainable_vars)
@@ -376,12 +379,13 @@ def create_student_model(
             pass
 
     # Add output layer with same number of classes
-    if num_classes <= 2:
-        # Binary classification
-        student_layers.append(layers.Dense(1, activation='sigmoid', name='student_output'))
-    else:
-        # Multi-class classification
-        student_layers.append(layers.Dense(num_classes, activation='softmax', name='student_output'))
+    # IMPORTANT: Always use num_classes outputs (even for binary: 2 not 1)
+    # This ensures consistency with teacher model and sparse_categorical_crossentropy
+    # Use NO activation (logits) for distillation
+    if num_classes <= 1:
+        num_classes = 2  # Ensure at least 2 for binary
+
+    student_layers.append(layers.Dense(num_classes, activation=None, name='student_output'))
 
     # Build model
     x = student_layers[0]
