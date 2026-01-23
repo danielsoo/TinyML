@@ -19,18 +19,18 @@ import tensorflow as tf
 
 from src.data.loader import load_dataset
 from src.models.nets import get_model
-from src.compression.distillation import (
+from src.modelcompression.distillation import (
     create_student_model,
     train_with_distillation,
     compare_models as compare_distillation
 )
-from src.compression.pruning import (
+from src.modelcompression.pruning import (
     apply_structured_pruning,
     compare_models,
     fine_tune_pruned_model,
     get_model_size
 )
-from src.compression.quantization import (
+from src.modelcompression.quantization import (
     quantize_model,
     compare_model_sizes,
     evaluate_quantization_accuracy

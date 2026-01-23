@@ -1,70 +1,4 @@
-📊 Evaluation Summary
-Accuracy: 0.9450 (94.50%)
-Loss: 0.1421
-
-📈 Ground Truth:
-  - Attack samples: 150
-  - Normal samples: 50
-  - Total samples: 200
-
-🔮 Predictions:
-  - Predicted Attack: 147
-  - Predicted Normal: 53
-
-✅ Confusion Matrix:
-  - True Positives (TP): 144
-  - True Negatives (TN): 48
-  - False Positives (FP): 5
-  - False Negatives (FN): 6
-
-📏 Metrics:
-  - Precision: 0.9664 (96.64%)
-  - Recall: 0.9600 (96.00%)
-  - F1-Score: 0.9632 (96.32%)
-```
-
-### 3. What happens under the hood?
-- `src/data/loader.py` → `load_bot_iot()` ingests & normalizes Bot-IoT (numeric features only, label = intrusion).
-- `partition_non_iid()` scatters data across `num_clients`, creating label-skewed partitions to mimic heterogeneous IoT fleets.
-- `src/models/nets.make_mlp()` builds a lightweight MLP tailored for tabular data.
-- `src/federated/client.KerasClient` manages Flower’s fit/evaluate cycle and prints detailed metrics each round.
-
----
-
-## TinyML Export (Baseline)
-
-Once a model is trained centrally (or after FL aggregation), it can be exported to TFLite:
-
-```bash
-# Use the saved .h5 from the federated run or generate a fresh one
-python -m src.tinyml.export_tflite
-```
-
-Output appears in `data/processed/tiny_model.tflite`. A dedicated TinyML “Hello World” deployment script (e.g., Raspberry Pi Pico / ESP32) is scheduled for Phase 1 completion.
-
----
-
-## Adversarial Robustness (Preview)
-
-- `src/adversarial/fgsm_hook.py` contains primitive FGSM perturbation utilities.
-- Phase 4 will integrate adversarial example generation into the FL training loop and re-run the TinyML compression stage on the hardened global model.
-
----
-
-## Troubleshooting & Tips
-
-- **MacBook memory pressure?** Lower `max_samples`, or temporarily switch to `placeholder_mnist`.
-- **Dataset missing?** Ensure `make download-data` completed, and `data/raw/Bot-IoT/` contains four `reduced_data_*.csv` files.
-- **Kaggle CLI “command not found”?** Reactivate the virtual environment (`source .venv/bin/activate`) before running the download script.
-- **Long training times?** Prefer lab hardware for full Bot-IoT runs; keep laptop tests to ≤ 10 k samples.
-
----
-
-## License
-
-This project is licensed under the **Apache License 2.0**.  
-See the [LICENSE](LICENSE) file for the complete text.
-## Federated & Adversarially Robust TinyML for IoT Security
+# Federated & Adversarially Robust TinyML for IoT Security
 
 This repository hosts the capstone project exploring how **Federated Learning (FL)**, **TinyML model compression**, and **Adversarial Training** can be combined to deliver privacy-preserving and attack-resilient intrusion detection on extremely resource-constrained IoT hardware.
 
@@ -80,7 +14,7 @@ This repository hosts the capstone project exploring how **Federated Learning (F
 | Pillar | Goal | Current Status |
 |--------|------|----------------|
 | **Federated Learning** | Train IDS models across distributed IoT clients without sharing raw data | ✅ Flower simulation skeleton implemented |
-| **TinyML** | Compress the global model to fit on microcontrollers (≤ few 100 KB) | ✅ Basic TFLite export implemented; compression analysis tools completed |
+| **TinyML** | Compress the global model to fit on microcontrollers (≤ few 100 KB) | ✅ Full pipeline (`compression.py`): distillation, pruning, INT8 quantization, TFLite export; analysis tools in place |
 | **Adversarial Robustness** | Harden the model against evasion/poisoning attacks | ⏳ FGSM utilities scaffolded; integration scheduled for Phase 4 |
 
 **Phase 1 Milestones (Weeks 1–3)**
@@ -136,13 +70,13 @@ This repository hosts the capstone project exploring how **Federated Learning (F
 
 | Task | Status | Details |
 |------|--------|---------|
-| Knowledge Distillation | ❌ Not Started | Teacher-Student model architecture and training logic not implemented |
-| Structured Pruning | ❌ Not Started | Model reduction functionality via filter/neuron removal not implemented |
-| Quantization | ⏳ Basic Implementation | Basic TFLite conversion implemented, 8-bit quantization (INT8) not yet applied |
-| TFLite model export | ✅ Complete | Basic TFLite conversion implemented in `src/tinyml/export_tflite.py`, supports H5 → TFLite conversion |
-| Size vs. Accuracy trade-off analysis | ✅ Complete | Comprehensive analysis tools implemented: `scripts/analyze_compression.py` and `scripts/visualize_results.py` with CSV/JSON/Markdown reports and visualization plots |
+| Knowledge Distillation | ✅ Complete | Teacher–Student training in `src/modelcompression/distillation.py`; used in `compression.py` pipeline |
+| Structured Pruning | ✅ Complete | Structured pruning in `src/modelcompression/pruning.py`; fine-tuning and ratio sweep in `compression.py` |
+| Quantization | ✅ Complete | INT8 quantization in `src/modelcompression/quantization.py`; TFLite INT8 export in `compression.py` |
+| TFLite model export | ✅ Complete | `src/tinyml/export_tflite.py` (H5 → TFLite); `compression.py` exports float32 and INT8 variants |
+| Size vs. Accuracy trade-off analysis | ✅ Complete | `scripts/analyze_compression.py`, `scripts/visualize_results.py`; CSV/JSON/Markdown reports and plots |
 
-**Completion: ~50%**
+**Completion: ~85%**
 
 ---
 
@@ -158,7 +92,7 @@ This repository hosts the capstone project exploring how **Federated Learning (F
 | Re-compression of robust model | ❌ Not Started | Compression pipeline re-run on hardened model not completed |
 | Microcontroller deployment | ⏳ In Progress | Test model creation, C array conversion, and local validation complete. ESP32 project structure ready. Hardware deployment pending hardware availability |
 
-**Completion: ~5%**
+**Completion: ~15%**
 
 ---
 
@@ -185,16 +119,16 @@ This repository hosts the capstone project exploring how **Federated Learning (F
 |-------|------------|------------------|
 | Phase 1: Foundation and Setup | 100% | Enhanced dataset preprocessing (IP addresses, categorical features), FL simulation, basic TFLite export, and microcontroller toolchain validation completed |
 | Phase 2: Federated Learning Framework | 100% | Complete FL simulation system built with detailed metrics |
-| Phase 3: TinyML Model Miniaturization | ~50% | Basic TFLite export and comprehensive compression analysis tools completed |
+| Phase 3: TinyML Model Miniaturization | ~85% | Distillation, pruning, INT8 quantization, and full pipeline (`compression.py`) implemented; analysis tools in place |
 | Phase 4: Adversarial Hardening & Deployment | ~15% | FGSM utilities prepared. Microcontroller deployment pipeline validated (test model, C conversion, ESP32 project ready) |
 | Phase 5: Final Evaluation & Reporting | ~40% | Performance and efficiency metrics collection, analysis reports, and visualizations completed |
 
-**Overall Project Completion: ~58%**
+**Overall Project Completion: ~65%**
 
 **Next Priorities:**
-1. Complete Phase 3: Implement Knowledge Distillation, Structured Pruning, and 8-bit Quantization (INT8)
-2. Start Phase 4: Integrate FGSM into FL training loop and implement adversarial training
-3. Prepare Phase 5: Conduct comprehensive experiments and finalize reporting
+1. Phase 3: Document and refine compression pipeline (see **Compression** section; updates by Sky Bae).
+2. Phase 4: Integrate FGSM into FL training loop and implement adversarial training.
+3. Phase 5: Run comprehensive experiments and finalize reporting.
 
 ---
 
@@ -202,28 +136,39 @@ This repository hosts the capstone project exploring how **Federated Learning (F
 
 ```
 TinyML/
+├── compression.py          # TinyML compression pipeline (train → distill → prune → quantize → TFLite)
 ├── config/                 # YAML configs (e.g., FL hyperparameters)
+│   ├── federated.yaml        # Central FL/config reference
 │   ├── federated_local.yaml  # Local/macOS configuration
 │   └── federated_colab.yaml  # Google Colab configuration
+├── colab/                  # Google Colab support
+│   ├── requirements_colab.txt
+│   └── train_colab.ipynb
 ├── data/
 │   ├── raw/                # Raw datasets (Bot-IoT ZIP extracts go here)
 │   └── processed/          # Exported TFLite / intermediate artifacts
 │       └── microcontroller/ # Microcontroller deployment files
+├── docs/                   # Setup guides, task docs (MINIMAL_SETUP, COLAB_SETUP_GUIDE, etc.)
 ├── esp32_tflite_project/   # ESP32 PlatformIO project
 │   ├── platformio.ini      # PlatformIO configuration
 │   └── src/                # ESP32 source code
 ├── scripts/
-│   ├── download_dataset.sh # Kaggle-powered dataset bootstrap
-│   ├── run_fl_sim.sh       # Convenience wrapper to launch FL simulation
-│   ├── create_test_model.py # Create test model for microcontroller
+│   ├── download_dataset.sh   # Kaggle-powered dataset bootstrap
+│   ├── run_fl_sim.sh         # Convenience wrapper to launch FL simulation
+│   ├── train.py              # Unified training (FL simulation, auto-detects env)
+│   ├── analyze_compression.py # Compression stage analysis & reports
+│   ├── visualize_results.py  # Size vs accuracy, metrics plots
+│   ├── create_test_model.py  # Create test model for microcontroller
 │   ├── deploy_microcontroller.py # Convert TFLite to C array
 │   └── test_tflite_inference.py # Test inference locally
 ├── src/
 │   ├── adversarial/        # FGSM hooks and upcoming defenses
 │   ├── data/               # Dataset loaders, partitioning utilities
 │   ├── federated/          # Flower client/server logic
+│   ├── modelcompression/   # Distillation, pruning, quantization
 │   ├── models/             # Model definitions (MLP, CNN baseline, etc.)
 │   └── tinyml/             # TFLite export tooling
+├── tests/                  # Unit tests (e.g. test_pruning)
 └── README.md
 ```
 
@@ -481,137 +426,14 @@ Once a model is trained centrally (or after FL aggregation), it can be exported 
 python -m src.tinyml.export_tflite
 ```
 
-Output appears in `data/processed/tiny_model.tflite`. For comprehensive analysis of compression stages (size, accuracy, latency), see the **Compression Analysis** section below.
+Output appears in `data/processed/tiny_model.tflite`. For compression pipeline details, see the **Compression** section below.
 
 ---
 
-## Compression Analysis
+## Compression
 
-The compression analysis tools measure model size, accuracy, and inference speed at each compression stage, and visualize size vs accuracy trade-offs.
 
-### 1. Analyze Compression Stages
-
-Analyze multiple model files (baseline, quantized, pruned, etc.) and generate comprehensive reports:
-
-```bash
-# Analyze multiple models with stage names
-python scripts/analyze_compression.py \
-    --models "Baseline:src/models/global_model.h5" \
-             "Quantized:data/processed/model_quantized.tflite" \
-             "Pruned:data/processed/model_pruned.tflite" \
-    --baseline src/models/global_model.h5 \
-    --config config/federated_local.yaml \
-    --output-dir data/processed/analysis
-
-# Or use Makefile (set MODELS variable)
-make analyze-compression MODELS="Baseline:src/models/global_model.h5 Quantized:model.tflite"
-```
-
-**Output:**
-- `compression_analysis.csv` - Tabular results
-- `compression_analysis.json` - JSON format for programmatic access
-- `compression_analysis.md` - Markdown report with comparison tables
-
-**Metrics Collected:**
-- Model file size (MB, bytes)
-- Parameter count
-- Compression ratio vs baseline (with size reduction percentage)
-- Accuracy, Precision, Recall, F1-Score
-- Inference latency (avg/min/max in ms)
-- Samples per second
-
-**Report Features:**
-- Quantitative comparison with baseline (percentage changes for size, accuracy, F1-score, latency)
-- Visual indicators (↑ improvement, ↓ degradation, → no change)
-- Overall status summary for each compression stage
-- Detailed markdown report with comparison tables
-
-### 2. Visualize Results
-
-Generate visualizations from analysis results:
-
-```bash
-# Generate all visualizations
-python scripts/visualize_results.py \
-    --results data/processed/analysis/compression_analysis.csv \
-    --output-dir data/processed/analysis
-
-# Or generate specific plots
-python scripts/visualize_results.py \
-    --results data/processed/analysis/compression_analysis.csv \
-    --plot size-accuracy  # or: metrics, compression-ratio, all
-
-# Or use Makefile
-make visualize-results
-```
-
-**Generated Plots:**
-- `size_vs_accuracy.png` - Size vs accuracy trade-off with trend line
-- `compression_metrics.png` - Comprehensive metrics comparison (4 subplots)
-- `compression_ratio.png` - Compression ratio visualization
-
-### 3. Local Environment Usage
-
-**Basic workflow:**
-```bash
-# 1. Train federated model (if not already done)
-make run-fl
-
-# 2. Analyze baseline model
-python scripts/analyze_compression.py \
-    --models "Baseline:src/models/global_model.h5" \
-    --config config/federated_local.yaml
-
-# 3. (Optional) Export to TFLite and analyze
-python -m src.tinyml.export_tflite
-python scripts/analyze_compression.py \
-    --models "Baseline:src/models/global_model.h5" \
-             "TFLite:data/processed/tiny_model.tflite" \
-    --baseline src/models/global_model.h5
-
-# 4. Visualize results
-python scripts/visualize_results.py \
-    --results data/processed/analysis/compression_analysis.csv
-```
-
-### 4. Google Colab Usage
-
-**Option A: Use the notebook (Recommended)**
-
-The `colab/train_colab.ipynb` notebook now includes compression analysis cells (Section 8️⃣). Simply run all cells sequentially.
-
-**Option B: Manual execution in Colab**
-
-```python
-# In Colab notebook cells:
-
-# 1. Export to TFLite (optional)
-import tensorflow as tf
-model = tf.keras.models.load_model("src/models/global_model.h5")
-converter = tf.lite.TFLiteConverter.from_keras_model(model)
-tflite_model = converter.convert()
-with open("src/models/global_model.tflite", "wb") as f:
-    f.write(tflite_model)
-
-# 2. Run analysis
-!python scripts/analyze_compression.py \
-    --models "Baseline:src/models/global_model.h5" \
-             "TFLite:src/models/global_model.tflite" \
-    --baseline src/models/global_model.h5 \
-    --config config/federated_colab.yaml \
-    --output-dir data/processed/analysis
-
-# 3. Visualize
-!python scripts/visualize_results.py \
-    --results data/processed/analysis/compression_analysis.csv \
-    --output-dir data/processed/analysis
-
-# 4. Display plots inline
-from IPython.display import Image, display
-display(Image("data/processed/analysis/size_vs_accuracy.png"))
-```
-
-**For detailed Colab instructions, see:** `docs/COMPRESSION_ANALYSIS_GUIDE.md`
+*Updated soon by Sky Bae*
 
 ---
 
