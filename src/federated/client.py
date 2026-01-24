@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Dict, Any, Tuple, Optional
+from typing import Tuple
 import os
 import sys
 import warnings
@@ -9,10 +9,8 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 warnings.filterwarnings('ignore', category=UserWarning)
 warnings.filterwarnings('ignore', message='.*protobuf.*')
 
-import flwr as fl
 import numpy as np
 import yaml
-from flwr.common import parameters_to_ndarrays
 
 from src.data.loader import load_dataset, partition_non_iid
 from src.models import nets
@@ -59,134 +57,29 @@ def load_config(config_path: str = None):
 CFG = None
 
 
-class SaveModelStrategy(fl.server.strategy.FedAvg):
-    """FedAvg strategy that stores latest parameters for saving."""
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.latest_parameters: Optional[fl.common.Parameters] = None
-
-    def aggregate_fit(self, server_round, results, failures):
-        aggregated_parameters, aggregated_metrics = super().aggregate_fit(
-            server_round, results, failures
-        )
-        if aggregated_parameters is not None:
-            self.latest_parameters = aggregated_parameters
-        return aggregated_parameters, aggregated_metrics
 
 
 def _build_model(model_name: str, input_shape: Tuple[int, ...], num_classes: int):
-    """Build model based on model name. Falls back to default functions if get_model is not available in nets module."""
+    """Build model based on model name. Supports both standard (nets.py) and lightweight architectures."""
+    name = (model_name or "mlp").lower()
+
+    # Check if it's a lightweight architecture
+    if name in ["lightweight", "bottleneck", "bottleneck_mlp", "tiny", "tiny_mlp"]:
+        from src.models.lightweight import get_lightweight_model
+        return get_lightweight_model(name, input_shape, num_classes)
+
+    # Standard architectures (nets.py)
     if hasattr(nets, "get_model"):
         return nets.get_model(model_name, input_shape, num_classes)
 
-    name = (model_name or "mlp").lower()
     if name in ["cnn", "small_cnn"] and hasattr(nets, "make_small_cnn"):
         return nets.make_small_cnn(input_shape, num_classes)
     if hasattr(nets, "make_mlp"):
         return nets.make_mlp(input_shape, num_classes)
 
     raise AttributeError(
-        "Model creation function not found. Please check if 'get_model' or 'make_mlp' is defined."
+        f"Model '{model_name}' not found. Options: mlp, cnn, lightweight, bottleneck, tiny"
     )
-
-
-# ------------------------------------------------
-# Flower NumPyClient
-# ------------------------------------------------
-
-class KerasClient(fl.client.NumPyClient):
-    def __init__(self, model, x_train, y_train, x_test, y_test, cid: int, num_classes: int):
-        self.model = model
-        self.x_train = x_train
-        self.y_train = y_train
-        self.x_test = x_test
-        self.y_test = y_test
-        self.cid = cid
-        self.num_classes = num_classes
-
-    def get_parameters(self, config: Dict[str, Any]):
-        return self.model.get_weights()
-
-    def fit(self, parameters, config: Dict[str, Any]):
-        self.model.set_weights(parameters)
-
-        epochs = int(config.get("local_epochs", 1))
-        batch_size = int(config.get("batch_size", 32))
-
-        self.model.fit(
-            self.x_train,
-            self.y_train,
-            epochs=epochs,
-            batch_size=batch_size,
-            verbose=0,
-        )
-
-        return self.model.get_weights(), len(self.x_train), {}
-
-    def evaluate(self, parameters, config: Dict[str, Any]):
-        self.model.set_weights(parameters)
-        loss, acc = self.model.evaluate(self.x_test, self.y_test, verbose=0)
-        y_true = self.y_test.astype(int)
-        y_prob = self.model.predict(self.x_test, verbose=0)
-
-        if y_prob.ndim == 2 and y_prob.shape[1] == 1:
-            y_prob = y_prob.ravel()
-
-        if self.num_classes <= 2:
-            if y_prob.ndim > 1:
-                y_prob = y_prob[:, 0]
-            y_pred = (y_prob >= 0.5).astype(int)
-        else:
-            if y_prob.ndim == 1:
-                raise ValueError("Expected 2D probability array for multi-class output.")
-            y_pred = np.argmax(y_prob, axis=1)
-
-        total = len(y_true)
-        attack_actual = int(np.sum(y_true == 1))
-        normal_actual = int(np.sum(y_true == 0))
-        attack_predicted = int(np.sum(y_pred == 1))
-        normal_predicted = int(np.sum(y_pred == 0))
-
-        true_positives = int(np.sum((y_true == 1) & (y_pred == 1)))
-        true_negatives = int(np.sum((y_true == 0) & (y_pred == 0)))
-        false_positives = int(np.sum((y_true == 0) & (y_pred == 1)))
-        false_negatives = int(np.sum((y_true == 1) & (y_pred == 0)))
-
-        precision = (
-            true_positives / (true_positives + false_positives)
-            if (true_positives + false_positives) > 0
-            else 0.0
-        )
-        recall = (
-            true_positives / (true_positives + false_negatives)
-            if (true_positives + false_negatives) > 0
-            else 0.0
-        )
-        f1 = (
-            2 * precision * recall / (precision + recall)
-            if (precision + recall) > 0
-            else 0.0
-        )
-
-        metrics = {
-            "accuracy": float(acc),
-            "loss": float(loss),
-            "total_samples": total,
-            "actual_attack": attack_actual,
-            "actual_normal": normal_actual,
-            "predicted_attack": attack_predicted,
-            "predicted_normal": normal_predicted,
-            "true_positives": true_positives,
-            "true_negatives": true_negatives,
-            "false_positives": false_positives,
-            "false_negatives": false_negatives,
-            "precision": float(precision),
-            "recall": float(recall),
-            "f1_score": float(f1),
-        }
-
-        return float(loss), len(self.x_test), metrics
 
 
 # ------------------------------------------------
@@ -242,7 +135,6 @@ def simulate_clients(config: dict = None):
 
     model_name = model_cfg.get("name", "mlp")
 
-    # State to use in client_fn
     state = {
         "num_clients": num_clients,
         "input_shape": input_shape,
@@ -252,174 +144,143 @@ def simulate_clients(config: dict = None):
         "test_parts": test_parts,
     }
 
-    def client_fn(context: fl.common.Context) -> fl.client.Client:
-        # Safely map cid from Flower/Ray to index
-        raw_cid = None
-
-        # VCE / New API
-        if hasattr(context, "node_config") and isinstance(context.node_config, dict):
-            raw_cid = context.node_config.get("cid", None)
-
-        # Legacy
-        if raw_cid is None and hasattr(context, "cid"):
-            raw_cid = context.cid
-
-        try:
-            cid_int = int(raw_cid)
-        except (TypeError, ValueError):
-            cid_int = hash(str(raw_cid))
-
-        idx = cid_int % state["num_clients"]
-
-        part_tr = state["train_parts"][idx]
-        part_te = state["test_parts"][idx]
-
-        model = _build_model(
-            state["model_name"],
-            state["input_shape"],
-            state["num_classes"],
-        )
-
-        client = KerasClient(
-            model,
-            part_tr["x"],
-            part_tr["y"],
-            part_te["x"],
-            part_te["y"],
-            cid=idx,
-            num_classes=state["num_classes"],
-        )
-
-        return client.to_client()
-
-    return state, client_fn
+    return state
 
 
 # ------------------------------------------------
 # Execution
 # ------------------------------------------------
 
-def main(save_path: str = "src/models/global_model.h5", config_path: str = None):
-    """Main execution function."""
-    global CFG
-    # Load configuration file
-    CFG = load_config(config_path)
-    
-    # Ensure model directory exists
-    Path(save_path).parent.mkdir(parents=True, exist_ok=True)
-    
-    (state, client_fn) = simulate_clients(CFG)
-    fed_cfg = CFG.get("federated", {})
+def _fedavg_simulation(state: dict, fed_cfg: dict):
+    """
+    Manual FedAvg simulation loop (no Ray dependency).
 
+    Implements the same logic as fl.simulation.start_simulation but runs
+    entirely in-process, compatible with any Python version.
+    """
+    num_clients = state["num_clients"]
     num_rounds = int(fed_cfg.get("num_rounds", 3))
     batch_size = int(fed_cfg.get("batch_size", 32))
     local_epochs = int(fed_cfg.get("local_epochs", 1))
 
-    def evaluate_metrics_aggregation_fn(results):
-        if not results:
-            return {}
-
-        metrics_list = [m[1] for m in results if m[1] is not None]
-        if not metrics_list:
-            return {}
-
-        mean_accuracy = float(np.mean([m.get("accuracy", 0.0) for m in metrics_list]))
-        mean_loss = float(np.mean([m.get("loss", 0.0) for m in metrics_list]))
-
-        aggregated = {"accuracy": mean_accuracy, "loss": mean_loss}
-
-        first = metrics_list[0]
-        for key in [
-            "total_samples",
-            "actual_attack",
-            "actual_normal",
-            "predicted_attack",
-            "predicted_normal",
-            "true_positives",
-            "true_negatives",
-            "false_positives",
-            "false_negatives",
-            "precision",
-            "recall",
-            "f1_score",
-        ]:
-            if key in first:
-                aggregated[key] = first[key]
-
-        print("\n📊 Evaluation Summary")
-        print("=" * 60)
-        print(f"Accuracy: {aggregated['accuracy']:.4f} ({aggregated['accuracy']*100:.2f}%)")
-        print(f"Loss: {aggregated['loss']:.4f}\n")
-
-        if "actual_attack" in aggregated and "actual_normal" in aggregated and "total_samples" in aggregated:
-            print("📈 Ground Truth:")
-            print(f"  - Attack samples: {aggregated['actual_attack']}")
-            print(f"  - Normal samples: {aggregated['actual_normal']}")
-            print(f"  - Total samples: {aggregated['total_samples']}\n")
-
-        if "predicted_attack" in aggregated and "predicted_normal" in aggregated:
-            print("🔮 Predictions:")
-            print(f"  - Predicted Attack: {aggregated['predicted_attack']}")
-            print(f"  - Predicted Normal: {aggregated['predicted_normal']}\n")
-
-        if {"true_positives", "true_negatives", "false_positives", "false_negatives"} <= aggregated.keys():
-            print("✅ Confusion Matrix:")
-            print(f"  - True Positives (TP): {aggregated['true_positives']}")
-            print(f"  - True Negatives (TN): {aggregated['true_negatives']}")
-            print(f"  - False Positives (FP): {aggregated['false_positives']}")
-            print(f"  - False Negatives (FN): {aggregated['false_negatives']}\n")
-
-        metric_present = all(k in aggregated for k in ["precision", "recall", "f1_score"])
-        if metric_present:
-            precision_pct = aggregated["precision"] * 100.0
-            recall_pct = aggregated["recall"] * 100.0
-            f1_pct = aggregated["f1_score"] * 100.0
-            print("📏 Metrics:")
-            print(f"  - Precision: {aggregated['precision']:.4f} ({precision_pct:.2f}%)")
-            print(f"  - Recall: {aggregated['recall']:.4f} ({recall_pct:.2f}%)")
-            print(f"  - F1-Score: {aggregated['f1_score']:.4f} ({f1_pct:.2f}%)")
-
-        print("=" * 60 + "\n")
-
-        return aggregated
-
-    strategy = SaveModelStrategy(
-        fraction_fit=fed_cfg.get("fraction_fit", 1.0),
-        fraction_evaluate=fed_cfg.get("fraction_evaluate", 1.0),
-        min_fit_clients=fed_cfg.get("min_fit_clients", state["num_clients"]),
-        min_evaluate_clients=fed_cfg.get("min_evaluate_clients", state["num_clients"]),
-        min_available_clients=fed_cfg.get("min_available_clients", state["num_clients"]),
-        on_fit_config_fn=lambda rnd: {
-            "batch_size": batch_size,
-            "local_epochs": local_epochs,
-        },
-        evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation_fn,
-    )
-
-    history = fl.simulation.start_simulation(
-        client_fn=client_fn,
-        num_clients=state["num_clients"],
-        config=fl.server.ServerConfig(num_rounds=num_rounds),
-        strategy=strategy,
-    )
-
-    # Save global model
-    # Use weights from last round
-    # Assume start_simulation has filled strategy.parameters with final values
+    # Build initial global model
     global_model = _build_model(
         state["model_name"],
         state["input_shape"],
         state["num_classes"],
     )
-    if getattr(strategy, "latest_parameters", None) is not None:
-        weights = parameters_to_ndarrays(strategy.latest_parameters)
-        global_model.set_weights(weights)
-        Path(save_path).parent.mkdir(parents=True, exist_ok=True)
-        global_model.save(save_path)
-        print(f"✅ Saved global model to {save_path}")
-    else:
-        print("⚠️ Could not find saveable parameters in Federated strategy.")
-        raise RuntimeError("Failed to save model: No parameters available in strategy.")
+    global_weights = global_model.get_weights()
+
+    print(f"\n  FedAvg Simulation: {num_clients} clients, {num_rounds} rounds")
+    print(f"  Model: {state['model_name']}, Params: {global_model.count_params():,}\n")
+
+    for round_num in range(1, num_rounds + 1):
+        print(f"{'─'*60}")
+        print(f"  Round {round_num}/{num_rounds}")
+        print(f"{'─'*60}")
+
+        # Each client trains locally
+        client_weights = []
+        client_sizes = []
+
+        for cid in range(num_clients):
+            # Build fresh model and set global weights
+            client_model = _build_model(
+                state["model_name"],
+                state["input_shape"],
+                state["num_classes"],
+            )
+            client_model.set_weights(global_weights)
+
+            # Get client data
+            x_tr = state["train_parts"][cid]["x"]
+            y_tr = state["train_parts"][cid]["y"]
+
+            # Local training
+            client_model.fit(
+                x_tr, y_tr,
+                epochs=local_epochs,
+                batch_size=batch_size,
+                verbose=0,
+            )
+
+            client_weights.append(client_model.get_weights())
+            client_sizes.append(len(x_tr))
+
+        # FedAvg: weighted average of client weights
+        total_samples = sum(client_sizes)
+        avg_weights = []
+        for layer_idx in range(len(global_weights)):
+            layer_avg = np.zeros_like(global_weights[layer_idx])
+            for cid in range(num_clients):
+                weight = client_sizes[cid] / total_samples
+                layer_avg += weight * client_weights[cid][layer_idx]
+            avg_weights.append(layer_avg)
+
+        global_weights = avg_weights
+        global_model.set_weights(global_weights)
+
+        # Evaluate on each client's test data
+        all_metrics = []
+        for cid in range(num_clients):
+            x_te = state["test_parts"][cid]["x"]
+            y_te = state["test_parts"][cid]["y"]
+            loss, acc = global_model.evaluate(x_te, y_te, verbose=0)
+            all_metrics.append({"accuracy": acc, "loss": loss})
+
+        mean_acc = np.mean([m["accuracy"] for m in all_metrics])
+        mean_loss = np.mean([m["loss"] for m in all_metrics])
+        print(f"  Accuracy: {mean_acc:.4f} ({mean_acc*100:.2f}%), Loss: {mean_loss:.4f}")
+
+    # Final evaluation with detailed metrics
+    print(f"\n{'─'*60}")
+    print(f"  Final Evaluation")
+    print(f"{'─'*60}")
+
+    # Combine all test data for final eval
+    all_x_test = np.concatenate([state["test_parts"][c]["x"] for c in range(num_clients)])
+    all_y_test = np.concatenate([state["test_parts"][c]["y"] for c in range(num_clients)])
+
+    final_loss, final_acc = global_model.evaluate(all_x_test, all_y_test, verbose=0)
+    y_prob = global_model.predict(all_x_test, verbose=0)
+    y_pred = np.argmax(y_prob, axis=1) if y_prob.shape[1] > 1 else (y_prob.ravel() >= 0.5).astype(int)
+    y_true = all_y_test.astype(int)
+
+    tp = int(np.sum((y_true == 1) & (y_pred == 1)))
+    tn = int(np.sum((y_true == 0) & (y_pred == 0)))
+    fp = int(np.sum((y_true == 0) & (y_pred == 1)))
+    fn = int(np.sum((y_true == 1) & (y_pred == 0)))
+    precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
+    recall = tp / (tp + fn) if (tp + fn) > 0 else 0.0
+    f1 = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0.0
+
+    print(f"  Accuracy:  {final_acc:.4f} ({final_acc*100:.2f}%)")
+    print(f"  Loss:      {final_loss:.4f}")
+    print(f"  Precision: {precision:.4f}")
+    print(f"  Recall:    {recall:.4f}")
+    print(f"  F1-Score:  {f1:.4f}")
+    print(f"  TP={tp}, TN={tn}, FP={fp}, FN={fn}")
+
+    return global_model
+
+
+def main(save_path: str = "src/models/global_model.h5", config_path: str = None):
+    """Main execution function."""
+    global CFG
+    CFG = load_config(config_path)
+
+    Path(save_path).parent.mkdir(parents=True, exist_ok=True)
+
+    state = simulate_clients(CFG)
+    fed_cfg = CFG.get("federated", {})
+
+    # Use manual FedAvg simulation (no Ray dependency)
+    global_model = _fedavg_simulation(state, fed_cfg)
+
+    # Save model
+    Path(save_path).parent.mkdir(parents=True, exist_ok=True)
+    global_model.save(save_path)
+    print(f"\n✅ Saved global model to {save_path}")
 
 
 if __name__ == "__main__":

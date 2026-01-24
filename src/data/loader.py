@@ -291,6 +291,124 @@ def load_bot_iot(
 
 
 # -------------------------
+# CICIDS2017 (MachineLearningCVE)
+# -------------------------
+
+def load_cicids2017(
+    data_path: str = "data/raw/MachineLearningCVE",
+    max_samples: int = None,
+    test_size: float = 0.2,
+    random_state: int = 42,
+    binary: bool = True,
+    **_,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Load CICIDS2017 (MachineLearningCVE) CSV files.
+
+    The dataset contains network traffic with labels:
+    BENIGN, DDoS, PortScan, Bot, DoS Hulk, DoS GoldenEye, etc.
+
+    Args:
+        data_path: Path to directory containing CSV files
+        max_samples: Maximum samples to use (None = all)
+        test_size: Fraction for test split
+        random_state: Random seed
+        binary: If True, map to 0=BENIGN, 1=ATTACK. If False, keep multi-class.
+
+    Returns:
+        (x_train, y_train, x_test, y_test)
+    """
+    root = _ensure_dir(data_path)
+    csv_files = sorted([p for p in root.glob("*.csv")])
+    if not csv_files:
+        raise FileNotFoundError(f"CICIDS2017 CSV files not found: {root.resolve()}")
+
+    print(f"[load_cicids2017] Loading {len(csv_files)} CSV files from {root}")
+
+    with warnings.catch_warnings():
+        warnings.filterwarnings('ignore', category=pd.errors.DtypeWarning)
+        dfs = [pd.read_csv(p, low_memory=True, encoding='utf-8', encoding_errors='replace') for p in csv_files]
+    df = pd.concat(dfs, axis=0, ignore_index=True)
+    print(f"[load_cicids2017] Total rows: {len(df):,}")
+
+    # Strip whitespace from column names (CICIDS has leading spaces)
+    df.columns = df.columns.str.strip()
+
+    # Identify label column
+    label_col = None
+    for candidate in ['Label', 'label', 'class', 'attack']:
+        if candidate in df.columns:
+            label_col = candidate
+            break
+    if label_col is None:
+        raise KeyError(f"Label column not found in columns: {list(df.columns[:5])}...")
+
+    # Extract labels
+    labels_raw = df[label_col].astype(str).str.strip()
+    feature_df = df.drop(columns=[label_col])
+
+    # Map labels
+    if binary:
+        # BENIGN=0, everything else=1
+        y = (labels_raw != 'BENIGN').astype(int).values
+        print(f"[load_cicids2017] Binary mode: BENIGN=0, ATTACK=1")
+    else:
+        from sklearn.preprocessing import LabelEncoder
+        le = LabelEncoder()
+        y = le.fit_transform(labels_raw)
+        print(f"[load_cicids2017] Multi-class mode: {len(le.classes_)} classes")
+        for i, cls in enumerate(le.classes_):
+            print(f"    {i}: {cls}")
+
+    # Remove non-numeric columns (like timestamps, IPs if present as strings)
+    # Keep only numeric columns
+    numeric_df = feature_df.apply(pd.to_numeric, errors="coerce")
+
+    # Remove columns that are all NaN
+    all_nan_cols = numeric_df.columns[numeric_df.isna().all()]
+    if len(all_nan_cols) > 0:
+        print(f"[load_cicids2017] Removed {len(all_nan_cols)} all-NaN columns")
+        numeric_df = numeric_df.drop(columns=all_nan_cols)
+
+    # Replace inf with NaN, then fill NaN with median
+    numeric_df = numeric_df.replace([np.inf, -np.inf], np.nan)
+    if numeric_df.isna().any().any():
+        medians = numeric_df.median(skipna=True).fillna(0.0)
+        numeric_df = numeric_df.fillna(medians)
+
+    X = numeric_df.values.astype("float32")
+
+    # Subsample if needed
+    if max_samples is not None and len(X) > max_samples:
+        unique, counts = np.unique(y, return_counts=True)
+        min_class_count = counts.min()
+        use_stratify = min_class_count >= 2
+
+        X, _, y, _ = train_test_split(
+            X, y,
+            train_size=max_samples,
+            stratify=y if use_stratify else None,
+            random_state=random_state,
+        )
+
+    # Train/test split
+    unique, counts = np.unique(y, return_counts=True)
+    min_class_count = counts.min()
+    use_stratify = min_class_count >= 2
+
+    x_train, x_test, y_train, y_test = train_test_split(
+        X, y,
+        test_size=test_size,
+        stratify=y if use_stratify else None,
+        random_state=random_state,
+    )
+
+    print(f"[load_cicids2017] Features: {x_train.shape[1]}, Train: {len(x_train):,}, Test: {len(x_test):,}")
+    print(f"[load_cicids2017] Class distribution (train): {np.bincount(y_train)}")
+
+    return x_train, y_train, x_test, y_test
+
+
+# -------------------------
 # Public API
 # -------------------------
 
@@ -305,6 +423,8 @@ def load_dataset(name: str, **kwargs) -> Tuple[np.ndarray, np.ndarray, np.ndarra
         return load_mnist(**kwargs)
     elif name.lower() in ["bot_iot", "bot-iot", "botiot"]:
         return load_bot_iot(**kwargs)
+    elif name.lower() in ["cicids", "cicids2017", "machinelearningcve", "cve"]:
+        return load_cicids2017(**kwargs)
     else:
         raise ValueError(f"Unsupported dataset: {name}")
 

@@ -27,6 +27,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from src.data.loader import load_dataset
 from src.compression.distillation import train_with_distillation, create_student_model
 from src.compression.pruning import apply_structured_pruning, fine_tune_pruned_model
+from tensorflow.keras import layers
 
 
 def load_config(config_path: str = "config/federated.yaml") -> dict:
@@ -89,6 +90,76 @@ def load_data(config: dict):
     print(f"✅ Class distribution: {np.bincount(y_train)}\n")
 
     return x_train, y_train, x_test, y_test, num_classes
+
+
+def visualize_model_comparison(teacher_model: keras.Model, student_model: keras.Model):
+    """
+    Print a side-by-side comparison of teacher and student model architectures.
+    Shows layer types, output shapes, and parameter counts.
+    """
+    print("\n" + "=" * 70)
+    print("MODEL ARCHITECTURE COMPARISON: Teacher vs Student")
+    print("=" * 70)
+
+    def get_layer_info(model):
+        """Extract layer name, type, output shape, and params for each layer."""
+        info = []
+        for layer in model.layers:
+            if isinstance(layer, layers.InputLayer):
+                continue
+            layer_type = layer.__class__.__name__
+            output_shape = layer.output_shape
+            params = layer.count_params()
+            info.append({
+                'name': layer.name,
+                'type': layer_type,
+                'output_shape': str(output_shape),
+                'params': params
+            })
+        return info
+
+    teacher_info = get_layer_info(teacher_model)
+    student_info = get_layer_info(student_model)
+
+    # Print Teacher
+    print(f"\n{'─' * 70}")
+    print(f"  TEACHER MODEL")
+    print(f"{'─' * 70}")
+    print(f"  {'Layer':<25} {'Type':<10} {'Output Shape':<20} {'Params':>10}")
+    print(f"  {'─'*25} {'─'*10} {'─'*20} {'─'*10}")
+    for info in teacher_info:
+        print(f"  {info['name']:<25} {info['type']:<10} {info['output_shape']:<20} {info['params']:>10,}")
+    print(f"  {'─'*25} {'─'*10} {'─'*20} {'─'*10}")
+    print(f"  {'TOTAL':<25} {'':<10} {'':<20} {teacher_model.count_params():>10,}")
+
+    # Print Student
+    print(f"\n{'─' * 70}")
+    print(f"  STUDENT MODEL")
+    print(f"{'─' * 70}")
+    print(f"  {'Layer':<25} {'Type':<10} {'Output Shape':<20} {'Params':>10}")
+    print(f"  {'─'*25} {'─'*10} {'─'*20} {'─'*10}")
+    for info in student_info:
+        print(f"  {info['name']:<25} {info['type']:<10} {info['output_shape']:<20} {info['params']:>10,}")
+    print(f"  {'─'*25} {'─'*10} {'─'*20} {'─'*10}")
+    print(f"  {'TOTAL':<25} {'':<10} {'':<20} {student_model.count_params():>10,}")
+
+    # Summary comparison
+    t_params = teacher_model.count_params()
+    s_params = student_model.count_params()
+    t_layers = len(teacher_info)
+    s_layers = len(student_info)
+
+    print(f"\n{'─' * 70}")
+    print(f"  SUMMARY")
+    print(f"{'─' * 70}")
+    print(f"  {'Metric':<30} {'Teacher':>15} {'Student':>15}")
+    print(f"  {'─'*30} {'─'*15} {'─'*15}")
+    print(f"  {'Total Layers':<30} {t_layers:>15} {s_layers:>15}")
+    print(f"  {'Total Parameters':<30} {t_params:>15,} {s_params:>15,}")
+    print(f"  {'Size (KB, float32)':<30} {t_params * 4 / 1024:>15.2f} {s_params * 4 / 1024:>15.2f}")
+    print(f"  {'Compression Ratio':<30} {'1.00x':>15} {t_params / s_params:>14.2f}x")
+    print(f"  {'Parameter Reduction':<30} {'—':>15} {(1 - s_params / t_params) * 100:>14.1f}%")
+    print("=" * 70 + "\n")
 
 
 def compress_model(
@@ -156,8 +227,8 @@ def compress_model(
         num_classes=num_classes
     )
 
-    print(f"Student model: {student_model.count_params():,} parameters "
-          f"({distillation_config['compression_ratio']*100:.0f}% of teacher)")
+    # Visualize architecture comparison
+    visualize_model_comparison(teacher_model, student_model)
 
     # Split data for distillation
     val_split = int(0.8 * len(x_train))
@@ -179,6 +250,13 @@ def compress_model(
         epochs=distillation_config['epochs'],
         batch_size=distillation_config['batch_size'],
         verbose=1
+    )
+
+    # Compile student before evaluation/pruning (distiller trains without compiling standalone)
+    student_model.compile(
+        optimizer="adam",
+        loss="sparse_categorical_crossentropy",
+        metrics=["accuracy"]
     )
 
     # Evaluate student

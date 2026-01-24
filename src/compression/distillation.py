@@ -100,138 +100,42 @@ def distillation_loss_fn(
     """
     Calculate knowledge distillation loss.
 
+    Both teacher and student output num_classes dimensions:
+    - Teacher: softmax probabilities, shape (batch, num_classes)
+    - Student: raw logits, shape (batch, num_classes)
+
+    Loss = alpha * KL(soft_teacher, soft_student) * T²
+         + (1 - alpha) * sparse_categorical_crossentropy(y_true, student_logits)
+
     Args:
-        y_true: True labels (one-hot encoded or sparse)
-        student_predictions: Student model predictions (logits)
-        teacher_predictions: Teacher model predictions (logits)
+        y_true: True labels (sparse integer labels)
+        student_predictions: Student model logits (batch, num_classes)
+        teacher_predictions: Teacher model softmax probabilities (batch, num_classes)
         temperature: Temperature for softening distributions
         alpha: Weight for distillation loss
 
     Returns:
-        Combined distillation loss
-
-    Explanation:
-        Distillation loss uses temperature-scaled softmax to create "soft targets"
-        that contain more information than hard labels (0 or 1).
-
-        Example (classifying dog/cat/bird):
-            Hard label: [0, 1, 0] (one-hot) - says "it's a cat, nothing else"
-
-            Teacher at T=1: [0.05, 0.90, 0.05] - still very confident
-            Teacher at T=3: [0.15, 0.65, 0.20] - reveals dog-cat similarity!
-
-        Why high temperature (3-10) works better:
-            1. Reveals inter-class relationships (dog-cat more similar than cat-bird)
-            2. Transfers teacher's learned features and uncertainties
-            3. Provides stronger gradients (scaled by T²) for better learning
-            4. Empirically proven to give +1-3% accuracy vs training from scratch
-
-        The T² scaling is critical:
-            - Dividing logits by T makes probabilities softer
-            - But this also makes gradients T² times smaller
-            - Multiplying loss by T² compensates for this
-            - Result: same gradient magnitude regardless of T
+        Combined distillation loss (batch,)
     """
-    # Detect binary vs multi-class classification based on output shape
-    # Use tf.cond to handle conditional logic in graph mode (required for TensorFlow)
-    def binary_case():
-        """Handle binary classification case."""
-        # Teacher: convert sigmoid probabilities to 2-class logits
-        teacher_shape_dyn = tf.shape(teacher_predictions)
-        teacher_is_binary = tf.equal(teacher_shape_dyn[-1], 1)
-        
-        def teacher_binary():
-            # Teacher output is probabilities (from sigmoid activation), convert to logits
-            teacher_probs = tf.clip_by_value(teacher_predictions, 1e-8, 1.0 - 1e-8)
-            return tf.concat([
-                tf.math.log(1 - teacher_probs),  # log(P(class=0))
-                tf.math.log(teacher_probs)       # log(P(class=1))
-            ], axis=-1)
-        
-        def teacher_multi():
-            # Teacher already has multi-class logits (from softmax model)
-            return teacher_predictions
-        
-        teacher_logits_2d = tf.cond(teacher_is_binary, teacher_binary, teacher_multi)
-        
-        # Student: convert probabilities to 2-class logits
-        # Student output is probabilities (from sigmoid activation)
-        student_probs = tf.clip_by_value(student_predictions, 1e-8, 1.0 - 1e-8)
-        student_logits_2d = tf.concat([
-            tf.math.log(1 - student_probs),  # log(P(class=0))
-            tf.math.log(student_probs)       # log(P(class=1))
-        ], axis=-1)
-        
-        # Apply temperature scaling and softmax
-        teacher_soft = tf.nn.softmax(teacher_logits_2d / temperature)
-        student_soft = tf.nn.softmax(student_logits_2d / temperature)
-        
-        # Distillation loss: KL divergence between soft predictions
-        distillation_loss = tf.keras.losses.categorical_crossentropy(
-            teacher_soft, student_soft
-        ) * (temperature ** 2)
-        
-        # Student loss: binary cross-entropy
-        # Ensure y_true is float32 and has correct shape for binary_crossentropy
-        # y_true should be (batch,) shape, student_predictions is (batch, 1)
-        y_true_float = tf.cast(y_true, tf.float32)
-        
-        # Flatten y_true to 1D (batch,) - use -1 to auto-detect batch size
-        # This is safer than trying to extract batch size from shape which might be [0]
-        y_true_flat = tf.reshape(y_true_float, [-1])
-        
-        # Reshape student_predictions to (batch,) - use -1 to auto-detect batch size
-        # This handles both (batch, 1) and (batch,) cases and avoids shape extraction issues
-        student_pred_flat = tf.reshape(student_predictions, [-1])
-        
-        # Calculate student_loss directly
-        # binary_crossentropy returns (batch,) shape, same as distillation_loss
-        student_loss = tf.keras.losses.binary_crossentropy(
-            y_true_flat, student_pred_flat, from_logits=False
-        )
-        
-        # Both distillation_loss and student_loss should have the same shape (batch,)
-        # They are computed from the same batch, so shapes should match
-        # No need to extract batch sizes - TensorFlow will handle shape compatibility
-        return distillation_loss, student_loss
-    
-    def multiclass_case():
-        """Handle multi-class classification case."""
-        # Soften teacher predictions with temperature
-        teacher_soft = tf.nn.softmax(teacher_predictions / temperature)
+    # Convert teacher probabilities to logits for temperature scaling
+    teacher_probs_clipped = tf.clip_by_value(teacher_predictions, 1e-8, 1.0)
+    teacher_logits = tf.math.log(teacher_probs_clipped)
 
-        # Soften student predictions with temperature
-        student_soft = tf.nn.softmax(student_predictions / temperature)
+    # Apply temperature scaling and softmax to both
+    teacher_soft = tf.nn.softmax(teacher_logits / temperature) # for loss function
+    student_soft = tf.nn.softmax(student_predictions / temperature) 
 
-        # Distillation loss: KL divergence between soft predictions
-        # Scale by temperature^2 to maintain gradient magnitude
-        distillation_loss = tf.keras.losses.categorical_crossentropy(
-            teacher_soft, student_soft
-        ) * (temperature ** 2)
+    # Distillation loss: KL divergence (via cross-entropy) scaled by T²
+    distillation_loss = tf.keras.losses.categorical_crossentropy(
+        teacher_soft, student_soft
+    ) * (temperature ** 2)
 
-        # Student loss: standard cross-entropy with true labels
-        student_loss = tf.keras.losses.sparse_categorical_crossentropy(
-            y_true, student_predictions, from_logits=True
-        )
-        
-        return distillation_loss, student_loss
-    
-    # Use tf.cond to select the appropriate case
-    # Check if binary using dynamic shape
-    student_shape_dyn = tf.shape(student_predictions)
-    is_binary_dyn = tf.equal(student_shape_dyn[-1], 1)
-    
-    distillation_loss, student_loss = tf.cond(
-        is_binary_dyn,
-        binary_case,
-        multiclass_case
+    # Student loss: standard cross-entropy with true labels
+    student_loss = tf.keras.losses.sparse_categorical_crossentropy(
+        y_true, student_predictions, from_logits=True
     )
 
-    # Ensure both losses have the same batch size (safety check)
-    # Combine losses directly
-    # TensorFlow will handle shape broadcasting automatically
-    # If shapes don't match, it will raise an error, but that's better than
-    # trying to extract batch sizes which can fail with unknown shapes
+    # Combine: alpha * distillation + (1-alpha) * student
     total_loss = alpha * distillation_loss + (1 - alpha) * student_loss
 
     return total_loss
@@ -391,91 +295,50 @@ def create_student_model(
     num_classes: int = 2
 ) -> keras.Model:
     """
-    Create a student model with reduced capacity compared to teacher.
+    Create a student model as a smaller version of the teacher's MLP architecture.
+
+    The student mirrors the teacher's structure (same number of hidden layers)
+    but with fewer neurons per layer, scaled by compression_ratio.
+
+    Teacher (256 → 128 → 64 → 2):
+    Student (128 →  64 → 32 → 2) at compression_ratio=0.5
 
     Args:
-        teacher_model: Teacher model to mimic
-        compression_ratio: Ratio of student size to teacher size (0.0 to 1.0)
-                          e.g., 0.5 = student has 50% of teacher's neurons
-        num_classes: Number of output classes
+        teacher_model: Teacher model to compress
+        compression_ratio: Fraction of neurons to keep (0.5 = half the neurons)
+        num_classes: Number of output classes (always >= 2)
 
     Returns:
-        Smaller student model with similar architecture
-
-    Strategy:
-        - Maintains the same number of layers
-        - Reduces neurons per layer by compression_ratio
-        - Keeps the same activation functions
-        - Useful for creating architecturally similar but smaller models
+        Student model outputting logits (no activation on final layer)
     """
-    # Get input shape from teacher
+    if num_classes <= 1:
+        num_classes = 2
+
     input_shape = teacher_model.input_shape[1:]
 
-    # Build student with reduced capacity
-    student_layers = []
-    student_layers.append(keras.Input(shape=input_shape))
-
+    # Extract hidden layer sizes from teacher (skip output layer)
+    teacher_hidden_units = []
     for layer in teacher_model.layers:
         if isinstance(layer, layers.Dense):
-            # Reduce number of neurons
-            original_units = layer.units
-            student_units = max(1, int(original_units * compression_ratio))
-
-            # Skip the last layer (will be added separately)
+            # Skip the output layer (last Dense layer)
             if layer == teacher_model.layers[-1]:
                 continue
+            teacher_hidden_units.append(layer.units)
 
-            student_layers.append(
-                layers.Dense(
-                    student_units,
-                    activation=layer.activation,
-                    name=f"student_{layer.name}"
-                )
-            )
+    # Build student with reduced hidden layers
+    student_hidden_units = [max(1, int(u * compression_ratio)) for u in teacher_hidden_units]
 
-        elif isinstance(layer, layers.Conv2D):
-            # Reduce number of filters
-            original_filters = layer.filters
-            student_filters = max(1, int(original_filters * compression_ratio))
+    # Build sequential model
+    model = keras.Sequential(name="student_model")
+    model.add(keras.Input(shape=input_shape))
 
-            student_layers.append(
-                layers.Conv2D(
-                    student_filters,
-                    kernel_size=layer.kernel_size,
-                    strides=layer.strides,
-                    padding=layer.padding,
-                    activation=layer.activation,
-                    name=f"student_{layer.name}"
-                )
-            )
+    for i, units in enumerate(student_hidden_units):
+        model.add(layers.Dense(units, activation="relu", name=f"student_dense_{i}"))
 
-        elif isinstance(layer, (layers.MaxPooling2D, layers.Flatten, layers.Dropout)):
-            # Copy pooling/flatten/dropout layers as-is
-            student_layers.append(
-                layer.__class__.from_config(layer.get_config())
-            )
+    # Output layer: num_classes outputs, NO activation (logits for distillation)
+    model.add(layers.Dense(num_classes, activation=None, name="student_output"))
 
-        elif isinstance(layer, layers.InputLayer):
-            # Skip, already added
-            pass
-
-    # Add output layer with same number of classes
-    # IMPORTANT: Always use num_classes outputs (even for binary: 2 not 1)
-    # This ensures consistency with teacher model and sparse_categorical_crossentropy
-    # Use NO activation (logits) for distillation
-    if num_classes <= 1:
-        num_classes = 2  # Ensure at least 2 for binary
-
-    student_layers.append(layers.Dense(num_classes, activation=None, name='student_output'))
-
-    # Build model
-    x = student_layers[0]
-    for layer in student_layers[1:]:
-        x = layer(x)
-
-    student_model = keras.Model(inputs=student_layers[0], outputs=x)
-
-    return student_model
+    return model
 
 
 def train_with_distillation(

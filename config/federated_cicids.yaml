@@ -1,0 +1,25 @@
+# config/federated_cicids.yaml
+# CICIDS2017 (MachineLearningCVE) dataset configuration
+
+data:
+  name: cicids2017
+  path: "data/raw/MachineLearningCVE"
+  num_clients: 4
+  max_samples: 200000
+  # binary: true = BENIGN vs ATTACK (2 classes)
+  # binary: false = multi-class (DDoS, PortScan, Bot, etc.)
+  binary: true
+
+model:
+  # Options: mlp, lightweight, bottleneck, tiny
+  name: mlp
+
+federated:
+  num_rounds: 3
+  fraction_fit: 1.0
+  fraction_evaluate: 1.0
+  local_epochs: 2
+  batch_size: 128
+  min_fit_clients: 4
+  min_evaluate_clients: 4
+  min_available_clients: 4
