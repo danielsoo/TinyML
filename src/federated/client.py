@@ -19,6 +19,7 @@ from src.models import nets
 # Suppress TensorFlow logging after import
 try:
     import tensorflow as tf
+    import tensorflow_model_optimization as tfmot
     tf.get_logger().setLevel('ERROR')
 except ImportError:
     pass
@@ -51,7 +52,7 @@ def load_config(config_path: str = None):
     if not cfg_path.exists():
         raise FileNotFoundError(f"Configuration file not found: {cfg_path.resolve()}")
     
-    with cfg_path.open() as f:
+    with cfg_path.open(encoding='utf-8') as f:
         return yaml.safe_load(f)
 
 # Default config load (can be reloaded in main)
@@ -95,7 +96,7 @@ def _build_model(model_name: str, input_shape: Tuple[int, ...], num_classes: int
 # ------------------------------------------------
 
 class KerasClient(fl.client.NumPyClient):
-    def __init__(self, model, x_train, y_train, x_test, y_test, cid: int, num_classes: int):
+    def __init__(self, model, x_train, y_train, x_test, y_test, cid: int, num_classes: int, use_class_weights: bool = False):
         self.model = model
         self.x_train = x_train
         self.y_train = y_train
@@ -103,6 +104,27 @@ class KerasClient(fl.client.NumPyClient):
         self.y_test = y_test
         self.cid = cid
         self.num_classes = num_classes
+        self.use_class_weights = use_class_weights
+        
+        # Compute class weights for imbalanced data (manual computation with smoothing)
+        if self.use_class_weights:
+            y_labels = np.argmax(y_train, axis=1) if len(y_train.shape) > 1 else y_train
+            classes, counts = np.unique(y_labels, return_counts=True)
+            
+            # Smoothed class weights: sqrt를 사용하여 극단적인 가중치 완화
+            n_samples = len(y_labels)
+            n_classes = len(classes)
+            # 기본 가중치 계산
+            raw_weights = n_samples / (n_classes * counts)
+            # Square root를 적용하여 부드럽게
+            smoothed_weights = np.sqrt(raw_weights)
+            # 정규화
+            class_weights_array = smoothed_weights / np.mean(smoothed_weights)
+            
+            self.class_weight = {int(cls): float(weight) for cls, weight in zip(classes, class_weights_array)}
+            print(f"[Client {cid}] Class weights (smoothed): {self.class_weight}")
+        else:
+            self.class_weight = None
 
     def get_parameters(self, config: Dict[str, Any]):
         return self.model.get_weights()
@@ -113,13 +135,20 @@ class KerasClient(fl.client.NumPyClient):
         epochs = int(config.get("local_epochs", 1))
         batch_size = int(config.get("batch_size", 32))
 
-        self.model.fit(
-            self.x_train,
-            self.y_train,
-            epochs=epochs,
-            batch_size=batch_size,
-            verbose=0,
-        )
+        # Prepare fit arguments
+        fit_kwargs = {
+            'x': self.x_train,
+            'y': self.y_train,
+            'epochs': epochs,
+            'batch_size': batch_size,
+            'verbose': 0
+        }
+        
+        # Add class weights if enabled
+        if self.class_weight is not None:
+            fit_kwargs['class_weight'] = self.class_weight
+
+        self.model.fit(**fit_kwargs)
 
         return self.model.get_weights(), len(self.x_train), {}
 
@@ -240,6 +269,7 @@ def simulate_clients(config: dict = None):
     test_parts = partition_non_iid(x_test, y_test, num_clients)
 
     model_name = model_cfg.get("name", "mlp")
+    use_class_weights = fed_cfg.get("use_class_weights", False)
 
     # State to use in client_fn
     state = {
@@ -249,6 +279,7 @@ def simulate_clients(config: dict = None):
         "model_name": model_name,
         "train_parts": train_parts,
         "test_parts": test_parts,
+        "use_class_weights": use_class_weights,
     }
 
     def client_fn(context: fl.common.Context) -> fl.client.Client:
@@ -287,6 +318,7 @@ def simulate_clients(config: dict = None):
             part_te["y"],
             cid=idx,
             num_classes=state["num_classes"],
+            use_class_weights=state["use_class_weights"],
         )
 
         return client.to_client()
@@ -417,12 +449,8 @@ def main(save_path: str = "src/models/global_model.h5", config_path: str = None)
         global_model.save(save_path)
         print(f"[SUCCESS] Saved global model to {save_path}")
     else:
-<<<<<<< Updated upstream
-        print("⚠️ Could not find saveable parameters in Federated strategy.")
-=======
         print("[WARNING] Could not find saveable parameters in Federated strategy.")
         raise RuntimeError("Failed to save model: No parameters available in strategy.")
->>>>>>> Stashed changes
 
 
 if __name__ == "__main__":

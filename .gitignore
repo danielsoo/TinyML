@@ -4,8 +4,12 @@
 # Python venv
 .venv/
 
-# Raw data
-data/*.csv
+# Raw data (large files should not be committed)
+data/raw/**/*.csv
+data/raw/**/*.zip
+data/raw/**/*.tar.gz
+data/raw/**/*.tar
+data/raw/**/*.gz
 *.csv
 
 # 기타 캐시
@@ -13,4 +17,4 @@ __pycache__/
 .ipynb_checkpoints/
 src/.DS_Store
 src/data/.DS_Store
-data/.DS_Storedata/raw/*.zip
+data/.DS_Store

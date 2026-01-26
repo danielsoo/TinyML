@@ -69,7 +69,7 @@ def test_full_pipeline_mlp():
     # Load config
     print("📋 Step 1: Loading Configuration")
     print("-" * 60)
-    with open("config/federated.yaml", encoding='utf-8') as f:
+    with open("config/federated_local.yaml", encoding='utf-8') as f:
         cfg = yaml.safe_load(f)
 
     data_cfg = cfg.get("data", {})
@@ -78,9 +78,9 @@ def test_full_pipeline_mlp():
     print("✅ Configuration loaded\n")
 
     # Load dataset
-    print("📂 Step 2: Loading Bot-IoT Dataset")
+    print("📂 Step 2: Loading CIC-IDS2017 Dataset")
     print("-" * 60)
-    dataset_name = data_cfg.get("name", "bot_iot")
+    dataset_name = data_cfg.get("name", "cicids2017")
     dataset_kwargs = {k: v for k, v in data_cfg.items() if k not in {"name", "num_clients"}}
 
     if "path" in dataset_kwargs and "data_path" not in dataset_kwargs:
