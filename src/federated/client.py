@@ -345,24 +345,24 @@ def main(save_path: str = "src/models/global_model.h5", config_path: str = None)
             if key in first:
                 aggregated[key] = first[key]
 
-        print("\n📊 Evaluation Summary")
+        print("\n[Evaluation Summary]")
         print("=" * 60)
         print(f"Accuracy: {aggregated['accuracy']:.4f} ({aggregated['accuracy']*100:.2f}%)")
         print(f"Loss: {aggregated['loss']:.4f}\n")
 
         if "actual_attack" in aggregated and "actual_normal" in aggregated and "total_samples" in aggregated:
-            print("📈 Ground Truth:")
+            print("[Ground Truth]")
             print(f"  - Attack samples: {aggregated['actual_attack']}")
             print(f"  - Normal samples: {aggregated['actual_normal']}")
             print(f"  - Total samples: {aggregated['total_samples']}\n")
 
         if "predicted_attack" in aggregated and "predicted_normal" in aggregated:
-            print("🔮 Predictions:")
+            print("[Predictions]")
             print(f"  - Predicted Attack: {aggregated['predicted_attack']}")
             print(f"  - Predicted Normal: {aggregated['predicted_normal']}\n")
 
         if {"true_positives", "true_negatives", "false_positives", "false_negatives"} <= aggregated.keys():
-            print("✅ Confusion Matrix:")
+            print("[Confusion Matrix]")
             print(f"  - True Positives (TP): {aggregated['true_positives']}")
             print(f"  - True Negatives (TN): {aggregated['true_negatives']}")
             print(f"  - False Positives (FP): {aggregated['false_positives']}")
@@ -373,7 +373,7 @@ def main(save_path: str = "src/models/global_model.h5", config_path: str = None)
             precision_pct = aggregated["precision"] * 100.0
             recall_pct = aggregated["recall"] * 100.0
             f1_pct = aggregated["f1_score"] * 100.0
-            print("📏 Metrics:")
+            print("[Metrics]")
             print(f"  - Precision: {aggregated['precision']:.4f} ({precision_pct:.2f}%)")
             print(f"  - Recall: {aggregated['recall']:.4f} ({recall_pct:.2f}%)")
             print(f"  - F1-Score: {aggregated['f1_score']:.4f} ({f1_pct:.2f}%)")
@@ -415,9 +415,14 @@ def main(save_path: str = "src/models/global_model.h5", config_path: str = None)
         global_model.set_weights(weights)
         Path(save_path).parent.mkdir(parents=True, exist_ok=True)
         global_model.save(save_path)
-        print(f"✅ Saved global model to {save_path}")
+        print(f"[SUCCESS] Saved global model to {save_path}")
     else:
+<<<<<<< Updated upstream
         print("⚠️ Could not find saveable parameters in Federated strategy.")
+=======
+        print("[WARNING] Could not find saveable parameters in Federated strategy.")
+        raise RuntimeError("Failed to save model: No parameters available in strategy.")
+>>>>>>> Stashed changes
 
 
 if __name__ == "__main__":

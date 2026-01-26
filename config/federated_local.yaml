@@ -2,10 +2,17 @@
 # 로컬 환경 전용 설정 파일
 
 data:
+<<<<<<< Updated upstream
   # bot_iot 또는 mnist 선택
   name: bot_iot
 
   # Bot-IoT CSV 경로 (로컬 환경)
+=======
+  # Choose cicids2017, bot_iot, or mnist
+  name: cicids2017
+
+  # Data path (same folder contains both Bot-IoT and CIC-IDS2017)
+>>>>>>> Stashed changes
   path: "data/raw/Bot-IoT"
 
   # 클라이언트 수
@@ -13,6 +20,9 @@ data:
 
   # 너무 크면 학습 오래 걸리니까 샘플 수 제한 (원하면 늘려도 됨)
   max_samples: 200000
+  
+  # For CIC-IDS2017: binary (BENIGN vs ATTACK) or multi-class
+  binary: true
 
 model:
   # mlp 또는 cnn (Bot-IoT면 보통 mlp)

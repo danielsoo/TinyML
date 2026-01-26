@@ -270,6 +270,157 @@ def load_bot_iot(
 
 
 # -------------------------
+# CIC-IDS2017 (CSV-based, multi-class classification)
+# -------------------------
+
+def load_cicids2017(
+    data_path: str = "data/raw/Bot-IoT",  # Same folder for now
+    max_samples: int = None,
+    test_size: float = 0.2,
+    random_state: int = 42,
+    binary: bool = True,  # True: BENIGN vs ATTACK, False: keep all classes
+    **_,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Load CIC-IDS2017 CSV files and return (x_train, y_train, x_test, y_test).
+    
+    Args:
+        data_path: Directory containing .pcap_ISCX.csv files
+        max_samples: Maximum total samples to use (for memory efficiency)
+        test_size: Fraction of data to use for testing
+        random_state: Random seed for reproducibility
+        binary: If True, convert to BENIGN(0) vs ATTACK(1). If False, keep multi-class.
+    
+    Returns:
+        x_train, y_train, x_test, y_test
+    """
+    data_dir = _ensure_dir(data_path)
+    
+    # Find all CIC-IDS2017 CSV files (*.pcap_ISCX.csv)
+    csv_files = list(data_dir.glob("*.pcap_ISCX.csv"))
+    
+    if not csv_files:
+        raise FileNotFoundError(
+            f"No CIC-IDS2017 CSV files (*.pcap_ISCX.csv) found in {data_dir}. "
+            "Please download the dataset from https://www.unb.ca/cic/datasets/ids-2017.html"
+        )
+    
+    print(f"[load_cicids2017] Found {len(csv_files)} CSV files")
+    
+    # Determine samples per file if max_samples is set
+    if max_samples is not None:
+        samples_per_file = max_samples // len(csv_files)
+        print(f"[load_cicids2017] Limiting to {samples_per_file} samples per file (total target: {max_samples})")
+    else:
+        samples_per_file = None
+    
+    # Load and concatenate all files
+    dfs = []
+    for csv_file in csv_files:
+        try:
+            if samples_per_file:
+                df = pd.read_csv(csv_file, nrows=samples_per_file)
+            else:
+                df = pd.read_csv(csv_file)
+            dfs.append(df)
+            print(f"[load_cicids2017] Loaded {len(df):,} rows from {csv_file.name}")
+        except Exception as e:
+            print(f"[load_cicids2017] Warning: Failed to load {csv_file.name}: {e}")
+            continue
+    
+    if not dfs:
+        raise ValueError("Failed to load any CIC-IDS2017 files")
+    
+    df = pd.concat(dfs, ignore_index=True)
+    print(f"[load_cicids2017] Total samples loaded: {len(df):,}")
+    
+    # Label column has leading space: ' Label'
+    label_col = df.columns[-1]
+    if label_col.strip() != "Label":
+        print(f"[load_cicids2017] Warning: Expected last column to be 'Label', got '{label_col}'")
+    
+    # Extract labels
+    y = df[label_col].values
+    df = df.drop(columns=[label_col])
+    
+    # Clean column names (remove leading/trailing spaces)
+    df.columns = df.columns.str.strip()
+    
+    # Handle infinity and NaN
+    df = df.replace([np.inf, -np.inf], np.nan)
+    
+    # Drop columns that are all NaN
+    nan_cols = df.columns[df.isna().all()].tolist()
+    if nan_cols:
+        print(f"[load_cicids2017] Dropping {len(nan_cols)} all-NaN columns")
+        df = df.drop(columns=nan_cols)
+    
+    # Fill remaining NaN with 0
+    df = df.fillna(0)
+    
+    # Convert all columns to numeric (some might be strings)
+    for col in df.columns:
+        if df[col].dtype == 'object':
+            try:
+                df[col] = pd.to_numeric(df[col], errors='coerce')
+                df[col] = df[col].fillna(0)
+            except:
+                # If conversion fails, drop the column
+                print(f"[load_cicids2017] Dropping non-numeric column: {col}")
+                df = df.drop(columns=[col])
+    
+    X = df.values.astype('float32')
+    
+    # Process labels
+    unique_labels = np.unique(y)
+    print(f"[load_cicids2017] Found {len(unique_labels)} unique labels")
+    
+    if binary:
+        # Convert to binary: BENIGN=0, everything else=1
+        y_binary = np.where(y == 'BENIGN', 0, 1)
+        y = y_binary
+        print(f"[load_cicids2017] Binary mode: BENIGN=0, ATTACK=1")
+        print(f"[load_cicids2017] Label distribution: BENIGN={np.sum(y==0)}, ATTACK={np.sum(y==1)}")
+    else:
+        # Multi-class: encode all labels
+        label_mapping = {label: idx for idx, label in enumerate(unique_labels)}
+        y = np.array([label_mapping[label] for label in y])
+        print(f"[load_cicids2017] Multi-class mode: {len(unique_labels)} classes")
+        for idx in range(len(unique_labels)):
+            print(f"  Class {idx}: {np.sum(y==idx)} samples")
+    
+    # Final sampling if needed
+    if max_samples is not None and len(X) > max_samples:
+        unique, counts = np.unique(y, return_counts=True)
+        min_class_count = counts.min()
+        use_stratify = min_class_count >= 2
+        
+        X, _, y, _ = train_test_split(
+            X, y,
+            train_size=max_samples,
+            stratify=y if use_stratify else None,
+            random_state=random_state,
+        )
+        print(f"[load_cicids2017] Sampled down to {len(X):,} total samples")
+    
+    # Train/test split
+    unique, counts = np.unique(y, return_counts=True)
+    min_class_count = counts.min()
+    use_stratify = min_class_count >= 2
+    
+    x_train, x_test, y_train, y_test = train_test_split(
+        X, y,
+        test_size=test_size,
+        stratify=y if use_stratify else None,
+        random_state=random_state,
+    )
+    
+    print(f"[load_cicids2017] Final feature shape: {x_train.shape[1]} features")
+    print(f"[load_cicids2017] Train samples: {len(x_train):,}, Test samples: {len(x_test):,}")
+    
+    return x_train, y_train, x_test, y_test
+
+
+# -------------------------
 # Public API
 # -------------------------
 
@@ -284,6 +435,8 @@ def load_dataset(name: str, **kwargs) -> Tuple[np.ndarray, np.ndarray, np.ndarra
         return load_mnist(**kwargs)
     elif name.lower() in ["bot_iot", "bot-iot", "botiot"]:
         return load_bot_iot(**kwargs)
+    elif name.lower() in ["cicids2017", "cic-ids-2017", "cic_ids_2017"]:
+        return load_cicids2017(**kwargs)
     else:
         raise ValueError(f"Unsupported dataset: {name}")
 

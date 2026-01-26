@@ -181,11 +181,33 @@ class CompressionAnalyzer:
             y_pred_list = []
             batch_size = 1
 
+            # Check input type (FLOAT32 or INT8)
+            input_dtype = input_details[0]["dtype"]
+            
             for i in range(0, len(self.x_test), batch_size):
                 batch_x = self.x_test[i : i + batch_size]
-                interpreter.set_tensor(input_details[0]["index"], batch_x.astype(np.float32))
+                
+                # Convert to appropriate type
+                if input_dtype == np.int8:
+                    # For INT8 quantized models, apply quantization
+                    input_scale = input_details[0].get("quantization_parameters", {}).get("scales", [1.0])[0]
+                    input_zero_point = input_details[0].get("quantization_parameters", {}).get("zero_points", [0])[0]
+                    batch_x_quantized = (batch_x / input_scale + input_zero_point).astype(np.int8)
+                    interpreter.set_tensor(input_details[0]["index"], batch_x_quantized)
+                else:
+                    # For FLOAT32 models
+                    interpreter.set_tensor(input_details[0]["index"], batch_x.astype(np.float32))
+                
                 interpreter.invoke()
                 output = interpreter.get_tensor(output_details[0]["index"])
+                
+                # Dequantize output if needed
+                output_dtype = output_details[0]["dtype"]
+                if output_dtype == np.int8:
+                    output_scale = output_details[0].get("quantization_parameters", {}).get("scales", [1.0])[0]
+                    output_zero_point = output_details[0].get("quantization_parameters", {}).get("zero_points", [0])[0]
+                    output = output_scale * (output.astype(np.float32) - output_zero_point)
+                
                 y_pred_list.append(output)
 
             y_pred_proba = np.concatenate(y_pred_list, axis=0)
@@ -237,14 +259,27 @@ class CompressionAnalyzer:
             input_details = interpreter.get_input_details()
             output_details = interpreter.get_output_details()
 
+            # Check input type (FLOAT32 or INT8)
+            input_dtype = input_details[0]["dtype"]
+
             times = []
             test_subset = self.x_test[:100]
             for _ in range(num_runs):
                 start = time.time()
                 for i in range(len(test_subset)):
-                    interpreter.set_tensor(
-                        input_details[0]["index"], test_subset[i : i + 1].astype(np.float32)
-                    )
+                    batch_x = test_subset[i : i + 1]
+                    
+                    # Convert to appropriate type
+                    if input_dtype == np.int8:
+                        # For INT8 quantized models, apply quantization
+                        input_scale = input_details[0].get("quantization_parameters", {}).get("scales", [1.0])[0]
+                        input_zero_point = input_details[0].get("quantization_parameters", {}).get("zero_points", [0])[0]
+                        batch_x_quantized = (batch_x / input_scale + input_zero_point).astype(np.int8)
+                        interpreter.set_tensor(input_details[0]["index"], batch_x_quantized)
+                    else:
+                        # For FLOAT32 models
+                        interpreter.set_tensor(input_details[0]["index"], batch_x.astype(np.float32))
+                    
                     interpreter.invoke()
                     _ = interpreter.get_tensor(output_details[0]["index"])
                 times.append((time.time() - start) * 1000)  # Convert to ms
@@ -364,7 +399,7 @@ class CompressionAnalyzer:
 
     def _generate_markdown_report(self, df: pd.DataFrame, output_path: Path):
         """Generate markdown report with comparison tables."""
-        with open(output_path, "w") as f:
+        with open(output_path, "w", encoding="utf-8") as f:
             f.write("# Compression Analysis Report\n\n")
             f.write(f"Generated: {pd.Timestamp.now()}\n\n")
 
@@ -482,8 +517,9 @@ def main():
         "--models",
         type=str,
         nargs="+",
-        required=True,
-        help="Model file paths to analyze (format: stage_name:path)",
+        required=False,
+        default=None,
+        help="Model file paths to analyze (format: stage_name:path). If not specified, analyzes train.py output models automatically.",
     )
     parser.add_argument(
         "--baseline",
@@ -510,6 +546,14 @@ def main():
     analyzer = CompressionAnalyzer(
         config_path=args.config, output_dir=args.output_dir
     )
+
+    # Use default model paths if not specified
+    if args.models is None:
+        print("No models specified. Using default train.py output models...")
+        args.models = [
+            "Original:models/tflite/saved_model_original.tflite",
+            "Compressed:models/tflite/saved_model_pruned_quantized.tflite"
+        ]
 
     # Parse model paths
     baseline_path = args.baseline

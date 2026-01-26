@@ -13,4 +13,4 @@ __pycache__/
 .ipynb_checkpoints/
 src/.DS_Store
 src/data/.DS_Store
-data/.DS_Store
+data/.DS_Storedata/raw/*.zip

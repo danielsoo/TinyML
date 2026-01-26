@@ -204,8 +204,9 @@ def main():
     parser.add_argument(
         "--results",
         type=str,
-        required=True,
-        help="Path to results file (CSV or JSON)",
+        required=False,
+        default="data/processed/analysis/compression_analysis.json",
+        help="Path to results file (CSV or JSON). Default: data/processed/analysis/compression_analysis.json",
     )
     parser.add_argument(
         "--output-dir",
