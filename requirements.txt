@@ -1,0 +1,16 @@
+# --- TensorFlow for Apple Silicon ---
+tensorflow
+
+# --- Core libs ---
+flwr<2
+numpy<2.0
+pandas
+scikit-learn
+matplotlib
+jupyter
+pyyaml
+
+# --- Adversarial ML ---
+adversarial-robustness-toolbox>=1,<2
+
+kaggle
