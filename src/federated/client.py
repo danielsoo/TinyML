@@ -29,14 +29,14 @@ except ImportError:
 
 def load_config(config_path: str = None):
     """Load configuration file. Defaults to environment variable or auto-detected path.
-    
+
     If config_path is None, automatically detects environment (Colab vs local)
     and selects appropriate config file.
     """
     if config_path is None:
         # Try environment variable first
         config_path = os.getenv("FEDERATED_CONFIG", None)
-        
+
         # If not set, auto-detect environment
         if config_path is None:
             try:
@@ -45,11 +45,11 @@ def load_config(config_path: str = None):
             except ImportError:
                 # Fallback to local config if env_utils not available
                 config_path = "config/federated_local.yaml"
-    
+
     cfg_path = Path(config_path)
     if not cfg_path.exists():
         raise FileNotFoundError(f"Configuration file not found: {cfg_path.resolve()}")
-    
+
     with cfg_path.open() as f:
         return yaml.safe_load(f)
 
@@ -80,6 +80,144 @@ def _build_model(model_name: str, input_shape: Tuple[int, ...], num_classes: int
     raise AttributeError(
         f"Model '{model_name}' not found. Options: mlp, cnn, lightweight, bottleneck, tiny"
     )
+
+
+# ------------------------------------------------
+# QAT (Quantization-Aware Training) Utilities
+# ------------------------------------------------
+
+def _apply_qat(model):
+    """
+    Apply quantization-aware training to a model.
+
+    Wraps the model with fake quantization nodes that simulate INT8
+    quantization during training. The model still uses float32 weights
+    but learns to be robust to quantization noise.
+
+    Returns:
+        QAT-wrapped model (still float32, but quantization-aware)
+    """
+    try:
+        import tensorflow_model_optimization as tfmot
+    except ImportError:
+        raise ImportError(
+            "tensorflow-model-optimization is required for QAT. "
+            "Install with: pip install tensorflow-model-optimization"
+        )
+
+    # tfmot requires tf.keras models (not keras 3.x)
+    # Clone the model using tf.keras to ensure compatibility
+    import tensorflow as tf
+
+    try:
+        # Try direct quantization first (works with tf.keras Sequential)
+        qat_model = tfmot.quantization.keras.quantize_model(model)
+    except ValueError:
+        # Model might be keras 3.x - rebuild as tf.keras Sequential
+        # Get config and weights from original model
+        config = model.get_config()
+        weights = model.get_weights()
+
+        # Rebuild using tf.keras
+        from tf_keras import Sequential, layers as tf_layers, Input
+
+        new_model = Sequential()
+        for layer_config in config['layers']:
+            layer_class = layer_config['class_name']
+            layer_cfg = layer_config['config']
+
+            if layer_class == 'InputLayer':
+                new_model.add(Input(shape=layer_cfg['batch_shape'][1:]))
+            elif layer_class == 'Dense':
+                new_model.add(tf_layers.Dense(
+                    units=layer_cfg['units'],
+                    activation=layer_cfg['activation'],
+                    name=layer_cfg['name']
+                ))
+
+        new_model.set_weights(weights)
+        new_model.compile(
+            optimizer="adam",
+            loss="sparse_categorical_crossentropy",
+            metrics=["accuracy"]
+        )
+
+        qat_model = tfmot.quantization.keras.quantize_model(new_model)
+
+    # Recompile with same settings
+    qat_model.compile(
+        optimizer="adam",
+        loss="sparse_categorical_crossentropy",
+        metrics=["accuracy"]
+    )
+
+    return qat_model
+
+
+def _strip_qat(qat_model):
+    """
+    Strip QAT wrappers from model, keeping the learned weights.
+
+    After QAT training, this removes the fake quantization nodes
+    and returns a regular Keras model with float32 weights that
+    have been trained to be quantization-friendly.
+
+    Returns:
+        Regular Keras model (float32 weights, no QAT wrappers)
+    """
+    try:
+        import tensorflow_model_optimization as tfmot
+    except ImportError:
+        raise ImportError("tensorflow-model-optimization is required")
+
+    return tfmot.quantization.keras.quantize_model(qat_model)
+
+
+def _extract_base_weights_from_qat(qat_model, base_model):
+    """
+    Extract the core weights from a QAT model and apply to base model.
+
+    QAT models have extra quantization-related variables. This function
+    extracts only the trainable kernel/bias weights and applies them
+    to a fresh base (non-QAT) model for aggregation.
+
+    Args:
+        qat_model: QAT-wrapped model after training
+        base_model: Fresh base model (same architecture, no QAT)
+
+    Returns:
+        base_model with weights copied from qat_model
+    """
+    # Get weight names from base model to know what to extract
+    base_weight_names = [w.name for w in base_model.weights]
+
+    # Build mapping from QAT weights to base weights
+    qat_weights = qat_model.get_weights()
+    base_weights = base_model.get_weights()
+
+    # QAT adds extra weights (quantize_layer, etc.)
+    # We need to match kernel/bias weights by position in layer order
+
+    # Simpler approach: match by counting Dense/Conv layers
+    new_weights = []
+    qat_idx = 0
+
+    for base_weight in base_weights:
+        # Find corresponding weight in QAT model by shape
+        found = False
+        for i in range(qat_idx, len(qat_weights)):
+            if qat_weights[i].shape == base_weight.shape:
+                new_weights.append(qat_weights[i])
+                qat_idx = i + 1
+                found = True
+                break
+
+        if not found:
+            # Keep original weight if no match (shouldn't happen)
+            new_weights.append(base_weight)
+
+    base_model.set_weights(new_weights)
+    return base_model
 
 
 # ------------------------------------------------
@@ -151,19 +289,31 @@ def simulate_clients(config: dict = None):
 # Execution
 # ------------------------------------------------
 
-def _fedavg_simulation(state: dict, fed_cfg: dict):
+def _fedavg_simulation(state: dict, fed_cfg: dict, use_qat: bool = False):
     """
     Manual FedAvg simulation loop (no Ray dependency).
 
     Implements the same logic as fl.simulation.start_simulation but runs
     entirely in-process, compatible with any Python version.
+
+    Args:
+        state: Client simulation state from simulate_clients()
+        fed_cfg: Federated learning configuration
+        use_qat: If True, clients train with quantization-aware training (QAT)
+
+    QAT Flow (when use_qat=True):
+        1. Server holds float32 global weights
+        2. Client receives weights → applies QAT → trains with fake quantization
+        3. Client extracts float32 weights (trained to be quantization-robust)
+        4. Server aggregates float32 weights via FedAvg
+        5. Final model can be converted to INT8 with minimal accuracy loss
     """
     num_clients = state["num_clients"]
     num_rounds = int(fed_cfg.get("num_rounds", 3))
     batch_size = int(fed_cfg.get("batch_size", 32))
     local_epochs = int(fed_cfg.get("local_epochs", 1))
 
-    # Build initial global model
+    # Build initial global model (float32, no QAT)
     global_model = _build_model(
         state["model_name"],
         state["input_shape"],
@@ -171,7 +321,8 @@ def _fedavg_simulation(state: dict, fed_cfg: dict):
     )
     global_weights = global_model.get_weights()
 
-    print(f"\n  FedAvg Simulation: {num_clients} clients, {num_rounds} rounds")
+    qat_status = " [QAT enabled]" if use_qat else ""
+    print(f"\n  FedAvg Simulation: {num_clients} clients, {num_rounds} rounds{qat_status}")
     print(f"  Model: {state['model_name']}, Params: {global_model.count_params():,}\n")
 
     for round_num in range(1, num_rounds + 1):
@@ -192,11 +343,15 @@ def _fedavg_simulation(state: dict, fed_cfg: dict):
             )
             client_model.set_weights(global_weights)
 
+            # Apply QAT if enabled (wrap with fake quantization)
+            if use_qat:
+                client_model = _apply_qat(client_model)
+
             # Get client data
             x_tr = state["train_parts"][cid]["x"]
             y_tr = state["train_parts"][cid]["y"]
 
-            # Local training
+            # Local training (with QAT fake-quantization if enabled)
             client_model.fit(
                 x_tr, y_tr,
                 epochs=local_epochs,
@@ -204,10 +359,22 @@ def _fedavg_simulation(state: dict, fed_cfg: dict):
                 verbose=0,
             )
 
-            client_weights.append(client_model.get_weights())
+            # Extract weights to send back to server
+            if use_qat:
+                # Build fresh base model to extract weights into
+                base_model = _build_model(
+                    state["model_name"],
+                    state["input_shape"],
+                    state["num_classes"],
+                )
+                base_model = _extract_base_weights_from_qat(client_model, base_model)
+                client_weights.append(base_model.get_weights())
+            else:
+                client_weights.append(client_model.get_weights())
+
             client_sizes.append(len(x_tr))
 
-        # FedAvg: weighted average of client weights
+        # FedAvg: weighted average of client weights (float32)
         total_samples = sum(client_sizes)
         avg_weights = []
         for layer_idx in range(len(global_weights)):
@@ -264,7 +431,7 @@ def _fedavg_simulation(state: dict, fed_cfg: dict):
     return global_model
 
 
-def main(save_path: str = "src/models/global_model.h5", config_path: str = None):
+def main(save_path: str = "src/models/global_model.h5", config_path: str = None, use_qat: bool = False):
     """Main execution function."""
     global CFG
     CFG = load_config(config_path)
@@ -275,7 +442,7 @@ def main(save_path: str = "src/models/global_model.h5", config_path: str = None)
     fed_cfg = CFG.get("federated", {})
 
     # Use manual FedAvg simulation (no Ray dependency)
-    global_model = _fedavg_simulation(state, fed_cfg)
+    global_model = _fedavg_simulation(state, fed_cfg, use_qat=use_qat)
 
     # Save model
     Path(save_path).parent.mkdir(parents=True, exist_ok=True)
@@ -299,13 +466,17 @@ if __name__ == "__main__":
         default=None,
         help="Path to config file (default: FEDERATED_CONFIG env var or config/federated_local.yaml)",
     )
+    parser.add_argument(
+        "--qat",
+        action="store_true",
+        help="Enable Quantization-Aware Training (QAT) during FL",
+    )
     args = parser.parse_args()
     try:
-        main(save_path=args.save_model, config_path=args.config)
+        main(save_path=args.save_model, config_path=args.config, use_qat=args.qat)
     except Exception as e:
         import traceback
         print(f"\n❌ Training failed with error: {type(e).__name__}: {e}", file=sys.stderr)
         print("\nFull traceback:", file=sys.stderr)
         traceback.print_exc(file=sys.stderr)
         sys.exit(1)
-

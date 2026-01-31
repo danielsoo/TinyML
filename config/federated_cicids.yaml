@@ -15,10 +15,10 @@ model:
   name: mlp
 
 federated:
-  num_rounds: 3
+  num_rounds: 25
   fraction_fit: 1.0
   fraction_evaluate: 1.0
-  local_epochs: 2
+  local_epochs: 1
   batch_size: 128
   min_fit_clients: 4
   min_evaluate_clients: 4

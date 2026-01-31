@@ -9,6 +9,7 @@ Usage:
     python test_train.py
     python test_train.py --config config/federated_cicids.yaml
     python test_train.py --output-dir models/cicids/
+    python test_train.py --qat  # Enable Quantization-Aware Training
 """
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
@@ -26,19 +27,25 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.data.loader import load_dataset
-from src.federated.client import load_config, simulate_clients, _build_model
+from src.federated.client import load_config, simulate_clients, _build_model, _apply_qat, _extract_base_weights_from_qat
 
 
-def run_fedavg(state: dict, fed_cfg: dict, verbose: bool = True):
+def run_fedavg(state: dict, fed_cfg: dict, verbose: bool = True, use_qat: bool = False):
     """
     FedAvg simulation with per-round metrics tracking.
+
+    Args:
+        state: Client simulation state
+        fed_cfg: Federated learning configuration
+        verbose: Print progress
+        use_qat: Enable Quantization-Aware Training (clients train with fake quantization)
 
     Returns:
         global_model: Trained Keras model
         history: Dict with per-round metrics
     """
     num_clients = state["num_clients"]
-    num_rounds = int(fed_cfg.get("num_rounds", 3))
+    num_rounds = int(fed_cfg.get("num_rounds", 100))
     batch_size = int(fed_cfg.get("batch_size", 32))
     local_epochs = int(fed_cfg.get("local_epochs", 1))
 
@@ -55,8 +62,9 @@ def run_fedavg(state: dict, fed_cfg: dict, verbose: bool = True):
         "loss": [],
     }
 
+    qat_status = " [QAT]" if use_qat else ""
     if verbose:
-        print(f"\n  FedAvg: {num_clients} clients, {num_rounds} rounds")
+        print(f"\n  FedAvg: {num_clients} clients, {num_rounds} rounds{qat_status}")
         print(f"  Model: {state['model_name']}, Params: {global_model.count_params():,}")
         print(f"  Local epochs: {local_epochs}, Batch size: {batch_size}\n")
 
@@ -77,6 +85,10 @@ def run_fedavg(state: dict, fed_cfg: dict, verbose: bool = True):
             )
             client_model.set_weights(global_weights)
 
+            # Apply QAT if enabled (wrap with fake quantization)
+            if use_qat:
+                client_model = _apply_qat(client_model)
+
             x_tr = state["train_parts"][cid]["x"]
             y_tr = state["train_parts"][cid]["y"]
 
@@ -87,7 +99,19 @@ def run_fedavg(state: dict, fed_cfg: dict, verbose: bool = True):
                 verbose=0,
             )
 
-            client_weights.append(client_model.get_weights())
+            # Extract weights to send back to server
+            if use_qat:
+                # Build fresh base model to extract weights into
+                base_model = _build_model(
+                    state["model_name"],
+                    state["input_shape"],
+                    state["num_classes"],
+                )
+                base_model = _extract_base_weights_from_qat(client_model, base_model)
+                client_weights.append(base_model.get_weights())
+            else:
+                client_weights.append(client_model.get_weights())
+
             client_sizes.append(len(x_tr))
 
         # FedAvg: weighted average
@@ -163,10 +187,13 @@ def main():
     parser.add_argument('--output-dir', type=str, default='models/cicids/')
     parser.add_argument('--model-name', type=str, default=None,
                         help='Override model name (mlp, lightweight, bottleneck, tiny)')
+    parser.add_argument('--qat', action='store_true',
+                        help='Enable Quantization-Aware Training (QAT) during FL')
     args = parser.parse_args()
 
+    qat_label = " [QAT]" if args.qat else ""
     print("\n" + "=" * 70)
-    print("TEST_TRAIN: Federated Learning Training")
+    print(f"TEST_TRAIN: Federated Learning Training{qat_label}")
     print("=" * 70)
 
     # Load config
@@ -208,7 +235,7 @@ def main():
     print("=" * 70)
 
     fed_cfg = config.get("federated", {})
-    global_model, history = run_fedavg(state, fed_cfg, verbose=True)
+    global_model, history = run_fedavg(state, fed_cfg, verbose=True, use_qat=args.qat)
 
     # Final evaluation
     print(f"\n{'─'*60}")
@@ -239,8 +266,9 @@ def main():
         "input_shape": list(state["input_shape"]),
         "num_classes": state["num_classes"],
         "num_clients": state["num_clients"],
+        "qat_enabled": args.qat,
         "federated": {
-            "num_rounds": int(fed_cfg.get("num_rounds", 3)),
+            "num_rounds": int(fed_cfg.get("num_rounds", 100)),
             "local_epochs": int(fed_cfg.get("local_epochs", 1)),
             "batch_size": int(fed_cfg.get("batch_size", 32)),
         },
