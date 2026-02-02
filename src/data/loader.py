@@ -95,6 +95,8 @@ def load_bot_iot(
     test_size: float = 0.2,
     random_state: int = 42,
     label_col: str = "label",
+    balance_ratio: float = None,
+    use_smote: bool = False,
     **_,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """Load Bot-IoT CSV files and return (x_train, y_train, x_test, y_test).
@@ -261,15 +263,49 @@ def load_bot_iot(
         random_state=random_state,
     )
 
+    # Mitigate imbalance: undersample majority (balance_ratio = minority:majority cap, e.g. 3.0 -> <=1:3)
+    if balance_ratio is not None and balance_ratio > 0:
+        unique_train = np.unique(y_train)
+        if len(unique_train) == 2:
+            rng = np.random.default_rng(random_state)
+            counts = np.bincount(y_train.astype(int))
+            minority_class = np.argmin(counts)
+            majority_class = 1 - minority_class
+            n_minority = counts[minority_class]
+            n_majority = counts[majority_class]
+            if n_majority > n_minority * balance_ratio:
+                n_majority_target = int(n_minority * balance_ratio)
+                majority_idx = np.where(y_train == majority_class)[0]
+                keep_idx = rng.choice(majority_idx, size=min(n_majority_target, len(majority_idx)), replace=False)
+                minority_idx = np.where(y_train == minority_class)[0]
+                balanced_idx = np.concatenate([minority_idx, keep_idx])
+                rng.shuffle(balanced_idx)
+                x_train = x_train[balanced_idx]
+                y_train = y_train[balanced_idx]
+                print(f"[load_bot_iot] Balanced training set: majority {n_majority} -> {len(keep_idx)} (ratio<={balance_ratio}), total={len(y_train):,}")
+
     x_train = x_train.astype("float32")
     x_test = x_test.astype("float32")
 
-    # Feature scaling: NN 학습 안정성·정확도 향상 (train 기준 fit, test는 transform만)
+    # Feature scaling: improves NN training stability and accuracy (fit on train, transform on test)
     from sklearn.preprocessing import StandardScaler
     scaler = StandardScaler()
     x_train = scaler.fit_transform(x_train).astype("float32")
     x_test = scaler.transform(x_test).astype("float32")
     print(f"[load_bot_iot] StandardScaler applied (fit on train).")
+
+    # SMOTE: oversample minority class (train only)
+    if use_smote and len(np.unique(y_train)) == 2:
+        try:
+            from imblearn.over_sampling import SMOTE
+            counts_before = np.bincount(y_train.astype(int))
+            k = max(1, min(5, int(counts_before.min()) - 1))
+            smote = SMOTE(random_state=random_state, k_neighbors=k)
+            x_train, y_train = smote.fit_resample(x_train, y_train)
+            x_train = x_train.astype("float32")
+            print(f"[load_bot_iot] SMOTE applied: train -> {len(y_train):,} (0={np.sum(y_train==0):,}, 1={np.sum(y_train==1):,})")
+        except Exception as e:
+            print(f"[load_bot_iot] SMOTE skipped: {e}")
 
     print(f"[load_bot_iot] Final feature shape: {x_train.shape[1]} features (includes IP addresses and categorical features)")
 
@@ -281,11 +317,13 @@ def load_bot_iot(
 # -------------------------
 
 def load_cicids2017(
-    data_path: str = "data/raw/Bot-IoT",  # Same folder for now
+    data_path: str = "data/raw/Bot-IoT",
     max_samples: int = None,
     test_size: float = 0.2,
     random_state: int = 42,
-    binary: bool = True,  # True: BENIGN vs ATTACK, False: keep all classes
+    binary: bool = True,
+    balance_ratio: float = None,
+    use_smote: bool = False,  # SMOTE oversamples minority class (train only)
     **_,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """Load CIC-IDS2017 CSV files and return (x_train, y_train, x_test, y_test).
@@ -376,6 +414,16 @@ def load_cicids2017(
                 df = df.drop(columns=[col])
     
     X = df.values.astype('float32')
+
+    # Remove duplicates (CIC-IDS2017 has many duplicate rows)
+    n_before = len(X)
+    df_temp = pd.DataFrame(X)
+    df_temp["_y"] = y
+    df_dedup = df_temp.drop_duplicates()
+    X = df_dedup.drop(columns=["_y"]).values.astype("float32")
+    y = df_dedup["_y"].values
+    n_after = len(X)
+    print(f"[load_cicids2017] Removed {n_before - n_after:,} duplicates ({n_after:,} unique)")
     
     # Process labels
     unique_labels = np.unique(y)
@@ -421,16 +469,199 @@ def load_cicids2017(
         random_state=random_state,
     )
 
-    # Feature scaling: NN 학습 안정성·정확도 향상 (train 기준 fit, test는 transform만)
+    # Undersample majority for severe imbalance (binary only)
+    if binary and balance_ratio is not None and balance_ratio > 0:
+        rng = np.random.default_rng(random_state)
+        counts = np.bincount(y_train.astype(int))
+        minority_class = np.argmin(counts)
+        majority_class = 1 - minority_class
+        n_minority = counts[minority_class]
+        n_majority = counts[majority_class]
+        if n_majority > n_minority * balance_ratio:
+            n_majority_target = int(n_minority * balance_ratio)
+            majority_idx = np.where(y_train == majority_class)[0]
+            keep_idx = rng.choice(majority_idx, size=n_majority_target, replace=False)
+            minority_idx = np.where(y_train == minority_class)[0]
+            balanced_idx = np.concatenate([minority_idx, keep_idx])
+            rng.shuffle(balanced_idx)
+            x_train = x_train[balanced_idx]
+            y_train = y_train[balanced_idx]
+            print(f"[load_cicids2017] Balanced training set: majority {n_majority} -> {n_majority_target} (ratio<={balance_ratio}), total={len(y_train):,}")
+
+    # Feature scaling: improves NN training stability and accuracy (fit on train, transform on test)
     from sklearn.preprocessing import StandardScaler
     scaler = StandardScaler()
     x_train = scaler.fit_transform(x_train).astype("float32")
     x_test = scaler.transform(x_test).astype("float32")
     print(f"[load_cicids2017] StandardScaler applied (fit on train).")
 
+    # SMOTE: oversample minority class (ATTACK) (train only, test unchanged)
+    if binary and use_smote:
+        try:
+            from imblearn.over_sampling import SMOTE
+            counts_before = np.bincount(y_train.astype(int))
+            k = max(1, min(5, int(counts_before.min()) - 1))
+            smote = SMOTE(random_state=random_state, k_neighbors=k)
+            x_train, y_train = smote.fit_resample(x_train, y_train)
+            x_train = x_train.astype("float32")
+            print(f"[load_cicids2017] SMOTE applied: train -> {len(y_train):,} (BENIGN={np.sum(y_train==0):,}, ATTACK={np.sum(y_train==1):,})")
+        except Exception as e:
+            print(f"[load_cicids2017] SMOTE skipped: {e}")
+
     print(f"[load_cicids2017] Final feature shape: {x_train.shape[1]} features")
     print(f"[load_cicids2017] Train samples: {len(x_train):,}, Test samples: {len(x_test):,}")
 
+    return x_train, y_train, x_test, y_test
+
+
+# -------------------------
+# TON_IoT (ToN_IoT) - UNSW Canberra IoT/IIoT Cybersecurity
+# -------------------------
+
+def load_ton_iot(
+    data_path: str = "data/raw/TON_IoT",
+    max_samples: int = None,
+    test_size: float = 0.2,
+    random_state: int = 42,
+    label_col: str = "label",
+    binary: bool = True,
+    balance_ratio: float = None,
+    use_smote: bool = False,
+    **_,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Load TON_IoT (ToN_IoT) CSV and return (x_train, y_train, x_test, y_test).
+
+    TON_IoT: Telemetry, OS (Windows/Ubuntu), Network datasets from UNSW Canberra.
+    Processed/Train_Test CSV have 'label' (normal vs attack) and optionally 'type' (attack sub-class).
+    Academic use free (Dr Nour Moustafa, UNSW).
+
+    Args:
+        data_path: Directory containing CSV (e.g. Train_Test_datasets or Processed)
+        label_col: Column name for label (default 'label')
+        binary: If True, normal=0 / attack=1. If False, use 'type' for multi-class when present.
+    """
+    root = _ensure_dir(data_path)
+    # Support both flat *.csv and subdirs like Train_Test_datasets/*.csv
+    csv_files = sorted(root.glob("*.csv"))
+    if not csv_files:
+        for sub in ["Train_Test_datasets", "Processed_datasets", "processed"]:
+            subdir = root / sub
+            if subdir.exists():
+                csv_files = sorted(subdir.glob("*.csv"))
+                if csv_files:
+                    break
+    if not csv_files:
+        raise FileNotFoundError(
+            f"TON_IoT CSV files not found under {root}. "
+            "Place CSV (e.g. from Train_Test_datasets) in data_path or data_path/Train_Test_datasets."
+        )
+
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=pd.errors.DtypeWarning)
+        dfs = [pd.read_csv(p, low_memory=False) for p in csv_files]
+    df = pd.concat(dfs, axis=0, ignore_index=True)
+
+    if label_col not in df.columns:
+        for cand in ["label", "Label", "type", "Type", "attack"]:
+            if cand in df.columns:
+                label_col = cand
+                print(f"[load_ton_iot] Using label column '{label_col}'")
+                break
+        else:
+            raise KeyError(f"Label column not found. Available: {list(df.columns)[:10]}...")
+
+    y_raw = df[label_col]
+    feature_df = df.drop(columns=[label_col])
+    if "type" in feature_df.columns and binary:
+        feature_df = feature_df.drop(columns=["type"])
+
+    # Map label to 0/1 for binary (support string or numeric)
+    if binary:
+        if pd.api.types.is_numeric_dtype(y_raw):
+            y = y_raw.values.astype(np.int64)
+            uniq = np.unique(y)
+            if len(uniq) > 2:
+                # Assume 0 = normal, others = attack
+                y = np.where(y == uniq[0], 0, 1).astype(np.int64)
+        else:
+            y_str = y_raw.astype(str).str.lower()
+            y = np.where(y_str.str.contains("normal|benign|0", regex=True), 0, 1).astype(np.int64)
+        print(f"[load_ton_iot] Binary labels: 0={np.sum(y==0):,}, 1={np.sum(y==1):,}")
+    else:
+        from sklearn.preprocessing import LabelEncoder
+        le = LabelEncoder()
+        y = le.fit_transform(y_raw.astype(str))
+        print(f"[load_ton_iot] Multi-class: {len(le.classes_)} classes")
+
+    # Numeric features only
+    for col in list(feature_df.columns):
+        if feature_df[col].dtype == "object" or not np.issubdtype(feature_df[col].dtype, np.number):
+            try:
+                feature_df[col] = pd.to_numeric(feature_df[col], errors="coerce")
+            except Exception:
+                feature_df = feature_df.drop(columns=[col])
+    numeric_df = feature_df.select_dtypes(include=[np.number])
+    all_nan = numeric_df.columns[numeric_df.isna().all()]
+    if len(all_nan) > 0:
+        numeric_df = numeric_df.drop(columns=all_nan)
+    medians = numeric_df.median(skipna=True).fillna(0)
+    numeric_df = numeric_df.fillna(medians)
+    X = numeric_df.values.astype("float32")
+
+    if max_samples is not None and len(X) > max_samples:
+        unique, counts = np.unique(y, return_counts=True)
+        use_stratify = counts.min() >= 2
+        X, _, y, _ = train_test_split(
+            X, y, train_size=max_samples,
+            stratify=y if use_stratify else None,
+            random_state=random_state,
+        )
+
+    unique, counts = np.unique(y, return_counts=True)
+    use_stratify = counts.min() >= 2
+    x_train, x_test, y_train, y_test = train_test_split(
+        X, y, test_size=test_size,
+        stratify=y if use_stratify else None,
+        random_state=random_state,
+    )
+
+    # Undersample majority (binary)
+    if binary and balance_ratio is not None and balance_ratio > 0 and len(unique) == 2:
+        rng = np.random.default_rng(random_state)
+        counts = np.bincount(y_train.astype(int))
+        minority_class = np.argmin(counts)
+        majority_class = 1 - minority_class
+        n_minority, n_majority = counts[minority_class], counts[majority_class]
+        if n_majority > n_minority * balance_ratio:
+            n_majority_target = int(n_minority * balance_ratio)
+            majority_idx = np.where(y_train == majority_class)[0]
+            keep_idx = rng.choice(majority_idx, size=min(n_majority_target, len(majority_idx)), replace=False)
+            minority_idx = np.where(y_train == minority_class)[0]
+            balanced_idx = np.concatenate([minority_idx, keep_idx])
+            rng.shuffle(balanced_idx)
+            x_train = x_train[balanced_idx]
+            y_train = y_train[balanced_idx]
+            print(f"[load_ton_iot] Balanced: majority {n_majority} -> {len(keep_idx)} (ratio<={balance_ratio}), total={len(y_train):,}")
+
+    from sklearn.preprocessing import StandardScaler
+    scaler = StandardScaler()
+    x_train = scaler.fit_transform(x_train).astype("float32")
+    x_test = scaler.transform(x_test).astype("float32")
+    print(f"[load_ton_iot] StandardScaler applied.")
+
+    if binary and use_smote and len(np.unique(y_train)) == 2:
+        try:
+            from imblearn.over_sampling import SMOTE
+            counts_before = np.bincount(y_train.astype(int))
+            k = max(1, min(5, int(counts_before.min()) - 1))
+            smote = SMOTE(random_state=random_state, k_neighbors=k)
+            x_train, y_train = smote.fit_resample(x_train, y_train)
+            x_train = x_train.astype("float32")
+            print(f"[load_ton_iot] SMOTE applied: train -> {len(y_train):,} (0={np.sum(y_train==0):,}, 1={np.sum(y_train==1):,})")
+        except Exception as e:
+            print(f"[load_ton_iot] SMOTE skipped: {e}")
+
+    print(f"[load_ton_iot] Features: {x_train.shape[1]}, Train: {len(y_train):,}, Test: {len(y_test):,}")
     return x_train, y_train, x_test, y_test
 
 
@@ -451,6 +682,8 @@ def load_dataset(name: str, **kwargs) -> Tuple[np.ndarray, np.ndarray, np.ndarra
         return load_bot_iot(**kwargs)
     elif name.lower() in ["cicids2017", "cic-ids-2017", "cic_ids_2017"]:
         return load_cicids2017(**kwargs)
+    elif name.lower() in ["ton_iot", "toniot", "ton_iot"]:
+        return load_ton_iot(**kwargs)
     else:
         raise ValueError(f"Unsupported dataset: {name}")
 

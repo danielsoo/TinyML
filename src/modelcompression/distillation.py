@@ -132,8 +132,18 @@ def distillation_loss_fn(
             - Multiplying loss by T² compensates for this
             - Result: same gradient magnitude regardless of T
     """
-    # Soften teacher predictions with temperature
-    teacher_soft = tf.nn.softmax(teacher_predictions / temperature)
+    # Handle binary teacher (sigmoid, 1 output) vs multi-class (softmax, C outputs)
+    def _binary_teacher_soft():
+        p = tf.squeeze(teacher_predictions, axis=-1)
+        eps = 1e-7
+        teacher_logits_2 = tf.stack([tf.math.log(1 - p + eps), tf.math.log(p + eps)], axis=-1)
+        return tf.nn.softmax(teacher_logits_2 / temperature)
+
+    def _multiclass_teacher_soft():
+        return tf.nn.softmax(teacher_predictions / temperature)
+
+    is_binary = tf.equal(tf.shape(teacher_predictions)[-1], 1)
+    teacher_soft = tf.cond(is_binary, _binary_teacher_soft, _multiclass_teacher_soft)
 
     # Soften student predictions with temperature
     student_soft = tf.nn.softmax(student_predictions / temperature)
@@ -376,11 +386,10 @@ def create_student_model(
             pass
 
     # Add output layer with same number of classes
+    # Use softmax with 2 outputs for binary (not sigmoid) so sparse_categorical_crossentropy works
     if num_classes <= 2:
-        # Binary classification
-        student_layers.append(layers.Dense(1, activation='sigmoid', name='student_output'))
+        student_layers.append(layers.Dense(2, activation='softmax', name='student_output'))
     else:
-        # Multi-class classification
         student_layers.append(layers.Dense(num_classes, activation='softmax', name='student_output'))
 
     # Build model

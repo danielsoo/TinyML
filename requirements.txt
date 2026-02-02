@@ -2,10 +2,11 @@
 tensorflow
 
 # --- Core libs ---
-flwr<2
+flwr[simulation]<2
 numpy<2.0
 pandas
 scikit-learn
+imbalanced-learn
 matplotlib
 jupyter
 pyyaml

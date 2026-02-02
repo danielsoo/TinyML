@@ -1,6 +1,6 @@
 #!/bin/bash
-# 이미 커밋된 생성물/모델을 Git 추적에서만 제거 (로컬 파일은 유지)
-# 사용: TinyML-main 루트에서  bash scripts/untrack_generated.sh
+# Remove already-committed generated files/models from Git tracking (keep local files)
+# Usage: from TinyML-main root: bash scripts/untrack_generated.sh
 
 cd "$(dirname "$0")/.."
 

@@ -12,6 +12,7 @@ import os
 import sys
 import time
 import warnings
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
@@ -46,6 +47,7 @@ class CompressionAnalyzer:
         self,
         config_path: str = None,
         output_dir: str = "data/processed/analysis",
+        version: str = None,
     ):
         """Initialize analyzer with config and output directory."""
         # Use federated_colab.yaml as default if exists, otherwise federated_local.yaml
@@ -56,8 +58,6 @@ class CompressionAnalyzer:
                 config_path = "config/federated_local.yaml"
         
         self.config_path = config_path
-        self.output_dir = Path(output_dir)
-        self.output_dir.mkdir(parents=True, exist_ok=True)
         self.results: List[Dict] = []
 
         # Load config
@@ -65,8 +65,27 @@ class CompressionAnalyzer:
         with open(config_path, encoding='utf-8') as f:
             self.config = yaml.safe_load(f)
 
-        # Load test dataset
+        # Version: CLI override > config > "run"
+        self.version = version or self.config.get("version") or "run"
+        # run_id: datetime detail (2026-01-30_14-50-09)
+        self.run_id = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+
+        # Data version (summary: which data was used for training)
         data_cfg = self.config.get("data", {})
+        data_parts = [data_cfg.get("name", "unknown")]
+        if data_cfg.get("max_samples"):
+            data_parts.append(f"max{data_cfg['max_samples']//1000}k")
+        if data_cfg.get("balance_ratio"):
+            data_parts.append(f"bal{data_cfg['balance_ratio']}")
+        self.data_version = "_".join(data_parts)
+
+        # version/datetime structure: analysis/v2/2026-01-30_14-50-09/
+        base_dir = Path(output_dir)
+        self.output_dir = base_dir / self.version / self.run_id
+        self.output_dir.mkdir(parents=True, exist_ok=True)
+        print(f"📌 Version: {self.version} | Run: {self.run_id} | Data: {self.data_version}")
+
+        # Load test dataset
         dataset_name = data_cfg.get("name", "bot_iot")
         dataset_kwargs = {
             k: v for k, v in data_cfg.items() if k not in {"name", "num_clients"}
@@ -388,8 +407,14 @@ class CompressionAnalyzer:
             json_path = self.output_dir / "compression_analysis.json"
             # Convert NumPy types to Python native types for JSON serialization
             serializable_results = self._convert_to_serializable(self.results)
-            with open(json_path, "w") as f:
-                json.dump(serializable_results, f, indent=2)
+            output_data = {
+                "version": self.version,
+                "data_version": self.data_version,
+                "generated_at": datetime.now().isoformat(),
+                "results": serializable_results,
+            }
+            with open(json_path, "w", encoding="utf-8") as f:
+                json.dump(output_data, f, indent=2, ensure_ascii=False)
             print(f"✅ JSON: {json_path}")
 
         if format in ["markdown", "all"]:
@@ -397,11 +422,49 @@ class CompressionAnalyzer:
             self._generate_markdown_report(df, md_path)
             print(f"✅ Markdown: {md_path}")
 
+        # Version summary (for version comparison)
+        self._append_version_summary(df)
+
+        # Path for next step (viz etc): version/run_id
+        rel_path = f"{self.version}/{self.run_id}"
+        (self.output_dir.parent.parent / ".last_run_id").write_text(rel_path, encoding="utf-8")
+
+    def _append_version_summary(self, df: pd.DataFrame):
+        """Append one-line summary to VERSIONS.md for cross-version comparison."""
+        summary_path = self.output_dir.parent.parent / "VERSIONS.md"
+        best_acc = df["accuracy"].max()
+        best_f1 = df["f1_score"].max()
+        orig_row = df.iloc[0]
+        comp_mask = df["stage"].str.lower().str.contains("compress", na=False)
+        comp_row = df[comp_mask].iloc[0] if comp_mask.any() else None
+        size_orig = orig_row["file_size_mb"]
+        size_comp = comp_row["file_size_mb"] if comp_row is not None else None
+        ratio = f"{size_orig/size_comp:.1f}x" if size_comp is not None and size_comp > 0 else "-"
+
+        header = "| Version | Run (datetime) | Data | Best Acc | Best F1 | Orig (MB) | Comp (MB) | Ratio |\n"
+        header += "|---------|----------------|------|----------|---------|-----------|-----------|-------|\n"
+        line = f"| {self.version} | {self.run_id} | {self.data_version} | {best_acc:.4f} | {best_f1:.4f} | {size_orig:.3f} | {size_comp or 0:.3f} | {ratio} |\n"
+
+        if not summary_path.exists():
+            summary_path.write_text("# Version Comparison\n\n" + header + line, encoding="utf-8")
+        else:
+            content = summary_path.read_text(encoding="utf-8")
+            if "| Version |" not in content:
+                content = content.rstrip() + "\n\n" + header
+            content = content.rstrip() + "\n" + line
+            summary_path.write_text(content, encoding="utf-8")
+        print(f"✅ Version summary: {summary_path}")
+
     def _generate_markdown_report(self, df: pd.DataFrame, output_path: Path):
         """Generate markdown report with comparison tables."""
         with open(output_path, "w", encoding="utf-8") as f:
             f.write("# Compression Analysis Report\n\n")
-            f.write(f"Generated: {pd.Timestamp.now()}\n\n")
+            f.write(f"| Item | Value |\n")
+            f.write(f"|------|----|\n")
+            f.write(f"| **Version** | {self.version} |\n")
+            f.write(f"| **Run (datetime)** | {self.run_id} |\n")
+            f.write(f"| **Data Version** | {self.data_version} |\n")
+            f.write(f"| **Generated** | {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} |\n\n")
 
             f.write("## Summary\n\n")
             f.write(f"Total stages analyzed: {len(df)}\n\n")
@@ -531,7 +594,13 @@ def main():
         "--output-dir",
         type=str,
         default="data/processed/analysis",
-        help="Output directory for results",
+        help="Base output directory (results go to {output-dir}/{version}/)",
+    )
+    parser.add_argument(
+        "--version",
+        type=str,
+        default=None,
+        help="Run version (overrides config). Default: from config or timestamp",
     )
     parser.add_argument(
         "--format",
@@ -544,7 +613,9 @@ def main():
     args = parser.parse_args()
 
     analyzer = CompressionAnalyzer(
-        config_path=args.config, output_dir=args.output_dir
+        config_path=args.config,
+        output_dir=args.output_dir,
+        version=args.version,
     )
 
     # Use default model paths if not specified

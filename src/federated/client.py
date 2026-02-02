@@ -8,12 +8,27 @@ import warnings
 # Suppress TensorFlow warnings
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 warnings.filterwarnings('ignore', category=UserWarning)
+
+# Avoid home disk quota: redirect temp to /scratch
+if 'TMPDIR' not in os.environ and os.path.exists('/scratch'):
+    user = os.environ.get('USER', '')
+    if user:
+        scratch_tmp = f'/scratch/{user}/tmp'
+        if not os.path.exists(scratch_tmp):
+            try:
+                os.makedirs(scratch_tmp, exist_ok=True)
+            except OSError:
+                pass
+        if os.path.exists(scratch_tmp):
+            os.environ['TMPDIR'] = scratch_tmp
+            os.environ['TEMP'] = scratch_tmp
+            os.environ['TMP'] = scratch_tmp
 warnings.filterwarnings('ignore', message='.*protobuf.*')
 
 import flwr as fl
 import numpy as np
 import yaml
-from flwr.common import parameters_to_ndarrays
+from flwr.common import ndarrays_to_parameters, parameters_to_ndarrays
 
 from src.data.loader import load_dataset, partition_non_iid
 from src.models import nets
@@ -23,8 +38,12 @@ try:
     import tensorflow as tf
     import tensorflow_model_optimization as tfmot
     tf.get_logger().setLevel('ERROR')
+    _KERAS_CALLBACKS = tf.keras.callbacks
 except ImportError:
-    pass
+    try:
+        from keras import callbacks as _KERAS_CALLBACKS
+    except ImportError:
+        _KERAS_CALLBACKS = None
 
 
 # ------------------------------------------------
@@ -61,14 +80,35 @@ def load_config(config_path: str = None):
 CFG = None
 
 
-class SaveModelStrategy(fl.server.strategy.FedAvg):
-    """FedAvg strategy that stores latest parameters for saving."""
+def _get_strategy_base():
+    """Use FedAvgM (momentum) when available to mitigate client drift."""
+    if hasattr(fl.server.strategy, "FedAvgM"):
+        return fl.server.strategy.FedAvgM
+    return fl.server.strategy.FedAvg
+
+
+class SaveModelStrategy(_get_strategy_base()):
+    """FedAvg/FedAvgM strategy that stores latest parameters for saving.
+    
+    FedAvgM: server-side momentum mitigates client drift and improves convergence stability.
+    """
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.latest_parameters: Optional[fl.common.Parameters] = None
 
     def aggregate_fit(self, server_round, results, failures):
+        """Aggregate fit results (sample-weighted, with momentum if FedAvgM)."""
+        if not results:
+            return None, {}
+        
+        total_examples = sum([num_examples for _, fit_res in results for num_examples in [fit_res.num_examples]])
+        if server_round % 5 == 0:
+            print(f"\n[Round {server_round}] Client contributions:")
+            for client_proxy, fit_res in results:
+                weight = fit_res.num_examples / total_examples
+                print(f"  Client samples: {fit_res.num_examples:,} (weight: {weight:.4f})")
+        
         aggregated_parameters, aggregated_metrics = super().aggregate_fit(
             server_round, results, failures
         )
@@ -82,16 +122,17 @@ def _build_model(
     input_shape: Tuple[int, ...],
     num_classes: int,
     learning_rate: float = 0.001,
+    use_focal_loss: bool = False,
 ):
-    """Build model based on model name. Falls back to default functions if get_model is not available in nets module."""
+    """Build model based on model name."""
     if hasattr(nets, "get_model"):
-        return nets.get_model(model_name, input_shape, num_classes, learning_rate)
+        return nets.get_model(model_name, input_shape, num_classes, learning_rate, use_focal_loss=use_focal_loss)
 
     name = (model_name or "mlp").lower()
     if name in ["cnn", "small_cnn"] and hasattr(nets, "make_small_cnn"):
         return nets.make_small_cnn(input_shape, num_classes, learning_rate)
     if hasattr(nets, "make_mlp"):
-        return nets.make_mlp(input_shape, num_classes, learning_rate)
+        return nets.make_mlp(input_shape, num_classes, learning_rate, use_focal_loss=use_focal_loss)
 
     raise AttributeError(
         "Model creation function not found. Please check if 'get_model' or 'make_mlp' is defined."
@@ -118,14 +159,14 @@ class KerasClient(fl.client.NumPyClient):
             y_labels = np.argmax(y_train, axis=1) if len(y_train.shape) > 1 else y_train
             classes, counts = np.unique(y_labels, return_counts=True)
             
-            # Smoothed class weights: sqrt를 사용하여 극단적인 가중치 완화
+            # Smoothed class weights: use sqrt to mitigate extreme weights
             n_samples = len(y_labels)
             n_classes = len(classes)
-            # 기본 가중치 계산
+            # Base weight calculation
             raw_weights = n_samples / (n_classes * counts)
-            # Square root를 적용하여 부드럽게
+            # Apply square root for smoothing
             smoothed_weights = np.sqrt(raw_weights)
-            # 정규화
+            # Normalize
             class_weights_array = smoothed_weights / np.mean(smoothed_weights)
             
             self.class_weight = {int(cls): float(weight) for cls, weight in zip(classes, class_weights_array)}
@@ -148,10 +189,19 @@ class KerasClient(fl.client.NumPyClient):
             'y': self.y_train,
             'epochs': epochs,
             'batch_size': batch_size,
-            'verbose': 0
+            'verbose': 0,
         }
-        
-        # Add class weights if enabled
+        use_callbacks = config.get("use_callbacks", False) and _KERAS_CALLBACKS is not None
+        if use_callbacks:
+            fit_kwargs['validation_data'] = (self.x_test, self.y_test)
+            fit_kwargs['callbacks'] = [
+                _KERAS_CALLBACKS.ReduceLROnPlateau(
+                    monitor='val_loss', factor=0.5, patience=2, min_lr=1e-6, verbose=0
+                ),
+                _KERAS_CALLBACKS.EarlyStopping(
+                    monitor='val_loss', patience=4, restore_best_weights=True, verbose=0
+                ),
+            ]
         if self.class_weight is not None:
             fit_kwargs['class_weight'] = self.class_weight
 
@@ -275,8 +325,23 @@ def simulate_clients(config: dict = None):
     train_parts = partition_non_iid(x_train, y_train, num_clients)
     test_parts = partition_non_iid(x_test, y_test, num_clients)
 
+    # Print client data distribution for debugging class imbalance
+    print("\n" + "="*60)
+    print("CLIENT DATA DISTRIBUTION")
+    print("="*60)
+    for cid in range(num_clients):
+        y_client = train_parts[cid]["y"]
+        unique, counts = np.unique(y_client, return_counts=True)
+        total = len(y_client)
+        print(f"Client {cid}: Total={total:,} samples")
+        for label, count in zip(unique, counts):
+            pct = 100.0 * count / total
+            print(f"  - Class {label}: {count:,} ({pct:.2f}%)")
+    print("="*60 + "\n")
+
     model_name = model_cfg.get("name", "mlp")
     use_class_weights = fed_cfg.get("use_class_weights", False)
+    use_focal_loss = fed_cfg.get("use_focal_loss", False)
     learning_rate = float(fed_cfg.get("learning_rate", 0.001))
 
     # State to use in client_fn
@@ -288,6 +353,7 @@ def simulate_clients(config: dict = None):
         "train_parts": train_parts,
         "test_parts": test_parts,
         "use_class_weights": use_class_weights,
+        "use_focal_loss": use_focal_loss,
         "learning_rate": learning_rate,
     }
 
@@ -318,6 +384,7 @@ def simulate_clients(config: dict = None):
             state["input_shape"],
             state["num_classes"],
             state["learning_rate"],
+            state.get("use_focal_loss", False),
         )
 
         client = KerasClient(
@@ -356,7 +423,7 @@ def main(save_path: str = "src/models/global_model.h5", config_path: str = None)
     batch_size = int(fed_cfg.get("batch_size", 32))
     local_epochs = int(fed_cfg.get("local_epochs", 1))
 
-    # 라운드별 메트릭 저장 (보고서·문제 구간 확인용)
+    # Per-round metrics storage (for reports and problem diagnosis)
     output_dir = Path("outputs")
     output_dir.mkdir(parents=True, exist_ok=True)
     csv_path = output_dir / "fl_evaluation_history.csv"
@@ -365,7 +432,7 @@ def main(save_path: str = "src/models/global_model.h5", config_path: str = None)
     metrics_history: List[Dict[str, Any]] = []
 
     num_clients = state["num_clients"]
-    # CSV 헤더 (기기별 정확도 컬럼 포함)
+    # CSV header (including per-device accuracy columns)
     header = [
         "round", "accuracy", "accuracy_pct", "loss",
         "precision", "precision_pct", "recall", "recall_pct", "f1_score", "f1_pct",
@@ -385,9 +452,18 @@ def main(save_path: str = "src/models/global_model.h5", config_path: str = None)
         r = res_item[1]
         if r is None:
             return None
-        if hasattr(r, "__len__") and len(r) >= 3:
-            return r[2]
-        return getattr(r, "metrics", r)
+        # Flower 1.x: EvaluateRes has .metrics attribute (Record/dict-like)
+        if hasattr(r, "metrics") and r.metrics is not None:
+            m = r.metrics
+            if isinstance(m, dict):
+                return m
+            if hasattr(m, "items"):
+                return dict(m)
+            return {}
+        # Legacy: tuple (loss, num_examples, metrics)
+        if isinstance(r, (tuple, list)) and len(r) >= 3:
+            return r[2] if isinstance(r[2], dict) else {}
+        return None
 
     def evaluate_metrics_aggregation_fn(results):
         if not results:
@@ -412,7 +488,7 @@ def main(save_path: str = "src/models/global_model.h5", config_path: str = None)
         recall_pct = mean_recall * 100.0
         f1_pct = mean_f1 * 100.0
 
-        # 기기별 정확도 (순서대로 client 0, 1, 2, 3)
+        # Per-device accuracy (client 0, 1, 2, 3 in order)
         client_accuracies = []
         client_accuracies_pct = []
         for i in range(num_clients):
@@ -447,7 +523,7 @@ def main(save_path: str = "src/models/global_model.h5", config_path: str = None)
             if key in first:
                 aggregated[key] = first[key]
 
-        # 라운드별 기록 (기기별 메트릭 포함)
+        # Per-round record (including per-device metrics)
         row = {
             "round": current_round,
             "accuracy": mean_accuracy,
@@ -491,7 +567,7 @@ def main(save_path: str = "src/models/global_model.h5", config_path: str = None)
             w = csv.writer(f)
             w.writerow(csv_row)
 
-        # 콘솔 출력: 평균 + 기기별 정확도 (소수 + 퍼센트)
+        # Console output: mean + per-device accuracy (decimal + percent)
         print("\n[Evaluation Summary]")
         print("=" * 60)
         print(f"Round: {current_round} / {num_rounds}")
@@ -530,7 +606,7 @@ def main(save_path: str = "src/models/global_model.h5", config_path: str = None)
 
         return aggregated
 
-    strategy = SaveModelStrategy(
+    strategy_kw = dict(
         fraction_fit=fed_cfg.get("fraction_fit", 1.0),
         fraction_evaluate=fed_cfg.get("fraction_evaluate", 1.0),
         min_fit_clients=fed_cfg.get("min_fit_clients", state["num_clients"]),
@@ -539,18 +615,54 @@ def main(save_path: str = "src/models/global_model.h5", config_path: str = None)
         on_fit_config_fn=lambda rnd: {
             "batch_size": batch_size,
             "local_epochs": local_epochs,
+            "use_callbacks": fed_cfg.get("use_callbacks", False),
         },
         evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation_fn,
     )
+    if hasattr(fl.server.strategy, "FedAvgM"):
+        strategy_kw["server_momentum"] = fed_cfg.get("server_momentum", 0.9)
+        strategy_kw["server_learning_rate"] = fed_cfg.get("server_learning_rate", 1.0)
+        init_model = _build_model(
+            state["model_name"],
+            state["input_shape"],
+            state["num_classes"],
+            state["learning_rate"],
+            state.get("use_focal_loss", False),
+        )
+        strategy_kw["initial_parameters"] = ndarrays_to_parameters(init_model.get_weights())
+        print(f"[Strategy] FedAvgM (momentum={strategy_kw['server_momentum']})")
+    strategy = SaveModelStrategy(**strategy_kw)
 
-    history = fl.simulation.start_simulation(
-        client_fn=client_fn,
-        num_clients=state["num_clients"],
-        config=fl.server.ServerConfig(num_rounds=num_rounds),
-        strategy=strategy,
-    )
+    try:
+        history = fl.simulation.start_simulation(
+            client_fn=client_fn,
+            num_clients=state["num_clients"],
+            config=fl.server.ServerConfig(num_rounds=num_rounds),
+            strategy=strategy,
+        )
+    except Exception as ex:
+        import traceback
+        project_root = Path(__file__).resolve().parent.parent.parent
+        err_log = project_root / "data" / "processed" / "simulation_crash.log"
+        err_log.parent.mkdir(parents=True, exist_ok=True)
+        with open(err_log, "w", encoding="utf-8") as f:
+            f.write("=== Simulation Crash ===\n\n")
+            traceback.print_exc(file=f)
+            if hasattr(ex, "__cause__") and ex.__cause__ is not None:
+                f.write("\n--- Caused by ---\n\n")
+                traceback.print_exception(type(ex.__cause__), ex.__cause__, getattr(ex.__cause__, "__traceback__", None), file=f)
+                f.write(str(ex.__cause__) + "\n")
+        print("\n" + "=" * 60)
+        print("  Simulation Crash - Full traceback saved to:")
+        print(f"  {err_log}")
+        print("=" * 60)
+        traceback.print_exc()
+        if hasattr(ex, "__cause__") and ex.__cause__ is not None:
+            print("\n  Caused by:", ex.__cause__)
+            traceback.print_exception(type(ex.__cause__), ex.__cause__, getattr(ex.__cause__, "__traceback__", None))
+        raise
 
-    # 라운드별 메트릭 JSON 저장 (기기별 포함, 보고서·그래프용)
+    # Per-round metrics JSON (per-device included, for reports and graphs)
     with open(json_path, "w", encoding="utf-8") as f:
         json.dump({
             "num_clients": num_clients,
@@ -562,7 +674,7 @@ def main(save_path: str = "src/models/global_model.h5", config_path: str = None)
     print(f"  - JSON: {json_path.resolve()}  (same + per-device for scripts / graphs)")
     print("  → Use these to find which round or which device accuracy drops.\n")
 
-    # 보고서(Markdown) + 그래프 생성
+    # Generate report (Markdown) and graph
     import subprocess
     import sys
     project_root = Path(__file__).resolve().parent.parent.parent

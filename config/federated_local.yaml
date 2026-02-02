@@ -1,5 +1,8 @@
 # config/federated_local.yaml
-# 로컬 환경 전용 설정 파일
+# Local environment config
+
+# Version (for result/analysis folder naming, e.g. v1, v2_balanced)
+version: "v8"
 
 data:
   # Choose cicids2017, bot_iot, or mnist
@@ -8,40 +11,43 @@ data:
   # Data path (same folder contains both Bot-IoT and CIC-IDS2017)
   path: "data/raw/Bot-IoT"
 
-  # 클라이언트 수 (기기 4대)
+  # Number of clients (4 devices)
   num_clients: 4
 
-  # 너무 크면 학습 오래 걸리니까 샘플 수 제한 (공격 샘플 확보 위해 증가)
-  max_samples: 200000
+  # Limit samples to avoid long training (increase for more attack samples)
+  max_samples: 1500000
   
   # For CIC-IDS2017: binary (BENIGN vs ATTACK) or multi-class
   binary: true
+  use_smote: true
 
 model:
-  # mlp 또는 cnn (Bot-IoT면 보통 mlp)
+  # mlp or cnn (usually mlp for Bot-IoT)
   name: mlp
 
 federated:
-  # 정확도 향상을 위해 라운드·에폭 상향 (기본 10라운드, 10에폭)
-  num_rounds: 10
+  # Increased rounds/epochs for better accuracy
+  num_rounds: 25
 
-  # 각 라운드에 학습에 참여할 비율 (전부 쓰면 1.0)
+  # Fraction of clients participating per round (1.0 = all)
   fraction_fit: 1.0
   fraction_evaluate: 1.0
 
   # Local training parameters
-  local_epochs: 10
+  local_epochs: 15
   batch_size: 128
-  # 학습률: 0.001 권장, 수렴 느리면 0.0005 등으로 낮춤
   learning_rate: 0.001
   
   # Class balancing
   use_class_weights: true
+  use_focal_loss: true
+  server_momentum: 0.9
+  server_learning_rate: 1.0
   
   # Quantization-Aware Training (QAT)
   use_qat: true
 
-  # 전략 내부에서 쓸 수 있도록 남겨둠 (기기 4개와 동일)
+  # For strategy internal use (same as 4 devices)
   min_fit_clients: 4
   min_evaluate_clients: 4
   min_available_clients: 4

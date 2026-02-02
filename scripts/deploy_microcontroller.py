@@ -1,6 +1,6 @@
 """
-마이크로컨트롤러 배포 스크립트
-ESP32에 TFLite 모델 배포를 위한 유틸리티
+Microcontroller deployment script
+Utility for deploying TFLite model to ESP32
 """
 import argparse
 import os
@@ -16,11 +16,11 @@ if str(project_root) not in sys.path:
 
 def convert_to_c_array(model_path: str, output_path: str):
     """
-    TFLite 모델을 C 배열로 변환
-    
+    Convert TFLite model to C array
+
     Args:
-        model_path: TFLite 모델 파일 경로
-        output_path: 출력 C 파일 경로
+        model_path: Path to TFLite model file
+        output_path: Path to output C file
     """
     if not os.path.exists(model_path):
         print(f"❌ Model file not found: {model_path}")
@@ -30,10 +30,10 @@ def convert_to_c_array(model_path: str, output_path: str):
         with open(model_path, 'rb') as f:
             model_data = f.read()
         
-        # C 배열 이름 생성 (파일명 기반)
+        # C array name from filename
         array_name = Path(model_path).stem.replace('-', '_').replace('.', '_')
         
-        # C 헤더 파일 생성
+        # Create C header file
         header_path = output_path.replace('.c', '.h')
         header_content = f"""#ifndef {array_name.upper()}_H
 #define {array_name.upper()}_H
@@ -47,14 +47,14 @@ extern const unsigned int {array_name}_len;
 #endif
 """
         
-        # C 소스 파일 생성
+        # Create C source file
         source_content = f"""// Auto-generated from {Path(model_path).name}
 #include "{Path(header_path).name}"
 
 const unsigned char {array_name}[] = {{
 """
         
-        # 바이트를 16진수 배열로 변환 (12개씩 줄바꿈)
+        # Convert bytes to hex array (12 per line)
         for i, byte in enumerate(model_data):
             if i % 12 == 0:
                 source_content += "\n  "
@@ -63,7 +63,7 @@ const unsigned char {array_name}[] = {{
         source_content = source_content.rstrip(',') + "\n};\n\n"
         source_content += f"const unsigned int {array_name}_len = {len(model_data)};\n"
         
-        # 파일 저장
+        # Save files
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
         
         with open(header_path, 'w') as f:
@@ -86,19 +86,19 @@ const unsigned char {array_name}[] = {{
 
 
 def check_tflite_model(model_path: str):
-    """TFLite 모델 정보 확인"""
+    """Check TFLite model info"""
     try:
         import tensorflow as tf
         
-        # 모델 로드
+        # Load model
         interpreter = tf.lite.Interpreter(model_path=model_path)
         interpreter.allocate_tensors()
         
-        # 입력/출력 정보
+        # Input/output info
         input_details = interpreter.get_input_details()
         output_details = interpreter.get_output_details()
         
-        # 파일 크기
+        # File size
         file_size = os.path.getsize(model_path)
         
         print("\n" + "=" * 60)
@@ -149,13 +149,13 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
     
-    # 모델 정보 확인
+    # Check model info
     info = check_tflite_model(args.model)
     
     if not info:
         sys.exit(1)
     
-    # C 배열로 변환
+    # Convert to C array
     if not args.check_only:
         success = convert_to_c_array(args.model, args.output)
         if success:

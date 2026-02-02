@@ -2,7 +2,7 @@
 set -euo pipefail
 source .venv/bin/activate || true
 
-# Kaggle 데이터셋 다운로드 및 압축 해제
+# Download and extract Kaggle dataset
 DATASET="vigneshvenkateswaran/bot-iot-5-data"
 OUTPUT_DIR="data/raw"
 

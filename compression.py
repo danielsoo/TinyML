@@ -402,31 +402,32 @@ def test_full_pipeline_mlp():
     return results
 
 
-def test_saved_model_pruning():
+def test_saved_model_pruning(config_path: str = "config/federated_local.yaml"):
     """
-    Test complete pipeline on a pre-trained saved model (if exists).
-
-    Pipeline: Load Model → Pruning → Quantization → TFLite Export
+    Compress a pre-trained saved model: Load → Prune → Quantize → TFLite Export.
+    Used by run.py pipeline to compress trained model (FL or Centralized).
     """
     print("\n" + "="*80)
-    print(" "*20 + "🧪 SAVED MODEL COMPRESSION TEST")
+    print(" "*20 + "📦 SAVED MODEL COMPRESSION")
     print("="*80 + "\n")
 
     model_path = Path("models/global_model.h5")
 
     if not model_path.exists():
         print(f"⚠️  No saved model found at {model_path}")
-        print(f"   Skipping this test. Train a model first with:")
-        print(f"   python train_windows.py\n")
+        print(f"   Train first, then copy to models/global_model.h5\n")
         return None
 
     print(f"📦 Loading saved model from {model_path}...")
     model = keras.models.load_model(model_path)
     print("✅ Model loaded\n")
 
-    # Load test data
+    # Load test data (use same config as training)
     print("📂 Loading test dataset...")
-    with open("config/federated.yaml", encoding='utf-8') as f:
+    cfg_path = Path(config_path)
+    if not cfg_path.exists():
+        cfg_path = Path("config/federated_local.yaml")
+    with open(cfg_path, encoding='utf-8') as f:
         cfg = yaml.safe_load(f)
 
     data_cfg = cfg.get("data", {})
@@ -520,32 +521,43 @@ def test_saved_model_pruning():
 
 
 def main():
-    """
-    Run all integration tests for the complete TinyML pipeline.
-
-    Tests:
-    1. Full pipeline: Training → Pruning → Fine-tuning → Quantization → TFLite
-    2. Saved model: Load → Prune → Quantize → TFLite
-    """
-    print("\n" + "🔬 "*30)
-    print(" "*15 + "TINYML PIPELINE INTEGRATION TEST SUITE")
-    print("🔬 "*30 + "\n")
+    import argparse
+    parser = argparse.ArgumentParser(description="TinyML compression pipeline")
+    parser.add_argument(
+        "--use-trained",
+        action="store_true",
+        help="Compress trained model only (for run.py pipeline, skip Test 1)",
+    )
+    parser.add_argument(
+        "--config",
+        type=str,
+        default="config/federated_local.yaml",
+        help="Config path for dataset (used by test_saved_model_pruning)",
+    )
+    args = parser.parse_args()
 
     results = {}
 
     try:
-        # Test 1: Full TinyML pipeline with MLP
-        print("Running Test 1: Full TinyML Pipeline (Train → distillation → Prune → Quantize → TFLite)")
-        results['mlp_pipeline'] = test_full_pipeline_mlp()
-
-        # Test 2: Saved model compression
-        print("\nRunning Test 2: Saved Model Compression (Load → Prune → Quantize → TFLite)")
-        results['saved_model'] = test_saved_model_pruning()
+        if args.use_trained:
+            # run.py pipeline: load trained model only -> compress -> save tflite
+            print("\n📌 Mode: use-trained (compress trained model only)\n")
+            results['saved_model'] = test_saved_model_pruning(config_path=args.config)
+            if results.get('saved_model') is None:
+                return None
+        else:
+            # Full integration test
+            print("\n" + "🔬 "*30)
+            print(" "*15 + "TINYML PIPELINE INTEGRATION TEST SUITE")
+            print("🔬 "*30 + "\n")
+            print("Running Test 1: Full TinyML Pipeline (Train → distillation → Prune → Quantize → TFLite)")
+            results['mlp_pipeline'] = test_full_pipeline_mlp()
+            print("\nRunning Test 2: Saved Model Compression (Load → Prune → Quantize → TFLite)")
+            results['saved_model'] = test_saved_model_pruning(config_path=args.config)
 
         print("\n" + "="*80)
-        print("✅ ALL INTEGRATION TESTS COMPLETED SUCCESSFULLY!")
+        print("✅ COMPRESSION COMPLETED SUCCESSFULLY!")
         print("="*80 + "\n")
-
         return results
 
     except Exception as e:
@@ -558,8 +570,7 @@ def main():
 
 if __name__ == "__main__":
     results = main()
-
     if results:
-        print("✅ Test suite completed successfully")
+        print("✅ Compression completed successfully")
     else:
-        print("❌ Test suite failed")
+        print("❌ Compression failed")

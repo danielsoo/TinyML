@@ -1,5 +1,5 @@
 """
-간단한 테스트 모델 생성 - 마이크로컨트롤러 배포 검증용
+Create simple test model for microcontroller deployment verification
 """
 import os
 
@@ -20,24 +20,24 @@ from src.tinyml.export_tflite import export_tflite
 
 def create_hello_world_model():
     """
-    매우 간단한 MLP 모델 (입력 2개, 출력 1개)
-    - 입력: [x1, x2] (2개의 float 값)
-    - 출력: 0~1 사이의 값 (sigmoid)
-    - 용도: 마이크로컨트롤러에서 추론 테스트
+    Very simple MLP (2 inputs, 1 output)
+    - Input: [x1, x2] (2 floats)
+    - Output: 0~1 (sigmoid)
+    - Use: inference test on microcontroller
     """
-    # 모델 구조 정의
+    # Model structure
     model = tf.keras.Sequential([
         tf.keras.layers.Dense(4, activation='relu', input_shape=(2,), name='dense1'),
         tf.keras.layers.Dense(2, activation='relu', name='dense2'),
         tf.keras.layers.Dense(1, activation='sigmoid', name='output')
     ])
     
-    # 간단한 더미 데이터로 학습
-    # 패턴: x1 + x2 > 1.0 이면 1, 아니면 0
+    # Train on simple dummy data
+    # Pattern: x1 + x2 > 1.0 -> 1, else 0
     X_train = np.random.rand(100, 2).astype(np.float32)
     y_train = (X_train[:, 0] + X_train[:, 1] > 1.0).astype(np.float32)
     
-    # 모델 컴파일 및 학습
+    # Compile and train model
     model.compile(
         optimizer='adam',
         loss='binary_crossentropy',
@@ -47,7 +47,7 @@ def create_hello_world_model():
     print("Training Hello World model...")
     model.fit(X_train, y_train, epochs=20, verbose=1, batch_size=32)
     
-    # 간단한 테스트
+    # Simple test
     test_input = np.array([[0.3, 0.3], [0.7, 0.7]], dtype=np.float32)
     predictions = model.predict(test_input, verbose=0)
     print(f"\nTest predictions:")
@@ -58,7 +58,7 @@ def create_hello_world_model():
 
 
 if __name__ == "__main__":
-    # 출력 디렉토리 생성
+    # Create output directory
     output_dir = "data/processed/microcontroller"
     os.makedirs(output_dir, exist_ok=True)
     
@@ -66,26 +66,26 @@ if __name__ == "__main__":
     print("Creating Hello World Test Model for Microcontroller")
     print("=" * 60)
     
-    # 모델 생성
+    # Create model
     model = create_hello_world_model()
     
-    # H5 형식으로 저장
+    # Save as H5
     h5_path = os.path.join(output_dir, "hello_world_model.h5")
     model.save(h5_path)
     print(f"\n✅ Saved H5 model: {h5_path}")
     
-    # TFLite로 변환
+    # Convert to TFLite
     tflite_path = os.path.join(output_dir, "hello_world_model.tflite")
     export_tflite(model, tflite_path)
     
-    # 모델 정보 출력
+    # Print model info
     print("\n" + "=" * 60)
     print("Model Information")
     print("=" * 60)
     print(f"Input shape: {model.input_shape}")
     print(f"Output shape: {model.output_shape}")
     
-    # 파일 크기 확인
+    # Check file sizes
     tflite_size = os.path.getsize(tflite_path)
     h5_size = os.path.getsize(h5_path)
     
@@ -95,7 +95,7 @@ if __name__ == "__main__":
     if tflite_size > 0:
         print(f"  Compression: {h5_size/tflite_size:.2f}x")
     
-    # 모델 파라미터 수
+    # Model parameter count
     total_params = model.count_params()
     print(f"\nTotal parameters: {total_params:,}")
     
