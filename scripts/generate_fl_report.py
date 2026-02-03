@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-"""FL 학습 결과 마크다운 보고서 생성.
+"""Generate FL evaluation report in Markdown.
 
-outputs/fl_evaluation_history.json 을 읽어
-outputs/fl_evaluation_report.md 를 생성합니다.
-- 라운드별 평균·기기별 정확도(%), 손실
-- 문제 구간(정확도 하락) 파악용
+Reads outputs/fl_evaluation_history.json and creates outputs/fl_evaluation_report.md.
+- Per-round mean and per-device accuracy (%), loss
+- For identifying problem segments (accuracy drops)
 """
 import json
 from pathlib import Path
@@ -36,7 +35,7 @@ def generate_fl_report(json_path: Path, output_dir: Path, report_name: str = "fl
             f.write(f"- **Final loss**: {last.get('loss', 0):.4f}\n")
         f.write("\n")
 
-        # 라운드별 테이블 (모두 퍼센트)
+        # Per-round table (all in percent)
         f.write("## Round-by-Round Metrics (Accuracy %)\n\n")
         header = "| Round | Mean (%) | Loss |"
         for i in range(num_clients):

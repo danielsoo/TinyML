@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""FL 학습 히스토리 분석: 라운드별·기기별 정확도 그래프.
+"""FL history analysis: round-by-round and per-device accuracy plot.
 
-outputs/fl_evaluation_history.json 을 읽어
-- 라운드별 평균 정확도
-- 기기(클라이언트)별 정확도
-를 시계열로 그려 outputs/fl_evaluation_plot.png 에 저장합니다.
-보고서·발표 시 어느 라운드/어느 기기에서 문제가 발생하는지 확인용.
+Reads outputs/fl_evaluation_history.json and plots:
+- Mean accuracy per round
+- Per-device (client) accuracy
+as time series, saves to outputs/fl_evaluation_plot.png.
+For reports/presentations: identify which round/device has issues.
 """
 from pathlib import Path
 import argparse

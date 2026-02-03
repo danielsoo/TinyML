@@ -10,12 +10,19 @@ import json
 from pathlib import Path
 from typing import Optional
 
+# Use Agg backend for headless environments (e.g. server)
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
-import seaborn as sns
 
-# Set style
-sns.set_style("whitegrid")
+try:
+    import seaborn as sns
+    sns.set_style("whitegrid")
+except ImportError:
+    sns = None  # Use default matplotlib style if seaborn not available
+
 plt.rcParams["figure.figsize"] = (12, 8)
 
 
@@ -28,10 +35,11 @@ class CompressionVisualizer:
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
-        # Load results
+        # Load results (supports versioned format: {version, data_version, results})
         if self.results_path.suffix == ".json":
-            with open(self.results_path) as f:
-                self.results = json.load(f)
+            with open(self.results_path, encoding="utf-8") as f:
+                data = json.load(f)
+            self.results = data.get("results", data) if isinstance(data, dict) else data
             self.df = pd.DataFrame(self.results)
         else:
             self.df = pd.read_csv(self.results_path)
@@ -239,7 +247,5 @@ def main():
 
 
 if __name__ == "__main__":
-    from typing import Optional
-    import numpy as np
     main()
 

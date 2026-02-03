@@ -35,7 +35,7 @@ from src.modelcompression.quantization import (
     compare_model_sizes,
     evaluate_quantization_accuracy
 )
-from src.tinyml.export_tflite import export_tflite
+from src.tinyml.export_tflite import export_tflite, export_tflite_qat, _strip_bn_dropout_for_tflite
 
 
 def safe_evaluate(model, x, y, verbose=0):
@@ -402,45 +402,77 @@ def test_full_pipeline_mlp():
     return results
 
 
-def test_saved_model_pruning():
+def test_saved_model_pruning(
+    config_path: str = "config/federated_local.yaml",
+    dataset_override: str = None,
+):
     """
-    Test complete pipeline on a pre-trained saved model (if exists).
-
-    Pipeline: Load Model → Pruning → Quantization → TFLite Export
+    Compress a pre-trained saved model: Load → Prune → Quantize → TFLite Export.
+    Used by run.py pipeline to compress trained model (FL or Centralized).
     """
     print("\n" + "="*80)
-    print(" "*20 + "🧪 SAVED MODEL COMPRESSION TEST")
+    print(" "*20 + "📦 SAVED MODEL COMPRESSION")
     print("="*80 + "\n")
 
     model_path = Path("models/global_model.h5")
 
     if not model_path.exists():
         print(f"⚠️  No saved model found at {model_path}")
-        print(f"   Skipping this test. Train a model first with:")
-        print(f"   python train_windows.py\n")
+        print(f"   Train first, then copy to models/global_model.h5\n")
         return None
 
     print(f"📦 Loading saved model from {model_path}...")
-    model = keras.models.load_model(model_path)
+    # Use compile=False: custom loss (focal loss) cannot be deserialized.
+    # Recompile with standard loss for evaluate() during compression.
+    model = keras.models.load_model(model_path, compile=False)
+    # Infer output shape for recompile (binary or multi-class)
+    last_layer = model.layers[-1]
+    num_classes = last_layer.units if hasattr(last_layer, "units") else 2
+    loss = "binary_crossentropy" if num_classes == 1 else "sparse_categorical_crossentropy"
+    model.compile(optimizer="adam", loss=loss, metrics=["accuracy"])
     print("✅ Model loaded\n")
 
-    # Load test data
+    # Load test data (use same config as training)
     print("📂 Loading test dataset...")
-    with open("config/federated.yaml", encoding='utf-8') as f:
+    cfg_path = Path(config_path)
+    if not cfg_path.exists():
+        cfg_path = Path("config/federated_local.yaml")
+    with open(cfg_path, encoding='utf-8') as f:
         cfg = yaml.safe_load(f)
 
     data_cfg = cfg.get("data", {})
-    dataset_name = data_cfg.get("name", "bot_iot")
+    dataset_name = dataset_override or data_cfg.get("name", "bot_iot")
+    if dataset_override:
+        print(f"📌 Dataset override: {dataset_override}\n")
     dataset_kwargs = {k: v for k, v in data_cfg.items() if k not in {"name", "num_clients"}}
 
     if "path" in dataset_kwargs and "data_path" not in dataset_kwargs:
         dataset_kwargs["data_path"] = dataset_kwargs.pop("path")
 
-    _, _, x_test, y_test = load_dataset(dataset_name, **dataset_kwargs)
+    x_train, y_train, x_test, y_test = load_dataset(dataset_name, **dataset_kwargs)
 
-    # Use subset
+    # Ensure data matches model input shape (38=Bot-IoT, 78=CIC-IDS2017)
+    model_input_dim = int(model.input_shape[1])
+    data_features = x_train.shape[1]
+    if model_input_dim != data_features:
+        alt_name = "bot_iot" if dataset_name.lower() in ["cicids2017", "cic-ids-2017"] else "cicids2017"
+        try:
+            x_train_alt, y_train_alt, x_test_alt, y_test_alt = load_dataset(alt_name, **dataset_kwargs)
+            if x_train_alt.shape[1] == model_input_dim:
+                x_train, y_train, x_test, y_test = x_train_alt, y_train_alt, x_test_alt, y_test_alt
+                print(f"⚠️  Switched to dataset '{alt_name}' (model expects {model_input_dim} features)\n")
+        except Exception:
+            pass
+        if x_train.shape[1] != model_input_dim:
+            raise ValueError(
+                f"Input shape mismatch: model expects {model_input_dim} features, "
+                f"but dataset '{dataset_name}' provides {data_features}. "
+                "Use the same config as training (38≈Bot-IoT, 78≈CIC-IDS2017)."
+            )
+
+    # Use subset for eval/speed
     x_test, y_test = x_test[:1000], y_test[:1000]
-    print(f"✅ Test samples: {len(x_test)}\n")
+    print(f"✅ Test samples: {len(x_test)}, features: {x_train.shape[1]}\n")
 
     # Evaluate original
     print("📊 Evaluating original saved model...")
@@ -481,9 +513,8 @@ def test_saved_model_pruning():
     output_dir = Path("models/tflite")
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    # Load some training data for representative dataset
-    _, _, x_train, _ = load_dataset(dataset_name, **dataset_kwargs)
-    x_train = x_train[:1000]  # Use subset
+    x_train_sub = x_train[:5000]
+    y_train_sub = y_train[:5000]
 
     # Export original (float32)
     tflite_orig_size = export_tflite(
@@ -492,19 +523,43 @@ def test_saved_model_pruning():
         quantize=False
     )
 
-    # Export pruned + quantized (int8)
+    # Export pruned + PTQ (post-training quantization)
     tflite_quant_size = export_tflite(
         pruned_model,
         str(output_dir / "saved_model_pruned_quantized.tflite"),
         quantize=True,
-        representative_data=x_train
+        representative_data=x_train_sub
     )
 
-    compression_ratio = tflite_orig_size / tflite_quant_size
+    # QAT: Quantization-Aware Training (fine-tune with quantization simulation)
+    print("\n🎓 Applying QAT (Quantization-Aware Training)...")
+    try:
+        import tensorflow_model_optimization as tfmot
+        # Strip BN before QAT to avoid TFLite conversion issues
+        pruned_for_qat = _strip_bn_dropout_for_tflite(pruned_model)
+        q_aware_model = tfmot.quantization.keras.quantize_model(pruned_for_qat)
+        q_aware_model.compile(optimizer="adam", loss=loss, metrics=["accuracy"])
+        print("   Fine-tuning QAT model (2 epochs)...")
+        q_aware_model.fit(
+            x_train_sub, y_train_sub,
+            epochs=2,
+            batch_size=128,
+            validation_split=0.1,
+            verbose=1
+        )
+        tflite_qat_size = export_tflite_qat(
+            q_aware_model,
+            str(output_dir / "saved_model_pruned_qat.tflite")
+        )
+        print(f"✅ QAT TFLite: {tflite_qat_size/1024:.2f} KB")
+    except Exception as e:
+        print(f"⚠️ QAT failed ({e}), skipping QAT export")
+        tflite_qat_size = None
 
-    print(f"\n✅ TFLite compression: {compression_ratio:.2f}x")
+    compression_ratio = tflite_orig_size / tflite_quant_size
+    print(f"\n✅ TFLite compression (PTQ): {compression_ratio:.2f}x")
     print(f"✅ Original size: {tflite_orig_size/1024:.2f} KB")
-    print(f"✅ Compressed size: {tflite_quant_size/1024:.2f} KB")
+    print(f"✅ Compressed (PTQ) size: {tflite_quant_size/1024:.2f} KB")
 
     # Save pruned model
     pruned_model.save(Path("models/test_pruned_model.h5"))
@@ -520,32 +575,49 @@ def test_saved_model_pruning():
 
 
 def main():
-    """
-    Run all integration tests for the complete TinyML pipeline.
-
-    Tests:
-    1. Full pipeline: Training → Pruning → Fine-tuning → Quantization → TFLite
-    2. Saved model: Load → Prune → Quantize → TFLite
-    """
-    print("\n" + "🔬 "*30)
-    print(" "*15 + "TINYML PIPELINE INTEGRATION TEST SUITE")
-    print("🔬 "*30 + "\n")
+    import argparse
+    parser = argparse.ArgumentParser(description="TinyML compression pipeline")
+    parser.add_argument(
+        "--use-trained",
+        action="store_true",
+        help="Compress trained model only (for run.py pipeline, skip Test 1)",
+    )
+    parser.add_argument(
+        "--config",
+        type=str,
+        default="config/federated_local.yaml",
+        help="Config path for dataset (used by test_saved_model_pruning)",
+    )
+    parser.add_argument(
+        "--dataset",
+        type=str,
+        default=None,
+        help="Override dataset name (e.g. bot_iot for 38 features when model was trained with Bot-IoT)",
+    )
+    args = parser.parse_args()
 
     results = {}
 
     try:
-        # Test 1: Full TinyML pipeline with MLP
-        print("Running Test 1: Full TinyML Pipeline (Train → distillation → Prune → Quantize → TFLite)")
-        results['mlp_pipeline'] = test_full_pipeline_mlp()
-
-        # Test 2: Saved model compression
-        print("\nRunning Test 2: Saved Model Compression (Load → Prune → Quantize → TFLite)")
-        results['saved_model'] = test_saved_model_pruning()
+        if args.use_trained:
+            # run.py pipeline: load trained model only -> compress -> save tflite
+            print("\n📌 Mode: use-trained (compress trained model only)\n")
+            results['saved_model'] = test_saved_model_pruning(config_path=args.config, dataset_override=args.dataset)
+            if results.get('saved_model') is None:
+                return None
+        else:
+            # Full integration test
+            print("\n" + "🔬 "*30)
+            print(" "*15 + "TINYML PIPELINE INTEGRATION TEST SUITE")
+            print("🔬 "*30 + "\n")
+            print("Running Test 1: Full TinyML Pipeline (Train → distillation → Prune → Quantize → TFLite)")
+            results['mlp_pipeline'] = test_full_pipeline_mlp()
+            print("\nRunning Test 2: Saved Model Compression (Load → Prune → Quantize → TFLite)")
+            results['saved_model'] = test_saved_model_pruning(config_path=args.config, dataset_override=args.dataset)
 
         print("\n" + "="*80)
-        print("✅ ALL INTEGRATION TESTS COMPLETED SUCCESSFULLY!")
+        print("✅ COMPRESSION COMPLETED SUCCESSFULLY!")
         print("="*80 + "\n")
-
         return results
 
     except Exception as e:
@@ -557,9 +629,10 @@ def main():
 
 
 if __name__ == "__main__":
+    import sys
     results = main()
-
     if results:
-        print("✅ Test suite completed successfully")
+        print("✅ Compression completed successfully")
     else:
-        print("❌ Test suite failed")
+        print("❌ Compression failed")
+        sys.exit(1)
