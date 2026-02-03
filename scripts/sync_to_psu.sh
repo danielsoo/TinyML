@@ -21,6 +21,7 @@ rsync -avz \
   --exclude='data/processed' \
   --exclude='/models' \
   --exclude='outputs' \
+  --exclude='TinyML-results' \
   --exclude='*.pyc' \
   ./ "$SERVER:$REMOTE/"
 

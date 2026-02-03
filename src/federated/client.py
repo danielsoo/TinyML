@@ -123,16 +123,23 @@ def _build_model(
     num_classes: int,
     learning_rate: float = 0.001,
     use_focal_loss: bool = False,
+    focal_loss_alpha: float = 0.75,
 ):
     """Build model based on model name."""
     if hasattr(nets, "get_model"):
-        return nets.get_model(model_name, input_shape, num_classes, learning_rate, use_focal_loss=use_focal_loss)
+        return nets.get_model(
+            model_name, input_shape, num_classes, learning_rate,
+            use_focal_loss=use_focal_loss, focal_loss_alpha=focal_loss_alpha,
+        )
 
     name = (model_name or "mlp").lower()
     if name in ["cnn", "small_cnn"] and hasattr(nets, "make_small_cnn"):
         return nets.make_small_cnn(input_shape, num_classes, learning_rate)
     if hasattr(nets, "make_mlp"):
-        return nets.make_mlp(input_shape, num_classes, learning_rate, use_focal_loss=use_focal_loss)
+        return nets.make_mlp(
+            input_shape, num_classes, learning_rate,
+            use_focal_loss=use_focal_loss, focal_loss_alpha=focal_loss_alpha,
+        )
 
     raise AttributeError(
         "Model creation function not found. Please check if 'get_model' or 'make_mlp' is defined."
@@ -342,6 +349,7 @@ def simulate_clients(config: dict = None):
     model_name = model_cfg.get("name", "mlp")
     use_class_weights = fed_cfg.get("use_class_weights", False)
     use_focal_loss = fed_cfg.get("use_focal_loss", False)
+    focal_loss_alpha = float(fed_cfg.get("focal_loss_alpha", 0.75))
     learning_rate = float(fed_cfg.get("learning_rate", 0.001))
 
     # State to use in client_fn
@@ -354,6 +362,7 @@ def simulate_clients(config: dict = None):
         "test_parts": test_parts,
         "use_class_weights": use_class_weights,
         "use_focal_loss": use_focal_loss,
+        "focal_loss_alpha": focal_loss_alpha,
         "learning_rate": learning_rate,
     }
 
@@ -628,6 +637,7 @@ def main(save_path: str = "src/models/global_model.h5", config_path: str = None)
             state["num_classes"],
             state["learning_rate"],
             state.get("use_focal_loss", False),
+            state.get("focal_loss_alpha", 0.75),
         )
         strategy_kw["initial_parameters"] = ndarrays_to_parameters(init_model.get_weights())
         print(f"[Strategy] FedAvgM (momentum={strategy_kw['server_momentum']})")
@@ -705,6 +715,8 @@ def main(save_path: str = "src/models/global_model.h5", config_path: str = None)
         state["input_shape"],
         state["num_classes"],
         state["learning_rate"],
+        state.get("use_focal_loss", False),
+        state.get("focal_loss_alpha", 0.75),
     )
     if getattr(strategy, "latest_parameters", None) is not None:
         weights = parameters_to_ndarrays(strategy.latest_parameters)

@@ -16,10 +16,13 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import seaborn as sns
 
-# Set style
-sns.set_style("whitegrid")
+try:
+    import seaborn as sns
+    sns.set_style("whitegrid")
+except ImportError:
+    sns = None  # Use default matplotlib style if seaborn not available
+
 plt.rcParams["figure.figsize"] = (12, 8)
 
 

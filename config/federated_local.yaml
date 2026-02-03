@@ -20,6 +20,7 @@ data:
   # For CIC-IDS2017: binary (BENIGN vs ATTACK) or multi-class
   binary: true
   use_smote: true
+  balance_ratio: 10.0
 
 model:
   # mlp or cnn (usually mlp for Bot-IoT)
@@ -41,6 +42,7 @@ federated:
   # Class balancing
   use_class_weights: true
   use_focal_loss: true
+  focal_loss_alpha: 0.75
   server_momentum: 0.9
   server_learning_rate: 1.0
   

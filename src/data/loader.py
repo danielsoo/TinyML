@@ -351,21 +351,22 @@ def load_cicids2017(
     
     print(f"[load_cicids2017] Found {len(csv_files)} CSV files")
     
-    # Determine samples per file if max_samples is set
+    # Load full files to preserve true class distribution (~55:45).
+    # Random sample per file if max_samples set (avoids head-only BENIGN bias).
     if max_samples is not None:
         samples_per_file = max_samples // len(csv_files)
-        print(f"[load_cicids2017] Limiting to {samples_per_file} samples per file (total target: {max_samples})")
+        print(f"[load_cicids2017] Target {samples_per_file} samples/file (random from full file)")
     else:
         samples_per_file = None
-    
-    # Load and concatenate all files
+
+    rng = np.random.default_rng(random_state)
     dfs = []
     for csv_file in csv_files:
         try:
-            if samples_per_file:
-                df = pd.read_csv(csv_file, nrows=samples_per_file)
-            else:
-                df = pd.read_csv(csv_file)
+            df = pd.read_csv(csv_file)
+            if samples_per_file and len(df) > samples_per_file:
+                idx = rng.choice(len(df), size=samples_per_file, replace=False)
+                df = df.iloc[idx]
             dfs.append(df)
             print(f"[load_cicids2017] Loaded {len(df):,} rows from {csv_file.name}")
         except Exception as e:

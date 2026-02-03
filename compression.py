@@ -419,7 +419,14 @@ def test_saved_model_pruning(config_path: str = "config/federated_local.yaml"):
         return None
 
     print(f"📦 Loading saved model from {model_path}...")
-    model = keras.models.load_model(model_path)
+    # Use compile=False: custom loss (focal loss) cannot be deserialized.
+    # Recompile with standard loss for evaluate() during compression.
+    model = keras.models.load_model(model_path, compile=False)
+    # Infer output shape for recompile (binary or multi-class)
+    last_layer = model.layers[-1]
+    num_classes = last_layer.units if hasattr(last_layer, "units") else 2
+    loss = "binary_crossentropy" if num_classes == 1 else "sparse_categorical_crossentropy"
+    model.compile(optimizer="adam", loss=loss, metrics=["accuracy"])
     print("✅ Model loaded\n")
 
     # Load test data (use same config as training)
@@ -569,8 +576,10 @@ def main():
 
 
 if __name__ == "__main__":
+    import sys
     results = main()
     if results:
         print("✅ Compression completed successfully")
     else:
         print("❌ Compression failed")
+        sys.exit(1)

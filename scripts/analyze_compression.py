@@ -114,12 +114,15 @@ class CompressionAnalyzer:
         file_size_bytes = path.stat().st_size
         file_size_mb = file_size_bytes / (1024 * 1024)
 
-        # Load model to count parameters
+        # Load model to count parameters (compile=False for custom loss compatibility)
         if model_path.endswith(".h5"):
-            model = tf.keras.models.load_model(model_path)
+            model = tf.keras.models.load_model(model_path, compile=False)
             param_count = model.count_params()
         elif model_path.endswith(".tflite"):
-            interpreter = tf.lite.Interpreter(model_path=model_path)
+            interpreter = tf.lite.Interpreter(
+                model_path=model_path,
+                experimental_preserve_all_tensors=True,
+            )
             interpreter.allocate_tensors()
             # get_tensor_details() returns a list of dicts, each with 'shape' key
             param_count = sum(
@@ -144,10 +147,10 @@ class CompressionAnalyzer:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
 
-        # Load model
+        # Load model (compile=False for custom loss e.g. focal loss)
         if model_path.endswith(".h5"):
-            model = tf.keras.models.load_model(model_path)
-            
+            model = tf.keras.models.load_model(model_path, compile=False)
+
             # Check input shape compatibility
             model_input_shape = model.input_shape
             data_feature_count = self.x_test.shape[1]
@@ -174,7 +177,10 @@ class CompressionAnalyzer:
                 y_pred = np.argmax(y_pred_proba, axis=1)
 
         elif model_path.endswith(".tflite"):
-            interpreter = tf.lite.Interpreter(model_path=model_path)
+            interpreter = tf.lite.Interpreter(
+                model_path=model_path,
+                experimental_preserve_all_tensors=True,
+            )
             interpreter.allocate_tensors()
 
             input_details = interpreter.get_input_details()
@@ -263,9 +269,9 @@ class CompressionAnalyzer:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
 
-        # Load model
+        # Load model (compile=False for custom loss compatibility)
         if model_path.endswith(".h5"):
-            model = tf.keras.models.load_model(model_path)
+            model = tf.keras.models.load_model(model_path, compile=False)
             times = []
             for _ in range(num_runs):
                 start = time.time()
@@ -273,7 +279,10 @@ class CompressionAnalyzer:
                 times.append((time.time() - start) * 1000)  # Convert to ms
 
         elif model_path.endswith(".tflite"):
-            interpreter = tf.lite.Interpreter(model_path=model_path)
+            interpreter = tf.lite.Interpreter(
+                model_path=model_path,
+                experimental_preserve_all_tensors=True,
+            )
             interpreter.allocate_tensors()
             input_details = interpreter.get_input_details()
             output_details = interpreter.get_output_details()

@@ -105,6 +105,8 @@ def main():
     print(f"  - Attack (train): {np.sum(y_train == 1):,} | Normal: {np.sum(y_train == 0):,}")
 
     use_focal_loss = fed_cfg.get("use_focal_loss", False)
+    focal_loss_alpha = float(fed_cfg.get("focal_loss_alpha", 0.75))
+    use_class_weights = fed_cfg.get("use_class_weights", False)
     learning_rate = fed_cfg.get("learning_rate", 0.001)
     batch_size = fed_cfg.get("batch_size", 128)
     local_epochs = fed_cfg.get("local_epochs", 15)
@@ -117,22 +119,37 @@ def main():
         epochs = min(100, num_rounds * 2)
         print(f"\n  Auto epochs: {epochs} (from num_rounds={num_rounds})")
 
+    # Class weights for imbalanced data (same logic as FL client)
+    class_weight = None
+    if use_class_weights and num_classes == 2:
+        counts = np.bincount(y_train.astype(int))
+        n_samples = len(y_train)
+        raw_weights = n_samples / (2 * counts)
+        smoothed = np.sqrt(raw_weights)
+        class_weight = {i: float(smoothed[i] / np.mean(smoothed)) for i in range(2)}
+        print(f"\n  Class weights (smoothed): {class_weight}")
+
     model_name = model_cfg.get("name", "mlp")
-    print(f"\n🏗️  Building {model_name.upper()} (focal_loss={use_focal_loss})...")
-    model = get_model(model_name, input_shape, num_classes, learning_rate, use_focal_loss)
+    print(f"\n🏗️  Building {model_name.upper()} (focal_loss={use_focal_loss}, alpha={focal_loss_alpha})...")
+    model = get_model(
+        model_name, input_shape, num_classes, learning_rate,
+        use_focal_loss=use_focal_loss, focal_loss_alpha=focal_loss_alpha,
+    )
 
-    print(f"\n🚀 Training...")
-    print(f"  - Epochs: {epochs}")
-    print(f"  - Batch size: {batch_size}")
-
-    model.fit(
-        x_train,
-        y_train,
+    fit_kwargs = dict(
         epochs=epochs,
         batch_size=batch_size,
         validation_data=(x_test, y_test),
         verbose=1,
     )
+    if class_weight is not None:
+        fit_kwargs["class_weight"] = class_weight
+
+    print(f"\n🚀 Training...")
+    print(f"  - Epochs: {epochs}")
+    print(f"  - Batch size: {batch_size}")
+
+    model.fit(x_train, y_train, **fit_kwargs)
 
     loss, acc = model.evaluate(x_test, y_test, verbose=0)
     print(f"\n📈 Final Test Accuracy: {acc:.4f} ({acc*100:.2f}%)")

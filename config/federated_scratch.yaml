@@ -2,7 +2,7 @@
 # PSU e5-cse-135-01: data on /scratch to avoid home disk quota
 
 # Version (for result/analysis folder naming)
-version: "v8"
+version: "v11"
 
 data:
   name: cicids2017
@@ -12,8 +12,9 @@ data:
   max_samples: 1500000
   binary: true
   use_smote: true
-  # balance_ratio: 5.0 causes train/test distribution mismatch -> accuracy drop, disabled, use class_weights only
-  # balance_ratio: 10.0  # Uncomment to try relaxed ratio
+  # 1.0 = 50:50 (undersample majority to match minority)
+  # 5.0 = majority <= 5x minority; 10.0 = more relaxed
+  balance_ratio: 1.0
 
 model:
   name: mlp
@@ -27,6 +28,8 @@ federated:
   learning_rate: 0.001
   use_class_weights: true
   use_focal_loss: true
+  # alpha upweights minority (attack). 0.85 = stronger emphasis
+  focal_loss_alpha: 0.85
   use_callbacks: false
   server_momentum: 0.9
   server_learning_rate: 1.0
