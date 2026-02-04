@@ -1,45 +1,24 @@
+# Raw data (용량 큼)
+data/raw/
+
+# Processed data & 학습/분석 결과 (서버 sync로 관리)
+data/processed/
+TinyML-results/
+outputs/
+processed/
+
+# 학습된 모델 (.h5, .tflite)
+models/*.h5
+models/*.tflite
+models/tflite/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
 # macOS
 .DS_Store
-
-# Python venv
-.venv/
-
-# Raw data (large files should not be committed)
-data/raw/**/*.csv
-data/raw/**/*.zip
-data/raw/**/*.tar.gz
-data/raw/**/*.tar
-data/raw/**/*.gz
-*.csv
-
-# Trained/generated models (binary, large)
-*.h5
-*.tflite
-models/
 src/models/*.h5
-data/processed/microcontroller/*.h5
-data/processed/microcontroller/*.tflite
-data/processed/microcontroller/model_data.c
-data/processed/microcontroller/model_data.h
-esp32_tflite_project/src/model_data.c
-esp32_tflite_project/src/model_data.h
-
-# Generated outputs (reports/graphs 재실행으로 생성 가능)
-outputs/*.csv
-outputs/*.json
-outputs/*.png
-outputs/fl_*.md
-outputs/pruning_demo/
-outputs/test_pipeline/
-data/processed/analysis/
-
-# Logs
 training_log.txt
-*.log
-
-# 기타 캐시
-__pycache__/
-.ipynb_checkpoints/
-src/.DS_Store
-src/data/.DS_Store
-data/.DS_Store
+esp32_tflite_project/src/model_data.*
