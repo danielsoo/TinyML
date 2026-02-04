@@ -47,7 +47,9 @@ class CompressionAnalyzer:
         self,
         config_path: str = None,
         output_dir: str = "data/processed/analysis",
+        output_dir_final: str = None,
         version: str = None,
+        run_id: str = None,
     ):
         """Initialize analyzer with config and output directory."""
         # Use federated_colab.yaml as default if exists, otherwise federated_local.yaml
@@ -68,7 +70,7 @@ class CompressionAnalyzer:
         # Version: CLI override > config > "run"
         self.version = version or self.config.get("version") or "run"
         # run_id: datetime detail (2026-01-30_14-50-09)
-        self.run_id = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        self.run_id = run_id or datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
         # Data version (summary: which data was used for training)
         data_cfg = self.config.get("data", {})
@@ -79,10 +81,14 @@ class CompressionAnalyzer:
             data_parts.append(f"bal{data_cfg['balance_ratio']}")
         self.data_version = "_".join(data_parts)
 
-        # version/datetime structure: analysis/v2/2026-01-30_14-50-09/
-        base_dir = Path(output_dir)
-        self.output_dir = base_dir / self.version / self.run_id
-        self.output_dir.mkdir(parents=True, exist_ok=True)
+        # Output: either direct path (runs/.../analysis) or version/run_id under base
+        if output_dir_final:
+            self.output_dir = Path(output_dir_final)
+            self.output_dir.mkdir(parents=True, exist_ok=True)
+        else:
+            base_dir = Path(output_dir)
+            self.output_dir = base_dir / self.version / self.run_id
+            self.output_dir.mkdir(parents=True, exist_ok=True)
         print(f"📌 Version: {self.version} | Run: {self.run_id} | Data: {self.data_version}")
 
         # Load test dataset
@@ -253,12 +259,19 @@ class CompressionAnalyzer:
         recall = recall_score(self.y_test, y_pred, average="binary" if self.num_classes <= 2 else "weighted", zero_division=0)
         f1 = f1_score(self.y_test, y_pred, average="binary" if self.num_classes <= 2 else "weighted", zero_division=0)
 
-        return {
+        out = {
             "accuracy": float(accuracy),
             "precision": float(precision),
             "recall": float(recall),
             "f1_score": float(f1),
         }
+        # 정상 클래스(0) 지표: 정상인데 정상이라고 한 비율(Recall), 정상이라고 한 것 중 정상인 비율(Precision)
+        if self.num_classes <= 2:
+            prec_per = precision_score(self.y_test, y_pred, average=None, zero_division=0)
+            rec_per = recall_score(self.y_test, y_pred, average=None, zero_division=0)
+            out["precision_normal"] = float(prec_per[0])  # 정상이라고 예측한 것 중 실제 정상 비율
+            out["recall_normal"] = float(rec_per[0])       # 실제 정상인 것 중 정상이라고 예측한 비율
+        return out
 
     def measure_inference_speed(
         self, model_path: str, num_runs: int = 10
@@ -348,6 +361,9 @@ class CompressionAnalyzer:
         print(f"\n🎯 Performance:")
         print(f"   • Accuracy: {accuracy_metrics['accuracy']:.4f} ({accuracy_metrics['accuracy']*100:.2f}%)")
         print(f"   • F1-Score: {accuracy_metrics['f1_score']:.4f} ({accuracy_metrics['f1_score']*100:.2f}%)")
+        if "recall_normal" in accuracy_metrics and "precision_normal" in accuracy_metrics:
+            print(f"   • Normal Recall (of actual normal, % predicted as normal): {accuracy_metrics['recall_normal']:.4f} ({accuracy_metrics['recall_normal']*100:.2f}%)")
+            print(f"   • Normal Precision (of predicted normal, % actually normal): {accuracy_metrics['precision_normal']:.4f} ({accuracy_metrics['precision_normal']*100:.2f}%)")
 
         # Measure inference speed
         speed_metrics = self.measure_inference_speed(model_path)
@@ -436,11 +452,20 @@ class CompressionAnalyzer:
 
         # Path for next step (viz etc): version/run_id
         rel_path = f"{self.version}/{self.run_id}"
-        (self.output_dir.parent.parent / ".last_run_id").write_text(rel_path, encoding="utf-8")
+        # When writing under runs/.../analysis, .last_run_id lives in runs/; else in analysis base
+        if "runs" in str(self.output_dir):
+            last_run_dir = self.output_dir.parent.parent.parent
+        else:
+            last_run_dir = self.output_dir.parent.parent
+        (last_run_dir / ".last_run_id").write_text(rel_path, encoding="utf-8")
 
     def _append_version_summary(self, df: pd.DataFrame):
         """Append one-line summary to VERSIONS.md for cross-version comparison."""
-        summary_path = self.output_dir.parent.parent / "VERSIONS.md"
+        if "runs" in str(self.output_dir):
+            summary_dir = self.output_dir.parent.parent.parent
+        else:
+            summary_dir = self.output_dir.parent.parent
+        summary_path = summary_dir / "VERSIONS.md"
         best_acc = df["accuracy"].max()
         best_f1 = df["f1_score"].max()
         orig_row = df.iloc[0]
@@ -487,17 +512,28 @@ class CompressionAnalyzer:
                 else:
                     baseline_row = df.iloc[0]
 
-            # Comparison table
-            f.write("## Comparison Table\n\n")
-            f.write("| Stage | Size (MB) | Parameters | Accuracy | F1-Score | Latency (ms) |\n")
-            f.write("|-------|-----------|------------|----------|----------|--------------|\n")
-
-            for _, row in df.iterrows():
-                f.write(
-                    f"| {row['stage']} | {row['file_size_mb']:.4f} | "
-                    f"{row['parameter_count']:,} | {row['accuracy']:.4f} | "
-                    f"{row['f1_score']:.4f} | {row['avg_latency_ms']:.2f} |\n"
-                )
+            # Comparison table (include 정상 Recall/Precision if present)
+            has_normal_metrics = "recall_normal" in df.columns and df["recall_normal"].notna().any()
+            if has_normal_metrics:
+                f.write("| Stage | Size (MB) | Parameters | Accuracy | F1-Score | Normal Recall | Normal Precision | Latency (ms) |\n")
+                f.write("|-------|-----------|------------|----------|----------|---------------|------------------|--------------|\n")
+                for _, row in df.iterrows():
+                    rec_n = f"{row['recall_normal']:.4f}" if pd.notna(row.get("recall_normal")) else "-"
+                    prec_n = f"{row['precision_normal']:.4f}" if pd.notna(row.get("precision_normal")) else "-"
+                    f.write(
+                        f"| {row['stage']} | {row['file_size_mb']:.4f} | "
+                        f"{row['parameter_count']:,} | {row['accuracy']:.4f} | "
+                        f"{row['f1_score']:.4f} | {rec_n} | {prec_n} | {row['avg_latency_ms']:.2f} |\n"
+                    )
+            else:
+                f.write("| Stage | Size (MB) | Parameters | Accuracy | F1-Score | Latency (ms) |\n")
+                f.write("|-------|-----------|------------|----------|----------|--------------|\n")
+                for _, row in df.iterrows():
+                    f.write(
+                        f"| {row['stage']} | {row['file_size_mb']:.4f} | "
+                        f"{row['parameter_count']:,} | {row['accuracy']:.4f} | "
+                        f"{row['f1_score']:.4f} | {row['avg_latency_ms']:.2f} |\n"
+                    )
 
             # Improvements vs Baseline section
             if baseline_row is not None and len(df) > 1:
@@ -567,6 +603,10 @@ class CompressionAnalyzer:
                 f.write(f"- **Precision**: {row['precision']:.4f}\n")
                 f.write(f"- **Recall**: {row['recall']:.4f}\n")
                 f.write(f"- **F1-Score**: {row['f1_score']:.4f}\n")
+                if "recall_normal" in row and pd.notna(row.get("recall_normal")):
+                    f.write(f"- **Normal Recall** (of actual normal, % predicted as normal): {row['recall_normal']:.4f}\n")
+                if "precision_normal" in row and pd.notna(row.get("precision_normal")):
+                    f.write(f"- **Normal Precision** (of predicted normal, % actually normal): {row['precision_normal']:.4f}\n")
                 f.write(f"- **Avg Latency**: {row['avg_latency_ms']:.2f} ms\n")
                 f.write(f"- **Samples/sec**: {row.get('samples_per_second', 0):.2f}\n")
                 if "compression_ratio" in row and pd.notna(row.get("compression_ratio")):
@@ -612,6 +652,18 @@ def main():
         help="Run version (overrides config). Default: from config or timestamp",
     )
     parser.add_argument(
+        "--output-dir-final",
+        type=str,
+        default=None,
+        help="Write directly to this path (e.g. data/processed/runs/v11/2026-02-04_12-00-00/analysis). No version/run_id appended.",
+    )
+    parser.add_argument(
+        "--run-id",
+        type=str,
+        default=None,
+        help="Run datetime (e.g. 2026-02-04_12-00-00). Used with --output-dir-final for .last_run_id.",
+    )
+    parser.add_argument(
         "--format",
         type=str,
         choices=["csv", "json", "markdown", "all"],
@@ -624,7 +676,9 @@ def main():
     analyzer = CompressionAnalyzer(
         config_path=args.config,
         output_dir=args.output_dir,
+        output_dir_final=args.output_dir_final,
         version=args.version,
+        run_id=args.run_id,
     )
 
     # Use default model paths if not specified

@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from typing import Tuple, Dict, List
 import warnings
@@ -339,6 +340,7 @@ def load_cicids2017(
         x_train, y_train, x_test, y_test
     """
     data_dir = _ensure_dir(data_path)
+    print(f"[load_cicids2017] data_path={data_path}")
     
     # Find all CIC-IDS2017 CSV files (*.pcap_ISCX.csv)
     csv_files = list(data_dir.glob("*.pcap_ISCX.csv"))
@@ -676,6 +678,16 @@ def load_dataset(name: str, **kwargs) -> Tuple[np.ndarray, np.ndarray, np.ndarra
     # Map path -> data_path (works even if yaml uses path)
     if "path" in kwargs and "data_path" not in kwargs:
         kwargs["data_path"] = kwargs.pop("path")
+
+    # Override data path from environment (e.g. on PSU server where data lives elsewhere)
+    if name.lower() in ["cicids2017", "cic-ids-2017", "cic_ids_2017"]:
+        env_path = os.environ.get("CICIDS2017_DATA_PATH")
+        if env_path:
+            kwargs["data_path"] = env_path
+    elif name.lower() in ["bot_iot", "bot-iot", "botiot"]:
+        env_path = os.environ.get("BOTIOT_DATA_PATH")
+        if env_path:
+            kwargs["data_path"] = env_path
 
     if name.lower() in ["mnist"]:
         return load_mnist(**kwargs)

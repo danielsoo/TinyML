@@ -8,8 +8,8 @@ data:
   # Choose cicids2017, bot_iot, or mnist
   name: cicids2017
 
-  # Data path (same folder contains both Bot-IoT and CIC-IDS2017)
-  path: "data/raw/Bot-IoT"
+  # Data path for CIC-IDS2017 (*.pcap_ISCX.csv). Use data/raw/Bot-IoT for Bot-IoT dataset.
+  path: "data/raw/CIC-IDS2017"
 
   # Number of clients (4 devices)
   num_clients: 4
@@ -18,9 +18,10 @@ data:
   max_samples: 1500000
   
   # For CIC-IDS2017: binary (BENIGN vs ATTACK) or multi-class
+  # balance_ratio 1.0 = 5:5 (normal:attack) training; 10.0 = up to 1:10
   binary: true
   use_smote: true
-  balance_ratio: 10.0
+  balance_ratio: 1.0
 
 model:
   # mlp or cnn (usually mlp for Bot-IoT)
