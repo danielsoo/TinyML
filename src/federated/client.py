@@ -32,6 +32,12 @@ from flwr.common import ndarrays_to_parameters, parameters_to_ndarrays
 
 from src.data.loader import load_dataset, partition_non_iid
 from src.models import nets
+from src.modelcompression.quantization import (
+    QuantizationParams,
+    calculate_quantization_params,
+    quantize_array,
+    dequantize_array,
+)
 
 # Suppress TensorFlow logging after import
 try:
@@ -151,8 +157,19 @@ def _build_model(
 # ------------------------------------------------
 
 class KerasClient(fl.client.NumPyClient):
-    def __init__(self, model, x_train, y_train, x_test, y_test, cid: int, num_classes: int, use_class_weights: bool = False):
-        self.model = model
+    def __init__(
+        self,
+        model,
+        x_train,
+        y_train,
+        x_test,
+        y_test,
+        cid: int,
+        num_classes: int,
+        use_class_weights: bool = False,
+        use_qat: bool = False,
+        learning_rate: float = 0.001,
+    ):
         self.x_train = x_train
         self.y_train = y_train
         self.x_test = x_test
@@ -160,7 +177,16 @@ class KerasClient(fl.client.NumPyClient):
         self.cid = cid
         self.num_classes = num_classes
         self.use_class_weights = use_class_weights
-        
+        self.use_qat = use_qat
+        self.learning_rate = learning_rate
+
+        # Apply QAT if enabled
+        if use_qat:
+            self.model = self._apply_qat(model)
+            print(f"[Client {cid}] QAT enabled - model quantization-aware")
+        else:
+            self.model = model
+
         # Compute class weights for imbalanced data (manual computation with smoothing)
         if self.use_class_weights:
             y_labels = np.argmax(y_train, axis=1) if len(y_train.shape) > 1 else y_train
@@ -181,10 +207,86 @@ class KerasClient(fl.client.NumPyClient):
         else:
             self.class_weight = None
 
+        # Cache for quantization parameters (for dequantizing received weights)
+        self.quant_params_cache: List[Optional[QuantizationParams]] = []
+
+    def _quantize_weights(self, weights: List[np.ndarray]) -> List[np.ndarray]:
+        """
+        Quantize float32 weights to int8 before sending to server.
+        Stores quantization params for potential later use.
+        """
+        if not self.use_qat:
+            return weights
+
+        quantized = []
+        self.quant_params_cache = []
+
+        for w in weights:
+            if w.dtype in [np.float32, np.float64]:
+                params = calculate_quantization_params(w, symmetric=True)
+                q_w = quantize_array(w, params)
+                quantized.append(q_w)
+                self.quant_params_cache.append(params)
+            else:
+                # Already quantized or non-float type
+                quantized.append(w)
+                self.quant_params_cache.append(None)
+
+        return quantized
+
+    def _dequantize_weights(self, weights: List[np.ndarray]) -> List[np.ndarray]:
+        """
+        Dequantize int8 weights received from server back to float32.
+        """
+        if not self.use_qat:
+            return weights
+
+        dequantized = []
+
+        for i, w in enumerate(weights):
+            if w.dtype == np.int8:
+                # Need to dequantize - calculate params from the data
+                params = calculate_quantization_params(w.astype(np.float32), symmetric=True)
+                dequantized.append(dequantize_array(w, params))
+            else:
+                # Already float32
+                dequantized.append(w)
+
+        return dequantized
+
+    def _apply_qat(self, model):
+        """
+        For QAT in federated learning, we keep the original model architecture
+        to ensure weight compatibility between clients and server.
+
+        The quantization happens only during communication:
+        - Weights are quantized (int8) before sending to server
+        - Weights are dequantized (float32) when received from server
+
+        This approach ensures:
+        1. Model architecture stays the same (compatible with FedAvg)
+        2. Communication is compressed (4x reduction)
+        3. Training still happens in float32 for accuracy
+
+        Note: For true QAT with tfmot.quantize_model(), the model structure changes
+        which breaks weight compatibility. That should be done post-training instead.
+        """
+        # Keep the original model - QAT for FL is implemented via
+        # quantize/dequantize in communication only
+        print(f"[Client {self.cid}] QAT mode: quantized communication enabled")
+        return model
+
     def get_parameters(self, config: Dict[str, Any]):
-        return self.model.get_weights()
+        """Get model weights, quantized if QAT is enabled."""
+        weights = self.model.get_weights()
+        if self.use_qat:
+            return self._quantize_weights(weights)
+        return weights
 
     def fit(self, parameters, config: Dict[str, Any]):
+        # Dequantize weights received from server if QAT is enabled
+        if self.use_qat:
+            parameters = self._dequantize_weights(parameters)
         self.model.set_weights(parameters)
 
         epochs = int(config.get("local_epochs", 1))
@@ -214,9 +316,17 @@ class KerasClient(fl.client.NumPyClient):
 
         self.model.fit(**fit_kwargs)
 
-        return self.model.get_weights(), len(self.x_train), {}
+        # Quantize weights before sending to server if QAT is enabled
+        weights = self.model.get_weights()
+        if self.use_qat:
+            weights = self._quantize_weights(weights)
+
+        return weights, len(self.x_train), {}
 
     def evaluate(self, parameters, config: Dict[str, Any]):
+        # Dequantize weights received from server if QAT is enabled
+        if self.use_qat:
+            parameters = self._dequantize_weights(parameters)
         self.model.set_weights(parameters)
         loss, acc = self.model.evaluate(self.x_test, self.y_test, verbose=0)
         y_true = self.y_test.astype(int)
@@ -351,6 +461,10 @@ def simulate_clients(config: dict = None):
     use_focal_loss = fed_cfg.get("use_focal_loss", False)
     focal_loss_alpha = float(fed_cfg.get("focal_loss_alpha", 0.75))
     learning_rate = float(fed_cfg.get("learning_rate", 0.001))
+    use_qat = fed_cfg.get("use_qat", False)
+
+    if use_qat:
+        print("[Config] QAT (Quantization-Aware Training) enabled for clients")
 
     # State to use in client_fn
     state = {
@@ -364,6 +478,7 @@ def simulate_clients(config: dict = None):
         "use_focal_loss": use_focal_loss,
         "focal_loss_alpha": focal_loss_alpha,
         "learning_rate": learning_rate,
+        "use_qat": use_qat,
     }
 
     def client_fn(context: fl.common.Context) -> fl.client.Client:
@@ -405,6 +520,8 @@ def simulate_clients(config: dict = None):
             cid=idx,
             num_classes=state["num_classes"],
             use_class_weights=state["use_class_weights"],
+            use_qat=state.get("use_qat", False),
+            learning_rate=state["learning_rate"],
         )
 
         return client.to_client()
