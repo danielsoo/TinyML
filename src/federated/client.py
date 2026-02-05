@@ -291,6 +291,15 @@ class KerasClient(fl.client.NumPyClient):
 
         epochs = int(config.get("local_epochs", 1))
         batch_size = int(config.get("batch_size", 32))
+        server_round = int(config.get("server_round", 1))
+
+        # Update learning rate if provided by server (for LR decay)
+        if "learning_rate" in config:
+            new_lr = float(config["learning_rate"])
+            if hasattr(self.model.optimizer, 'learning_rate'):
+                tf.keras.backend.set_value(self.model.optimizer.learning_rate, new_lr)
+                if server_round % 10 == 0 or server_round == 1:
+                    print(f"[Client {self.cid}] Round {server_round}: LR = {new_lr:.6f}")
 
         # Prepare fit arguments
         fit_kwargs = {

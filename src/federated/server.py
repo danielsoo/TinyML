@@ -17,6 +17,60 @@ from flwr.common import (
 )
 from flwr.server.client_proxy import ClientProxy
 
+# Learning rate decay functions
+def cosine_decay(initial_lr: float, current_round: int, total_rounds: int, min_lr: float = 1e-6) -> float:
+    """Cosine annealing learning rate decay."""
+    import math
+    return min_lr + 0.5 * (initial_lr - min_lr) * (1 + math.cos(math.pi * current_round / total_rounds))
+
+
+def exponential_decay(initial_lr: float, current_round: int, decay_rate: float = 0.95) -> float:
+    """Exponential learning rate decay: lr = initial_lr * decay_rate^round."""
+    return initial_lr * (decay_rate ** current_round)
+
+
+def step_decay(initial_lr: float, current_round: int, drop_rate: float = 0.5, epochs_drop: int = 10) -> float:
+    """Step decay: drops learning rate by drop_rate every epochs_drop rounds."""
+    import math
+    return initial_lr * (drop_rate ** math.floor(current_round / epochs_drop))
+
+
+def linear_decay(initial_lr: float, current_round: int, total_rounds: int, min_lr: float = 1e-6) -> float:
+    """Linear learning rate decay from initial_lr to min_lr."""
+    decay = (initial_lr - min_lr) * (1 - current_round / total_rounds)
+    return max(min_lr, min_lr + decay)
+
+
+def get_lr_decay_fn(decay_type: str, initial_lr: float, total_rounds: int, **kwargs):
+    """
+    Get learning rate decay function based on type.
+
+    Args:
+        decay_type: One of 'cosine', 'exponential', 'step', 'linear', 'none'
+        initial_lr: Initial learning rate
+        total_rounds: Total number of FL rounds
+        **kwargs: Additional parameters (decay_rate, drop_rate, epochs_drop, min_lr)
+
+    Returns:
+        Function that takes current_round and returns learning rate
+    """
+    min_lr = kwargs.get('min_lr', 1e-6)
+
+    if decay_type == 'cosine':
+        return lambda r: cosine_decay(initial_lr, r, total_rounds, min_lr)
+    elif decay_type == 'exponential':
+        decay_rate = kwargs.get('decay_rate', 0.95)
+        return lambda r: max(min_lr, exponential_decay(initial_lr, r, decay_rate))
+    elif decay_type == 'step':
+        drop_rate = kwargs.get('drop_rate', 0.5)
+        epochs_drop = kwargs.get('epochs_drop', 10)
+        return lambda r: max(min_lr, step_decay(initial_lr, r, drop_rate, epochs_drop))
+    elif decay_type == 'linear':
+        return lambda r: linear_decay(initial_lr, r, total_rounds, min_lr)
+    else:  # 'none' or unknown
+        return lambda r: initial_lr
+
+
 # Import quantization utilities
 try:
     import tensorflow_model_optimization as tfmot
@@ -258,20 +312,48 @@ class QATFedAvgMStrategy(QATAwareStrategy):
 
     FedAvgM applies momentum on the server side to stabilize training
     and reduce client drift in non-IID settings.
+
+    Supports learning rate decay schedules:
+    - cosine: Cosine annealing (smooth decay)
+    - exponential: Exponential decay (lr * decay_rate^round)
+    - step: Step decay (drop by factor every N rounds)
+    - linear: Linear decay from initial to min_lr
+    - none: No decay (constant learning rate)
     """
 
     def __init__(
         self,
         server_momentum: float = 0.9,
         server_learning_rate: float = 1.0,
+        lr_decay_type: str = 'none',
+        total_rounds: int = 100,
+        lr_decay_rate: float = 0.95,
+        lr_drop_rate: float = 0.5,
+        lr_epochs_drop: int = 10,
+        lr_min: float = 1e-4,
         **kwargs
     ):
         super().__init__(**kwargs)
         self.server_momentum = server_momentum
+        self.initial_server_lr = server_learning_rate
         self.server_learning_rate = server_learning_rate
         self.momentum_buffer: Optional[List[np.ndarray]] = None
 
+        # Learning rate decay setup
+        self.lr_decay_type = lr_decay_type
+        self.lr_decay_fn = get_lr_decay_fn(
+            decay_type=lr_decay_type,
+            initial_lr=server_learning_rate,
+            total_rounds=total_rounds,
+            decay_rate=lr_decay_rate,
+            drop_rate=lr_drop_rate,
+            epochs_drop=lr_epochs_drop,
+            min_lr=lr_min,
+        )
+
         print(f"[Server] FedAvgM: momentum={server_momentum}, lr={server_learning_rate}")
+        if lr_decay_type != 'none':
+            print(f"[Server] LR decay: {lr_decay_type} (min_lr={lr_min})")
 
     def aggregate_fit(
         self,
@@ -279,7 +361,7 @@ class QATFedAvgMStrategy(QATAwareStrategy):
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[Tuple[ClientProxy, FitRes] | BaseException],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
-        """Aggregate with server-side momentum."""
+        """Aggregate with server-side momentum and learning rate decay."""
 
         # Get aggregated parameters from parent
         aggregated_parameters, metrics = super().aggregate_fit(
@@ -288,6 +370,11 @@ class QATFedAvgMStrategy(QATAwareStrategy):
 
         if aggregated_parameters is None:
             return None, metrics
+
+        # Update learning rate with decay schedule
+        self.server_learning_rate = self.lr_decay_fn(server_round)
+        if server_round % 5 == 0 or server_round == 1:
+            print(f"  Server LR: {self.server_learning_rate:.6f}")
 
         # Apply server momentum
         new_weights = parameters_to_ndarrays(aggregated_parameters)
@@ -317,15 +404,35 @@ class QATFedAvgMStrategy(QATAwareStrategy):
 
 
 def on_fit_config(server_round: int) -> Dict[str, Any]:
-    """Generate fit configuration for clients."""
+    """Generate fit configuration for clients with optional LR decay."""
     cfg = _get_config()
     fed_cfg = cfg.get("federated", {})
+
+    # Calculate client learning rate with decay if configured
+    base_lr = fed_cfg.get("learning_rate", 0.001)
+    lr_decay_type = fed_cfg.get("client_lr_decay_type", fed_cfg.get("lr_decay_type", "none"))
+    total_rounds = fed_cfg.get("num_rounds", 100)
+
+    if lr_decay_type != "none":
+        lr_decay_fn = get_lr_decay_fn(
+            decay_type=lr_decay_type,
+            initial_lr=base_lr,
+            total_rounds=total_rounds,
+            decay_rate=fed_cfg.get("lr_decay_rate", 0.95),
+            drop_rate=fed_cfg.get("lr_drop_rate", 0.5),
+            epochs_drop=fed_cfg.get("lr_epochs_drop", 10),
+            min_lr=fed_cfg.get("lr_min", 1e-6),
+        )
+        current_lr = lr_decay_fn(server_round)
+    else:
+        current_lr = base_lr
 
     return {
         "local_epochs": fed_cfg.get("local_epochs", 2),
         "batch_size": fed_cfg.get("batch_size", 128),
         "server_round": server_round,
         "use_callbacks": fed_cfg.get("use_callbacks", False),
+        "learning_rate": current_lr,  # Decayed learning rate for clients
     }
 
 
@@ -340,6 +447,13 @@ def create_strategy(config: dict = None) -> fl.server.strategy.Strategy:
 
     Selects QATFedAvgMStrategy if QAT is enabled and FedAvgM is available,
     otherwise falls back to QATAwareStrategy (FedAvg).
+
+    Supports learning rate decay via config:
+        lr_decay_type: 'cosine', 'exponential', 'step', 'linear', 'none'
+        lr_decay_rate: decay rate for exponential (default: 0.95)
+        lr_drop_rate: drop factor for step decay (default: 0.5)
+        lr_epochs_drop: rounds between drops for step decay (default: 10)
+        lr_min: minimum learning rate (default: 1e-4)
     """
     if config is None:
         config = _get_config()
@@ -366,6 +480,13 @@ def create_strategy(config: dict = None) -> fl.server.strategy.Strategy:
         strategy = QATFedAvgMStrategy(
             server_momentum=fed_cfg.get("server_momentum", 0.9),
             server_learning_rate=fed_cfg.get("server_learning_rate", 1.0),
+            # Learning rate decay parameters
+            lr_decay_type=fed_cfg.get("lr_decay_type", "none"),
+            total_rounds=fed_cfg.get("num_rounds", 100),
+            lr_decay_rate=fed_cfg.get("lr_decay_rate", 0.95),
+            lr_drop_rate=fed_cfg.get("lr_drop_rate", 0.5),
+            lr_epochs_drop=fed_cfg.get("lr_epochs_drop", 10),
+            lr_min=fed_cfg.get("lr_min", 1e-4),
             **strategy_kwargs
         )
     else:
