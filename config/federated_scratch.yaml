@@ -2,34 +2,34 @@
 # PSU e5-cse-135-01: data on /scratch to avoid home disk quota
 
 # Version (for result/analysis folder naming)
-version: "v11"
+version: "v12"
 
 data:
   name: cicids2017
   path: "/scratch/yqp5187/Bot-IoT"
 
   num_clients: 4
+  # OOM 방지: 41라운드 근처에서 OOM 나면 1M으로 더 줄이거나 num_rounds 40 유지
   max_samples: 1500000
   binary: true
   use_smote: true
-  # 1.0 = 50:50 (undersample majority to match minority)
-  # 5.0 = majority <= 5x minority; 10.0 = more relaxed
-  balance_ratio: 1.0
+  # 8:2 = 정상 80%, 공격 20% (실제 배포 시 예상 비율)
+  balance_ratio: 4.0
 
 model:
   name: mlp
 
 federated:
-  num_rounds: 25
+  num_rounds: 40
   fraction_fit: 1.0
   fraction_evaluate: 1.0
-  local_epochs: 15
+  local_epochs: 10
   batch_size: 128
-  learning_rate: 0.001
+  learning_rate: 0.0005
   use_class_weights: true
   use_focal_loss: true
-  # alpha upweights minority (attack). 0.85 = stronger emphasis
-  focal_loss_alpha: 0.85
+  # alpha upweights minority (attack). 8:2 학습 시 공격 놓치지 않도록 0.9 이상 권장
+  focal_loss_alpha: 0.92
   use_callbacks: false
   server_momentum: 0.9
   server_learning_rate: 1.0

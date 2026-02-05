@@ -448,20 +448,43 @@ def load_cicids2017(
         print(f"[load_cicids2017] Multi-class mode: {len(unique_labels)} classes")
         for idx in range(len(unique_labels)):
             print(f"  Class {idx}: {np.sum(y==idx)} samples")
-    
-    # Final sampling if needed
+
+    # Shuffle full pool so train/test and mini-batches are not biased by file order
+    # (important when max_samples is None: avoids "all from file1 then file2" structure)
+    shuffle_idx = rng.permutation(len(X))
+    X = X[shuffle_idx]
+    y = y[shuffle_idx]
+    print(f"[load_cicids2017] Shuffled full pool (random_state={random_state})")
+
+    # Final sampling if needed (max_samples로 줄일 때 비율 맞추기)
+    # balance_ratio가 있으면 목표 비율(예: 8:2)로 샘플링 → 정상만 있는 파일이 많아도 풀 비율이 치우치지 않음
     if max_samples is not None and len(X) > max_samples:
-        unique, counts = np.unique(y, return_counts=True)
-        min_class_count = counts.min()
-        use_stratify = min_class_count >= 2
-        
-        X, _, y, _ = train_test_split(
-            X, y,
-            train_size=max_samples,
-            stratify=y if use_stratify else None,
-            random_state=random_state,
-        )
-        print(f"[load_cicids2017] Sampled down to {len(X):,} total samples")
+        if binary and balance_ratio is not None and balance_ratio > 0:
+            # 목표: majority:minority = balance_ratio:1 (예: 4:1 → 정상 80%, 공격 20%)
+            idx_minority = np.where(y == 1)[0]   # attack
+            idx_majority = np.where(y == 0)[0]   # normal
+            n_minority_target = int(max_samples / (1 + balance_ratio))
+            n_majority_target = max_samples - n_minority_target
+            n_minority_take = min(len(idx_minority), n_minority_target)
+            n_majority_take = min(len(idx_majority), max_samples - n_minority_take)
+            pick_minority = rng.choice(idx_minority, size=n_minority_take, replace=False) if n_minority_take else np.array([], dtype=np.intp)
+            pick_majority = rng.choice(idx_majority, size=n_majority_take, replace=False) if n_majority_take else np.array([], dtype=np.intp)
+            keep_idx = np.concatenate([pick_minority, pick_majority])
+            rng.shuffle(keep_idx)
+            X = X[keep_idx]
+            y = y[keep_idx]
+            print(f"[load_cicids2017] Sampled down to {len(X):,} total samples (target ratio majority:minority={balance_ratio}:1)")
+        else:
+            unique, counts = np.unique(y, return_counts=True)
+            min_class_count = counts.min()
+            use_stratify = min_class_count >= 2
+            X, _, y, _ = train_test_split(
+                X, y,
+                train_size=max_samples,
+                stratify=y if use_stratify else None,
+                random_state=random_state,
+            )
+            print(f"[load_cicids2017] Sampled down to {len(X):,} total samples")
     
     # Train/test split
     unique, counts = np.unique(y, return_counts=True)

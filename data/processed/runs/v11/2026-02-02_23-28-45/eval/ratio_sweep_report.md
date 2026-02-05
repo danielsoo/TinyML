@@ -4,22 +4,7 @@
 |------|-------|
 | **Model** | `data/processed/runs/v11/2026-02-02_23-28-45/models/tflite/saved_model_original.tflite` |
 | **Config** | `config/federated_local.yaml` |
-| **Generated** | 2026-02-04 13:43:29 |## Run / Training Configuration
-
-| Item | Value |
-|------|-------|
-| **Data** | cicids2017 |
-| **Max samples** | 1500000 |
-| **Balance ratio** | 1.0 (50:50) |
-| **Num clients** | 4 |
-| **Model** | mlp |
-| **FL rounds** | 25 |
-| **Local epochs** | 15 |
-| **Batch size** | 128 |
-| **Learning rate** | 0.001 |
-| **Use QAT** | True |
-
-
+| **Generated** | 2026-02-04 13:43:29 |
 
 ## Summary
 

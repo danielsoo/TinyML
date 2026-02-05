@@ -5,34 +5,7 @@
 | **Version** | v5 |
 | **Run (날짜_시간)** | 2026-01-31_02-03-23 |
 | **Data Version** | cicids2017_max1500k |
-| **Generated** | 2026-01-31 02:04:10 |## Run / Training Configuration
-
-| Item | Value |
-|------|-------|
-| **Data** | cicids2017 |
-| **Data path** | data/raw/CIC-IDS2017 |
-| **Max samples** | 1500000 |
-| **Balance ratio** (정상:공격) | 4.0   # 공격 2 : 정상 8 (실제 트래픽 5~20% 공격 가정) |
-| **Num clients** | 4 |
-| **Binary** | True |
-| **Use SMOTE** | True |
-| **Model** | mlp |
-| **FL rounds** | 25 |
-| **Local epochs** | 15 |
-| **Batch size** | 128 |
-| **Learning rate** | 0.001 |
-| **Fraction fit** | 1.0 |
-| **Fraction evaluate** | 1.0 |
-| **Use class weights** | True |
-| **Use focal loss** | True |
-| **Focal loss alpha** | 0.75 |
-| **Use QAT** | True |
-| **Server momentum** | 0.9 |
-| **Server learning rate** | 1.0 |
-| **Min fit clients** | 4 |
-| **Min evaluate clients** | 4 |
-
-
+| **Generated** | 2026-01-31 02:04:10 |
 
 ## Summary
 

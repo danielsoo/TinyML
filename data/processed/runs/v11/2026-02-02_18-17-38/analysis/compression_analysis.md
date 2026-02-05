@@ -5,34 +5,7 @@
 | **Version** | v11 |
 | **Run (datetime)** | 2026-02-02_18-17-38 |
 | **Data Version** | cicids2017_max1500k_bal1.0 |
-| **Generated** | 2026-02-02 18:18:04 |## Run / Training Configuration
-
-| Item | Value |
-|------|-------|
-| **Data** | cicids2017 |
-| **Data path** | /scratch/yqp5187/Bot-IoT |
-| **Max samples** | 1500000 |
-| **Balance ratio** (정상:공격) | 1.0 (50:50) |
-| **Num clients** | 4 |
-| **Binary** | True |
-| **Use SMOTE** | True |
-| **Model** | mlp |
-| **FL rounds** | 25 |
-| **Local epochs** | 15 |
-| **Batch size** | 128 |
-| **Learning rate** | 0.001 |
-| **Fraction fit** | 1.0 |
-| **Fraction evaluate** | 1.0 |
-| **Use class weights** | True |
-| **Use focal loss** | True |
-| **Focal loss alpha** | 0.85 |
-| **Use QAT** | True |
-| **Server momentum** | 0.9 |
-| **Server learning rate** | 1.0 |
-| **Min fit clients** | 4 |
-| **Min evaluate clients** | 4 |
-
-
+| **Generated** | 2026-02-02 18:18:04 |
 
 ## Summary
 

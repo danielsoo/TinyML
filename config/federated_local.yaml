@@ -1,8 +1,8 @@
 # config/federated_local.yaml
 # Local environment config
 
-# Version (for result/analysis folder naming, e.g. v1, v2_balanced)
-version: "v8"
+# Version (for result/analysis folder naming). 로컬/서버 동일하게 맞추면 runs/ 폴더 통일
+version: "v12"
 
 data:
   # Choose cicids2017, bot_iot, or mnist
@@ -14,14 +14,13 @@ data:
   # Number of clients (4 devices)
   num_clients: 4
 
-  # Limit samples to avoid long training (increase for more attack samples)
-  max_samples: 1500000
-  
-  # For CIC-IDS2017: binary (BENIGN vs ATTACK) or multi-class
-  # balance_ratio = 정상:공격 비율 상한. 1.0=5:5, 4.0=8:2(공격 20%), 9.0=9:1(공격 10%), 19.0=19:1(공격 5%)
+  # 데이터 무제한 (max_samples 없음 = 전부 사용)
+  # max_samples: 1500000  # 제한 쓰려면 주석 해제
+
+  # balance_ratio: 1.0 = 5:5 (정상:공격 50:50)
   binary: true
   use_smote: true
-  balance_ratio: 4.0   # 공격 2 : 정상 8 (실제 트래픽 5~20% 공격 가정)
+  balance_ratio: 1.0   # 5:5
 
 model:
   # mlp or cnn (usually mlp for Bot-IoT)

@@ -74,6 +74,23 @@ bash scripts/sync_to_psu.sh
 
 ---
 
+## OOM 나왔을 때 / 실행 전 캐시·메모리 정리
+
+OOM은 **RAM** 문제라서, 디스크 캐시(pip/conda cache 정리)는 거의 도움이 안 됩니다. 도움이 되는 건 **이전 run에서 남은 Ray·Python 프로세스 정리**입니다.
+
+**실행 전에 (서버에서):**
+
+1. **Ray 정리** — 이전 run이 죽었어도 Ray 워커가 백그라운드로 살아 있으면 메모리를 잡고 있을 수 있음  
+   ```bash
+   ray stop --force
+   ```
+2. **run_psu_server.sh 사용** — 스크립트가 시작 시 `ray stop`을 한 번 호출하므로, `bash scripts/run_psu_server.sh` 로 실행하면 매번 깨끗한 상태에서 시작함.
+3. **데이터 상한** — 여전히 OOM이 나면 `config/federated_scratch.yaml`에서 `max_samples: 1500000` (또는 더 작게) 사용.
+
+**정리:** 캐시 지우는 건 “Ray/이전 프로세스 정리”가 효과적이고, `run_psu_server.sh`에 그 단계가 들어가 있음.
+
+---
+
 ## 서버에서 모델 찾는 방법
 
 `train.py`로 학습을 끝내면 모델이 아래 위치에 저장됩니다.
