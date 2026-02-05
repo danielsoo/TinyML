@@ -209,6 +209,14 @@ def main():
 
 def _write_markdown_report(rows, output_path: Path, model_path: str, config_path: str):
     """Write Markdown report in compression_analysis.md style (Detailed Metrics per ratio)."""
+    cfg = {}
+    if Path(config_path).exists():
+        with open(config_path, encoding="utf-8") as fp:
+            cfg = yaml.safe_load(fp) or {}
+    data_cfg = cfg.get("data", {})
+    fed_cfg = cfg.get("federated", {})
+    model_cfg = cfg.get("model", {})
+
     with open(output_path, "w", encoding="utf-8") as f:
         f.write("# Ratio Sweep Report\n\n")
         f.write(f"| Item | Value |\n")
@@ -216,6 +224,22 @@ def _write_markdown_report(rows, output_path: Path, model_path: str, config_path
         f.write(f"| **Model** | `{model_path}` |\n")
         f.write(f"| **Config** | `{config_path}` |\n")
         f.write(f"| **Generated** | {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} |\n\n")
+        f.write("## Run / Training Configuration\n\n")
+        f.write("| Item | Value |\n|------|-------|\n")
+        f.write(f"| **Data** | {data_cfg.get('name', '-')} |\n")
+        f.write(f"| **Max samples** | {data_cfg.get('max_samples', '-')} |\n")
+        br = data_cfg.get("balance_ratio")
+        br_desc = {1.0: "50:50", 4.0: "정상:공격 8:2", 9.0: "9:1", 19.0: "19:1"}.get(br) if br is not None else None
+        br_str = f"{br} ({br_desc})" if br_desc else (str(br) if br is not None else "-")
+        f.write(f"| **Balance ratio** | {br_str} |\n")
+        f.write(f"| **Num clients** | {data_cfg.get('num_clients', '-')} |\n")
+        f.write(f"| **Model** | {model_cfg.get('name', '-')} |\n")
+        f.write(f"| **FL rounds** | {fed_cfg.get('num_rounds', '-')} |\n")
+        f.write(f"| **Local epochs** | {fed_cfg.get('local_epochs', '-')} |\n")
+        f.write(f"| **Batch size** | {fed_cfg.get('batch_size', '-')} |\n")
+        f.write(f"| **Learning rate** | {fed_cfg.get('learning_rate', '-')} |\n")
+        f.write(f"| **Use QAT** | {fed_cfg.get('use_qat', '-')} |\n")
+        f.write("\n")
         f.write("## Summary\n\n")
         f.write(f"Total ratios evaluated: {len(rows)}\n\n")
         f.write("## Comparison Table\n\n")

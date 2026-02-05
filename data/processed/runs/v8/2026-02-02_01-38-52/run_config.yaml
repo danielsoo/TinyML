@@ -1,0 +1,26 @@
+data:
+  name: cicids2017
+  path: data/raw/CIC-IDS2017
+  num_clients: 4
+  max_samples: 1500000
+  binary: True
+  use_smote: True
+  balance_ratio: 4.0   # 공격 2 : 정상 8 (실제 트래픽 5~20% 공격 가정)
+model:
+  name: mlp
+federated:
+  num_rounds: 25
+  fraction_fit: 1.0
+  fraction_evaluate: 1.0
+  local_epochs: 15
+  batch_size: 128
+  learning_rate: 0.001
+  use_class_weights: True
+  use_focal_loss: True
+  focal_loss_alpha: 0.75
+  server_momentum: 0.9
+  server_learning_rate: 1.0
+  use_qat: True
+  min_fit_clients: 4
+  min_evaluate_clients: 4
+  min_available_clients: 4

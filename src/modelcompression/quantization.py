@@ -2,6 +2,8 @@
 Post-training quantization implementation for TensorFlow/Keras models.
 Reduces model size by converting 32-bit float weights to 8-bit integers.
 """
+from __future__ import annotations
+
 import numpy as np
 from tensorflow import keras
 from typing import Tuple, Dict, Optional, List

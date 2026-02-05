@@ -365,7 +365,10 @@ def load_cicids2017(
     dfs = []
     for csv_file in csv_files:
         try:
-            df = pd.read_csv(csv_file)
+            try:
+                df = pd.read_csv(csv_file, low_memory=False)
+            except Exception:
+                df = pd.read_csv(csv_file, engine="python", low_memory=False)
             if samples_per_file and len(df) > samples_per_file:
                 idx = rng.choice(len(df), size=samples_per_file, replace=False)
                 df = df.iloc[idx]

@@ -1,11 +1,9 @@
-# Raw data (용량 큼)
+# data: raw만 무시, processed는 추적 (runs·보고서 포함)
 data/raw/
 
-# Processed data & 학습/분석 결과 (서버 sync로 관리)
-data/processed/
+# 기타 결과 폴더 (프로젝트 루트)
 TinyML-results/
 outputs/
-processed/
 
 # 학습된 모델 (.h5, .tflite)
 models/*.h5

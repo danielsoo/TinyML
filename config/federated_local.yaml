@@ -18,10 +18,10 @@ data:
   max_samples: 1500000
   
   # For CIC-IDS2017: binary (BENIGN vs ATTACK) or multi-class
-  # balance_ratio 1.0 = 5:5 (normal:attack) training; 10.0 = up to 1:10
+  # balance_ratio = 정상:공격 비율 상한. 1.0=5:5, 4.0=8:2(공격 20%), 9.0=9:1(공격 10%), 19.0=19:1(공격 5%)
   binary: true
   use_smote: true
-  balance_ratio: 1.0
+  balance_ratio: 4.0   # 공격 2 : 정상 8 (실제 트래픽 5~20% 공격 가정)
 
 model:
   # mlp or cnn (usually mlp for Bot-IoT)

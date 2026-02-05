@@ -19,11 +19,25 @@ bash TinyML-main/scripts/pull_results_to_tinyml_results.sh
 - **받는 곳**: **TinyML-main** (`data/processed/runs/`, `models/`, `outputs/`)
 - **폴더 구조**: 한 run = 한 폴더  
   `TinyML-main/data/processed/runs/<version>/<datetime>/`  
-  - `analysis/` — compression_analysis.md, ratio_sweep_report.md 등  
+  - `run_config.yaml` — 해당 run에 사용한 전체 설정 (라운드, 에폭, balance_ratio 등)  
+  - `analysis/` — compression_analysis.md (내부에 **Run / Training Configuration** 섹션 포함), 시각화  
   - `models/` — tflite, h5 등  
   - `outputs/`  
-  - `eval/` — `--model`로 평가했을 때 ratio_sweep_report.md 등  
+  - `eval/` — ratio_sweep_report.md (동일하게 학습 설정 요약 포함)  
 - **예**: `TinyML-main/data/processed/runs/v11/2026-02-02_23-28-45/models/tflite/saved_model_original.tflite`
+
+**기존 run 보고서에 학습 설정 넣기 (한 번만 실행):**  
+이전 버전 run들 `compression_analysis.md` / `ratio_sweep_report.md`에 "Run / Training Configuration" 섹션이 없으면 한 번에 채우려면:
+
+```bash
+cd /path/to/TinyML-main
+# conda/venv 활성화 후 (pyyaml 필요)
+python scripts/backfill_run_config_to_reports.py
+```
+
+- `--dry-run`: 실제 수정 없이 어떤 파일이 바뀔지만 출력  
+- 각 run 폴더에 `run_config.yaml`이 없으면 버전별로 추정한 config로 저장  
+- `analysis/compression_analysis.md`, `eval/ratio_sweep_report.md`에 섹션이 없으면 삽입
 
 rsync 직접 쓰려면:
 

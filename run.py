@@ -180,6 +180,11 @@ def main():
         runs_dir = Path("data/processed/runs") / version_override / run_id
         runs_dir.mkdir(parents=True, exist_ok=True)
         current_runs_dir = runs_dir
+        # Save full run config for reports and reproducibility
+        run_config_path = runs_dir / "run_config.yaml"
+        with open(run_config_path, "w", encoding="utf-8") as f:
+            yaml.dump(run_cfg, f, default_flow_style=False, allow_unicode=True, sort_keys=False)
+        print(f"   📋 Saved run config: {run_config_path}\n")
         analysis_out = runs_dir / "analysis"
         analysis_cmd = [
             sys.executable, "scripts/analyze_compression.py",
