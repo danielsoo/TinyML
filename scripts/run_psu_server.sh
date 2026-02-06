@@ -13,13 +13,13 @@ export XDG_CONFIG_HOME="/scratch/${USER}/.config"
 
 mkdir -p "$TMPDIR" "$MPLCONFIGDIR" 2>/dev/null || true
 
-# OOM 방지: 이전 run에서 남은 Ray 워커 정리 (메모리 해제)
+# OOM mitigation: clean leftover Ray workers from previous run
 if command -v ray >/dev/null 2>&1; then
   ray stop --force 2>/dev/null || true
   echo "Ray stopped (cleaned leftover workers)"
 fi
 
-# 메모리 사용 가능량 확인 (시작 전)
+# Check available memory (before start)
 echo "=== Memory (before run) ==="
 if command -v free >/dev/null 2>&1; then
   free -h

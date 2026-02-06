@@ -264,7 +264,7 @@ def load_bot_iot(
     x_train = x_train.astype("float32")
     x_test = x_test.astype("float32")
 
-    # Feature scaling: NN 학습 안정성·정확도 향상 (train 기준 fit, test는 transform만)
+    # Feature scaling: improves NN stability and accuracy (fit on train, transform on test only)
     from sklearn.preprocessing import StandardScaler
     scaler = StandardScaler()
     x_train = scaler.fit_transform(x_train).astype("float32")
@@ -441,7 +441,7 @@ def load_cicids2017(
             y_train = y_train[balanced_idx]
             print(f"[load_cicids2017] Balanced training set: majority {n_majority} -> {n_majority_target} (ratio<={balance_ratio}), total={len(y_train):,}")
 
-    # Feature scaling: NN 학습 안정성·정확도 향상 (train 기준 fit, test는 transform만)
+    # Feature scaling: improves NN stability and accuracy (fit on train, transform on test only)
     from sklearn.preprocessing import StandardScaler
     scaler = StandardScaler()
     x_train = scaler.fit_transform(x_train).astype("float32")

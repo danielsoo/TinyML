@@ -289,6 +289,18 @@ class KerasClient(fl.client.NumPyClient):
             parameters = self._dequantize_weights(parameters)
         self.model.set_weights(parameters)
 
+        # Learning rate decay by round: lr = base_lr * (lr_decay ** (round-1))
+        lr_base = config.get("learning_rate")
+        lr_decay = float(config.get("lr_decay", 1.0))
+        server_round = int(config.get("server_round", 1))
+        if lr_base is not None and getattr(self.model.optimizer, "learning_rate", None) is not None:
+            if lr_decay < 1.0:
+                lr = float(lr_base) * (lr_decay ** (server_round - 1))
+                lr = max(lr, 1e-6)
+            else:
+                lr = float(lr_base)
+            self.model.optimizer.learning_rate.assign(lr)
+
         epochs = int(config.get("local_epochs", 1))
         batch_size = int(config.get("batch_size", 32))
 
@@ -742,6 +754,9 @@ def main(save_path: str = "src/models/global_model.h5", config_path: str = None)
             "batch_size": batch_size,
             "local_epochs": local_epochs,
             "use_callbacks": fed_cfg.get("use_callbacks", False),
+            "server_round": rnd,
+            "learning_rate": state["learning_rate"],
+            "lr_decay": fed_cfg.get("lr_decay", 1.0),
         },
         evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation_fn,
     )

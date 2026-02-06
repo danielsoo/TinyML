@@ -68,7 +68,7 @@ class CompressionAnalyzer:
         # Version: CLI override > config > timestamp
         self.version = version or self.config.get("version") or datetime.now().strftime("%Y%m%d_%H%M%S")
 
-        # Data version (요약: 어떤 데이터로 학습했는지)
+        # Data version (summary of which data was used for training)
         data_cfg = self.config.get("data", {})
         data_parts = [data_cfg.get("name", "unknown")]
         if data_cfg.get("max_samples"):
@@ -77,7 +77,7 @@ class CompressionAnalyzer:
             data_parts.append(f"bal{data_cfg['balance_ratio']}")
         self.data_version = "_".join(data_parts)
 
-        # 버전별 출력 디렉터리
+        # Per-version output directory
         base_dir = Path(output_dir)
         self.output_dir = base_dir / self.version
         self.output_dir.mkdir(parents=True, exist_ok=True)
@@ -420,7 +420,7 @@ class CompressionAnalyzer:
             self._generate_markdown_report(df, md_path)
             print(f"✅ Markdown: {md_path}")
 
-        # 버전별 요약 기록 (버전 비교용)
+        # Per-version summary for comparison
         self._append_version_summary(df)
 
     def _append_version_summary(self, df: pd.DataFrame):
@@ -453,7 +453,7 @@ class CompressionAnalyzer:
         """Generate markdown report with comparison tables."""
         with open(output_path, "w", encoding="utf-8") as f:
             f.write("# Compression Analysis Report\n\n")
-            f.write(f"| 항목 | 값 |\n")
+            f.write(f"| Item | Value |\n")
             f.write(f"|------|----|\n")
             f.write(f"| **Run Version** | {self.version} |\n")
             f.write(f"| **Data Version** | {self.data_version} |\n")

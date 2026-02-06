@@ -1,45 +1,45 @@
-# PSU 서버 동기화 & 서버에서 모델 찾기
+# PSU Server Sync & Finding Models on Server
 
-## 서버 → 로컬 (결과만 받기)
+## Server → Local (pull results only)
 
-**TinyML-main 하나만 사용.** 서버에서 가져온 결과(분석·모델·eval·outputs)는 **전부 TinyML-main 안**에 들어갑니다.
+**Use TinyML-main only.** Results pulled from the server (analysis, models, eval, outputs) go **entirely into TinyML-main**.
 
 ```bash
 cd /path/to/TinyML-main
 bash scripts/pull_results_to_tinyml_results.sh
 ```
 
-또는 Research 폴더에서:
+Or from the Research folder:
 
 ```bash
 cd /path/to/Research
 bash TinyML-main/scripts/pull_results_to_tinyml_results.sh
 ```
 
-- **받는 곳**: **TinyML-main** (`data/processed/runs/`, `models/`, `outputs/`)
-- **폴더 구조**: 한 run = 한 폴더  
+- **Destination**: **TinyML-main** (`data/processed/runs/`, `models/`, `outputs/`)
+- **Folder layout**: one run = one folder  
   `TinyML-main/data/processed/runs/<version>/<datetime>/`  
-  - `run_config.yaml` — 해당 run에 사용한 전체 설정 (라운드, 에폭, balance_ratio 등)  
-  - `analysis/` — compression_analysis.md (내부에 **Run / Training Configuration** 섹션 포함), 시각화  
-  - `models/` — tflite, h5 등  
+  - `run_config.yaml` — full config used for that run (rounds, epochs, balance_ratio, etc.)  
+  - `analysis/` — compression_analysis.md (includes **Run / Training Configuration**), visualizations  
+  - `models/` — tflite, h5, etc.  
   - `outputs/`  
-  - `eval/` — ratio_sweep_report.md (동일하게 학습 설정 요약 포함)  
-- **예**: `TinyML-main/data/processed/runs/v11/2026-02-02_23-28-45/models/tflite/saved_model_original.tflite`
+  - `eval/` — ratio_sweep_report.md (training config summary)  
+- **Example**: `TinyML-main/data/processed/runs/v11/2026-02-02_23-28-45/models/tflite/saved_model_original.tflite`
 
-**기존 run 보고서에 학습 설정 넣기 (한 번만 실행):**  
-이전 버전 run들 `compression_analysis.md` / `ratio_sweep_report.md`에 "Run / Training Configuration" 섹션이 없으면 한 번에 채우려면:
+**Backfill training config into existing run reports (run once):**  
+To add "Run / Training Configuration" to older runs that lack it in `compression_analysis.md` / `ratio_sweep_report.md`:
 
 ```bash
 cd /path/to/TinyML-main
-# conda/venv 활성화 후 (pyyaml 필요)
+# after activating conda/venv (pyyaml required)
 python scripts/backfill_run_config_to_reports.py
 ```
 
-- `--dry-run`: 실제 수정 없이 어떤 파일이 바뀔지만 출력  
-- 각 run 폴더에 `run_config.yaml`이 없으면 버전별로 추정한 config로 저장  
-- `analysis/compression_analysis.md`, `eval/ratio_sweep_report.md`에 섹션이 없으면 삽입
+- `--dry-run`: show what would change without modifying files  
+- If `run_config.yaml` is missing in a run folder, infer from version and save  
+- Insert section into `analysis/compression_analysis.md`, `eval/ratio_sweep_report.md` if missing
 
-rsync 직접 쓰려면:
+To use rsync directly:
 
 ```bash
 cd /path/to/TinyML-main
@@ -48,59 +48,193 @@ rsync -avz yqp5187@e5-cse-135-01.cse.psu.edu:/scratch/yqp5187/TinyML-main/models
 rsync -avz yqp5187@e5-cse-135-01.cse.psu.edu:/scratch/yqp5187/TinyML-main/outputs/ outputs/
 ```
 
-**옵션:** `sync_results_from_psu.sh`는 `data/processed/` (analysis, runs)만 동기화합니다. run별 모델·eval 전부가 필요하면 위 `pull_results_to_tinyml_results.sh`를 쓰면 됩니다.
+**Option:** `sync_results_from_psu.sh` syncs only `data/processed/` (analysis, runs). For full models and eval per run, use `pull_results_to_tinyml_results.sh` above.
 
-**`command not found` / `invalid option` / `hostname contains invalid characters` 나올 때:** 스크립트가 CRLF(Windows 줄바꿈)로 저장됐을 수 있습니다. TinyML-main 폴더에서 한 번만 실행:
+**When you see `command not found` / `invalid option` / `hostname contains invalid characters`:** The script may have been saved with CRLF (Windows line endings). From the TinyML-main folder run once:
 
 ```bash
 sed -i '' 's/\r$//' scripts/pull_results_to_tinyml_results.sh
 ```
 
-그 다음 다시 `bash scripts/pull_results_to_tinyml_results.sh` 실행.
+Then run `bash scripts/pull_results_to_tinyml_results.sh` again.
 
 ---
 
-## 로컬 → 서버 (코드 올리기)
+## Local → Server (push code)
 
-변경된 로컬 파일을 서버로 올릴 때:
+To push changed local files to the server:
 
 ```bash
 cd /path/to/TinyML-main
 bash scripts/sync_to_psu.sh
 ```
 
-- 올라가는 것: `config/`, `scripts/`, `src/` (코드), `docs/` 등
-- 제외: `data/raw`, `data/processed`, `models/`, `src/models/*.h5`, `outputs`, `TinyML-results`, `.git` 등 (대용량·생성물은 제외)
+- **Included**: `config/`, `scripts/`, `src/` (code), `docs/`, etc.
+- **Excluded**: `data/raw`, `data/processed`, `models/`, `src/models/*.h5`, `outputs`, `TinyML-results`, `.git` (large/generated)
 
 ---
 
-## OOM 나왔을 때 / 실행 전 캐시·메모리 정리
+## Running on Vast.ai
 
-OOM은 **RAM** 문제라서, 디스크 캐시(pip/conda cache 정리)는 거의 도움이 안 됩니다. 도움이 되는 건 **이전 run에서 남은 Ray·Python 프로세스 정리**입니다.
+On Vast instances use a **single data path** (`data/raw/CIC-IDS2017`), so one full rsync/sync brings both code and data. Do **not** use PSU's `config/federated_scratch.yaml`; use the **Vast** config.
 
-**실행 전에 (서버에서):**
+**0. config must exist on Vast**  
+When uploading the project to Vast, include the **entire `config/`** folder. Without `config/federated_vast.yaml` you get `Configuration file not found: .../config/federated_vast.yaml` / `Could not verify data path`.  
+If the file is missing, copy it from local once or create it on Vast manually:
 
-1. **Ray 정리** — 이전 run이 죽었어도 Ray 워커가 백그라운드로 살아 있으면 메모리를 잡고 있을 수 있음  
+```bash
+# On Vast instance (when config/ exists but federated_vast.yaml is missing)
+mkdir -p /workspace/TinyML-main/config
+cat > /workspace/TinyML-main/config/federated_vast.yaml << 'EOF'
+# config/federated_vast.yaml - Vast: single data path (data/raw/CIC-IDS2017)
+version: "v12"
+data:
+  name: cicids2017
+  path: "data/raw/CIC-IDS2017"
+  num_clients: 4
+  max_samples: 1500000
+  binary: true
+  use_smote: true
+  balance_ratio: 4.0
+model:
+  name: mlp
+federated:
+  num_rounds: 50
+  fraction_fit: 1.0
+  fraction_evaluate: 1.0
+  local_epochs: 5
+  batch_size: 128
+  learning_rate: 0.0005
+  lr_decay: 0.99
+  use_class_weights: true
+  use_focal_loss: true
+  focal_loss_alpha: 0.92
+  use_callbacks: false
+  server_momentum: 0.9
+  server_learning_rate: 1.0
+  use_qat: true
+  min_fit_clients: 4
+  min_evaluate_clients: 4
+  min_available_clients: 4
+EOF
+```
+
+**1. Install dependencies (once)**  
+Vast base images may not include `flwr` etc. After connecting to the instance:
+
+```bash
+cd /workspace/TinyML-main
+pip install -r requirements.txt
+```
+
+**2. Run**  
+Use **`config/federated_vast.yaml`** only (data path: `data/raw/CIC-IDS2017`):
+
+```bash
+cd /workspace/TinyML-main
+python run.py --config config/federated_vast.yaml
+```
+
+Or:
+
+```bash
+bash scripts/run_vast.sh
+```
+
+**2b. Keep training when disconnected: use tmux**  
+If your Mac sleeps or SSH drops, the training in that terminal will stop. Running inside **tmux** keeps the session on the server.
+
+```bash
+# After SSH to Vast
+tmux new -s train
+cd /workspace/TinyML-main
+python run.py --config config/federated_vast.yaml
+```
+
+- **Detach**: `Ctrl+B` then `D` — training keeps running.
+- **Reattach**: After SSH, `tmux attach -t train` to see logs again.
+- If tmux is missing: `apt-get update && apt-get install -y tmux` (or skip if already in image)
+
+**3. Summary**
+
+| Item | PSU server | Vast.ai |
+|------|------------|---------|
+| config | `config/federated_scratch.yaml` | `config/federated_vast.yaml` |
+| Data path | `/scratch/yqp5187/Bot-IoT` | `data/raw/CIC-IDS2017` (inside project) |
+| Run | `bash scripts/run_psu_server.sh` | `bash scripts/run_vast.sh` or `python run.py --config config/federated_vast.yaml` |
+
+Using `federated_scratch.yaml` on Vast points to `/scratch/...` which does not exist there and can fail; without `flwr` you get `ModuleNotFoundError: No module named 'flwr'`. Following the steps above fixes both.
+
+---
+
+## When OOM occurs / Pre-run cache and memory cleanup
+
+OOM is a **RAM** issue; clearing disk cache (pip/conda) rarely helps. What helps is **cleaning leftover Ray/Python processes** from previous runs.
+
+**Before running (on server):**
+
+1. **Stop Ray** — Ray workers can keep using memory in the background even after a run dies  
    ```bash
    ray stop --force
    ```
-2. **run_psu_server.sh 사용** — 스크립트가 시작 시 `ray stop`을 한 번 호출하므로, `bash scripts/run_psu_server.sh` 로 실행하면 매번 깨끗한 상태에서 시작함.
-3. **데이터 상한** — 여전히 OOM이 나면 `config/federated_scratch.yaml`에서 `max_samples: 1500000` (또는 더 작게) 사용.
+2. **Use run_psu_server.sh** — It runs `ray stop` at start, so `bash scripts/run_psu_server.sh` gives a clean state each time.
+3. **Cap data size** — If OOM persists, lower `max_samples` in `config/federated_scratch.yaml` (e.g. 1500000 or less).
 
-**정리:** 캐시 지우는 건 “Ray/이전 프로세스 정리”가 효과적이고, `run_psu_server.sh`에 그 단계가 들어가 있음.
+**Summary:** Cleaning Ray/previous processes is effective; `run_psu_server.sh` includes that step.
 
 ---
 
-## 서버에서 모델 찾는 방법
+## Freeing server disk space: what is safe to remove
 
-`train.py`로 학습을 끝내면 모델이 아래 위치에 저장됩니다.
+When server disk (`/scratch/yqp5187/`) is low, remove **only what you don't need**. Check sizes with `du -sh <path>` first.
 
-| 파일 | 설명 |
-|------|------|
-| `src/models/global_model.h5` | 최신 복사본 (항상 마지막 학습 결과로 덮어씀) |
-| `src/models/global_model_YYYYMMDD_HHMMSS.h5` | 타임스탬프 파일 (예: v11 실행 시 생성된 파일) |
+**Check sizes on server:**
 
-**서버 접속 후 확인:**
+```bash
+cd /scratch/yqp5187/TinyML-main
+
+# Entire runs (can be several GB if many old runs)
+du -sh data/processed/runs/
+
+# Per run (to decide what to delete)
+du -sh data/processed/runs/*/*
+
+# Other
+du -sh outputs/ models/ 2>/dev/null
+du -sh /scratch/yqp5187/conda_envs/research   # conda env
+```
+
+**Safe to remove (already pulled locally or no longer needed):**
+
+| Target | Description | Example command |
+|--------|-------------|-----------------|
+| **Old runs** | v11/v12 etc. Run folders; pull needed ones locally first | `rm -rf data/processed/runs/v11/2026-02-02_*` |
+| **outputs/** | Previous pipeline output (duplicate if in runs) | `rm -rf outputs/*` |
+| **models/** root | `models/*.h5`, `models/tflite/*` — duplicate if in runs | `rm -f models/*.h5 models/tflite/*.tflite` |
+| **pip cache** | Re-downloaded on reinstall | `pip cache purge` |
+| **conda cache** | Re-downloaded on reinstall | `conda clean -a` |
+| **Ray /tmp** | Ray temp files | `rm -rf /scratch/yqp5187/tmp/ray/*` (after stopping Ray) |
+
+**Do not remove:**
+
+- `data/raw/` (original CSV) — needed for training
+- `src/`, `config/`, `scripts/` — code
+- **Current run** — back up with `pull_results` etc. before deleting
+
+**One-liner:** Removing old `data/processed/runs/<version>/<date>` and `outputs/`, `models/` frees a lot of space.
+
+---
+
+## Finding models on server
+
+After training with `train.py`, models are saved at:
+
+| File | Description |
+|------|-------------|
+| `src/models/global_model.h5` | Latest copy (overwritten each run) |
+| `src/models/global_model_YYYYMMDD_HHMMSS.h5` | Timestamped file (e.g. from v11 run) |
+
+**After SSH to server:**
 
 ```bash
 ssh yqp5187@e5-cse-135-01.cse.psu.edu
@@ -108,135 +242,135 @@ cd /scratch/yqp5187/TinyML-main
 ls -la src/models/
 ```
 
-**9:1 테스트만 할 때 (학습 건너뛰고):**
+**9:1 evaluation only (skip training):**
 
 ```bash
 cd /scratch/yqp5187/TinyML-main
-conda activate /scratch/yqp5187/conda_envs/research   # 또는 사용 중인 env
+conda activate /scratch/yqp5187/conda_envs/research   # or your env
 python scripts/evaluate_9to1.py --config config/federated_local.yaml --model src/models/global_model.h5 --ratio 9
 ```
 
-특정 타임스탬프 모델로 테스트하려면:
+To test a specific timestamped model:
 
 ```bash
 python scripts/evaluate_9to1.py --config config/federated_local.yaml --model src/models/global_model_20260202_232845.h5 --ratio 9
 ```
 
-(실제 파일명은 `ls src/models/`로 확인)
+(Check actual filenames with `ls src/models/`)
 
 ---
 
-## 비율에 맞는 임계값 추천 (tune_threshold.py)
+## Threshold recommendation for a given ratio (tune_threshold.py)
 
-특정 비율(예: 9:1)에서 **어떤 threshold를 쓰면 좋을지** 추천받으려면:
+To get a **recommended threshold** for a given ratio (e.g. 9:1):
 
 ```bash
 cd /path/to/TinyML-main
 python scripts/tune_threshold.py --config config/federated_scratch.yaml --model models/tflite/saved_model_original.tflite --ratio 90
 ```
 
-- `--ratio 90`: 정상 90% : 공격 10% 테스트셋으로 threshold 탐색
-- `--metric f1`: F1 최대화로 추천 (기본)
-- `--metric attack_recall`: 공격 Recall 최대화 (공격을 더 많이 잡고 싶을 때)
-- `--metric balanced`: 0.5*F1 + 0.5*attack_recall 로 추천
-- `--out threshold_90.csv`: 구간별 지표 CSV 저장
+- `--ratio 90`: 90% normal : 10% attack test set for threshold search
+- `--metric f1`: Recommend by F1 (default)
+- `--metric attack_recall`: Maximize attack recall (catch more attacks)
+- `--metric balanced`: 0.5*F1 + 0.5*attack_recall
+- `--out threshold_90.csv`: Save per-interval metrics CSV
 
-출력 예: 여러 threshold에서 Accuracy, F1, Normal Recall, Normal Precision, Attack Recall을 보여주고, 선택한 metric 기준 **추천 threshold**를 한 줄로 출력합니다.
+Output: shows Accuracy, F1, Normal Recall, Normal Precision, Attack Recall for several thresholds and prints the **recommended threshold** for the chosen metric.
 
 ---
 
-## 모델 지정해서 평가만 돌리기 (폴더 구조)
+## Evaluation-only with a specific model (folder layout)
 
-학습/압축 없이 **지정한 모델**로 ratio sweep + threshold tuning만 돌리고, 그 결과를 보고서로 남기려면 `run.py --model <경로>` 를 쓰면 됩니다. 보고서가 저장되는 폴더는 아래처럼 정해집니다.
+To run only ratio sweep + threshold tuning with a **given model** (no train/compression) and save the report, use `run.py --model <path>`. Report location:
 
-| 상황 | 보고서 저장 위치 |
+| Case | Report location |
 |------|------------------|
-| `--model` 이 **runs 아래** 모델일 때<br/>예: `data/processed/runs/v11/2026-02-02_23-28-45/models/tflite/saved_model_original.tflite` | **그 run의 `eval/`**<br/>→ `data/processed/runs/v11/2026-02-02_23-28-45/eval/ratio_sweep_report.md` |
-| `--model` 이 지정됐지만 runs 밖 경로일 때<br/>+ `.last_run_id` 있음 (이전에 분석 실행함) | **현재 분석 폴더**<br/>→ `data/processed/analysis/<version>/<datetime>/ratio_sweep_report.md` |
-| `--model` 만 지정하고 분석 폴더/run 없음 | **eval 전용 폴더**<br/>→ `data/processed/eval/<YYYY-MM-DD_HH-MM-SS>/ratio_sweep_report.md` |
-| `--model` 없이 파이프라인 실행 (기본) | **현재 분석 폴더**<br/>→ `data/processed/analysis/<version>/<datetime>/ratio_sweep_report.md` |
+| `--model` is under **runs**<br/>e.g. `data/processed/runs/v11/2026-02-02_23-28-45/models/tflite/saved_model_original.tflite` | **That run's `eval/`**<br/>→ `data/processed/runs/v11/2026-02-02_23-28-45/eval/ratio_sweep_report.md` |
+| `--model` set but path outside runs<br/>+ `.last_run_id` exists (analysis was run before) | **Current analysis folder**<br/>→ `data/processed/analysis/<version>/<datetime>/ratio_sweep_report.md` |
+| Only `--model` set, no analysis/run folder | **Eval-only folder**<br/>→ `data/processed/eval/<YYYY-MM-DD_HH-MM-SS>/ratio_sweep_report.md` |
+| Pipeline run without `--model` (default) | **Current analysis folder**<br/>→ `data/processed/analysis/<version>/<datetime>/ratio_sweep_report.md` |
 
-**예시 (학습/압축/분석 생략, 특정 run 모델로 평가만):**
+**Example (skip train/compression/analysis, evaluate one run's model):**
 
 ```bash
 python run.py --skip-train --skip-compression --skip-analysis \
   --model data/processed/runs/v11/2026-02-02_23-28-45/models/tflite/saved_model_original.tflite
 ```
 
-→ `data/processed/runs/v11/2026-02-02_23-28-45/eval/ratio_sweep_report.md` 에 ratio sweep + threshold tuning 결과가 쌓입니다. 같은 run의 모델을 여러 번 평가해도 같은 `eval/` 폴더에 덮어쓰게 됩니다.
+→ Ratio sweep + threshold tuning go to `data/processed/runs/v11/2026-02-02_23-28-45/eval/ratio_sweep_report.md`. Re-running evaluation for the same run overwrites that `eval/` folder.
 
-**폴더 구조 요약**
+**Folder layout summary**
 
-- **한 번의 학습 run** → `data/processed/runs/<version>/<datetime>/`  
-  - `models/`, `outputs/`, `analysis/` (스냅샷)  
-  - **지정 모델로 평가만 돌리면** → 같은 run 아래 `eval/ratio_sweep_report.md`
-- **학습 없이 임의 모델로만 평가** → `data/processed/eval/<timestamp>/ratio_sweep_report.md`
-
----
-
-## compression_analysis vs ratio_sweep 같은 데이터인지 확인
-
-두 리포트가 **같은 테스트 데이터**로 나왔는지 확인하려면:
-
-1. **실행 로그에서 확인**
-   - `run.py` 또는 `analyze_compression.py` 실행 시: `[load_cicids2017] data_path=...` 와 `Test set loaded: N samples` 가 찍힘.
-   - `evaluate_ratio_sweep.py` 실행 시: 같은 `[load_cicids2017] data_path=...` 와 `Test: N (Normal=..., Attack=...)` 가 찍힘.
-   - **data_path**가 같고 **Test set 크기(N)**가 같으면 같은 데이터로 평가한 것.
-
-2. **서버에서 한 번에 돌릴 때**
-   - `run.py` 한 번에 돌리면 compression 분석과 ratio sweep이 **같은 환경**에서 순서대로 실행되므로, `CICIDS2017_DATA_PATH` 를 설정하지 않으면 둘 다 config의 `data.path` (예: `data/raw/Bot-IoT`) 를 씀.
-   - 서버에서 `export CICIDS2017_DATA_PATH=/scratch/yqp5187/Bot-IoT` 한 뒤 `run.py` 를 돌리면 둘 다 그 경로를 씀.
-   - 따라서 **같은 셸에서 한 번만** `run.py` 를 실행했다면, 두 단계는 같은 데이터를 쓴다.
-
-3. **다른 결과가 나온다면**
-   - compression은 높은데 ratio_sweep은 Normal Recall 0이면: 예전에 **다른 환경**(예: 로컬 vs 서버, 또는 env 설정 전/후)에서 각각 돌렸을 가능성이 있음.
-   - **모델이 다르면** 결과도 다름: compression_analysis는 **TFLite** (Original/PTQ), ratio_sweep은 **Keras .h5** 를 쓰면 서로 다른 예측이 나올 수 있음. `run.py` 는 ratio_sweep에 **같은 Original TFLite** (`models/tflite/saved_model_original.tflite`) 를 쓰도록 되어 있어서, 같은 run 이면 두 리포트가 같은 모델로 평가됨.
-   - 다음부터는 위 1번처럼 로그에 찍힌 `data_path` 와 테스트 샘플 수를 비교하면 됨.
+- **One training run** → `data/processed/runs/<version>/<datetime>/`  
+  - `models/`, `outputs/`, `analysis/` (snapshot)  
+  - **Evaluation-only with a given model** → same run's `eval/ratio_sweep_report.md`
+- **Evaluation-only with arbitrary model** → `data/processed/eval/<timestamp>/ratio_sweep_report.md`
 
 ---
 
-## 서버 안에서 데이터 찾는 방법
+## Checking if compression_analysis and ratio_sweep use the same data
 
-SSH로 서버 접속한 뒤, CIC-IDS2017 CSV가 어디 있는지 찾을 때:
+To verify both reports used **the same test data**:
+
+1. **From run logs**
+   - When running `run.py` or `analyze_compression.py`: `[load_cicids2017] data_path=...` and `Test set loaded: N samples`.
+   - When running `evaluate_ratio_sweep.py`: same `[load_cicids2017] data_path=...` and `Test: N (Normal=..., Attack=...)`.
+   - Same **data_path** and same **test set size (N)** means same data.
+
+2. **When running everything on server**
+   - A single `run.py` run executes compression analysis and ratio sweep in the **same environment** in order; without `CICIDS2017_DATA_PATH` both use config's `data.path` (e.g. `data/raw/Bot-IoT`).
+   - On server, `export CICIDS2017_DATA_PATH=/scratch/yqp5187/Bot-IoT` then `run.py` — both use that path.
+   - So if you ran `run.py` **once in the same shell**, both steps used the same data.
+
+3. **If results differ**
+   - High compression metrics but ratio_sweep Normal Recall 0: they may have been run in **different environments** (e.g. local vs server, or before/after env change).
+   - **Different models** give different results: compression_analysis uses **TFLite** (Original/PTQ), ratio_sweep can use **Keras .h5**; `run.py` uses the **same Original TFLite** (`models/tflite/saved_model_original.tflite`) for ratio_sweep so same run ⇒ same model for both reports.
+   - From then on, compare `data_path` and test sample count in logs as in step 1.
+
+---
+
+## Finding data on the server
+
+After SSH to the server, to find where CIC-IDS2017 CSV files are:
 
 ```bash
-# 1) 내 스크래치 아래에서 *.pcap_ISCX.csv 검색 (시간 걸릴 수 있음)
+# 1) Search under scratch for *.pcap_ISCX.csv (may take a while)
 find /scratch/yqp5187 -name "*.pcap_ISCX.csv" -type f 2>/dev/null
 
-# 2) 파일명에 CIC 또는 ISCX 포함된 CSV만 검색
+# 2) CSV with CIC or ISCX in name
 find /scratch/yqp5187 -name "*CIC*" -o -name "*ISCX*" 2>/dev/null | head -50
 
-# 3) 먼저 상위 디렉터리만 보고, 데이터 폴더 후보 확인
+# 3) Check top-level dirs first for candidate data folders
 ls -la /scratch/yqp5187/
 ls -la /scratch/yqp5187/TinyML-main/data/raw/ 2>/dev/null
 ```
 
-찾은 디렉터리 경로(예: `/scratch/yqp5187/datasets/cicids2017`)를 `CICIDS2017_DATA_PATH`로 쓰면 됩니다.
+Use the directory path you find (e.g. `/scratch/yqp5187/datasets/cicids2017`) as `CICIDS2017_DATA_PATH`.
 
 ---
 
-## 서버에서 데이터 경로가 다를 때 (CIC-IDS2017)
+## When data path is different on server (CIC-IDS2017)
 
-9:1 평가나 학습 시 `No CIC-IDS2017 CSV files (*.pcap_ISCX.csv) found in data/raw/Bot-IoT` 가 나오면, 서버에 데이터가 다른 폴더에 있다는 뜻입니다.
+If you see `No CIC-IDS2017 CSV files (*.pcap_ISCX.csv) found in data/raw/Bot-IoT` during 9:1 evaluation or training, data is in a different folder on the server.
 
-**방법 1: 환경 변수로 경로 지정**
+**Option 1: Set path via environment variable**
 
-서버에서 CIC-IDS2017 CSV 파일들이 있는 디렉터리로 경로를 지정한 뒤 실행:
+On the server, set the directory that contains CIC-IDS2017 CSV files, then run:
 
 ```bash
-export CICIDS2017_DATA_PATH=/scratch/yqp5187/경로/  # 실제 *.pcap_ISCX.csv 가 있는 폴더
+export CICIDS2017_DATA_PATH=/scratch/yqp5187/your_path/   # folder that has *.pcap_ISCX.csv
 python scripts/evaluate_9to1.py --config config/federated_local.yaml --model src/models/global_model.h5 --ratio 9
 ```
 
-`tune_threshold_all_ratios.py`, `evaluate_ratio_sweep.py`, `run.py` 등 **데이터를 읽는 모든 스크립트**도 같은 방식으로 `CICIDS2017_DATA_PATH`를 설정한 뒤 실행하면 됩니다.
+All scripts that read data (`tune_threshold_all_ratios.py`, `evaluate_ratio_sweep.py`, `run.py`, etc.) should use the same `CICIDS2017_DATA_PATH` when run.
 
-**방법 2: 데이터를 config 경로에 두기**
+**Option 2: Put data at config path**
 
-`data/raw/Bot-IoT` (또는 config의 `data.path`) 아래에 `*.pcap_ISCX.csv` 파일들을 넣거나, 그 경로를 해당 폴더로 심볼릭 링크:
+Place `*.pcap_ISCX.csv` under `data/raw/Bot-IoT` (or config's `data.path`), or symlink that path to the real folder:
 
 ```bash
 mkdir -p /scratch/yqp5187/TinyML-main/data/raw/Bot-IoT
-# 여기에 CIC-IDS2017 CSV 복사 또는 ln -s /실제경로/*.pcap_ISCX.csv .
+# Copy CIC-IDS2017 CSV here or: ln -s /actual_path/*.pcap_ISCX.csv .
 ```
 
-데이터를 아직 서버에 두지 않았다면, [CIC-IDS2017](https://www.unb.ca/cic/datasets/ids-2017.html)에서 받아 서버의 한 폴더에 풀어 둔 다음, 그 폴더 경로를 `CICIDS2017_DATA_PATH`로 쓰면 됩니다.
+If data is not on the server yet, download from [CIC-IDS2017](https://www.unb.ca/cic/datasets/ids-2017.html), extract to a folder on the server, and set that path as `CICIDS2017_DATA_PATH`.

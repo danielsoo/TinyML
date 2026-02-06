@@ -326,6 +326,8 @@ def on_fit_config(server_round: int) -> Dict[str, Any]:
         "batch_size": fed_cfg.get("batch_size", 128),
         "server_round": server_round,
         "use_callbacks": fed_cfg.get("use_callbacks", False),
+        "learning_rate": fed_cfg.get("learning_rate", 0.001),
+        "lr_decay": fed_cfg.get("lr_decay", 1.0),
     }
 
 

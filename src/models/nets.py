@@ -63,7 +63,7 @@ def make_mlp(
     use_focal_loss: bool = False,
     focal_loss_alpha: float = 0.75,
 ) -> Model:
-    """MLP: 512->256->128 구조, BatchNorm, Dropout. 학습 알고리즘 향상."""
+    """MLP: 512->256->128, BatchNorm, Dropout. For training stability and accuracy."""
     from keras import Input
     model = Sequential(
         [

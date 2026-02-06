@@ -456,11 +456,11 @@ def load_cicids2017(
     y = y[shuffle_idx]
     print(f"[load_cicids2017] Shuffled full pool (random_state={random_state})")
 
-    # Final sampling if needed (max_samples로 줄일 때 비율 맞추기)
-    # balance_ratio가 있으면 목표 비율(예: 8:2)로 샘플링 → 정상만 있는 파일이 많아도 풀 비율이 치우치지 않음
+    # Final sampling if needed (preserve ratio when capping by max_samples)
+    # If balance_ratio set, sample to target ratio (e.g. 8:2) so pool ratio stays balanced
     if max_samples is not None and len(X) > max_samples:
         if binary and balance_ratio is not None and balance_ratio > 0:
-            # 목표: majority:minority = balance_ratio:1 (예: 4:1 → 정상 80%, 공격 20%)
+            # Target: majority:minority = balance_ratio:1 (e.g. 4:1 -> normal 80%, attack 20%)
             idx_minority = np.where(y == 1)[0]   # attack
             idx_majority = np.where(y == 0)[0]   # normal
             n_minority_target = int(max_samples / (1 + balance_ratio))

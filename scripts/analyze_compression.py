@@ -265,12 +265,12 @@ class CompressionAnalyzer:
             "recall": float(recall),
             "f1_score": float(f1),
         }
-        # 정상 클래스(0) 지표: 정상인데 정상이라고 한 비율(Recall), 정상이라고 한 것 중 정상인 비율(Precision)
+        # Normal class (0) metrics: Recall = of actual normal, predicted normal; Precision = of predicted normal, actual normal
         if self.num_classes <= 2:
             prec_per = precision_score(self.y_test, y_pred, average=None, zero_division=0)
             rec_per = recall_score(self.y_test, y_pred, average=None, zero_division=0)
-            out["precision_normal"] = float(prec_per[0])  # 정상이라고 예측한 것 중 실제 정상 비율
-            out["recall_normal"] = float(rec_per[0])       # 실제 정상인 것 중 정상이라고 예측한 비율
+            out["precision_normal"] = float(prec_per[0])  # of predicted normal, fraction actually normal
+            out["recall_normal"] = float(rec_per[0])       # of actual normal, fraction predicted normal
         return out
 
     def measure_inference_speed(
@@ -511,9 +511,9 @@ class CompressionAnalyzer:
             f.write(f"| **Data path** | {data_cfg.get('path', '-')} |\n")
             f.write(f"| **Max samples** | {data_cfg.get('max_samples', '-')} |\n")
             br = data_cfg.get('balance_ratio')
-            br_desc = {1.0: "50:50", 4.0: "정상:공격 8:2", 9.0: "9:1", 19.0: "19:1"}.get(br) if br is not None else None
+            br_desc = {1.0: "50:50", 4.0: "normal:attack 8:2", 9.0: "9:1", 19.0: "19:1"}.get(br) if br is not None else None
             br_str = f"{br} ({br_desc})" if br_desc else (str(br) if br is not None else "-")
-            f.write(f"| **Balance ratio** (정상:공격) | {br_str} |\n")
+            f.write(f"| **Balance ratio** (normal:attack) | {br_str} |\n")
             f.write(f"| **Num clients** | {data_cfg.get('num_clients', '-')} |\n")
             f.write(f"| **Binary** | {data_cfg.get('binary', '-')} |\n")
             f.write(f"| **Use SMOTE** | {data_cfg.get('use_smote', '-')} |\n")
@@ -546,7 +546,7 @@ class CompressionAnalyzer:
                 else:
                     baseline_row = df.iloc[0]
 
-            # Comparison table (include 정상 Recall/Precision if present)
+            # Comparison table (include normal Recall/Precision if present)
             has_normal_metrics = "recall_normal" in df.columns and df["recall_normal"].notna().any()
             if has_normal_metrics:
                 f.write("| Stage | Size (MB) | Parameters | Accuracy | F1-Score | Normal Recall | Normal Precision | Latency (ms) |\n")

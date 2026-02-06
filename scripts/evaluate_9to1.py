@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-학습된 모델을 실제 상황처럼 정상:공격 = 9:1 테스트셋으로 시뮬레이션 평가합니다.
-(테스트만 9:1로 맞추고, 모델은 그대로 사용)
+Evaluate trained model on a 9:1 (normal:attack) test set to simulate real deployment.
+(Only test set is subsampled to 9:1; model is used as-is.)
 
 Usage:
   python scripts/evaluate_9to1.py --config config/federated_local.yaml --model src/models/global_model.h5
@@ -35,7 +35,7 @@ def main():
     dataset_kwargs = {k: v for k, v in data_cfg.items() if k not in {"name", "num_clients"}}
     if "path" in dataset_kwargs and "data_path" not in dataset_kwargs:
         dataset_kwargs["data_path"] = dataset_kwargs.pop("path")
-    dataset_kwargs["balance_ratio"] = dataset_kwargs.get("balance_ratio")  # 학습용 균형은 그대로 (train만 영향)
+    dataset_kwargs["balance_ratio"] = dataset_kwargs.get("balance_ratio")  # train balance unchanged (affects train only)
     dataset_kwargs["binary"] = data_cfg.get("binary", True)
 
     from src.data.loader import load_dataset
@@ -47,7 +47,7 @@ def main():
     n_attack = int(np.sum(y_test == 1))
     print(f"   Test original: {n_test:,} (BENIGN={n_normal:,}, ATTACK={n_attack:,})")
 
-    # 테스트셋을 정상:공격 = ratio:1 로 서브샘플 (공격은 전부 쓰고, 정상은 ratio*공격 수만큼만)
+    # Subsample test set to normal:attack = ratio:1 (keep all attack; take ratio*attack_count normal)
     rng = np.random.default_rng(args.seed)
     idx_attack = np.where(y_test == 1)[0]
     idx_normal = np.where(y_test == 0)[0]

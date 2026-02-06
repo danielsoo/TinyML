@@ -1,7 +1,7 @@
 # config/federated_local.yaml
 # Local environment config
 
-# Version (for result/analysis folder naming). 로컬/서버 동일하게 맞추면 runs/ 폴더 통일
+# Version (for result/analysis folder naming). Match local/server for consistent runs/ layout
 version: "v12"
 
 data:
@@ -14,10 +14,10 @@ data:
   # Number of clients (4 devices)
   num_clients: 4
 
-  # 데이터 무제한 (max_samples 없음 = 전부 사용)
-  # max_samples: 1500000  # 제한 쓰려면 주석 해제
+  # No data cap (omit max_samples = use all)
+  # max_samples: 1500000  # uncomment to limit
 
-  # balance_ratio: 1.0 = 5:5 (정상:공격 50:50)
+  # balance_ratio: 1.0 = 5:5 (normal:attack 50:50)
   binary: true
   use_smote: true
   balance_ratio: 1.0   # 5:5

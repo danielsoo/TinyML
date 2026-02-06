@@ -124,9 +124,9 @@ def config_section_markdown(cfg: dict, for_compression_report: bool = True) -> s
         f"| **Max samples** | {data_cfg.get('max_samples', '-')} |\n",
     ]
     br = data_cfg.get("balance_ratio")
-    br_desc = {1.0: "50:50", 4.0: "정상:공격 8:2", 9.0: "9:1", 19.0: "19:1"}.get(br) if br is not None else None
+    br_desc = {1.0: "50:50", 4.0: "normal:attack 8:2", 9.0: "9:1", 19.0: "19:1"}.get(br) if br is not None else None
     br_str = f"{br} ({br_desc})" if br_desc else (str(br) if br is not None else "-")
-    lines.append(f"| **Balance ratio** (정상:공격) | {br_str} |\n")
+    lines.append(f"| **Balance ratio** (normal:attack) | {br_str} |\n")
     lines.extend([
         f"| **Num clients** | {data_cfg.get('num_clients', '-')} |\n",
         f"| **Binary** | {data_cfg.get('binary', '-')} |\n",
@@ -157,7 +157,7 @@ def config_section_markdown_short(cfg: dict) -> str:
     fed_cfg = cfg.get("federated", {})
     model_cfg = cfg.get("model", {})
     br = data_cfg.get("balance_ratio")
-    br_desc = {1.0: "50:50", 4.0: "정상:공격 8:2", 9.0: "9:1", 19.0: "19:1"}.get(br) if br is not None else None
+    br_desc = {1.0: "50:50", 4.0: "normal:attack 8:2", 9.0: "9:1", 19.0: "19:1"}.get(br) if br is not None else None
     br_str = f"{br} ({br_desc})" if br_desc else (str(br) if br is not None else "-")
     return "".join([
         "## Run / Training Configuration\n\n",

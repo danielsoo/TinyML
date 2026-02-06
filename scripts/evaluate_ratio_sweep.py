@@ -229,7 +229,7 @@ def _write_markdown_report(rows, output_path: Path, model_path: str, config_path
         f.write(f"| **Data** | {data_cfg.get('name', '-')} |\n")
         f.write(f"| **Max samples** | {data_cfg.get('max_samples', '-')} |\n")
         br = data_cfg.get("balance_ratio")
-        br_desc = {1.0: "50:50", 4.0: "정상:공격 8:2", 9.0: "9:1", 19.0: "19:1"}.get(br) if br is not None else None
+        br_desc = {1.0: "50:50", 4.0: "normal:attack 8:2", 9.0: "9:1", 19.0: "19:1"}.get(br) if br is not None else None
         br_str = f"{br} ({br_desc})" if br_desc else (str(br) if br is not None else "-")
         f.write(f"| **Balance ratio** | {br_str} |\n")
         f.write(f"| **Num clients** | {data_cfg.get('num_clients', '-')} |\n")
@@ -262,8 +262,8 @@ def _write_markdown_report(rows, output_path: Path, model_path: str, config_path
             f.write(f"- **F1-Score**: {r['f1_score']:.4f}\n")
             nr = r.get("normal_recall", 0)
             np_ = r.get("normal_precision", 0)
-            f.write(f"- **Normal Recall** (정상인데 정상이라고 한 비율): {nr:.4f}\n")
-            f.write(f"- **Normal Precision** (정상이라고 한 것 중 정상인 비율): {np_:.4f}\n")
+            f.write(f"- **Normal Recall** (of actual normal, predicted normal): {nr:.4f}\n")
+            f.write(f"- **Normal Precision** (of predicted normal, actual normal): {np_:.4f}\n")
             f.write("\n")
 
 

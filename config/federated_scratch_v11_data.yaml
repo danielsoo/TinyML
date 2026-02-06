@@ -1,5 +1,5 @@
 # config/federated_scratch_v11_data.yaml
-# v11과 동일한 데이터 양(1.5M)으로 테스트할 때 사용
+# Use when testing with same data size as v11 (1.5M)
 
 version: "v12"
 
@@ -7,7 +7,7 @@ data:
   name: cicids2017
   path: "/scratch/yqp5187/Bot-IoT"
   num_clients: 4
-  max_samples: 1500000   # v11과 동일 (1.5M)
+  max_samples: 1500000   # same as v11 (1.5M)
   binary: true
   use_smote: true
   balance_ratio: 1.0
