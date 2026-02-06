@@ -95,32 +95,56 @@ def _get_strategy_base():
 
 class SaveModelStrategy(_get_strategy_base()):
     """FedAvg/FedAvgM strategy that stores latest parameters for saving.
-    
+
     FedAvgM: server-side momentum mitigates client drift and improves convergence stability.
     """
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self, evaluate_metrics_aggregation_fn=None, **kwargs):
+        # Store the aggregation function before passing to parent
+        self._evaluate_metrics_aggregation_fn = evaluate_metrics_aggregation_fn
+        super().__init__(evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation_fn, **kwargs)
         self.latest_parameters: Optional[fl.common.Parameters] = None
 
     def aggregate_fit(self, server_round, results, failures):
         """Aggregate fit results (sample-weighted, with momentum if FedAvgM)."""
         if not results:
             return None, {}
-        
+
         total_examples = sum([num_examples for _, fit_res in results for num_examples in [fit_res.num_examples]])
         if server_round % 5 == 0:
             print(f"\n[Round {server_round}] Client contributions:")
             for client_proxy, fit_res in results:
                 weight = fit_res.num_examples / total_examples
                 print(f"  Client samples: {fit_res.num_examples:,} (weight: {weight:.4f})")
-        
+
         aggregated_parameters, aggregated_metrics = super().aggregate_fit(
             server_round, results, failures
         )
         if aggregated_parameters is not None:
             self.latest_parameters = aggregated_parameters
         return aggregated_parameters, aggregated_metrics
+
+    def aggregate_evaluate(self, server_round, results, failures):
+        """Aggregate evaluation results from clients and call custom aggregation function."""
+        if not results:
+            return None, {}
+
+        # Call parent aggregation first
+        aggregated_loss, aggregated_metrics = super().aggregate_evaluate(
+            server_round, results, failures
+        )
+
+        # Call our custom metrics aggregation function if set
+        # Note: Parent class should already call this, but we ensure it here
+        if self._evaluate_metrics_aggregation_fn is not None:
+            try:
+                custom_metrics = self._evaluate_metrics_aggregation_fn(results)
+                if custom_metrics:
+                    aggregated_metrics.update(custom_metrics)
+            except Exception as e:
+                print(f"[Warning] evaluate_metrics_aggregation_fn error: {e}")
+
+        return aggregated_loss, aggregated_metrics
 
 
 def _build_model(
@@ -558,11 +582,16 @@ def main(save_path: str = "src/models/global_model.h5", config_path: str = None)
     batch_size = int(fed_cfg.get("batch_size", 32))
     local_epochs = int(fed_cfg.get("local_epochs", 1))
 
+    # Get version from config for output directory
+    version = CFG.get("version", "default")
+
     # Per-round metrics storage (for reports and problem diagnosis)
-    output_dir = Path("outputs")
+    # Save to data/processed/{version}/
+    output_dir = Path("data/processed") / version
     output_dir.mkdir(parents=True, exist_ok=True)
     csv_path = output_dir / "fl_evaluation_history.csv"
     json_path = output_dir / "fl_evaluation_history.json"
+    md_path = output_dir / "fl_training_report.md"
     round_counter: List[int] = [0]
     metrics_history: List[Dict[str, Any]] = []
 
@@ -702,44 +731,44 @@ def main(save_path: str = "src/models/global_model.h5", config_path: str = None)
             w = csv.writer(f)
             w.writerow(csv_row)
 
-        # Console output: mean + per-device accuracy (decimal + percent)
-        print("\n[Evaluation Summary]")
-        print("=" * 60)
-        print(f"Round: {current_round} / {num_rounds}")
-        print(f"Accuracy (mean):  {aggregated['accuracy']:.4f}  ({accuracy_pct:.2f}%)")
-        print(f"Loss:             {aggregated['loss']:.4f}")
-        print("[Per-Device Accuracy]")
-        for i in range(num_clients):
-            if i < len(client_accuracies_pct):
-                print(f"  - Device {i}:  {client_accuracies[i]:.4f}  ({client_accuracies_pct[i]:.2f}%)")
-        print()
-
-        if "actual_attack" in aggregated and "actual_normal" in aggregated and "total_samples" in aggregated:
-            print("[Ground Truth]")
-            print(f"  - Attack samples: {aggregated['actual_attack']}")
-            print(f"  - Normal samples: {aggregated['actual_normal']}")
-            print(f"  - Total samples:  {aggregated['total_samples']}\n")
-
-        if "predicted_attack" in aggregated and "predicted_normal" in aggregated:
-            print("[Predictions]")
-            print(f"  - Predicted Attack:  {aggregated['predicted_attack']}")
-            print(f"  - Predicted Normal:  {aggregated['predicted_normal']}\n")
-
-        if {"true_positives", "true_negatives", "false_positives", "false_negatives"} <= aggregated.keys():
-            print("[Confusion Matrix]")
-            print(f"  - True Positives (TP):  {aggregated['true_positives']}")
-            print(f"  - True Negatives (TN):  {aggregated['true_negatives']}")
-            print(f"  - False Positives (FP): {aggregated['false_positives']}")
-            print(f"  - False Negatives (FN): {aggregated['false_negatives']}\n")
-
-        print("[Metrics]")
-        print(f"  - Precision:  {aggregated['precision']:.4f}  ({precision_pct:.2f}%)")
-        print(f"  - Recall:     {aggregated['recall']:.4f}  ({recall_pct:.2f}%)")
-        print(f"  - F1-Score:   {aggregated['f1_score']:.4f}  ({f1_pct:.2f}%)")
-
-        print("=" * 60 + "\n")
+        # Brief progress indicator (single line per round)
+        print(f"  Round {current_round}/{num_rounds}: Acc={accuracy_pct:.2f}%, Recall={recall_pct:.2f}%, F1={f1_pct:.2f}%")
 
         return aggregated
+
+    # Build initial model for parameters
+    init_model = _build_model(
+        state["model_name"],
+        state["input_shape"],
+        state["num_classes"],
+        state["learning_rate"],
+        state.get("use_focal_loss", False),
+        state.get("focal_loss_alpha", 0.75),
+    )
+
+    # Learning rate decay function for clients
+    lr_decay_type = fed_cfg.get("lr_decay_type", "none")
+    base_lr = state["learning_rate"]
+
+    def get_client_lr(server_round: int) -> float:
+        """Calculate decayed learning rate for clients."""
+        if lr_decay_type == "none":
+            return base_lr
+        import math
+        min_lr = fed_cfg.get("lr_min", 1e-6)
+        if lr_decay_type == "cosine":
+            return min_lr + 0.5 * (base_lr - min_lr) * (1 + math.cos(math.pi * server_round / num_rounds))
+        elif lr_decay_type == "exponential":
+            decay_rate = fed_cfg.get("lr_decay_rate", 0.95)
+            return max(min_lr, base_lr * (decay_rate ** server_round))
+        elif lr_decay_type == "step":
+            drop_rate = fed_cfg.get("lr_drop_rate", 0.5)
+            epochs_drop = fed_cfg.get("lr_epochs_drop", 10)
+            return max(min_lr, base_lr * (drop_rate ** math.floor(server_round / epochs_drop)))
+        elif lr_decay_type == "linear":
+            decay = (base_lr - min_lr) * (1 - server_round / num_rounds)
+            return max(min_lr, min_lr + decay)
+        return base_lr
 
     strategy_kw = dict(
         fraction_fit=fed_cfg.get("fraction_fit", 1.0),
@@ -751,22 +780,19 @@ def main(save_path: str = "src/models/global_model.h5", config_path: str = None)
             "batch_size": batch_size,
             "local_epochs": local_epochs,
             "use_callbacks": fed_cfg.get("use_callbacks", False),
+            "server_round": rnd,
+            "learning_rate": get_client_lr(rnd),
         },
         evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation_fn,
+        # Always set initial parameters for proper evaluation in round 1
+        initial_parameters=ndarrays_to_parameters(init_model.get_weights()),
     )
     if hasattr(fl.server.strategy, "FedAvgM"):
         strategy_kw["server_momentum"] = fed_cfg.get("server_momentum", 0.9)
         strategy_kw["server_learning_rate"] = fed_cfg.get("server_learning_rate", 1.0)
-        init_model = _build_model(
-            state["model_name"],
-            state["input_shape"],
-            state["num_classes"],
-            state["learning_rate"],
-            state.get("use_focal_loss", False),
-            state.get("focal_loss_alpha", 0.75),
-        )
-        strategy_kw["initial_parameters"] = ndarrays_to_parameters(init_model.get_weights())
         print(f"[Strategy] FedAvgM (momentum={strategy_kw['server_momentum']})")
+    else:
+        print("[Strategy] FedAvg")
     strategy = SaveModelStrategy(**strategy_kw)
 
     try:
@@ -805,33 +831,48 @@ def main(save_path: str = "src/models/global_model.h5", config_path: str = None)
             "num_rounds": num_rounds,
             "rounds": metrics_history,
         }, f, indent=2, ensure_ascii=False)
-    print(f"[Report] Round-by-round metrics saved:")
-    print(f"  - CSV:  {csv_path.resolve()}  (round, accuracy, device 0~{num_clients-1} accuracy_pct, ...)")
-    print(f"  - JSON: {json_path.resolve()}  (same + per-device for scripts / graphs)")
-    print("  → Use these to find which round or which device accuracy drops.\n")
 
-    # Generate report (Markdown) and graph
-    import subprocess
-    import sys
-    project_root = Path(__file__).resolve().parent.parent.parent
-    try:
-        subprocess.run(
-            [sys.executable, "scripts/generate_fl_report.py", "--input", str(json_path), "--output-dir", str(output_dir)],
-            cwd=project_root,
-            check=False,
-            timeout=15,
-        )
-    except Exception as e:
-        print(f"[Report] Markdown: run manually:  python scripts/generate_fl_report.py  ({e})")
-    try:
-        subprocess.run(
-            [sys.executable, "scripts/visualize_fl_history.py", "--input", str(json_path), "--output-dir", str(output_dir)],
-            cwd=project_root,
-            check=False,
-            timeout=30,
-        )
-    except Exception as e:
-        print(f"[Report] Graph: run manually:  python scripts/visualize_fl_history.py  ({e})\n")
+    # Generate summary Markdown table
+    md_content = f"""# Federated Learning Training Report
+
+| Item | Value |
+|------|-------|
+| **Version** | {version} |
+| **Num Clients** | {num_clients} |
+| **Num Rounds** | {num_rounds} |
+| **Local Epochs** | {local_epochs} |
+| **Batch Size** | {batch_size} |
+
+## Training Results
+
+| Round | Accuracy (%) | Recall (%) | F1-Score (%) |
+|-------|-------------|------------|--------------|
+"""
+    for row in metrics_history:
+        md_content += f"| {row['round']} | {row['accuracy_pct']:.2f} | {row['recall_pct']:.2f} | {row['f1_pct']:.2f} |\n"
+
+    # Add final metrics summary
+    if metrics_history:
+        final = metrics_history[-1]
+        md_content += f"""
+## Final Metrics (Round {final['round']})
+
+| Metric | Value |
+|--------|-------|
+| **Accuracy** | {final['accuracy_pct']:.2f}% |
+| **Precision** | {final['precision_pct']:.2f}% |
+| **Recall** | {final['recall_pct']:.2f}% |
+| **F1-Score** | {final['f1_pct']:.2f}% |
+| **Loss** | {final['loss']:.4f} |
+"""
+
+    with open(md_path, "w", encoding="utf-8") as f:
+        f.write(md_content)
+
+    print(f"\n[Report] Files saved to {output_dir}/:")
+    print(f"  - fl_training_report.md")
+    print(f"  - fl_evaluation_history.csv")
+    print(f"  - fl_evaluation_history.json\n")
 
     # Save global model
     # Use weights from last round

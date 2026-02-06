@@ -24,6 +24,10 @@ from src.modelcompression.distillation import (
     train_with_distillation,
     compare_models as compare_distillation
 )
+from src.modelcompression.progressive_distillation import (
+    ProgressiveDistillation,
+    run_n_stage_distillation,
+)
 from src.modelcompression.pruning import (
     apply_structured_pruning,
     compare_models,
@@ -75,6 +79,7 @@ def test_full_pipeline_mlp():
     data_cfg = cfg.get("data", {})
     model_cfg = cfg.get("model", {})
     fed_cfg = cfg.get("federated", {})
+    compression_cfg = cfg.get("compression", {})
     print("✅ Configuration loaded\n")
 
     # Load dataset
@@ -152,22 +157,11 @@ def test_full_pipeline_mlp():
     print(f"✅ Parameters: {teacher_params:,}")
     print(f"✅ Size: {teacher_size_kb:.2f} KB\n")
 
-    # Knowledge Distillation
-    print("🎓 Step 5: Knowledge Distillation")
-    print("-" * 60)
-    print("Creating student model (50% of teacher size)...")
-
-    # Create student model
-    student_model = create_student_model(
-        teacher_model=model,
-        compression_ratio=0.5,
-        num_classes=num_classes
-    )
-
-    student_params = student_model.count_params()
-    print(f"✅ Teacher parameters: {teacher_params:,}")
-    print(f"✅ Student parameters: {student_params:,}")
-    print(f"✅ Compression ratio: {teacher_params/student_params:.2f}x\n")
+    # Get distillation settings from config
+    distillation_mode = compression_cfg.get("distillation_mode", "progressive")
+    temperature = compression_cfg.get("temperature", 3.0)
+    alpha = compression_cfg.get("alpha", 0.3)
+    distillation_epochs = compression_cfg.get("distillation_epochs", 10)
 
     # Split data for distillation
     val_split = int(0.8 * len(x_train))
@@ -176,43 +170,130 @@ def test_full_pipeline_mlp():
     x_val_dist = x_train[val_split:]
     y_val_dist = y_train[val_split:]
 
-    print("Training student with knowledge distillation...")
-    student_model, distill_history = train_with_distillation(
-        teacher_model=model,
-        student_model=student_model,
-        x_train=x_train_dist,
-        y_train=y_train_dist,
-        x_val=x_val_dist,
-        y_val=y_val_dist,
-        temperature=3.0,
-        alpha=0.3,
-        epochs=10,
-        batch_size=fed_cfg.get("batch_size", 128),
-        learning_rate=0.001,
-        verbose=True
-    )
+    # if distillation_mode == "progressive":
+    #     # Progressive Knowledge Distillation: Multi-stage (e.g., 512 → 256 → 128)
+    #     print("🎓 Step 5: Progressive Knowledge Distillation")
+    #     print("-" * 60)
+    #     print("Using multi-stage progressive distillation for better compression...")
 
-    # Compile student for evaluation
-    student_model.compile(
-        optimizer='adam',
-        loss='sparse_categorical_crossentropy',
-        metrics=['accuracy']
-    )
+    #     # Get stages from config or use defaults
+    #     stage_units = compression_cfg.get("progressive_stages", [
+    #         [512, 256],   # Stage 1: Teacher → Student-1
+    #         [256, 128],   # Stage 2: Teacher + Student-1 → Student-2
+    #         [128, 64],    # Stage 3: All previous → Student-3 (smallest)
+    #     ])
 
-    # Evaluate distilled student
-    student_loss, student_acc = safe_evaluate(student_model, x_test, y_test, verbose=0)
-    student_size_kb = (student_params * 4) / 1024
+    #     print(f"\n📋 Progressive Distillation Stages:")
+    #     for i, units in enumerate(stage_units):
+    #         print(f"   Stage {i+1}: {units}")
+    #     print(f"   Temperature: {temperature}, Alpha: {alpha}")
+    #     print()
 
-    print(f"\n📊 Distillation Results:")
-    print(f"✅ Student accuracy: {student_acc:.2%}")
-    print(f"✅ Student loss: {student_loss:.4f}")
-    print(f"✅ Accuracy drop: {(orig_acc - student_acc)*100:.2f}%")
-    print(f"✅ Size: {student_size_kb:.2f} KB")
-    print(f"✅ Compression: {teacher_size_kb/student_size_kb:.2f}x\n")
+    #     # Run progressive distillation
+    #     students, distill_results = run_n_stage_distillation(
+    #         teacher_model=model,
+    #         x_train=x_train_dist,
+    #         y_train=y_train_dist,
+    #         x_val=x_val_dist,
+    #         y_val=y_val_dist,
+    #         stage_units=stage_units,
+    #         num_classes=num_classes,
+    #         temperature=temperature,
+    #         alpha=alpha,
+    #         epochs_per_stage=distillation_epochs,
+    #         batch_size=fed_cfg.get("batch_size", 128),
+    #         learning_rate=0.001,
+    #         output_dir=None,
+    #     )
 
-    # Use student model for further compression
-    model = student_model
-    orig_acc = student_acc  # Update baseline for comparison
+    #     # Use the final (smallest) student for further compression
+    #     student_model = students[-1]
+    #     final_result = distill_results[-1]
+
+    #     # Compile final student for evaluation
+    #     student_model.compile(
+    #         optimizer='adam',
+    #         loss='sparse_categorical_crossentropy',
+    #         metrics=['accuracy']
+    #     )
+
+    #     # Evaluate final distilled student
+    #     student_loss, student_acc = safe_evaluate(student_model, x_test, y_test, verbose=0)
+    #     student_params = student_model.count_params()
+    #     student_size_kb = (student_params * 4) / 1024
+
+    #     print(f"\n📊 Progressive Distillation Results:")
+    #     print(f"✅ Final student accuracy: {student_acc:.2%}")
+    #     print(f"✅ Final student loss: {student_loss:.4f}")
+    #     print(f"✅ Accuracy change: {(student_acc - orig_acc)*100:+.2f}%")
+    #     print(f"✅ Final size: {student_size_kb:.2f} KB")
+    #     print(f"✅ Total compression: {teacher_size_kb/student_size_kb:.2f}x")
+
+    #     # Show progression
+    #     print(f"\n📈 Accuracy Progression:")
+    #     for result in distill_results:
+    #         print(f"   Stage {result.stage} ({result.student_name}): {result.final_accuracy:.2%}")
+    #     print()
+
+    # else:
+    #     # Direct Knowledge Distillation: Single-stage (Teacher → Student)
+    #     print("🎓 Step 5: Direct Knowledge Distillation")
+    #     print("-" * 60)
+    #     print("Using single-stage direct distillation...")
+
+    #     # Get compression ratio from config
+    #     compression_ratio = compression_cfg.get("direct_compression_ratio", 0.5)
+
+    #     # Create student model
+    #     student_model = create_student_model(
+    #         teacher_model=model,
+    #         compression_ratio=compression_ratio,
+    #         num_classes=num_classes
+    #     )
+
+    #     student_params = student_model.count_params()
+    #     print(f"✅ Teacher parameters: {teacher_params:,}")
+    #     print(f"✅ Student parameters: {student_params:,}")
+    #     print(f"✅ Compression ratio: {teacher_params/student_params:.2f}x")
+    #     print(f"   Temperature: {temperature}, Alpha: {alpha}\n")
+
+    #     print("Training student with knowledge distillation...")
+    #     student_model, distill_history = train_with_distillation(
+    #         teacher_model=model,
+    #         student_model=student_model,
+    #         x_train=x_train_dist,
+    #         y_train=y_train_dist,
+    #         x_val=x_val_dist,
+    #         y_val=y_val_dist,
+    #         temperature=temperature,
+    #         alpha=alpha,
+    #         epochs=distillation_epochs,
+    #         batch_size=fed_cfg.get("batch_size", 128),
+    #         learning_rate=0.001,
+    #         verbose=True
+    #     )
+
+    #     # Compile student for evaluation
+    #     student_model.compile(
+    #         optimizer='adam',
+    #         loss='sparse_categorical_crossentropy',
+    #         metrics=['accuracy']
+    #     )
+
+    #     # Evaluate distilled student
+    #     student_loss, student_acc = safe_evaluate(student_model, x_test, y_test, verbose=0)
+    #     student_size_kb = (student_params * 4) / 1024
+
+    #     print(f"\n📊 Direct Distillation Results:")
+    #     print(f"✅ Student accuracy: {student_acc:.2%}")
+    #     print(f"✅ Student loss: {student_loss:.4f}")
+    #     print(f"✅ Accuracy change: {(student_acc - orig_acc)*100:+.2f}%")
+    #     print(f"✅ Size: {student_size_kb:.2f} KB")
+    #     print(f"✅ Compression: {teacher_size_kb/student_size_kb:.2f}x\n")
+
+    # # Use student model for further compression
+    # model = student_model
+    # orig_acc = student_acc  # Update baseline for comparison
 
     # Apply pruning at different ratios
     print("✂️  Step 6: Testing Multiple Pruning Ratios (on distilled model)")
@@ -427,10 +508,12 @@ def test_saved_model_pruning(
     model = keras.models.load_model(model_path, compile=False)
     # Infer output shape for recompile (binary or multi-class)
     last_layer = model.layers[-1]
-    num_classes = last_layer.units if hasattr(last_layer, "units") else 2
-    loss = "binary_crossentropy" if num_classes == 1 else "sparse_categorical_crossentropy"
+    output_units = last_layer.units if hasattr(last_layer, "units") else 2
+    # For binary classification with sigmoid (1 output), num_classes is still 2
+    num_classes = 2 if output_units == 1 else output_units
+    loss = "binary_crossentropy" if output_units == 1 else "sparse_categorical_crossentropy"
     model.compile(optimizer="adam", loss=loss, metrics=["accuracy"])
-    print("✅ Model loaded\n")
+    print(f"✅ Model loaded (output_units={output_units}, num_classes={num_classes})\n")
 
     # Load test data (use same config as training)
     print("📂 Loading test dataset...")
@@ -441,6 +524,7 @@ def test_saved_model_pruning(
         cfg = yaml.safe_load(f)
 
     data_cfg = cfg.get("data", {})
+    compression_cfg = cfg.get("compression", {})
     dataset_name = dataset_override or data_cfg.get("name", "bot_iot")
     if dataset_override:
         print(f"📌 Dataset override: {dataset_override}\n")
@@ -474,17 +558,168 @@ def test_saved_model_pruning(
     x_test, y_test = x_test[:1000], y_test[:1000]
     print(f"✅ Test samples: {len(x_test)}, features: {x_train.shape[1]}\n")
 
-    # Evaluate original
-    print("📊 Evaluating original saved model...")
+    # Evaluate original (teacher model)
+    print("📊 Evaluating original saved model (Teacher)...")
     orig_loss, orig_acc = safe_evaluate(model, x_test, y_test, verbose=0)
+    teacher_params = model.count_params()
+    teacher_size_kb = (teacher_params * 4) / 1024
     print(f"✅ Accuracy: {orig_acc:.2%}")
-    print(f"✅ Loss: {orig_loss:.4f}\n")
+    print(f"✅ Loss: {orig_loss:.4f}")
+    print(f"✅ Parameters: {teacher_params:,}")
+    print(f"✅ Size: {teacher_size_kb:.2f} KB\n")
 
-    # Apply pruning
-    print("✂️  Applying 50% structured pruning...")
+    # Get distillation settings from config
+    distillation_mode = compression_cfg.get("distillation_mode", "progressive")
+    temperature = compression_cfg.get("temperature", 3.0)
+    alpha = compression_cfg.get("alpha", 0.3)
+    distillation_epochs = compression_cfg.get("distillation_epochs", 10)
+
+    # Split data for distillation
+    val_split = int(0.8 * len(x_train))
+    x_train_dist = x_train[:val_split]
+    y_train_dist = y_train[:val_split]
+    x_val_dist = x_train[val_split:]
+    y_val_dist = y_train[val_split:]
+
+    # num_classes already determined above when loading model
+
+    if distillation_mode == "progressive":
+        # Progressive Knowledge Distillation: Multi-stage
+        print("🎓 Step: Progressive Knowledge Distillation")
+        print("-" * 60)
+        print("Using multi-stage progressive distillation for better compression...")
+
+        # Get stages from config or use defaults
+        stage_units = compression_cfg.get("progressive_stages", [
+            [512, 256],
+            [256, 128],
+            [128, 64],
+        ])
+
+        print(f"\n📋 Progressive Distillation Stages:")
+        for i, units in enumerate(stage_units):
+            print(f"   Stage {i+1}: {units}")
+        print(f"   Temperature: {temperature}, Alpha: {alpha}")
+        print()
+
+        # Run progressive distillation
+        students, distill_results = run_n_stage_distillation(
+            teacher_model=model,
+            x_train=x_train_dist,
+            y_train=y_train_dist,
+            x_val=x_val_dist,
+            y_val=y_val_dist,
+            stage_units=stage_units,
+            num_classes=num_classes,
+            temperature=temperature,
+            alpha=alpha,
+            epochs_per_stage=distillation_epochs,
+            batch_size=128,
+            learning_rate=0.001,
+            output_dir=None,
+        )
+
+        # Use the final (smallest) student for further compression
+        student_model = students[-1]
+
+        # Compile final student for evaluation
+        student_model.compile(
+            optimizer='adam',
+            loss='sparse_categorical_crossentropy',
+            metrics=['accuracy']
+        )
+
+        # Evaluate final distilled student
+        student_loss, student_acc = safe_evaluate(student_model, x_test, y_test, verbose=0)
+        student_params = student_model.count_params()
+        student_size_kb = (student_params * 4) / 1024
+
+        print(f"\n📊 Progressive Distillation Results:")
+        print(f"✅ Final student accuracy: {student_acc:.2%}")
+        print(f"✅ Final student loss: {student_loss:.4f}")
+        print(f"✅ Accuracy change: {(student_acc - orig_acc)*100:+.2f}%")
+        print(f"✅ Final size: {student_size_kb:.2f} KB")
+        print(f"✅ Total compression: {teacher_size_kb/student_size_kb:.2f}x")
+
+        # Show progression
+        print(f"\n📈 Accuracy Progression:")
+        for result in distill_results:
+            print(f"   Stage {result.stage} ({result.student_name}): {result.final_accuracy:.2%}")
+        print()
+
+        # Use student model for pruning
+        model = student_model
+        orig_acc = student_acc
+
+    elif distillation_mode == "direct":
+        # Direct Knowledge Distillation: Single-stage
+        print("🎓 Step: Direct Knowledge Distillation")
+        print("-" * 60)
+        print("Using single-stage direct distillation...")
+
+        compression_ratio = compression_cfg.get("direct_compression_ratio", 0.5)
+
+        student_model = create_student_model(
+            teacher_model=model,
+            compression_ratio=compression_ratio,
+            num_classes=num_classes
+        )
+
+        student_params = student_model.count_params()
+        print(f"✅ Teacher parameters: {teacher_params:,}")
+        print(f"✅ Student parameters: {student_params:,}")
+        print(f"✅ Compression ratio: {teacher_params/student_params:.2f}x")
+        print(f"   Temperature: {temperature}, Alpha: {alpha}\n")
+
+        print("Training student with knowledge distillation...")
+        student_model, distill_history = train_with_distillation(
+            teacher_model=model,
+            student_model=student_model,
+            x_train=x_train_dist,
+            y_train=y_train_dist,
+            x_val=x_val_dist,
+            y_val=y_val_dist,
+            temperature=temperature,
+            alpha=alpha,
+            epochs=distillation_epochs,
+            batch_size=128,
+            learning_rate=0.001,
+            verbose=True
+        )
+
+        # Compile student for evaluation
+        student_model.compile(
+            optimizer='adam',
+            loss='sparse_categorical_crossentropy',
+            metrics=['accuracy']
+        )
+
+        # Evaluate distilled student
+        student_loss, student_acc = safe_evaluate(student_model, x_test, y_test, verbose=0)
+        student_size_kb = (student_params * 4) / 1024
+
+        print(f"\n📊 Direct Distillation Results:")
+        print(f"✅ Student accuracy: {student_acc:.2%}")
+        print(f"✅ Student loss: {student_loss:.4f}")
+        print(f"✅ Accuracy change: {(student_acc - orig_acc)*100:+.2f}%")
+        print(f"✅ Size: {student_size_kb:.2f} KB")
+        print(f"✅ Compression: {teacher_size_kb/student_size_kb:.2f}x\n")
+
+        # Use student model for pruning
+        model = student_model
+        orig_acc = student_acc
+
+    else:
+        # No distillation (distillation_mode == "none" or unrecognized)
+        print("⏭️  Skipping distillation (distillation_mode: none)")
+        print()
+
+    # Apply pruning (use config or default 0.5)
+    pruning_ratio = compression_cfg.get("pruning_ratio", 0.5)
+    print(f"✂️  Applying {pruning_ratio:.0%} structured pruning...")
     pruned_model = apply_structured_pruning(
         model,
-        pruning_ratio=0.5,
+        pruning_ratio=pruning_ratio,
         skip_last_layer=True,
         verbose=True
     )

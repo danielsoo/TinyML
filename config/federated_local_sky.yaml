@@ -62,3 +62,28 @@ federated:
   min_evaluate_clients: 4
   min_available_clients: 4
 
+# Compression settings (used by compression.py)
+compression:
+  # Distillation mode: 'progressive' or 'direct'
+  # - progressive: Multi-stage distillation (512 → 256 → 128), better for high compression
+  # - direct: Single-stage distillation (teacher → student), faster
+  distillation_mode: progressive
+
+  # Progressive distillation stages (only used when distillation_mode: progressive)
+  # Each stage defines hidden units for the student model
+  # Example: [[512, 256], [256, 128], [128, 64]] creates 3 students
+  progressive_stages:
+    - [512, 256]
+
+  # Direct distillation settings (only used when distillation_mode: direct)
+  # Compression ratio: 0.5 means student has 50% of teacher's parameters
+  direct_compression_ratio: 0.5
+
+  # Distillation hyperparameters
+  temperature: 3.0           # Softmax temperature (higher = softer probabilities)
+  alpha: 0.3                 # Weight for distillation loss (0-1, higher = more teacher influence)
+  distillation_epochs: 10    # Epochs per distillation stage
+
+  # Pruning settings
+  pruning_ratio: 0.5         # Fraction of neurons to prune (0.3, 0.5, or 0.7)
+

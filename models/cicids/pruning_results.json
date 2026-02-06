@@ -1,0 +1,52 @@
+{
+  "timestamp": "2026-01-23T21:42:46.635605",
+  "method": "pruning_standard_mlp",
+  "student_type": "nets.py (create_student_model)",
+  "pruned_model_path": "models\\cicids\\pruned_standard.h5",
+  "config": {
+    "pruning_ratio": 0.5,
+    "fine_tune_epochs": 5,
+    "fine_tune_lr": 0.0001,
+    "batch_size": 128
+  },
+  "input_shape": [
+    78
+  ],
+  "num_classes": 2,
+  "pre_prune_metrics": {
+    "accuracy": 0.8540999889373779,
+    "loss": 0.6413516402244568,
+    "precision": 0.6249388753056234,
+    "recall": 0.6487309644670051,
+    "f1_score": 0.636612702366127,
+    "tp": 5112,
+    "tn": 29052,
+    "fp": 3068,
+    "fn": 2768,
+    "params": 18498
+  },
+  "post_prune_metrics": {
+    "accuracy": 0.8020750284194946,
+    "loss": 1.5706053972244263,
+    "precision": 0.20634920634920634,
+    "recall": 0.001649746192893401,
+    "f1_score": 0.003273322422258592,
+    "tp": 13,
+    "tn": 32070,
+    "fp": 50,
+    "fn": 7867,
+    "params": 7202
+  },
+  "post_finetune_metrics": {
+    "accuracy": 0.8029999732971191,
+    "loss": 0.7031100392341614,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1_score": 0.0,
+    "tp": 0,
+    "tn": 32120,
+    "fp": 0,
+    "fn": 7880,
+    "params": 7202
+  }
+}

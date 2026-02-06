@@ -6,7 +6,7 @@ version: "v11"
 
 data:
   name: cicids2017
-  path: "/scratch/yqp5187/Bot-IoT"
+  path: "/data/raw/MachineLearningCVE"
 
   num_clients: 4
   max_samples: 1500000

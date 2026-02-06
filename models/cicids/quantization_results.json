@@ -1,0 +1,38 @@
+{
+  "timestamp": "2026-01-23T21:43:55.264661",
+  "method": "quantization_standard_mlp",
+  "pruned_model_path": "models\\cicids\\pruned_standard.h5",
+  "tflite_float": {
+    "path": "models\\cicids\\standard_float.tflite",
+    "size_kb": 30.109375,
+    "metrics": {
+      "accuracy": 0.8105,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1_score": 0.0,
+      "tp": 0,
+      "tn": 1621,
+      "fp": 0,
+      "fn": 379
+    }
+  },
+  "tflite_int8": {
+    "path": "models\\cicids\\standard_int8.tflite",
+    "size_kb": 11.7890625,
+    "metrics": {
+      "accuracy": 0.8105,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1_score": 0.0,
+      "tp": 0,
+      "tn": 1621,
+      "fp": 0,
+      "fn": 379
+    }
+  },
+  "input_shape": [
+    78
+  ],
+  "num_classes": 2,
+  "keras_params": 7202
+}

@@ -1,0 +1,39 @@
+{
+  "timestamp": "2026-01-23T20:37:10.358307",
+  "method": "quantization_lightweight_lightweight",
+  "model_name": "lightweight",
+  "pruned_model_path": "models\\cicids\\pruned_lightweight.h5",
+  "tflite_float": {
+    "path": "models\\cicids\\lightweight_float.tflite",
+    "size_kb": 14.19921875,
+    "metrics": {
+      "accuracy": 0.816,
+      "precision": 0.8235294117647058,
+      "recall": 0.036939313984168866,
+      "f1_score": 0.07070707070707072,
+      "tp": 14,
+      "tn": 1618,
+      "fp": 3,
+      "fn": 365
+    }
+  },
+  "tflite_int8": {
+    "path": "models\\cicids\\lightweight_int8.tflite",
+    "size_kb": 6.7265625,
+    "metrics": {
+      "accuracy": 0.374,
+      "precision": 0.15602836879432624,
+      "recall": 0.5224274406332454,
+      "f1_score": 0.24029126213592233,
+      "tp": 198,
+      "tn": 550,
+      "fp": 1071,
+      "fn": 181
+    }
+  },
+  "input_shape": [
+    78
+  ],
+  "num_classes": 2,
+  "keras_params": 3090
+}

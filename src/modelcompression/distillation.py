@@ -133,17 +133,18 @@ def distillation_loss_fn(
             - Result: same gradient magnitude regardless of T
     """
     # Handle binary teacher (sigmoid, 1 output) vs multi-class (softmax, C outputs)
-    def _binary_teacher_soft():
+    # Use static shape check to avoid tf.cond tracing issues
+    num_outputs = teacher_predictions.shape[-1]
+
+    if num_outputs is not None and num_outputs == 1:
+        # Binary teacher with sigmoid output (1 unit)
         p = tf.squeeze(teacher_predictions, axis=-1)
         eps = 1e-7
         teacher_logits_2 = tf.stack([tf.math.log(1 - p + eps), tf.math.log(p + eps)], axis=-1)
-        return tf.nn.softmax(teacher_logits_2 / temperature)
-
-    def _multiclass_teacher_soft():
-        return tf.nn.softmax(teacher_predictions / temperature)
-
-    is_binary = tf.equal(tf.shape(teacher_predictions)[-1], 1)
-    teacher_soft = tf.cond(is_binary, _binary_teacher_soft, _multiclass_teacher_soft)
+        teacher_soft = tf.nn.softmax(teacher_logits_2 / temperature)
+    else:
+        # Multi-class or binary with 2 softmax outputs
+        teacher_soft = tf.nn.softmax(teacher_predictions / temperature)
 
     # Soften student predictions with temperature
     student_soft = tf.nn.softmax(student_predictions / temperature)
@@ -259,6 +260,8 @@ class Distiller(keras.Model):
                     y, student_predictions, teacher_predictions,
                     self.temperature, self.alpha
                 )
+            # Reduce to scalar (mean over batch)
+            loss = tf.reduce_mean(loss)
 
         # Compute gradients
         trainable_vars = self.student.trainable_variables
@@ -411,7 +414,7 @@ def train_with_distillation(
     y_val: np.ndarray,
     temperature: float = 3.0,
     alpha: float = 0.1,
-    epochs: int = 10,
+    epochs: int = 5,
     batch_size: int = 128,
     learning_rate: float = 0.001,
     verbose: bool = True

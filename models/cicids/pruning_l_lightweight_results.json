@@ -1,0 +1,52 @@
+{
+  "timestamp": "2026-01-23T20:35:38.418616",
+  "method": "pruning_lightweight_lightweight",
+  "model_name": "lightweight",
+  "pruned_model_path": "models\\cicids\\pruned_lightweight.h5",
+  "config": {
+    "pruning_ratio": 0.5,
+    "fine_tune_epochs": 5,
+    "fine_tune_lr": 0.0001,
+    "batch_size": 128
+  },
+  "input_shape": [
+    78
+  ],
+  "num_classes": 2,
+  "pre_prune_metrics": {
+    "accuracy": 0.8079500198364258,
+    "loss": 0.7021372318267822,
+    "precision": 0.9805825242718447,
+    "recall": 0.025634517766497462,
+    "f1_score": 0.04996289883749691,
+    "tp": 202,
+    "tn": 32116,
+    "fp": 4,
+    "fn": 7678,
+    "params": 7202
+  },
+  "post_prune_metrics": {
+    "accuracy": 0.8052999973297119,
+    "loss": 6.653366565704346,
+    "precision": 0.719047619047619,
+    "recall": 0.01916243654822335,
+    "f1_score": 0.0373300370828183,
+    "tp": 151,
+    "tn": 32061,
+    "fp": 59,
+    "fn": 7729,
+    "params": 3090
+  },
+  "post_finetune_metrics": {
+    "accuracy": 0.8067749738693237,
+    "loss": 0.5057100653648376,
+    "precision": 0.8952879581151832,
+    "recall": 0.0217005076142132,
+    "f1_score": 0.04237393135918722,
+    "tp": 171,
+    "tn": 32100,
+    "fp": 20,
+    "fn": 7709,
+    "params": 3090
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "timestamp": "2026-01-23T21:30:40.685925",
+  "method": "distillation_standard_mlp",
+  "student_type": "nets.py (create_student_model)",
+  "student_model_path": "models\\cicids\\student_standard.h5",
+  "config": {
+    "compression_ratio": 0.5,
+    "temperature": 3.0,
+    "alpha": 0.1,
+    "epochs": 10,
+    "batch_size": 128
+  },
+  "input_shape": [
+    78
+  ],
+  "num_classes": 2,
+  "teacher_metrics": {
+    "accuracy": 0.8029999732971191,
+    "loss": 0.5476434826850891,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1_score": 0.0,
+    "tp": 0,
+    "tn": 32120,
+    "fp": 0,
+    "fn": 7880,
+    "params": 53378
+  },
+  "student_metrics": {
+    "accuracy": 0.8540999889373779,
+    "loss": 0.6413516402244568,
+    "precision": 0.6249388753056234,
+    "recall": 0.6487309644670051,
+    "f1_score": 0.636612702366127,
+    "tp": 5112,
+    "tn": 29052,
+    "fp": 3068,
+    "fn": 2768,
+    "params": 18498
+  }
+}
