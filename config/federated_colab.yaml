@@ -1,0 +1,38 @@
+# config/federated_colab.yaml
+# Google Colab environment config
+
+version: "v1"
+
+data:
+  # Choose bot_iot or mnist
+  name: bot_iot
+
+  # Bot-IoT CSV path (Colab: Google Drive)
+  path: "/content/drive/MyDrive/TinyML_models"
+
+  # Number of clients
+  num_clients: 4
+
+  # Limit samples (for faster analysis)
+  max_samples: 200000
+
+model:
+  # mlp or cnn (usually mlp for Bot-IoT)
+  name: mlp
+
+federated:
+  num_rounds: 3
+
+  # Fraction of clients participating per round (1.0 = all)
+  fraction_fit: 1.0
+  fraction_evaluate: 1.0
+
+  # Local training settings
+  local_epochs: 2
+  batch_size: 128
+
+  # For strategy internal use
+  min_fit_clients: 4
+  min_evaluate_clients: 4
+  min_available_clients: 4
+

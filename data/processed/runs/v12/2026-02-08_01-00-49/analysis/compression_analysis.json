@@ -1,0 +1,39 @@
+{
+  "version": "v12",
+  "data_version": "cicids2017_bal4.0",
+  "generated_at": "2026-02-08T01:05:34.235023",
+  "results": [
+    {
+      "stage": "Original",
+      "model_path": "models/tflite/saved_model_original.tflite",
+      "file_size_bytes": 821632,
+      "file_size_mb": 0.7835693359375,
+      "parameter_count": 205777,
+      "accuracy": 0.6153339907863231,
+      "precision": 0.2866860217366197,
+      "recall": 0.845173940098388,
+      "f1_score": 0.42814405091146995,
+      "avg_latency_ms": 4.01606559753418,
+      "min_latency_ms": 3.0672550201416016,
+      "max_latency_ms": 7.9898834228515625,
+      "samples_per_second": 24899.991688731105,
+      "compression_ratio": 1.0
+    },
+    {
+      "stage": "Compressed (PTQ)",
+      "model_path": "models/tflite/saved_model_pruned_quantized.tflite",
+      "file_size_bytes": 70896,
+      "file_size_mb": 0.0676116943359375,
+      "parameter_count": 61969,
+      "accuracy": 0.9342580349623631,
+      "precision": 0.7840788130254382,
+      "recall": 0.8475338428844822,
+      "f1_score": 0.8145724135207263,
+      "avg_latency_ms": 0.9777307510375977,
+      "min_latency_ms": 0.7672309875488281,
+      "max_latency_ms": 1.2068748474121094,
+      "samples_per_second": 102277.64637030895,
+      "compression_ratio": 11.589257503949447
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+# --- TensorFlow for Apple Silicon ---
+tensorflow
+
+# --- Core libs ---
+flwr[simulation]<2
+numpy<2.0
+pandas
+scikit-learn
+imbalanced-learn
+matplotlib
+seaborn
+jupyter
+pyyaml
+
+# --- Model optimization (pruning, QAT) ---
+tensorflow-model-optimization
+tf-keras  # required by tfmot on TF 2.16+
+
+# --- Adversarial ML ---
+adversarial-robustness-toolbox>=1,<2
+
+kaggle

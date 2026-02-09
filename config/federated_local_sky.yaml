@@ -1,0 +1,64 @@
+# config/federated_local.yaml
+# Local environment config
+
+# Version (for result/analysis folder naming, e.g. v1, v2_balanced)
+version: "v12"
+
+data:
+  # Choose cicids2017, bot_iot, or mnist
+  name: cicids2017
+
+  # Data path (same folder contains both Bot-IoT and CIC-IDS2017)
+  path: "/workspace/TinyML-main/data/raw/CIC-IDS2017"
+
+  # Number of clients (4 devices)
+  num_clients: 4
+
+  # Limit samples to avoid long training (increase for more attack samples)
+  max_samples: 1500000 
+  
+  # For CIC-IDS2017: binary (BENIGN vs ATTACK) or multi-class
+  binary: true
+  use_smote: true
+  balance_ratio: 4.0
+
+model:
+  # mlp or cnn (usually mlp for Bot-IoT)
+  name: mlp
+
+federated:
+  # Increased rounds/epochs for better accuracy
+  num_rounds: 60
+
+  # Fraction of clients participating per round (1.0 = all)
+  fraction_fit: 1.0
+  fraction_evaluate: 1.0
+
+  # Local training parameters
+  local_epochs: 3
+  batch_size: 128
+  learning_rate: 0.001
+  
+  # Class balancing
+  use_class_weights: true
+  use_focal_loss: true
+  focal_loss_alpha: 0.35
+  server_momentum: 0.5
+  server_learning_rate: 0.1
+
+  # Learning rate decay (applies to both server and client LR)
+  # Options: 'cosine', 'exponential', 'step', 'linear', 'none'
+  lr_decay_type: cosine
+  lr_decay_rate: 0.97      # For exponential decay
+  lr_drop_rate: 0.5        # For step decay
+  lr_epochs_drop: 5       # For step decay (drop every N rounds)
+  lr_min: 0.0001           # Minimum learning rate
+
+  # Quantization-Aware Training (QAT)
+  use_qat: true
+
+  # For strategy internal use (same as 4 devices)
+  min_fit_clients: 4
+  min_evaluate_clients: 4
+  min_available_clients: 4
+

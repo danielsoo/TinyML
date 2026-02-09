@@ -1,0 +1,37 @@
+version: v13
+compression:
+  use_distillation: true
+  run_both: true
+data:
+  name: cicids2017
+  path: data/raw/CIC-IDS2017
+  num_clients: 4
+  max_samples: 1500000
+  binary: true
+  use_smote: true
+  balance_ratio: 4.0
+model:
+  name: mlp
+federated:
+  num_rounds: 100
+  fraction_fit: 1.0
+  fraction_evaluate: 1.0
+  local_epochs: 2
+  batch_size: 128
+  learning_rate: 0.001
+  lr_decay_type: cosine
+  lr_decay_rate: 0.95
+  lr_drop_rate: 0.5
+  lr_epochs_drop: 10
+  lr_min: 0.0001
+  lr_decay: 0.99
+  use_class_weights: true
+  use_focal_loss: true
+  focal_loss_alpha: 0.92
+  use_callbacks: false
+  server_momentum: 0.5
+  server_learning_rate: 0.1
+  use_qat: true
+  min_fit_clients: 4
+  min_evaluate_clients: 4
+  min_available_clients: 4

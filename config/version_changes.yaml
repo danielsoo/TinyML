@@ -1,0 +1,76 @@
+# Version changelog: detailed changes for each experiment version
+# Used by generate_version_summary.py for VERSIONS.md and paper documentation.
+# Edit this file when you make changes; add new versions as you run experiments.
+
+v1:
+  training:
+    - Initial setup
+    - CIC-IDS2017, max 200k samples, balance_ratio 5.0
+  compression:
+    - Basic pipeline: prune 50%, INT8 quantization, TFLite export
+
+v3:
+  training:
+    - CIC-IDS2017, max 1500k samples
+  compression:
+    - Same as v1 (prune 50%, INT8, TFLite)
+
+v4:
+  training:
+    - Full CIC-IDS2017 (no max_samples limit)
+    - Accuracy drop observed
+  compression:
+    - Same as v1
+
+v5:
+  training:
+    - Deeper/wider MLP architecture
+    - Focal loss for imbalanced data
+    - Gradient clipping (Adam clipnorm)
+    - Learning rate scheduling (ReduceLROnPlateau)
+    - Early stopping callbacks
+    - FedAvgM aggregation (server momentum 0.9)
+    - num_rounds 25, local_epochs 15
+  compression:
+    - Same as v1
+
+v6:
+  training:
+    - Same as v5 (version tag fix)
+  compression:
+    - Same as v1
+
+v7:
+  training:
+    - Same as v5/v6
+    - Accuracy drop (~12%) - FedAvg investigation
+  compression:
+    - Same as v1
+
+v8:
+  training:
+    - balance_ratio tuning (10.0)
+    - focal_loss_alpha 0.75
+    - Centralized training option added (v8_centralized)
+  compression:
+    - Same as v1 (prune 50%, PTQ)
+
+v8_centralized:
+  training:
+    - Centralized training (no FedAvg) for baseline comparison
+    - Same data/config as v8
+  compression:
+    - Same as v8
+
+v11:
+  training:
+    - balance_ratio 1.0 (50:50 undersample)
+    - focal_loss_alpha 0.85 (stronger minority emphasis)
+    - use_smote true
+    - CIC-IDS2017 max 1500k
+  compression:
+    - BN (BatchNorm) folding before TFLite export (fixes NaN/wrong outputs)
+    - PTQ: Dynamic Range Quantization (int8 weights, float32 I/O) instead of full INT8
+    - Full INT8 caused P/R/F1=0; DRQ preserves accuracy
+    - QAT option added (saved_model_pruned_qat.tflite) - requires tensorflow-model-optimization
+    - Pruning 50%, skip last layer

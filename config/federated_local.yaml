@@ -1,0 +1,56 @@
+# config/federated_local.yaml
+# Local environment config
+
+# Version (for result/analysis folder naming, e.g. v1, v2_balanced)
+version: "v8"
+
+data:
+  # Choose cicids2017, bot_iot, or mnist
+  name: cicids2017
+
+  # Data path (same folder contains both Bot-IoT and CIC-IDS2017)
+  path: "data/raw/Bot-IoT"
+
+  # Number of clients (4 devices)
+  num_clients: 4
+
+  # Limit samples to avoid long training (increase for more attack samples)
+  max_samples: 1500000
+  
+  # For CIC-IDS2017: binary (BENIGN vs ATTACK) or multi-class
+  binary: true
+  use_smote: true
+  balance_ratio: 10.0
+
+model:
+  # mlp or cnn (usually mlp for Bot-IoT)
+  name: mlp
+
+federated:
+  # Increased rounds/epochs for better accuracy
+  num_rounds: 25
+
+  # Fraction of clients participating per round (1.0 = all)
+  fraction_fit: 1.0
+  fraction_evaluate: 1.0
+
+  # Local training parameters
+  local_epochs: 15
+  batch_size: 128
+  learning_rate: 0.001
+  
+  # Class balancing
+  use_class_weights: true
+  use_focal_loss: true
+  focal_loss_alpha: 0.75
+  server_momentum: 0.9
+  server_learning_rate: 1.0
+  
+  # Quantization-Aware Training (QAT)
+  use_qat: true
+
+  # For strategy internal use (same as 4 devices)
+  min_fit_clients: 4
+  min_evaluate_clients: 4
+  min_available_clients: 4
+

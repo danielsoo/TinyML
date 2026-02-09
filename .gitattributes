@@ -1,0 +1,2 @@
+# Shell scripts: always LF (CRLF breaks on Mac/Linux)
+*.sh text eol=lf

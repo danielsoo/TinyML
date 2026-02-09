@@ -1,0 +1,26 @@
+# Raw data (용량 큼)
+data/raw/
+
+# Processed data & 학습/분석 결과 (서버 sync로 관리)
+data/processed/*
+!data/processed/runs/
+TinyML-results/
+outputs/
+/processed/
+
+# 학습된 모델 (.h5, .tflite)
+models/*.h5
+models/*.tflite
+models/tflite/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# macOS
+.DS_Store
+FETCH_HEAD
+src/models/*.h5
+training_log.txt
+esp32_tflite_project/src/model_data.*

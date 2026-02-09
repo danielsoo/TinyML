@@ -1,0 +1,39 @@
+# config/federated_scratch.yaml
+# PSU e5-cse-135-01: data on /scratch to avoid home disk quota
+
+# Version (for result/analysis folder naming)
+version: "v11"
+
+data:
+  name: cicids2017
+  path: "/scratch/yqp5187/Bot-IoT"
+
+  num_clients: 4
+  max_samples: 1500000
+  binary: true
+  use_smote: true
+  # 1.0 = 50:50 (undersample majority to match minority)
+  # 5.0 = majority <= 5x minority; 10.0 = more relaxed
+  balance_ratio: 1.0
+
+model:
+  name: mlp
+
+federated:
+  num_rounds: 25
+  fraction_fit: 1.0
+  fraction_evaluate: 1.0
+  local_epochs: 15
+  batch_size: 128
+  learning_rate: 0.001
+  use_class_weights: true
+  use_focal_loss: true
+  # alpha upweights minority (attack). 0.85 = stronger emphasis
+  focal_loss_alpha: 0.85
+  use_callbacks: false
+  server_momentum: 0.9
+  server_learning_rate: 1.0
+  use_qat: true
+  min_fit_clients: 4
+  min_evaluate_clients: 4
+  min_available_clients: 4
