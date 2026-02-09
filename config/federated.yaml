@@ -13,7 +13,7 @@ data:
   num_clients: 4
 
   # Data limit: 2M safe for training. null caused NaN with full dataset+SMOTE.
-  #max_samples: 2000000
+  max_samples: 2000000
 
   # For CIC-IDS2017: binary (BENIGN vs ATTACK) or multi-class
   binary: true
@@ -28,7 +28,7 @@ model:
 # 0.15: Keras often needs lower (was 0 before with 0.5). TFLite also benefits.
 # Higher (0.5~0.7): higher Precision, lower Recall.
 evaluation:
-  prediction_threshold: 0.6
+  prediction_threshold: 0.25
 
 federated:
   # Fewer rounds for stability (avoids NaN), LR kept at 0.0005
