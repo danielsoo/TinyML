@@ -7,6 +7,8 @@ import warnings
 
 # Suppress TensorFlow warnings
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+# Reduce Ray backend log noise (e.g. metrics exporter, large object dumps) when using FL simulation
+os.environ.setdefault('RAY_BACKEND_LOG_LEVEL', 'warning')
 warnings.filterwarnings('ignore', category=UserWarning)
 
 # Avoid home disk quota: redirect temp to /scratch
@@ -183,7 +185,9 @@ class KerasClient(fl.client.NumPyClient):
         # Apply QAT if enabled
         if use_qat:
             self.model = self._apply_qat(model)
-            print(f"[Client {cid}] QAT enabled - model quantization-aware")
+            # Log only once (client 0) to avoid repeated messages when using Ray/simulation
+            if cid == 0:
+                print("[Client 0] QAT enabled - model quantization-aware")
         else:
             self.model = model
 
@@ -203,7 +207,12 @@ class KerasClient(fl.client.NumPyClient):
             class_weights_array = smoothed_weights / np.mean(smoothed_weights)
             
             self.class_weight = {int(cls): float(weight) for cls, weight in zip(classes, class_weights_array)}
-            print(f"[Client {cid}] Class weights (smoothed): {self.class_weight}")
+            # Compact log to avoid huge (0,0.0),(1,0.0),... dumps when many classes or Ray wraps output
+            if len(self.class_weight) <= 8:
+                print(f"[Client {cid}] Class weights (smoothed): {self.class_weight}")
+            else:
+                w_vals = list(self.class_weight.values())
+                print(f"[Client {cid}] Class weights: {len(self.class_weight)} classes, min={min(w_vals):.3f}, max={max(w_vals):.3f}")
         else:
             self.class_weight = None
 

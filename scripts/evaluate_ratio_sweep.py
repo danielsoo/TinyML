@@ -55,17 +55,26 @@ def load_config_and_data(args):
         output_details = interpreter.get_output_details()
         model = ("tflite", interpreter, input_details, output_details)
     else:
-        try:
-            keras_model = tf.keras.models.load_model(model_path, compile=False)
-        except Exception as e:
-            if "Unknown" in str(e) or "custom" in str(e).lower():
-                from src.models.nets import _focal_loss
-                keras_model = tf.keras.models.load_model(
-                    model_path, compile=False,
-                    custom_objects={"_focal_loss": _focal_loss, "loss_fn": _focal_loss()},
-                )
-            else:
-                raise
+        use_qat = cfg.get("federated", {}).get("use_qat", False)
+        if use_qat:
+            try:
+                import tensorflow_model_optimization as tfmot
+                with tfmot.quantization.keras.quantize_scope():
+                    keras_model = tf.keras.models.load_model(model_path, compile=False)
+            except Exception:
+                keras_model = tf.keras.models.load_model(model_path, compile=False)
+        else:
+            try:
+                keras_model = tf.keras.models.load_model(model_path, compile=False)
+            except Exception as e:
+                if "Unknown" in str(e) or "custom" in str(e).lower():
+                    from src.models.nets import _focal_loss
+                    keras_model = tf.keras.models.load_model(
+                        model_path, compile=False,
+                        custom_objects={"_focal_loss": _focal_loss, "loss_fn": _focal_loss()},
+                    )
+                else:
+                    raise
         keras_model.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
         model = ("keras", keras_model, None, None)
     return x_test, y_test, idx_normal, idx_attack, N_normal, N_attack, model, dataset_name

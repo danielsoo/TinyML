@@ -6,6 +6,8 @@ Executes the full workflow:
 2. Compress model (compression.py)
 3. Analyze compression results (analyze_compression.py)
 4. Ratio sweep (evaluate_ratio_sweep.py) → ratio_sweep_report.md
+3b. FGSM (run_fgsm.py) → run_dir/fgsm/fgsm_report.md + fgsm_results.json
+4. Ratio sweep (evaluate_ratio_sweep.py) → ratio_sweep_report.md
 4b. Threshold tuning (tune_threshold_all_ratios.py) → appended to ratio_sweep_report.md (full sweep + best per ratio)
 5. Visualize results (visualize_results.py)
 
@@ -90,6 +92,11 @@ def main():
         help="Skip ratio sweep (100%%–0%% normal:attack report)"
     )
     parser.add_argument(
+        "--skip-fgsm",
+        action="store_true",
+        help="Skip FGSM attack step (run_dir/fgsm/)"
+    )
+    parser.add_argument(
         "--config",
         type=str,
         default="config/federated_local.yaml",
@@ -106,8 +113,32 @@ def main():
         default="",
         help="Model path for evaluation (ratio sweep + threshold tuning). If not set, uses default TFLite/Keras from project root.",
     )
+    parser.add_argument(
+        "--log",
+        type=str,
+        default="",
+        help="Tee full stdout/stderr to this file (e.g. run.log).",
+    )
 
     args = parser.parse_args()
+
+    # Optional: tee output to log file
+    log_path = getattr(args, "log", "") or ""
+    if log_path:
+        class Tee:
+            def __init__(self, *files):
+                self.files = files
+            def write(self, obj):
+                for f in self.files:
+                    f.write(obj)
+                    f.flush()
+            def flush(self):
+                for f in self.files:
+                    f.flush()
+        log_file = open(log_path, "w", encoding="utf-8")
+        sys.stdout = Tee(sys.__stdout__, log_file)
+        sys.stderr = Tee(sys.__stderr__, log_file)
+        print(f"Logging to {log_path}")
     
     # Track overall success, eval report dir, and current run dir (when we run analysis)
     all_success = True
@@ -149,6 +180,38 @@ def main():
             dst_model.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy(src_model, dst_model)
             print(f"   📋 Copied {src_model} → {dst_model} (for compression)\n")
+
+        # Build traditional (no-QAT) model if missing so all three TFLite outputs are produced
+        with open(args.config, encoding="utf-8") as f:
+            run_cfg = yaml.safe_load(f)
+        use_real_qat = run_cfg.get("federated", {}).get("use_qat", False)
+        comp_cfg = run_cfg.get("compression", {})
+        always_build_traditional = comp_cfg.get("always_build_traditional", True)
+        trad_path = Path(comp_cfg.get("traditional_model_path") or "models/global_model_traditional.h5")
+        if use_real_qat and always_build_traditional and not trad_path.exists():
+            print(f"\n{'='*80}")
+            print(f"  📦 Building Traditional model (FL without QAT) for saved_model_no_qat_ptq.tflite")
+            print(f"{'='*80}\n")
+            import tempfile
+            with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as tmp:
+                run_cfg["federated"] = {**run_cfg.get("federated", {}), "use_qat": False}
+                yaml.dump(run_cfg, tmp, default_flow_style=False, allow_unicode=True, sort_keys=False)
+                tmp_path = tmp.name
+            try:
+                ok = run_command(
+                    [sys.executable, "scripts/train.py", "--config", tmp_path],
+                    "Traditional FL (no QAT)"
+                )
+                if ok and Path("src/models/global_model.h5").exists():
+                    trad_path.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copy("src/models/global_model.h5", trad_path)
+                    print(f"   📋 Traditional model saved to {trad_path}\n")
+                    # Restore QAT model for compression (second train overwrote src/models/global_model.h5)
+                    if dst_model.exists():
+                        shutil.copy(dst_model, src_model)
+                        print(f"   📋 Restored QAT model to {src_model}\n")
+            finally:
+                Path(tmp_path).unlink(missing_ok=True)
     else:
         print(f"\n{'='*80}")
         print(f"  ⏭️  SKIPPING STEP 1: Training (using existing model)")
@@ -201,6 +264,24 @@ def main():
         print(f"\n{'='*80}")
         print(f"  ⏭️  SKIPPING STEP 3: Analysis")
         print(f"{'='*80}\n")
+
+    # Step 3b: FGSM (write run_dir/fgsm/fgsm_report.md + fgsm_results.json)
+    if current_runs_dir is not None and not args.skip_fgsm:
+        fgsm_out = current_runs_dir / "fgsm"
+        fgsm_model = Path("models/global_model.h5")
+        if fgsm_model.exists():
+            fgsm_cmd = [
+                sys.executable, "scripts/run_fgsm.py",
+                "--model", str(fgsm_model),
+                "--config", args.config,
+                "--output-dir", str(fgsm_out),
+            ]
+            success = run_command(fgsm_cmd, "STEP 3b: FGSM (run_dir/fgsm/)")
+            if not success:
+                print("⚠️  FGSM failed. Continuing...")
+            all_success = all_success and success
+        else:
+            print("⚠️  models/global_model.h5 not found. Skipping FGSM.")
 
     # Step 4: Ratio sweep (100:0 → 0:100) + threshold tuning → ratio_sweep_report.md
     if not args.skip_ratio_sweep:
@@ -331,12 +412,20 @@ def main():
     print("  📦 Models:")
     print("     - src/models/global_model.h5 (FL trained)")
     print("     - models/tflite/saved_model_original.tflite")
-    print("     - models/tflite/saved_model_pruned_quantized.tflite")
+    print("     - models/tflite/saved_model_qat_pruned_float32.tflite (QAT+Prune only)")
+    print("     - models/tflite/saved_model_qat_ptq.tflite")
+    print("     - models/tflite/saved_model_pruned_quantized.tflite (legacy)")
+    print("     - models/tflite/saved_model_no_qat_ptq.tflite (if traditional model was built)")
     print(f"  📊 Analysis ({rel_path}):")
     print(f"     - {_analysis_dir}/compression_analysis.csv")
     print(f"     - {_analysis_dir}/compression_analysis.json")
     print(f"     - {_analysis_dir}/compression_analysis.md")
     print(f"     - {_eval_dir}/ratio_sweep_report.md")
+    _fgsm_dir = f"data/processed/runs/{rel_path}/fgsm"
+    if Path(_fgsm_dir).exists():
+        print(f"  🎯 FGSM ({rel_path}):")
+        print(f"     - {_fgsm_dir}/fgsm_report.md")
+        print(f"     - {_fgsm_dir}/fgsm_results.json")
     if eval_report_dir is not None:
         print(f"  📊 Eval report (--model): {eval_report_dir}/ratio_sweep_report.md")
     print(f"  📈 Visualizations:")

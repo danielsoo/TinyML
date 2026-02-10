@@ -19,6 +19,7 @@
 | **Binary** | True |
 | **Use SMOTE** | True |
 | **Model** | mlp |
+| **Aggregation strategy** | FedAvgM (momentum=0.9) |
 | **FL rounds** | 25 |
 | **Local epochs** | 15 |
 | **Batch size** | 128 |

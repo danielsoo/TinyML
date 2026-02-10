@@ -111,6 +111,18 @@ class CompressionAnalyzer:
         self.input_shape = (self.x_test.shape[1],) if self.x_test.ndim == 2 else self.x_test.shape[1:]
         self.num_classes = len(np.unique(self.y_test))
 
+    def _load_keras_h5(self, model_path: str):
+        """Load Keras .h5 model; use quantize_scope when config has use_qat (QAT models)."""
+        use_qat = self.config.get("federated", {}).get("use_qat", False)
+        if use_qat:
+            try:
+                import tensorflow_model_optimization as tfmot
+                with tfmot.quantization.keras.quantize_scope():
+                    return tf.keras.models.load_model(model_path, compile=False)
+            except Exception:
+                pass
+        return tf.keras.models.load_model(model_path, compile=False)
+
     def measure_model_size(self, model_path: str) -> Dict[str, float]:
         """Measure model file size and calculate compression metrics."""
         path = Path(model_path)
@@ -122,7 +134,7 @@ class CompressionAnalyzer:
 
         # Load model to count parameters (compile=False for custom loss compatibility)
         if model_path.endswith(".h5"):
-            model = tf.keras.models.load_model(model_path, compile=False)
+            model = self._load_keras_h5(model_path)
             param_count = model.count_params()
         elif model_path.endswith(".tflite"):
             interpreter = tf.lite.Interpreter(
@@ -155,7 +167,7 @@ class CompressionAnalyzer:
 
         # Load model (compile=False for custom loss e.g. focal loss)
         if model_path.endswith(".h5"):
-            model = tf.keras.models.load_model(model_path, compile=False)
+            model = self._load_keras_h5(model_path)
 
             # Check input shape compatibility
             model_input_shape = model.input_shape
@@ -284,7 +296,7 @@ class CompressionAnalyzer:
 
         # Load model (compile=False for custom loss compatibility)
         if model_path.endswith(".h5"):
-            model = tf.keras.models.load_model(model_path, compile=False)
+            model = self._load_keras_h5(model_path)
             times = []
             for _ in range(num_runs):
                 start = time.time()
@@ -616,6 +628,17 @@ class CompressionAnalyzer:
                     
                     f.write(f"| {row['stage']} | {size_str} | {acc_str} | {f1_str} | {latency_str} | {status} |\n")
 
+            # Pipeline overview: how each stage is produced
+            f.write("\n## Pipeline overview (How each stage is produced)\n\n")
+            f.write("| Stage | Input | Processing | Output file |\n")
+            f.write("|-------|-------|------------|-------------|\n")
+            f.write("| **Keras** | FL/central training done | Use as-is (no QAT strip) or load .h5 | `models/global_model.h5` |\n")
+            f.write("| **Original (TFLite)** | Keras model | float32 TFLite export (no quantization) | `saved_model_original.tflite` |\n")
+            f.write("| **QAT+Prune only** | QAT-trained model | QAT strip → 50% structured pruning → **float32** TFLite (no quant) | `saved_model_qat_pruned_float32.tflite` |\n")
+            f.write("| **Compressed (QAT)** | QAT-trained model | QAT strip → 50% prune → **quantize_model** → 2 epoch fine-tune → **int8** TFLite | `saved_model_pruned_qat.tflite` |\n")
+            f.write("| **QAT+PTQ** | QAT-trained model | QAT strip → 50% prune → **PTQ** (quantize with representative data) → int8 TFLite | `saved_model_qat_ptq.tflite` |\n")
+            f.write("| **noQAT+PTQ** | Model trained **without QAT** | 50% prune → PTQ → int8 TFLite | `saved_model_no_qat_ptq.tflite` |\n")
+
             # Compression ratios if available
             if "compression_ratio" in df.columns:
                 f.write("\n## Compression Ratios\n\n")
@@ -720,8 +743,11 @@ def main():
         print("No models specified. Using default train.py output models...")
         args.models = [
             "Original:models/tflite/saved_model_original.tflite",
+            "QAT+Prune only:models/tflite/saved_model_qat_pruned_float32.tflite",
             "Compressed (PTQ):models/tflite/saved_model_pruned_quantized.tflite",
-            "Compressed (QAT):models/tflite/saved_model_pruned_qat.tflite"
+            "QAT+PTQ:models/tflite/saved_model_qat_ptq.tflite",
+            "Compressed (QAT):models/tflite/saved_model_pruned_qat.tflite",
+            "noQAT+PTQ:models/tflite/saved_model_no_qat_ptq.tflite",
         ]
 
     # Parse model paths

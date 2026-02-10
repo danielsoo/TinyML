@@ -1,9 +1,12 @@
-# data: raw만 무시, processed는 추적 (runs·보고서 포함)
+# Raw data (용량 큼)
 data/raw/
 
-# 기타 결과 폴더 (프로젝트 루트)
+# Processed data & 학습/분석 결과 (서버 sync로 관리)
+data/processed/*
+!data/processed/runs/
 TinyML-results/
 outputs/
+/processed/
 
 # 학습된 모델 (.h5, .tflite)
 models/*.h5
@@ -17,7 +20,7 @@ __pycache__/
 
 # macOS
 .DS_Store
-
+FETCH_HEAD
 src/models/*.h5
 training_log.txt
 esp32_tflite_project/src/model_data.*

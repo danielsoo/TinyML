@@ -99,7 +99,13 @@ def test_fgsm_attack():
     if os.path.exists(model_path):
         print(f"   ✅ Loading existing model from {model_path}")
         print(f"   ℹ️  Using Federated Learning trained model (recommended)")
-        model = tf.keras.models.load_model(model_path)
+        # QAT models require quantize_scope to load; try that first
+        try:
+            import tensorflow_model_optimization as tfmot
+            with tfmot.quantization.keras.quantize_scope():
+                model = tf.keras.models.load_model(model_path, compile=False)
+        except Exception:
+            model = tf.keras.models.load_model(model_path, compile=False)
     else:
         print("   ⚠️  Model not found!")
         print("   ⚠️  WARNING: No pre-trained model found.")

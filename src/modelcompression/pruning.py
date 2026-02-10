@@ -116,7 +116,7 @@ def apply_structured_pruning(
     """
     if verbose:
         print(f"\n{'='*60}")
-        print(f"=' Applying Structured Pruning (ratio={pruning_ratio:.1%})")
+        print(f"  Applying Structured Pruning (ratio={pruning_ratio:.1%})")
         print(f"{'='*60}\n")
 
     # Track which neurons/filters to keep at each layer
@@ -363,7 +363,7 @@ def compare_models(original: keras.Model, pruned: keras.Model) -> None:
     reduction_size = (1 - pruned_size / orig_size) * 100
 
     print(f"\n{'='*60}")
-    print(f"=� Model Comparison")
+    print(f"  Model Comparison")
     print(f"{'='*60}")
     print(f"\nOriginal Model:")
     print(f"  - Parameters: {orig_params:,}")
@@ -409,7 +409,7 @@ def fine_tune_pruned_model(
     """
     if verbose:
         print(f"\n{'='*60}")
-        print(f"= Fine-tuning Pruned Model")
+        print(f"  Fine-tuning Pruned Model")
         print(f"{'='*60}")
         print(f"Epochs: {epochs}")
         print(f"Batch size: {batch_size}")

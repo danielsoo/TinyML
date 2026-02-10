@@ -1,37 +1,82 @@
 # config/federated.yaml
 
-version: "v1"
+version: "v19"
 
 data:
-  # Choose bot_iot or mnist
-  name: bot_iot
+  # Choose cicids2017, bot_iot, or mnist
+  name: cicids2017
 
-  # Path to Bot-IoT CSV (local Windows path)
-  path: "data/raw/Bot-IoT"
-  # For Colab: /content/drive/MyDrive/TinyML_models
+  # Path to CIC-IDS2017 dataset (relative = works on Mac and Vast)
+  path: "data/raw/CIC-IDS2017"
 
   # Number of clients
   num_clients: 4
 
-  # Limit samples to avoid long training (increase if needed)
-  max_samples: 200000
+  # Data limit: 2M safe for training. null caused NaN with full dataset+SMOTE.
+  max_samples: 2000000
+
+  # For CIC-IDS2017: binary (BENIGN vs ATTACK) or multi-class
+  binary: true
+  use_smote: true
+  balance_ratio: 4.0
 
 model:
-  # mlp or cnn (usually mlp for Bot-IoT, cnn for MNIST)
+  # mlp or cnn (usually mlp for IDS)
   name: mlp
 
+# Evaluation: prediction threshold for binary (prob >= threshold → Attack)
+# 0.15: Keras often needs lower (was 0 before with 0.5). TFLite also benefits.
+# Higher (0.5~0.7): higher Precision, lower Recall.
+evaluation:
+  prediction_threshold: 0.3
+
 federated:
-  num_rounds: 3
+  # Fewer rounds for stability (avoids NaN), LR kept at 0.0005
+  num_rounds: 80
 
   # Fraction of clients participating per round (1.0 = all)
   fraction_fit: 1.0
   fraction_evaluate: 1.0
 
-  # Local training settings
+  # Local training: fewer epochs per round for stability (avoids NaN/client drift)
   local_epochs: 2
   batch_size: 128
+  learning_rate: 0.0005
+  
+  # Class balancing for imbalanced dataset
+  # focal_loss_alpha: 0.25 gave better overall results (Compressed Acc/F1) in practice.
+  use_class_weights: true
+  use_focal_loss: true
+  focal_loss_alpha: 0.5
+  
+  # Distillation (disabled for cleaner reports)
+  use_distillation: false
+  
+  # Server optimization
+  server_momentum: 0.5
+  server_learning_rate: 1.0
+
+  # Learning rate decay for stability
+  # Options: 'cosine', 'exponential', 'step', 'linear', 'none'
+  lr_decay_type: cosine
+  lr_decay_rate: 0.97      # For exponential decay
+  lr_drop_rate: 0.5        # For step decay
+  lr_epochs_drop: 5        # For step decay (drop every N rounds)
+  lr_min: 0.0001           # Minimum learning rate
+  
+  # Quantization Aware Training
+  use_qat: true
 
   # For strategy internal use
   min_fit_clients: 4
   min_evaluate_clients: 4
   min_available_clients: 4
+
+# Optional: produce all three TFLite outputs (QAT+prune float32, QAT+PTQ, noQAT+PTQ)
+# Set always_build_traditional: true to always build the traditional (non-QAT) model when missing.
+# When true and use_qat: true, if traditional model path does not exist, run.py will run FL once
+# without QAT to create it, then run compression to generate saved_model_no_qat_ptq.tflite.
+compression:
+  always_build_traditional: true
+  # Path to traditional (non-QAT) model. If null, default is models/global_model_traditional.h5
+  traditional_model_path: null  # e.g. "models/global_model_traditional.h5"

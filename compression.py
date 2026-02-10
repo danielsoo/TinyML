@@ -422,9 +422,25 @@ def test_saved_model_pruning(
         return None
 
     print(f"📦 Loading saved model from {model_path}...")
-    # Use compile=False: custom loss (focal loss) cannot be deserialized.
+    # Load config first to check use_qat (QAT models need quantize_scope to load)
+    cfg_path = Path(config_path)
+    if not cfg_path.exists():
+        cfg_path = Path("config/federated_local.yaml")
+    with open(cfg_path, encoding='utf-8') as f:
+        cfg_pre = yaml.safe_load(f)
+    use_qat = cfg_pre.get("federated", {}).get("use_qat", False)
+    if use_qat:
+        try:
+            import tensorflow_model_optimization as tfmot
+            with tfmot.quantization.keras.quantize_scope():
+                model = keras.models.load_model(model_path, compile=False)
+            print("   (loaded with quantize_scope for QAT)")
+        except Exception as e:
+            print(f"   ⚠️ QAT load failed ({e}), trying without quantize_scope")
+            model = keras.models.load_model(model_path, compile=False)
+    else:
+        model = keras.models.load_model(model_path, compile=False)
     # Recompile with standard loss for evaluate() during compression.
-    model = keras.models.load_model(model_path, compile=False)
     # Infer output shape for recompile (binary or multi-class)
     last_layer = model.layers[-1]
     num_classes = last_layer.units if hasattr(last_layer, "units") else 2
@@ -434,7 +450,6 @@ def test_saved_model_pruning(
 
     # Load test data (use same config as training)
     print("📂 Loading test dataset...")
-    cfg_path = Path(config_path)
     if not cfg_path.exists():
         cfg_path = Path("config/federated_local.yaml")
     with open(cfg_path, encoding='utf-8') as f:
@@ -523,17 +538,60 @@ def test_saved_model_pruning(
         quantize=False
     )
 
-    # Export pruned + PTQ (post-training quantization)
-    tflite_quant_size = export_tflite(
+    # (1) QAT + prune only: float32 TFLite (no quantization)
+    tflite_pruned_float_size = export_tflite(
+        pruned_model,
+        str(output_dir / "saved_model_qat_pruned_float32.tflite"),
+        quantize=False
+    )
+    print(f"✅ QAT + prune only (float32): {tflite_pruned_float_size/1024:.2f} KB")
+
+    # (2) QAT + PTQ: prune then PTQ → int8
+    tflite_qat_ptq_size = export_tflite(
+        pruned_model,
+        str(output_dir / "saved_model_qat_ptq.tflite"),
+        quantize=True,
+        representative_data=x_train_sub
+    )
+    # Keep legacy name for backward compatibility
+    export_tflite(
         pruned_model,
         str(output_dir / "saved_model_pruned_quantized.tflite"),
         quantize=True,
         representative_data=x_train_sub
     )
 
+    # (3) No-QAT + PTQ: Traditional model → Prune → PTQ (when traditional_model_path is set)
+    comp_cfg = cfg.get("compression", {})
+    traditional_model_path = comp_cfg.get("traditional_model_path")
+    if traditional_model_path is None:
+        traditional_model_path = "models/global_model_traditional.h5"
+    tflite_traditional_ptq_size = None
+    if Path(traditional_model_path).exists():
+        print("\n📦 Traditional PTQ (no-QAT model → Prune → PTQ)...")
+        trad_model = keras.models.load_model(traditional_model_path, compile=False)
+        trad_model.compile(optimizer="adam", loss=loss, metrics=["accuracy"])
+        trad_pruned = apply_structured_pruning(
+            trad_model,
+            pruning_ratio=0.5,
+            skip_last_layer=True,
+            verbose=False
+        )
+        tflite_traditional_ptq_size = export_tflite(
+            trad_pruned,
+            str(output_dir / "saved_model_no_qat_ptq.tflite"),
+            quantize=True,
+            representative_data=x_train_sub
+        )
+        print(f"✅ noQAT + PTQ: {tflite_traditional_ptq_size/1024:.2f} KB")
+
     # QAT: Quantization-Aware Training (fine-tune with quantization simulation)
     print("\n🎓 Applying QAT (Quantization-Aware Training)...")
     try:
+        try:
+            import tf_keras  # noqa: F401 - TF 2.16+ needs tf_keras for tfmot
+        except ImportError:
+            pass
         import tensorflow_model_optimization as tfmot
         # Strip BN before QAT to avoid TFLite conversion issues
         pruned_for_qat = _strip_bn_dropout_for_tflite(pruned_model)
@@ -553,13 +611,21 @@ def test_saved_model_pruning(
         )
         print(f"✅ QAT TFLite: {tflite_qat_size/1024:.2f} KB")
     except Exception as e:
-        print(f"⚠️ QAT failed ({e}), skipping QAT export")
+        msg = str(e)
+        if "tf_keras" in msg.lower():
+            print(f"⚠️ QAT failed: {e}")
+            print("   → Install: pip install tf-keras")
+        else:
+            print(f"⚠️ QAT failed ({e}), skipping QAT export")
         tflite_qat_size = None
 
-    compression_ratio = tflite_orig_size / tflite_quant_size
-    print(f"\n✅ TFLite compression (PTQ): {compression_ratio:.2f}x")
-    print(f"✅ Original size: {tflite_orig_size/1024:.2f} KB")
-    print(f"✅ Compressed (PTQ) size: {tflite_quant_size/1024:.2f} KB")
+    compression_ratio = tflite_orig_size / tflite_qat_ptq_size
+    print(f"\n✅ TFLite summary")
+    print(f"   • Original (float32):     {tflite_orig_size/1024:.2f} KB")
+    print(f"   • QAT + prune only:       saved_model_qat_pruned_float32.tflite  (float32)")
+    print(f"   • QAT + PTQ:              saved_model_qat_ptq.tflite ({tflite_qat_ptq_size/1024:.2f} KB, {compression_ratio:.2f}x)")
+    if tflite_traditional_ptq_size is not None:
+        print(f"   • noQAT + PTQ:           saved_model_no_qat_ptq.tflite ({tflite_traditional_ptq_size/1024:.2f} KB)")
 
     # Save pruned model
     pruned_model.save(Path("models/test_pruned_model.h5"))

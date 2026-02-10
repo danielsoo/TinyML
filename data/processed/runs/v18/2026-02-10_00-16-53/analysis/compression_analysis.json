@@ -1,0 +1,71 @@
+{
+  "version": "v18",
+  "data_version": "cicids2017_max2000k_bal4.0",
+  "generated_at": "2026-02-10T00:18:06.440982",
+  "results": [
+    {
+      "stage": "Keras",
+      "model_path": "models/global_model.h5",
+      "file_size_bytes": 884848,
+      "file_size_mb": 0.8438568115234375,
+      "parameter_count": 208385,
+      "accuracy": 0.8224688017938968,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1_score": 0.0,
+      "avg_latency_ms": 257.25812911987305,
+      "min_latency_ms": 96.76003456115723,
+      "max_latency_ms": 1646.3022232055664,
+      "samples_per_second": 388.71463592664,
+      "compression_ratio": 1.0
+    },
+    {
+      "stage": "Original (TFLite)",
+      "model_path": "models/tflite/saved_model_original.tflite",
+      "file_size_bytes": 821996,
+      "file_size_mb": 0.7839164733886719,
+      "parameter_count": 205777,
+      "accuracy": 0.8224688017938968,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1_score": 0.0,
+      "avg_latency_ms": 2.335357666015625,
+      "min_latency_ms": 2.302408218383789,
+      "max_latency_ms": 2.4137496948242188,
+      "samples_per_second": 42819.993466187516,
+      "compression_ratio": 1.0764626591856894
+    },
+    {
+      "stage": "Compressed (PTQ)",
+      "model_path": "models/tflite/saved_model_pruned_quantized.tflite",
+      "file_size_bytes": 70904,
+      "file_size_mb": 0.06761932373046875,
+      "parameter_count": 61969,
+      "accuracy": 0.739726528224627,
+      "precision": 0.40472481827622014,
+      "recall": 0.9899262055946456,
+      "f1_score": 0.5745490403099694,
+      "avg_latency_ms": 0.5424261093139648,
+      "min_latency_ms": 0.5314350128173828,
+      "max_latency_ms": 0.5886554718017578,
+      "samples_per_second": 184356.9073886862,
+      "compression_ratio": 12.479521606679453
+    },
+    {
+      "stage": "Compressed (QAT)",
+      "model_path": "models/tflite/saved_model_pruned_qat.tflite",
+      "file_size_bytes": 66320,
+      "file_size_mb": 0.0632476806640625,
+      "parameter_count": 62048,
+      "accuracy": 0.7669701179682168,
+      "precision": 0.4225193956717027,
+      "recall": 0.8523768663119958,
+      "f1_score": 0.564980491633584,
+      "avg_latency_ms": 0.5482673645019531,
+      "min_latency_ms": 0.5359649658203125,
+      "max_latency_ms": 0.5779266357421875,
+      "samples_per_second": 182392.7639589494,
+      "compression_ratio": 13.342098914354644
+    }
+  ]
+}

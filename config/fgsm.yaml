@@ -1,0 +1,37 @@
+# config/fgsm.yaml
+# FGSM adversarial attack testing (matches FL training data when using CIC-IDS2017)
+
+# Dataset: same as federated.yaml for comparable results
+data:
+  name: cicids2017
+  path: "data/raw/CIC-IDS2017"
+  max_samples: 2000000   # match FL training for comparable evaluation
+  binary: true
+  balance_ratio: 4.0   # 80:20 normal:attack
+  use_smote: true
+
+# Model to attack (FL-trained .h5)
+# Use path relative to project root, or absolute path.
+# Examples:
+#   model: "models/global_model.h5"
+#   model: "data/processed/runs/v17/2026-02-09_17-52-41/models/global_model.h5"
+model:
+  path: "models/global_model.h5"
+
+# FGSM attack parameters
+attack:
+  # Epsilon values to sweep (perturbation magnitude)
+  epsilon_values: [0.01, 0.05, 0.1, 0.15, 0.2]
+  # Epsilon for full adversarial dataset generation
+  epsilon_default: 0.1
+  # Classification threshold for binary (prob >= threshold → Attack). Should match FL/training (e.g. 0.3); run's run_config overrides when model is under a run dir.
+  prediction_threshold: 0.3
+  # Epsilon tuning: target attack success rate when tuning
+  tune_target_success_rate: 0.5
+
+# Evaluation subset sizes (larger = more stable metrics)
+eval:
+  test_subset_size: 5000   # samples for epsilon sweep
+  tune_subset_size: 5000   # samples for epsilon tuning
+  adv_subset_size: 20000  # samples for full adversarial dataset
+  batch_size: 64
