@@ -18,6 +18,10 @@ __pycache__/
 *.pyc
 *.pyo
 
+# IDE / sync (로컬만, 푸시 제외)
+.cursor/
+.stfolder/
+
 # macOS
 .DS_Store
 FETCH_HEAD
