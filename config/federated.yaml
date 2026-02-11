@@ -1,6 +1,6 @@
 # config/federated.yaml
 
-version: "v19"
+version: "v20"
 
 data:
   # Choose cicids2017, bot_iot, or mnist
@@ -57,7 +57,7 @@ federated:
   # focal_loss_alpha: 0.25 gave better overall results (Compressed Acc/F1) in practice.
   use_class_weights: true
   use_focal_loss: true
-  focal_loss_alpha: 0.5
+  focal_loss_alpha: 0.7
   
   # Distillation (disabled for cleaner reports)
   use_distillation: false

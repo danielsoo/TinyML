@@ -1,7 +1,7 @@
 # Conversation Application Verification
 
 **Date:** 2026-02-10  
-**Branch:** decayinglr (current)  
+**Branch:** main (TinyML)  
 **Last applied:** All changes re-applied (config, compression, run, analyze_compression, test_fgsm, evaluate_ratio_sweep, tune_threshold_all_ratios).
 
 This document checks whether the code changes discussed in the conversation have been applied to the current codebase.

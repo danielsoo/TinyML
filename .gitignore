@@ -5,7 +5,6 @@ data/raw/
 data/processed/*
 !data/processed/runs/
 # run 출력 폴더들(v18, v19, v19/날짜 등) 무시 → 미추적(??) 안 뜸
-data/processed/runs/*/
 TinyML-results/
 outputs/
 /processed/

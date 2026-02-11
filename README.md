@@ -66,7 +66,7 @@ runs/<version>/<run_id>/
 ## Repository Layout
 
 ```
-TinyML-decayinglr/
+TinyML/
 ├── run.py                    # Main pipeline runner
 ├── compression.py            # TinyML compression pipeline (prune → quantize → TFLite)
 ├── config/
@@ -117,6 +117,15 @@ TinyML-decayinglr/
 - **Eval:** test_subset_size 5000, adv_subset_size 20000
 
 When the model path is under `data/processed/runs/<version>/<run_id>/models/`, FGSM and compression analysis use that run's `run_config.yaml` for `prediction_threshold` (ensuring consistency with training).
+
+---
+
+## Server (Vast.ai)
+
+**서버에는 TinyML 폴더만 있으면 됩니다.** 워크스페이스 경로: `/workspace/TinyML`
+
+- Git 연결 없이 로컬 **TinyML** 폴더를 서버로 넘기면 됩니다 (Syncthing, scp, zip 등).
+- [docs/SERVER_SETUP.md](docs/SERVER_SETUP.md) · [docs/SERVER_SYNC_COMMANDS.md](docs/SERVER_SYNC_COMMANDS.md)
 
 ---
 
