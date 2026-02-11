@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """
-Test set ratio sweep: evaluate model from 100% normal (100:0) to 100% attack (0:100)
+Test set ratio sweep: evaluate model(s) from 100% normal (100:0) to 100% attack (0:100)
 in 10% steps. Reports Accuracy, Precision, Recall, F1, Normal Recall, Normal Precision per ratio.
+With --models: runs sweep for all models and writes one comparison report (Model x Ratio).
 
 Usage:
   python scripts/evaluate_ratio_sweep.py --config config/federated_local.yaml --model src/models/global_model.h5
-  python scripts/evaluate_ratio_sweep.py --ratios "100,90,...,0" --out results.csv --report ratio_sweep_report.md
+  python scripts/evaluate_ratio_sweep.py --models m1.h5 m2.tflite ... --config ... --report ratio_sweep_report.md
 """
 import argparse
 import csv
@@ -21,9 +22,29 @@ import numpy as np
 import yaml
 
 
-def load_config_and_data(args):
-    """Load config, dataset; return (x_test, y_test, model, dataset_name)."""
-    with open(args.config, encoding="utf-8") as f:
+def get_display_name(model_path: Path) -> str:
+    """Short display name for report (match compression_analysis / FGSM)."""
+    stem = model_path.stem
+    if stem == "global_model":
+        return "Keras (global_model.h5)"
+    if stem == "saved_model_original":
+        return "Original (TFLite)"
+    if stem == "saved_model_qat_pruned_float32":
+        return "QAT+Prune only"
+    if stem == "saved_model_qat_ptq":
+        return "QAT+PTQ"
+    if stem == "saved_model_no_qat_ptq":
+        return "noQAT+PTQ"
+    if stem == "saved_model_pruned_qat":
+        return "Compressed (QAT)"
+    if stem == "saved_model_pruned_quantized":
+        return "Compressed (PTQ)"
+    return stem
+
+
+def load_data_only(config_path: str):
+    """Load config and dataset only; return (x_test, y_test, idx_normal, idx_attack, N_normal, N_attack, dataset_name)."""
+    with open(config_path, encoding="utf-8") as f:
         cfg = yaml.safe_load(f)
     data_cfg = cfg.get("data", {})
     dataset_name = data_cfg.get("name", "cicids2017")
@@ -31,7 +52,6 @@ def load_config_and_data(args):
     if "path" in dataset_kwargs and "data_path" not in dataset_kwargs:
         dataset_kwargs["data_path"] = dataset_kwargs.pop("path")
     dataset_kwargs["binary"] = data_cfg.get("binary", True)
-
     from src.data.loader import load_dataset
     print("Loading dataset...")
     _, _, x_test, y_test = load_dataset(dataset_name, **dataset_kwargs)
@@ -39,21 +59,22 @@ def load_config_and_data(args):
     idx_attack = np.where(y_test == 1)[0]
     N_normal, N_attack = len(idx_normal), len(idx_attack)
     print(f"  Test: {len(y_test):,} (Normal={N_normal:,}, Attack={N_attack:,})")
+    return x_test, y_test, idx_normal, idx_attack, N_normal, N_attack, dataset_name, cfg
 
-    model_path = Path(args.model)
+
+def load_model(model_path: Path, cfg: dict):
+    """Load one model; return (model_tuple, display_name). model_tuple is (kind, ...) for _predict_proba."""
+    import tensorflow as tf
     if not model_path.exists():
         raise FileNotFoundError(f"Model not found: {model_path}")
     print(f"Loading model: {model_path}")
-    import tensorflow as tf
     if str(model_path).endswith(".tflite"):
         interpreter = tf.lite.Interpreter(
             model_path=str(model_path),
             experimental_preserve_all_tensors=True,
         )
         interpreter.allocate_tensors()
-        input_details = interpreter.get_input_details()
-        output_details = interpreter.get_output_details()
-        model = ("tflite", interpreter, input_details, output_details)
+        model = ("tflite", interpreter, interpreter.get_input_details(), interpreter.get_output_details())
     else:
         use_qat = cfg.get("federated", {}).get("use_qat", False)
         if use_qat:
@@ -77,6 +98,13 @@ def load_config_and_data(args):
                     raise
         keras_model.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
         model = ("keras", keras_model, None, None)
+    return model, get_display_name(model_path)
+
+
+def load_config_and_data(args):
+    """Load config, dataset and single model; return (x_test, y_test, model, dataset_name, ...)."""
+    x_test, y_test, idx_normal, idx_attack, N_normal, N_attack, dataset_name, cfg = load_data_only(args.config)
+    model, _ = load_model(Path(args.model), cfg)
     return x_test, y_test, idx_normal, idx_attack, N_normal, N_attack, model, dataset_name
 
 
@@ -131,12 +159,12 @@ def _predict_proba(model, x_eval):
     return np.asarray(y_prob, dtype=np.float64)
 
 
-def evaluate_subset(model, x_test, y_test, eval_idx, verbose=0):
-    """Run model on subset; return metrics dict."""
+def evaluate_subset(model, x_test, y_test, eval_idx, threshold=0.5, verbose=0):
+    """Run model on subset; return metrics dict. threshold: prob >= threshold → Attack (1)."""
     x_eval = x_test[eval_idx]
     y_eval = y_test[eval_idx]
     y_prob = _predict_proba(model, x_eval)
-    y_pred = (y_prob >= 0.5).astype(np.int32)
+    y_pred = (y_prob >= threshold).astype(np.int32)
 
     from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
     n_classes = len(np.unique(y_eval))
@@ -162,58 +190,180 @@ def evaluate_subset(model, x_test, y_test, eval_idx, verbose=0):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Evaluate model across test set ratios (normal%:attack%)")
+    parser = argparse.ArgumentParser(description="Evaluate model(s) across test set ratios (normal%:attack%)")
     parser.add_argument("--config", default="config/federated_local.yaml", help="Config YAML")
-    parser.add_argument("--model", default="src/models/global_model.h5", help="Path to Keras model (.h5)")
+    parser.add_argument("--model", default="", help="Single model path (used if --models not given)")
+    parser.add_argument("--models", nargs="*", default=None, help="Multiple model paths for one comparison report")
     parser.add_argument("--ratios", type=str, default="100,90,80,70,60,50,40,30,20,10,0",
                         help="Comma-separated normal%% values (default: 100,90,...,0)")
     parser.add_argument("--out", type=str, default="", help="Optional CSV output path")
-    parser.add_argument("--report", type=str, default="", help="Optional Markdown report path (same format as compression_analysis.md)")
+    parser.add_argument("--report", type=str, default="", help="Optional Markdown report path")
     parser.add_argument("--seed", type=int, default=42, help="Random seed for subsampling")
     args = parser.parse_args()
 
     ratios = [int(x.strip()) for x in args.ratios.split(",")]
     rng = np.random.default_rng(args.seed)
 
-    x_test, y_test, idx_normal, idx_attack, N_normal, N_attack, model, _ = load_config_and_data(args)
+    with open(args.config, encoding="utf-8") as f:
+        threshold = float(yaml.safe_load(f).get("evaluation", {}).get("prediction_threshold", 0.5))
 
-    print(f"\nSweep: normal% = {ratios}")
-    print("=" * 100)
-    rows = []
-    for normal_pct in ratios:
-        eval_idx = subsample_by_ratio(idx_normal, idx_attack, N_normal, N_attack, normal_pct, rng)
-        n_n = int(np.sum(y_test[eval_idx] == 0))
-        n_a = int(np.sum(y_test[eval_idx] == 1))
-        metrics = evaluate_subset(model, x_test, y_test, eval_idx, verbose=0)
-        row = {
-            "normal_pct": normal_pct,
-            "attack_pct": 100 - normal_pct,
-            "n_normal": n_n,
-            "n_attack": n_a,
-            "n_total": len(eval_idx),
-            **metrics,
-        }
-        rows.append(row)
-        print(f"  Normal {normal_pct:3d}% : Attack {100-normal_pct:3d}%  |  n={len(eval_idx):,} (N={n_n:,}, A={n_a:,})  |  "
-              f"Acc={metrics['accuracy']:.4f}  F1={metrics['f1_score']:.4f}  |  "
-              f"NormRec={metrics.get('normal_recall', 0):.4f}  NormPrec={metrics.get('normal_precision', 0):.4f}")
-
-    print("=" * 100)
-    if args.out:
-        out_path = Path(args.out)
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(out_path, "w", newline="", encoding="utf-8") as f:
-            w = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
-            w.writeheader()
-            w.writerows(rows)
-        print(f"Saved CSV: {out_path}")
-
-    if args.report:
-        report_path = Path(args.report)
-        report_path.parent.mkdir(parents=True, exist_ok=True)
-        _write_markdown_report(rows, report_path, args.model, args.config)
-        print(f"Saved report: {report_path}")
+    multi = getattr(args, "models", None) and len(args.models) > 0
+    if multi:
+        # Multi-model: one report comparing all models (Model x Ratio)
+        model_paths = [Path(p) for p in args.models if Path(p).exists()]
+        if not model_paths:
+            print("No model paths found.", file=sys.stderr)
+            return 1
+        x_test, y_test, idx_normal, idx_attack, N_normal, N_attack, dataset_name, cfg = load_data_only(args.config)
+        # Precompute eval indices per ratio (same for all models)
+        eval_indices = {}
+        for normal_pct in ratios:
+            eval_indices[normal_pct] = subsample_by_ratio(idx_normal, idx_attack, N_normal, N_attack, normal_pct, rng)
+        all_results = []
+        for model_path in model_paths:
+            model, display_name = load_model(model_path, cfg)
+            rows = []
+            for normal_pct in ratios:
+                eval_idx = eval_indices[normal_pct]
+                n_n = int(np.sum(y_test[eval_idx] == 0))
+                n_a = int(np.sum(y_test[eval_idx] == 1))
+                metrics = evaluate_subset(model, x_test, y_test, eval_idx, threshold=threshold, verbose=0)
+                row = {
+                    "normal_pct": normal_pct,
+                    "attack_pct": 100 - normal_pct,
+                    "n_normal": n_n,
+                    "n_attack": n_a,
+                    "n_total": len(eval_idx),
+                    **metrics,
+                }
+                rows.append(row)
+            all_results.append((display_name, str(model_path), rows))
+            print(f"  Done: {display_name}")
+        if args.report:
+            report_path = Path(args.report)
+            report_path.parent.mkdir(parents=True, exist_ok=True)
+            _write_multi_model_report(all_results, report_path, args.config, ratios)
+            print(f"Saved report: {report_path}")
+    else:
+        # Single model (original behavior)
+        model_path = args.model or "src/models/global_model.h5"
+        args.model = model_path
+        x_test, y_test, idx_normal, idx_attack, N_normal, N_attack, model, _ = load_config_and_data(args)
+        print(f"\nSweep: normal% = {ratios} (threshold={threshold})")
+        print("=" * 100)
+        rows = []
+        for normal_pct in ratios:
+            eval_idx = subsample_by_ratio(idx_normal, idx_attack, N_normal, N_attack, normal_pct, rng)
+            n_n = int(np.sum(y_test[eval_idx] == 0))
+            n_a = int(np.sum(y_test[eval_idx] == 1))
+            metrics = evaluate_subset(model, x_test, y_test, eval_idx, threshold=threshold, verbose=0)
+            row = {
+                "normal_pct": normal_pct,
+                "attack_pct": 100 - normal_pct,
+                "n_normal": n_n,
+                "n_attack": n_a,
+                "n_total": len(eval_idx),
+                **metrics,
+            }
+            rows.append(row)
+            print(f"  Normal {normal_pct:3d}% : Attack {100-normal_pct:3d}%  |  n={len(eval_idx):,} (N={n_n:,}, A={n_a:,})  |  "
+                  f"Acc={metrics['accuracy']:.4f}  F1={metrics['f1_score']:.4f}  |  "
+                  f"NormRec={metrics.get('normal_recall', 0):.4f}  NormPrec={metrics.get('normal_precision', 0):.4f}")
+        print("=" * 100)
+        if args.out:
+            out_path = Path(args.out)
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(out_path, "w", newline="", encoding="utf-8") as f:
+                w = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
+                w.writeheader()
+                w.writerows(rows)
+            print(f"Saved CSV: {out_path}")
+        if args.report:
+            report_path = Path(args.report)
+            report_path.parent.mkdir(parents=True, exist_ok=True)
+            _write_markdown_report(rows, report_path, args.model, args.config)
+            print(f"Saved report: {report_path}")
     print("Done.")
+
+
+def _write_multi_model_report(all_results, output_path: Path, config_path: str, ratios: list):
+    """Write one report comparing all models (Model x Ratio) for paper / comparison."""
+    cfg = {}
+    if Path(config_path).exists():
+        with open(config_path, encoding="utf-8") as fp:
+            cfg = yaml.safe_load(fp) or {}
+    data_cfg = cfg.get("data", {})
+    fed_cfg = cfg.get("federated", {})
+    model_cfg = cfg.get("model", {})
+    br = data_cfg.get("balance_ratio")
+    br_desc = {1.0: "50:50", 4.0: "normal:attack 8:2", 9.0: "9:1", 19.0: "19:1"}.get(br) if br is not None else None
+    br_str = f"{br} ({br_desc})" if br_desc else (str(br) if br is not None else "-")
+
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write("# Ratio Sweep Report (All Models)\n\n")
+        f.write("| Item | Value |\n|------|-------|\n")
+        f.write(f"| **Models** | {len(all_results)} models (same as compression_analysis) |\n")
+        f.write(f"| **Config** | `{config_path}` |\n")
+        f.write(f"| **Generated** | {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} |\n\n")
+        f.write("## Run / Training Configuration\n\n")
+        f.write("| Item | Value |\n|------|-------|\n")
+        f.write(f"| **Data** | {data_cfg.get('name', '-')} |\n")
+        f.write(f"| **Max samples** | {data_cfg.get('max_samples', '-')} |\n")
+        f.write(f"| **Balance ratio** | {br_str} |\n")
+        f.write(f"| **Num clients** | {data_cfg.get('num_clients', '-')} |\n")
+        f.write(f"| **Model** | {model_cfg.get('name', '-')} |\n")
+        f.write(f"| **FL rounds** | {fed_cfg.get('num_rounds', '-')} |\n")
+        f.write(f"| **Local epochs** | {fed_cfg.get('local_epochs', '-')} |\n")
+        f.write(f"| **Batch size** | {fed_cfg.get('batch_size', '-')} |\n")
+        f.write(f"| **Learning rate** | {fed_cfg.get('learning_rate', '-')} |\n")
+        f.write(f"| **Use QAT** | {fed_cfg.get('use_qat', '-')} |\n\n")
+        f.write("## Summary\n\n")
+        f.write(f"Total models: {len(all_results)}, Total ratios: {len(ratios)}\n\n")
+
+        # Comparison (Accuracy): Model | 100 | 90 | 80 | ... | 0
+        f.write("## Comparison — Accuracy (Model × Normal%)\n\n")
+        header = "| Model | " + " | ".join(str(p) for p in ratios) + " |\n"
+        f.write(header)
+        f.write("|" + "-------|" * (len(ratios) + 1) + "\n")
+        for display_name, _, rows in all_results:
+            by_pct = {r["normal_pct"]: r["accuracy"] for r in rows}
+            cells = " | ".join(f"{by_pct.get(p, 0):.4f}" for p in ratios)
+            f.write(f"| {display_name} | {cells} |\n")
+        f.write("\n")
+
+        # Comparison (F1-Score)
+        f.write("## Comparison — F1-Score (Model × Normal%)\n\n")
+        f.write(header)
+        f.write("|" + "-------|" * (len(ratios) + 1) + "\n")
+        for display_name, _, rows in all_results:
+            by_pct = {r["normal_pct"]: r["f1_score"] for r in rows}
+            cells = " | ".join(f"{by_pct.get(p, 0):.4f}" for p in ratios)
+            f.write(f"| {display_name} | {cells} |\n")
+        f.write("\n")
+
+        # Comparison (Normal Recall)
+        f.write("## Comparison — Normal Recall (Model × Normal%)\n\n")
+        f.write(header)
+        f.write("|" + "-------|" * (len(ratios) + 1) + "\n")
+        for display_name, _, rows in all_results:
+            by_pct = {r["normal_pct"]: r.get("normal_recall", 0) for r in rows}
+            cells = " | ".join(f"{by_pct.get(p, 0):.4f}" for p in ratios)
+            f.write(f"| {display_name} | {cells} |\n")
+        f.write("\n")
+
+        # Detailed per model (compact table each)
+        f.write("## Detailed (per model)\n\n")
+        for display_name, model_path, rows in all_results:
+            f.write(f"### {display_name}\n\n")
+            f.write("| Normal% | Attack% | n_total | Accuracy | Precision | Recall | F1-Score | Normal Recall | Normal Precision |\n")
+            f.write("|---------|----------|---------|----------|------------|--------|----------|---------------|-------------------|\n")
+            for r in rows:
+                nr = r.get("normal_recall", 0)
+                np_ = r.get("normal_precision", 0)
+                f.write(f"| {r['normal_pct']} | {r['attack_pct']} | {r['n_total']:,} | "
+                        f"{r['accuracy']:.4f} | {r['precision']:.4f} | {r['recall']:.4f} | {r['f1_score']:.4f} | "
+                        f"{nr:.4f} | {np_:.4f} |\n")
+            f.write("\n")
 
 
 def _write_markdown_report(rows, output_path: Path, model_path: str, config_path: str):

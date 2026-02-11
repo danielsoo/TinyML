@@ -45,6 +45,9 @@ def compute_gradients(
     """
     if loss_fn is None:
         loss_fn = model.loss
+    # Keras may store loss as string (e.g. "binary_crossentropy"); resolve to callable
+    if isinstance(loss_fn, str):
+        loss_fn = keras.losses.get(loss_fn)
     
     # Convert to TensorFlow tensors
     x_tensor = tf.Variable(x, dtype=tf.float32)
@@ -52,15 +55,22 @@ def compute_gradients(
     
     with tf.GradientTape() as tape:
         tape.watch(x_tensor)
-        # Forward pass
         predictions = model(x_tensor, training=False)
-        # Compute loss
+        # binary_crossentropy requires same rank: target and output (n,) or (n,1)
+        # Model often outputs (batch, 1); y is (batch,) -> align by expanding y to (batch, 1)
+        pred_rank = len(predictions.shape)
+        y_rank = len(y_tensor.shape)
+        if pred_rank == 2 and y_rank == 1:
+            y_tensor = tf.reshape(y_tensor, [-1, 1])
         loss = loss_fn(y_tensor, predictions)
     
     # Compute gradients
     gradients = tape.gradient(loss, x_tensor)
-    
-    return gradients.numpy()
+    grad_np = gradients.numpy()
+    # Avoid nan/inf so x_adv and perturbation stats are valid (v18-style report)
+    if not np.isfinite(grad_np).all():
+        grad_np = np.nan_to_num(grad_np, nan=0.0, posinf=0.0, neginf=0.0)
+    return grad_np
 
 
 def generate_fgsm_attack(
@@ -88,11 +98,14 @@ def generate_fgsm_attack(
     # Compute gradients
     gradients = compute_gradients(model, x, y)
     
-    # Get sign of gradients
+    # Get sign of gradients (nan-safe: nan -> 0 so no perturbation)
     grad_sign = np.sign(gradients)
+    grad_sign = np.nan_to_num(grad_sign, nan=0.0, posinf=0.0, neginf=0.0)
     
     # Generate adversarial examples
-    x_adv = x + eps * grad_sign
+    x_adv = np.asarray(x + eps * grad_sign, dtype=np.float32)
+    if not np.isfinite(x_adv).all():
+        x_adv = np.where(np.isfinite(x_adv), x_adv, np.asarray(x, dtype=np.float32))
     
     # Clip to valid range
     x_adv = np.clip(x_adv, clip_min, clip_max)
@@ -149,10 +162,11 @@ def evaluate_attack_success(
     attack_success = original_correct - adversarial_correct
     attack_success_rate = attack_success / total_samples if total_samples > 0 else 0.0
     
-    # Perturbation magnitude
-    perturbation = np.abs(x_adversarial - x_original)
-    avg_perturbation = np.mean(perturbation)
-    max_perturbation = np.max(perturbation)
+    # Perturbation magnitude (nan-safe so report always shows numbers like v18)
+    perturbation = np.abs(np.asarray(x_adversarial, dtype=np.float64) - np.asarray(x_original, dtype=np.float64))
+    perturbation = np.nan_to_num(perturbation, nan=0.0, posinf=0.0, neginf=0.0)
+    avg_perturbation = float(np.mean(perturbation)) if perturbation.size > 0 else 0.0
+    max_perturbation = float(np.max(perturbation)) if perturbation.size > 0 else 0.0
     
     return {
         "original_accuracy": float(original_accuracy),

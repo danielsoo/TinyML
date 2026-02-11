@@ -105,6 +105,9 @@ class CompressionAnalyzer:
         _, _, self.x_test, self.y_test = load_dataset(dataset_name, **dataset_kwargs)
         print(f"✅ Test set loaded: {len(self.x_test):,} samples")
 
+        # Prediction threshold for binary (prob >= threshold → Attack). Same as ratio_sweep/eval.
+        self.prediction_threshold = float(self.config.get("evaluation", {}).get("prediction_threshold", 0.5))
+
         # Get model config
         model_cfg = self.config.get("model", {})
         self.model_name = model_cfg.get("name", "mlp")
@@ -186,11 +189,11 @@ class CompressionAnalyzer:
             
             y_pred_proba = model.predict(self.x_test, verbose=0)
 
-            # Convert probabilities to predictions
+            # Convert probabilities to predictions (use config threshold)
             if self.num_classes <= 2:
                 if y_pred_proba.ndim > 1:
                     y_pred_proba = y_pred_proba[:, 0]
-                y_pred = (y_pred_proba >= 0.5).astype(int)
+                y_pred = (y_pred_proba >= self.prediction_threshold).astype(int)
             else:
                 y_pred = np.argmax(y_pred_proba, axis=1)
 
@@ -255,11 +258,11 @@ class CompressionAnalyzer:
 
             y_pred_proba = np.concatenate(y_pred_list, axis=0)
 
-            # Convert probabilities to predictions
+            # Convert probabilities to predictions (use config threshold)
             if self.num_classes <= 2:
                 if y_pred_proba.ndim > 1:
                     y_pred_proba = y_pred_proba[:, 0]
-                y_pred = (y_pred_proba >= 0.5).astype(int)
+                y_pred = (y_pred_proba >= self.prediction_threshold).astype(int)
             else:
                 y_pred = np.argmax(y_pred_proba, axis=1)
         else:
@@ -518,6 +521,8 @@ class CompressionAnalyzer:
             data_cfg = cfg.get("data", {})
             fed_cfg = cfg.get("federated", {})
             model_cfg = cfg.get("model", {})
+            eval_cfg = cfg.get("evaluation", {})
+            comp_cfg = cfg.get("compression", {})
             f.write("| Item | Value |\n|------|-------|\n")
             f.write(f"| **Data** | {data_cfg.get('name', '-')} |\n")
             f.write(f"| **Data path** | {data_cfg.get('path', '-')} |\n")
@@ -539,11 +544,25 @@ class CompressionAnalyzer:
             f.write(f"| **Use class weights** | {fed_cfg.get('use_class_weights', '-')} |\n")
             f.write(f"| **Use focal loss** | {fed_cfg.get('use_focal_loss', '-')} |\n")
             f.write(f"| **Focal loss alpha** | {fed_cfg.get('focal_loss_alpha', '-')} |\n")
+            f.write(f"| **Use distillation** | {fed_cfg.get('use_distillation', '-')} |\n")
             f.write(f"| **Use QAT** | {fed_cfg.get('use_qat', '-')} |\n")
             f.write(f"| **Server momentum** | {fed_cfg.get('server_momentum', '-')} |\n")
             f.write(f"| **Server learning rate** | {fed_cfg.get('server_learning_rate', '-')} |\n")
+            f.write(f"| **LR decay type** | {fed_cfg.get('lr_decay_type', '-')} |\n")
+            f.write(f"| **LR decay rate** | {fed_cfg.get('lr_decay_rate', '-')} |\n")
+            f.write(f"| **LR drop rate** | {fed_cfg.get('lr_drop_rate', '-')} |\n")
+            f.write(f"| **LR epochs drop** | {fed_cfg.get('lr_epochs_drop', '-')} |\n")
+            f.write(f"| **LR min** | {fed_cfg.get('lr_min', '-')} |\n")
             f.write(f"| **Min fit clients** | {fed_cfg.get('min_fit_clients', '-')} |\n")
             f.write(f"| **Min evaluate clients** | {fed_cfg.get('min_evaluate_clients', '-')} |\n")
+            f.write(f"| **Min available clients** | {fed_cfg.get('min_available_clients', '-')} |\n")
+            f.write(f"| **Prediction threshold** | {eval_cfg.get('prediction_threshold', self.prediction_threshold)} |\n")
+            rs_models = eval_cfg.get('ratio_sweep_models')
+            rs_str = f"{len(rs_models)} models" if isinstance(rs_models, list) else (str(rs_models) if rs_models is not None else "-")
+            f.write(f"| **Ratio sweep models** | {rs_str} |\n")
+            f.write(f"| **Always build traditional** | {comp_cfg.get('always_build_traditional', '-')} |\n")
+            trad_path = comp_cfg.get('traditional_model_path')
+            f.write(f"| **Traditional model path** | {trad_path if trad_path is not None else 'null'} |\n")
             f.write("\n")
 
             f.write("## Summary\n\n")

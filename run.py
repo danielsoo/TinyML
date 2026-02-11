@@ -140,8 +140,9 @@ def main():
         sys.stderr = Tee(sys.__stderr__, log_file)
         print(f"Logging to {log_path}")
     
-    # Track overall success, eval report dir, and current run dir (when we run analysis)
+    # Track overall success, step results for final report, eval dir, run dir
     all_success = True
+    step_results = []  # list of (step_name, success) for final summary
     eval_report_dir = None
     current_runs_dir = None  # data/processed/runs/<version>/<run_id> when analysis runs
 
@@ -169,6 +170,7 @@ def main():
                 [sys.executable, "scripts/train.py", "--config", args.config],
                 "STEP 1: Federated Learning Training"
             )
+        step_results.append(("STEP 1: Training", success))
         if not success:
             print("⚠️  Training failed. Stopping pipeline.")
             return 1
@@ -223,6 +225,7 @@ def main():
             [sys.executable, "compression.py", "--use-trained", "--config", args.config],
             "STEP 2: Model Compression"
         )
+        step_results.append(("STEP 2: Compression", success))
         if not success:
             print("⚠️  Compression failed. Stopping pipeline.")
             return 1
@@ -257,6 +260,7 @@ def main():
             "--run-id", run_id,
         ]
         success = run_command(analysis_cmd, "STEP 3: Compression Analysis")
+        step_results.append(("STEP 3: Analysis", success))
         if not success:
             print("⚠️  Analysis failed. Continuing to visualization...")
         all_success = all_success and success
@@ -265,79 +269,109 @@ def main():
         print(f"  ⏭️  SKIPPING STEP 3: Analysis")
         print(f"{'='*80}\n")
 
-    # Step 3b: FGSM (write run_dir/fgsm/fgsm_report.md + fgsm_results.json)
+    # Step 3b: FGSM (write run_dir/fgsm/fgsm_report.md + fgsm_results.json) — compare all models
     if current_runs_dir is not None and not args.skip_fgsm:
         fgsm_out = current_runs_dir / "fgsm"
         fgsm_model = Path("models/global_model.h5")
         if fgsm_model.exists():
+            with open(args.config, encoding="utf-8") as f:
+                _eval_cfg = yaml.safe_load(f).get("evaluation", {})
+            _raw = _eval_cfg.get("ratio_sweep_models")
+            ratio_list = [m.strip() for m in _raw] if _raw and isinstance(_raw, list) else []
+            fgsm_models = [str(fgsm_model)] + [m for m in ratio_list if m]
+            fgsm_models = [p for p in fgsm_models if Path(p).exists()]
             fgsm_cmd = [
                 sys.executable, "scripts/run_fgsm.py",
-                "--model", str(fgsm_model),
+                "--models", *fgsm_models,
                 "--config", args.config,
                 "--output-dir", str(fgsm_out),
             ]
             success = run_command(fgsm_cmd, "STEP 3b: FGSM (run_dir/fgsm/)")
+            step_results.append(("STEP 3b: FGSM", success))
             if not success:
                 print("⚠️  FGSM failed. Continuing...")
             all_success = all_success and success
         else:
             print("⚠️  models/global_model.h5 not found. Skipping FGSM.")
 
-    # Step 4: Ratio sweep (100:0 → 0:100) + threshold tuning → ratio_sweep_report.md
+    # Step 4: Ratio sweep (100:0 → 0:100) + threshold tuning for one or all models
+    eval_report_dir = None
+    step4_success = True
     if not args.skip_ratio_sweep:
-        # Model for evaluation
-        ratio_model = args.model.strip() if args.model else ""
-        if not ratio_model:
-            ratio_model = "models/tflite/saved_model_original.tflite"
-            if not Path(ratio_model).exists():
-                ratio_model = "src/models/global_model.h5"
-        ratio_model_path = Path(ratio_model)
-        if not ratio_model_path.exists():
-            print(f"⚠️  Model not found: {ratio_model}. Skipping Step 4.")
+        last_run_file = Path("data/processed/runs/.last_run_id")
+        eval_dir_from_model = get_eval_dir_for_model(args.model) if args.model else None
+        if eval_dir_from_model is not None:
+            report_dir = eval_dir_from_model
+            report_dir.mkdir(parents=True, exist_ok=True)
+            eval_report_dir = report_dir
+            print(f"  📁 Eval report dir (from --model): {report_dir}")
+        elif last_run_file.exists():
+            rel_path = last_run_file.read_text(encoding="utf-8").strip()
+            report_dir = Path("data/processed/runs") / rel_path / "eval"
+            report_dir.mkdir(parents=True, exist_ok=True)
+            eval_report_dir = report_dir
         else:
-            # Where to save the report
-            last_run_file = Path("data/processed/runs/.last_run_id")
-            eval_dir_from_model = get_eval_dir_for_model(ratio_model) if args.model else None
-            if eval_dir_from_model is not None:
-                # Model is under data/processed/runs/<version>/<datetime>/models/ → save to .../eval/
-                report_dir = eval_dir_from_model
-                report_dir.mkdir(parents=True, exist_ok=True)
-                report_path = report_dir / "ratio_sweep_report.md"
-                eval_report_dir = report_dir  # show in final summary
-                print(f"  📁 Eval report dir (from --model): {report_dir}")
-            elif last_run_file.exists():
-                rel_path = last_run_file.read_text(encoding="utf-8").strip()
-                report_dir = Path("data/processed/runs") / rel_path / "eval"
-                report_dir.mkdir(parents=True, exist_ok=True)
-                report_path = report_dir / "ratio_sweep_report.md"
-            else:
-                # Eval-only run: no analysis yet, model not under runs/ → data/processed/eval/<timestamp>/
-                report_dir = Path("data/processed/eval") / datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-                report_dir.mkdir(parents=True, exist_ok=True)
-                report_path = report_dir / "ratio_sweep_report.md"
-                print(f"  📁 Eval-only report dir: {report_dir}")
+            report_dir = Path("data/processed/eval") / datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+            report_dir.mkdir(parents=True, exist_ok=True)
+            eval_report_dir = report_dir
+            print(f"  📁 Eval-only report dir: {report_dir}")
 
+        # Build model list: single (--model) or all from config (same as compression_analysis)
+        if args.model and args.model.strip():
+            ratio_models = [args.model.strip()]
+        else:
+            with open(args.config, encoding="utf-8") as f:
+                _eval_cfg = yaml.safe_load(f).get("evaluation", {})
+            _raw = _eval_cfg.get("ratio_sweep_models")
+            if _raw and isinstance(_raw, list):
+                ratio_models = [m.strip() for m in _raw if m and str(m).strip()]
+            else:
+                ratio_models = [
+                    "models/tflite/saved_model_original.tflite",
+                    "models/tflite/saved_model_qat_pruned_float32.tflite",
+                    "models/tflite/saved_model_qat_ptq.tflite",
+                    "models/tflite/saved_model_no_qat_ptq.tflite",
+                    "models/tflite/saved_model_pruned_qat.tflite",
+                    "models/tflite/saved_model_pruned_quantized.tflite",
+                ]
+            if not any(Path(m).exists() for m in ratio_models):
+                ratio_models = ["models/tflite/saved_model_original.tflite"]
+            if not ratio_models or not any(Path(m).exists() for m in ratio_models):
+                ratio_models = ["src/models/global_model.h5"]
+
+        ratio_model_paths = [Path(m) for m in ratio_models if Path(m).exists()]
+        report_path = report_dir / "ratio_sweep_report.md"
+
+        # Step 4: one ratio sweep over all models → single comparison report
+        if ratio_model_paths:
             sweep_cmd = [
                 sys.executable, "scripts/evaluate_ratio_sweep.py",
                 "--config", args.config,
-                "--model", str(ratio_model_path),
+                "--models", *[str(p) for p in ratio_model_paths],
                 "--report", str(report_path),
             ]
-            success = run_command(sweep_cmd, "STEP 4: Ratio Sweep (100%→0% normal:attack report)")
+            success = run_command(sweep_cmd, "STEP 4: Ratio Sweep (all models)")
+            step4_success = step4_success and success
             if not success:
-                print("⚠️  Ratio sweep failed. Continuing...")
+                print("  ⚠️  Ratio sweep failed. Continuing...")
             all_success = all_success and success
+
+            # Step 4b: threshold tuning per model, append to same report
             if success and report_path.exists():
-                tune_cmd = [
-                    sys.executable, "scripts/tune_threshold_all_ratios.py",
-                    "--config", args.config,
-                    "--model", str(ratio_model_path),
-                    "--append-to", str(report_path),
-                ]
-                tune_ok = run_command(tune_cmd, "STEP 4b: Threshold Tuning (append to ratio_sweep_report.md)")
-                if not tune_ok:
-                    print("⚠️  Threshold tuning failed. Ratio sweep report is still complete.")
-                all_success = all_success and tune_ok
+                for ratio_model_path in ratio_model_paths:
+                    stem = ratio_model_path.stem
+                    tune_cmd = [
+                        sys.executable, "scripts/tune_threshold_all_ratios.py",
+                        "--config", args.config,
+                        "--model", str(ratio_model_path),
+                        "--append-to", str(report_path),
+                    ]
+                    tune_ok = run_command(tune_cmd, f"STEP 4b: Threshold Tuning — {stem}")
+                    step4_success = step4_success and tune_ok
+                    if not tune_ok:
+                        print(f"  ⚠️  Threshold tuning failed for {stem}. Report is still complete.")
+                    all_success = all_success and tune_ok
+        step_results.append(("STEP 4: Ratio sweep", step4_success))
     else:
         print(f"\n{'='*80}")
         print(f"  ⏭️  SKIPPING STEP 4: Ratio sweep")
@@ -362,6 +396,7 @@ def main():
             "--output-dir", str(analysis_dir),
         ]
         success = run_command(viz_cmd, "STEP 5: Result Visualization")
+        step_results.append(("STEP 5: Visualization", success))
         if not success:
             print("⚠️  Visualization failed.")
         all_success = all_success and success
@@ -370,12 +405,17 @@ def main():
         print(f"  ⏭️  SKIPPING STEP 5: Visualization")
         print(f"{'='*80}\n")
     
-    # Final summary
+    # Final summary: 완료/실패를 로그에서 정확히 표시
+    failed_steps = [name for name, ok in step_results if not ok]
     print(f"\n{'='*80}")
+    print(f"  PIPELINE RESULT")
+    print(f"{'='*80}")
     if all_success:
-        print(f"  ✅ PIPELINE COMPLETED SUCCESSFULLY!")
+        print(f"  ✅ Result: SUCCESS — All steps completed.")
     else:
-        print(f"  ⚠️  PIPELINE COMPLETED WITH SOME WARNINGS")
+        print(f"  ❌ Result: FAILED — {len(failed_steps)} step(s) failed.")
+        for name in failed_steps:
+            print(f"     • {name}")
     print(f"{'='*80}\n")
     
     # Run path (version/datetime) — single source: data/processed/runs/.last_run_id
@@ -420,7 +460,7 @@ def main():
     print(f"     - {_analysis_dir}/compression_analysis.csv")
     print(f"     - {_analysis_dir}/compression_analysis.json")
     print(f"     - {_analysis_dir}/compression_analysis.md")
-    print(f"     - {_eval_dir}/ratio_sweep_report.md")
+    print(f"     - {_eval_dir}/ratio_sweep_report.md or ratio_sweep_<model>.md (one per model)")
     _fgsm_dir = f"data/processed/runs/{rel_path}/fgsm"
     if Path(_fgsm_dir).exists():
         print(f"  🎯 FGSM ({rel_path}):")

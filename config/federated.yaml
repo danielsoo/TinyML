@@ -29,6 +29,16 @@ model:
 # Higher (0.5~0.7): higher Precision, lower Recall.
 evaluation:
   prediction_threshold: 0.3
+  # Models to run ratio sweep (Step 4) when run.py does not pass --model.
+  # Run sweep for each existing path; reports: eval/ratio_sweep_<stem>.md
+  # null or omit = default list below (all produced TFLite models)
+  ratio_sweep_models:
+    - models/tflite/saved_model_original.tflite
+    - models/tflite/saved_model_qat_pruned_float32.tflite
+    - models/tflite/saved_model_qat_ptq.tflite
+    - models/tflite/saved_model_no_qat_ptq.tflite
+    - models/tflite/saved_model_pruned_qat.tflite
+    - models/tflite/saved_model_pruned_quantized.tflite
 
 federated:
   # Fewer rounds for stability (avoids NaN), LR kept at 0.0005
