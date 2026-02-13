@@ -79,12 +79,14 @@ class QATAwareStrategy(fl.server.strategy.FedAvg):
         use_qat: bool = False,
         use_dequantize_aggregate: bool = True,
         quantize_before_send: bool = True,
+        num_rounds: int = 10,
         **kwargs
     ):
         super().__init__(**kwargs)
         self.use_qat = use_qat
         self.use_dequantize_aggregate = use_dequantize_aggregate
         self.quantize_before_send = quantize_before_send
+        self.num_rounds = num_rounds
         self.latest_parameters: Optional[Parameters] = None
         self.quant_params_cache: Dict[int, List[QuantizationParams]] = {}
 
@@ -162,13 +164,16 @@ class QATAwareStrategy(fl.server.strategy.FedAvg):
         if not results:
             return None, {}
 
-        # Log client contributions periodically
+        # 매 라운드마다 진행 상황 표시 (몇 번째 / 전체)
+        print(f"\n[Round {server_round}/{self.num_rounds}]", end="")
         if server_round % 5 == 0 or server_round == 1:
             total_examples = sum(fit_res.num_examples for _, fit_res in results)
-            print(f"\n[Round {server_round}] Aggregating {len(results)} clients:")
+            print(f" Aggregating {len(results)} clients:")
             for client_proxy, fit_res in results:
                 weight = fit_res.num_examples / total_examples
                 print(f"  Client: {fit_res.num_examples:,} samples (weight: {weight:.4f})")
+        else:
+            print()
 
         # If using QAT with dequantization, process weights
         if self.use_qat and self.use_dequantize_aggregate:
@@ -320,6 +325,13 @@ def on_fit_config(server_round: int) -> Dict[str, Any]:
     """Generate fit configuration for clients."""
     cfg = _get_config()
     fed_cfg = cfg.get("federated", {})
+    num_rounds = fed_cfg.get("num_rounds", 10)
+    idx = os.environ.get("SWEEP_RUN_INDEX")
+    tot = os.environ.get("SWEEP_RUN_TOTAL")
+    msg = f"\n[Round {server_round}/{num_rounds}]"
+    if idx and tot:
+        msg += f" (sweep run {idx}/{tot} runs)"
+    print(msg)
 
     return {
         "local_epochs": fed_cfg.get("local_epochs", 2),
@@ -351,6 +363,7 @@ def create_strategy(config: dict = None) -> fl.server.strategy.Strategy:
     use_qat = fed_cfg.get("use_qat", False)
     use_momentum = fed_cfg.get("server_momentum", 0) > 0
 
+    num_rounds = fed_cfg.get("num_rounds", 10)
     strategy_kwargs = {
         "fraction_fit": fed_cfg.get("fraction_fit", 1.0),
         "fraction_evaluate": fed_cfg.get("fraction_evaluate", 1.0),
@@ -362,6 +375,7 @@ def create_strategy(config: dict = None) -> fl.server.strategy.Strategy:
         "use_qat": use_qat,
         "use_dequantize_aggregate": use_qat,  # Dequantize client weights when QAT is used
         "quantize_before_send": use_qat,  # Quantize before sending to clients when QAT is used
+        "num_rounds": num_rounds,
     }
 
     if use_momentum:

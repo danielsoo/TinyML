@@ -71,20 +71,22 @@ def print_section(title: str):
 
 
 def check_gpu():
-    """Check GPU availability."""
+    """Check GPU availability and enable VRAM (memory growth)."""
     print_section("🔍 GPU Check")
     
     try:
+        from src.utils.env_utils import configure_tf_gpu
         import tensorflow as tf
+        has_gpu = configure_tf_gpu(memory_growth=True, log_devices=False)
         gpus = tf.config.list_physical_devices('GPU')
         
         if gpus:
-            print(f"✅ GPU devices found: {len(gpus)}")
+            print(f"✅ GPU devices found: {len(gpus)} (VRAM will be used for training)")
             for gpu in gpus:
                 print(f"   - {gpu.name}")
         else:
             print("⚠️  No GPU devices found. Training will use CPU (may be slower).")
-            print("   Tip: In Colab, enable GPU via Runtime → Change runtime type → GPU")
+            print("   Tip: On vast.ai, use a GPU instance. On Colab: Runtime → Change runtime type → GPU")
         
         print(f"TensorFlow version: {tf.__version__}")
         

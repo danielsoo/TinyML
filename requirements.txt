@@ -14,6 +14,7 @@ pyyaml
 
 # --- Model optimization (pruning, QAT) ---
 tensorflow-model-optimization
+tf-keras
 
 # --- Adversarial ML ---
 adversarial-robustness-toolbox>=1,<2

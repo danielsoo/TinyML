@@ -7,6 +7,9 @@ import warnings
 
 # Suppress TensorFlow warnings
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+# Limit TF threads to avoid pthread_create failure when Ray spawns many client actors
+os.environ.setdefault('TF_NUM_INTEROP_THREADS', '2')
+os.environ.setdefault('TF_NUM_INTRAOP_THREADS', '2')
 # Reduce Ray backend log noise (e.g. metrics exporter, large object dumps) when using FL simulation
 os.environ.setdefault('RAY_BACKEND_LOG_LEVEL', 'warning')
 warnings.filterwarnings('ignore', category=UserWarning)
@@ -41,11 +44,16 @@ from src.modelcompression.quantization import (
     dequantize_array,
 )
 
-# Suppress TensorFlow logging after import
+# Suppress TensorFlow logging after import; enable GPU (VRAM) if available
 try:
     import tensorflow as tf
     import tensorflow_model_optimization as tfmot
     tf.get_logger().setLevel('ERROR')
+    try:
+        from src.utils.env_utils import configure_tf_gpu
+        configure_tf_gpu(memory_growth=True, log_devices=False)
+    except ImportError:
+        pass
     _KERAS_CALLBACKS = tf.keras.callbacks
 except ImportError:
     try:
@@ -109,10 +117,15 @@ class SaveModelStrategy(_get_strategy_base()):
         """Aggregate fit results (sample-weighted, with momentum if FedAvgM)."""
         if not results:
             return None, {}
-        
+        # 매 라운드마다 스윕 Run 번호 표시 (Flower의 [ROUND N] 다음에 보이도록)
+        run_idx = os.environ.get("SWEEP_RUN_INDEX")
+        run_tot = os.environ.get("SWEEP_RUN_TOTAL")
+        if run_idx and run_tot:
+            print(f"\n>>> Sweep Run {run_idx}/{run_tot} | Round {server_round} <<<", flush=True)
         total_examples = sum([num_examples for _, fit_res in results for num_examples in [fit_res.num_examples]])
+        run_tag = f" [Run {run_idx}/{run_tot}]" if (run_idx and run_tot) else ""
         if server_round % 5 == 0:
-            print(f"\n[Round {server_round}] Client contributions:")
+            print(f"[Round {server_round}]{run_tag} Client contributions:")
             for client_proxy, fit_res in results:
                 weight = fit_res.num_examples / total_examples
                 print(f"  Client samples: {fit_res.num_examples:,} (weight: {weight:.4f})")
@@ -715,9 +728,12 @@ def main(save_path: str = "src/models/global_model.h5", config_path: str = None)
             w.writerow(csv_row)
 
         # Console output: mean + per-device accuracy (decimal + percent)
+        run_tag = ""
+        if os.environ.get("SWEEP_RUN_INDEX") and os.environ.get("SWEEP_RUN_TOTAL"):
+            run_tag = f"  (Run {os.environ['SWEEP_RUN_INDEX']}/{os.environ['SWEEP_RUN_TOTAL']})"
         print("\n[Evaluation Summary]")
         print("=" * 60)
-        print(f"Round: {current_round} / {num_rounds}")
+        print(f"Round: {current_round} / {num_rounds}{run_tag}")
         print(f"Accuracy (mean):  {aggregated['accuracy']:.4f}  ({accuracy_pct:.2f}%)")
         print(f"Loss:             {aggregated['loss']:.4f}")
         print("[Per-Device Accuracy]")
@@ -784,12 +800,17 @@ def main(save_path: str = "src/models/global_model.h5", config_path: str = None)
         print(f"[Strategy] FedAvgM (momentum={strategy_kw['server_momentum']})")
     strategy = SaveModelStrategy(**strategy_kw)
 
+    # Clients use CPU only to avoid GPU OOM when multiple Ray actors share one GPU.
+    # (Giving each client num_gpus=0.25 still maps to one device and causes out-of-memory.)
+    num_clients = state["num_clients"]
+    client_resources = {"num_gpus": 0.0}
     try:
         history = fl.simulation.start_simulation(
             client_fn=client_fn,
-            num_clients=state["num_clients"],
+            num_clients=num_clients,
             config=fl.server.ServerConfig(num_rounds=num_rounds),
             strategy=strategy,
+            client_resources=client_resources,
         )
     except Exception as ex:
         import traceback

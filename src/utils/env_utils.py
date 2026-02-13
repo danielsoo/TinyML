@@ -8,6 +8,35 @@ from pathlib import Path
 from typing import Optional
 
 
+def configure_tf_gpu(memory_growth: bool = True, log_devices: bool = False) -> bool:
+    """Configure TensorFlow to use GPU and optionally limit VRAM allocation.
+
+    - memory_growth=True: VRAM is allocated on demand (recommended on shared/vast.ai).
+    - Returns True if at least one GPU is visible to TensorFlow.
+
+    On vast.ai: rent a GPU instance; ensure the image has CUDA. TensorFlow will use
+    the GPU automatically. If you have multiple GPUs, set CUDA_VISIBLE_DEVICES to
+    use a specific one (e.g. CUDA_VISIBLE_DEVICES=0).
+    """
+    try:
+        import tensorflow as tf
+    except ImportError:
+        return False
+    gpus = tf.config.list_physical_devices("GPU")
+    if not gpus:
+        return False
+    try:
+        for gpu in gpus:
+            if memory_growth:
+                tf.config.experimental.set_memory_growth(gpu, True)
+        if log_devices:
+            print(f"[GPU] {len(gpus)} device(s): {[g.name for g in gpus]}")
+    except RuntimeError:
+        # Already initialized (e.g. after first TF op)
+        pass
+    return len(gpus) > 0
+
+
 def is_colab() -> bool:
     """Check if running in Google Colab environment.
     
