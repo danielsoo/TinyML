@@ -1,0 +1,33 @@
+# --- TensorFlow (CPU/GPU; Apple Silicon uses tensorflow) ---
+tensorflow
+
+# --- Federated learning ---
+flwr[simulation]<2
+
+# --- Core scientific / data ---
+numpy<2.0
+pandas
+scikit-learn
+imbalanced-learn
+
+# --- Config & CLI ---
+pyyaml
+
+# --- Visualization & reporting ---
+matplotlib
+seaborn
+
+# --- Model optimization (pruning, QAT) ---
+tensorflow-model-optimization
+tf-keras
+
+# --- Adversarial ML (FGSM etc.) ---
+adversarial-robustness-toolbox>=1,<2
+
+# --- Optional: notebooks & data sources ---
+jupyter
+kaggle
+
+# --- Optional: progress & HTTP (used by some scripts) ---
+tqdm
+requests

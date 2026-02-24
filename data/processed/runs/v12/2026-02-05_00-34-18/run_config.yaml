@@ -1,0 +1,27 @@
+version: v12
+data:
+  name: cicids2017
+  path: /scratch/yqp5187/Bot-IoT
+  num_clients: 4
+  binary: true
+  use_smote: true
+  balance_ratio: 1.0
+model:
+  name: mlp
+federated:
+  num_rounds: 25
+  fraction_fit: 1.0
+  fraction_evaluate: 1.0
+  local_epochs: 15
+  batch_size: 128
+  learning_rate: 0.001
+  use_class_weights: true
+  use_focal_loss: true
+  focal_loss_alpha: 0.85
+  use_callbacks: false
+  server_momentum: 0.9
+  server_learning_rate: 1.0
+  use_qat: true
+  min_fit_clients: 4
+  min_evaluate_clients: 4
+  min_available_clients: 4

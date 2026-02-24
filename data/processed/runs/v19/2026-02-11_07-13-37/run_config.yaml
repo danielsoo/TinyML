@@ -1,0 +1,45 @@
+version: v19
+data:
+  name: cicids2017
+  path: data/raw/CIC-IDS2017
+  num_clients: 4
+  max_samples: 2000000
+  binary: true
+  use_smote: true
+  balance_ratio: 4.0
+model:
+  name: mlp
+evaluation:
+  prediction_threshold: 0.3
+  ratio_sweep_models:
+  - models/tflite/saved_model_original.tflite
+  - models/tflite/saved_model_qat_pruned_float32.tflite
+  - models/tflite/saved_model_qat_ptq.tflite
+  - models/tflite/saved_model_no_qat_ptq.tflite
+  - models/tflite/saved_model_pruned_qat.tflite
+  - models/tflite/saved_model_pruned_quantized.tflite
+federated:
+  num_rounds: 80
+  fraction_fit: 1.0
+  fraction_evaluate: 1.0
+  local_epochs: 2
+  batch_size: 128
+  learning_rate: 0.0005
+  use_class_weights: true
+  use_focal_loss: true
+  focal_loss_alpha: 0.65
+  use_distillation: false
+  server_momentum: 0.5
+  server_learning_rate: 1.0
+  lr_decay_type: cosine
+  lr_decay_rate: 0.97
+  lr_drop_rate: 0.5
+  lr_epochs_drop: 5
+  lr_min: 0.0001
+  use_qat: true
+  min_fit_clients: 4
+  min_evaluate_clients: 4
+  min_available_clients: 4
+compression:
+  always_build_traditional: true
+  traditional_model_path: null

@@ -1,0 +1,118 @@
+{
+  "dataset": "cicids2017",
+  "data_path": "data/raw/CIC-IDS2017",
+  "max_samples": 2000000,
+  "threshold": 0.3,
+  "epsilon_used": 0.1,
+  "attack_model": "models/global_model.h5",
+  "epsilon_sweep": [
+    {
+      "epsilon": 0.01,
+      "original_accuracy": 0.8156,
+      "adversarial_accuracy": 0.8156,
+      "attack_success_rate": 0.0,
+      "avg_perturbation": 0.2580506043203712
+    },
+    {
+      "epsilon": 0.05,
+      "original_accuracy": 0.8156,
+      "adversarial_accuracy": 0.8156,
+      "attack_success_rate": 0.0,
+      "avg_perturbation": 0.2580506043203712
+    },
+    {
+      "epsilon": 0.1,
+      "original_accuracy": 0.8156,
+      "adversarial_accuracy": 0.8156,
+      "attack_success_rate": 0.0,
+      "avg_perturbation": 0.2580506043203712
+    },
+    {
+      "epsilon": 0.15,
+      "original_accuracy": 0.8156,
+      "adversarial_accuracy": 0.8156,
+      "attack_success_rate": 0.0,
+      "avg_perturbation": 0.2580506043203712
+    },
+    {
+      "epsilon": 0.2,
+      "original_accuracy": 0.8156,
+      "adversarial_accuracy": 0.8156,
+      "attack_success_rate": 0.0,
+      "avg_perturbation": 0.2580506043203712
+    }
+  ],
+  "tuning": {
+    "best_epsilon": 0.01,
+    "target_success_rate": 0.5
+  },
+  "comparison": [
+    {
+      "model_path": "models/global_model.h5",
+      "display_name": "Keras (global_model.h5)",
+      "original_accuracy": 0.81905,
+      "adversarial_accuracy": 0.81905,
+      "attack_success_rate": 0.0,
+      "attack_success_count": 0,
+      "total_samples": 20000,
+      "avg_perturbation": 0.2575360346425859,
+      "max_perturbation": 81.82202911376953
+    },
+    {
+      "model_path": "models/tflite/saved_model_original.tflite",
+      "display_name": "Original (TFLite)",
+      "original_accuracy": 0.48985,
+      "adversarial_accuracy": 0.44505,
+      "attack_success_rate": 0.0448,
+      "attack_success_count": 896,
+      "total_samples": 20000,
+      "avg_perturbation": 0.2575360346425859,
+      "max_perturbation": 81.82202911376953
+    },
+    {
+      "model_path": "models/tflite/saved_model_qat_pruned_float32.tflite",
+      "display_name": "QAT+Prune only",
+      "original_accuracy": 0.9493,
+      "adversarial_accuracy": 0.91255,
+      "attack_success_rate": 0.03675,
+      "attack_success_count": 735,
+      "total_samples": 20000,
+      "avg_perturbation": 0.2575360346425859,
+      "max_perturbation": 81.82202911376953
+    },
+    {
+      "model_path": "models/tflite/saved_model_qat_ptq.tflite",
+      "display_name": "QAT+PTQ",
+      "original_accuracy": 0.94945,
+      "adversarial_accuracy": 0.912,
+      "attack_success_rate": 0.03745,
+      "attack_success_count": 749,
+      "total_samples": 20000,
+      "avg_perturbation": 0.2575360346425859,
+      "max_perturbation": 81.82202911376953
+    },
+    {
+      "model_path": "models/tflite/saved_model_no_qat_ptq.tflite",
+      "display_name": "noQAT+PTQ",
+      "original_accuracy": 0.81905,
+      "adversarial_accuracy": 0.81905,
+      "attack_success_rate": 0.0,
+      "attack_success_count": 0,
+      "total_samples": 20000,
+      "avg_perturbation": 0.2575360346425859,
+      "max_perturbation": 81.82202911376953
+    },
+    {
+      "model_path": "models/tflite/saved_model_pruned_quantized.tflite",
+      "display_name": "Compressed (PTQ)",
+      "original_accuracy": 0.94945,
+      "adversarial_accuracy": 0.912,
+      "attack_success_rate": 0.03745,
+      "attack_success_count": 749,
+      "total_samples": 20000,
+      "avg_perturbation": 0.2575360346425859,
+      "max_perturbation": 81.82202911376953
+    }
+  ],
+  "generated": "2026-02-11T07:15:50.949481"
+}

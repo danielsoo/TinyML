@@ -1,0 +1,31 @@
+# Raw data (용량 큼)
+data/raw/
+
+# Processed data & 학습/분석 결과
+# runs/v*/ 디렉토리는 추적 (실험 결과 보관)
+data/processed/analysis/
+data/processed/temp/
+TinyML-results/
+outputs/
+/processed/
+
+# 학습된 모델 (.h5, .tflite)
+models/*.h5
+models/*.tflite
+models/tflite/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# IDE / sync (로컬만, 푸시 제외)
+.cursor/
+.stfolder/
+
+# macOS
+.DS_Store
+FETCH_HEAD
+src/models/*.h5
+training_log.txt
+esp32_tflite_project/src/model_data.*

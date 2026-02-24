@@ -1,0 +1,59 @@
+{
+  "model_path": "models/global_model.h5",
+  "dataset": "cicids2017",
+  "data_path": "data/raw/CIC-IDS2017",
+  "max_samples": 2000000,
+  "threshold": 0.3,
+  "epsilon_sweep": [
+    {
+      "epsilon": 0.01,
+      "original_accuracy": 0.8274,
+      "adversarial_accuracy": 0.8198,
+      "attack_success_rate": 0.0076,
+      "avg_perturbation": 0.25870802998542786
+    },
+    {
+      "epsilon": 0.05,
+      "original_accuracy": 0.8274,
+      "adversarial_accuracy": 0.8198,
+      "attack_success_rate": 0.0076,
+      "avg_perturbation": 0.26753532886505127
+    },
+    {
+      "epsilon": 0.1,
+      "original_accuracy": 0.8274,
+      "adversarial_accuracy": 0.8198,
+      "attack_success_rate": 0.0076,
+      "avg_perturbation": 0.27911582589149475
+    },
+    {
+      "epsilon": 0.15,
+      "original_accuracy": 0.8274,
+      "adversarial_accuracy": 0.8198,
+      "attack_success_rate": 0.0076,
+      "avg_perturbation": 0.29158899188041687
+    },
+    {
+      "epsilon": 0.2,
+      "original_accuracy": 0.8274,
+      "adversarial_accuracy": 0.8198,
+      "attack_success_rate": 0.0076,
+      "avg_perturbation": 0.3048954904079437
+    }
+  ],
+  "tuning": {
+    "best_epsilon": 0.01,
+    "target_success_rate": 0.5
+  },
+  "final": {
+    "epsilon_used": 0.1,
+    "original_accuracy": 0.8319,
+    "adversarial_accuracy": 0.8216,
+    "attack_success_rate": 0.0103,
+    "attack_success_count": 206,
+    "total_samples": 20000,
+    "avg_perturbation": 0.2790276110172272,
+    "max_perturbation": 211.62606811523438
+  },
+  "generated": "2026-02-10T19:43:54.254052"
+}
