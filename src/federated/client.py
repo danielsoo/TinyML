@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Dict, Any, Tuple, Optional, List
 import csv
 import json
+import math
 import os
 import warnings
 
@@ -355,12 +356,22 @@ class KerasClient(fl.client.NumPyClient):
             parameters = self._dequantize_weights(parameters)
         self.model.set_weights(parameters)
 
-        # Learning rate decay by round: lr = base_lr * (lr_decay ** (round-1))
+        # Learning rate schedule by round (cosine or exponential)
         lr_base = config.get("learning_rate")
         lr_decay = float(config.get("lr_decay", 1.0))
+        lr_decay_type = (config.get("lr_decay_type") or "exponential").strip().lower()
+        lr_min = float(config.get("lr_min", 1e-6))
         server_round = int(config.get("server_round", 1))
+        num_rounds = int(config.get("num_rounds", 10))
         if lr_base is not None and getattr(self.model.optimizer, "learning_rate", None) is not None:
-            if lr_decay < 1.0:
+            if lr_decay_type == "cosine" and num_rounds > 0:
+                # Cosine schedule: eta_t = eta_min + (1/2)(eta_max - eta_min)(1 + cos(t*pi/T))
+                eta_max = float(lr_base)
+                t = min(server_round, num_rounds)
+                lr = lr_min + 0.5 * (eta_max - lr_min) * (1.0 + math.cos(math.pi * t / num_rounds))
+                lr = max(float(lr), 1e-6)
+            elif lr_decay < 1.0:
+                # Exponential: lr = base_lr * (lr_decay ** (round-1))
                 lr = float(lr_base) * (lr_decay ** (server_round - 1))
                 lr = max(lr, 1e-6)
             else:

@@ -1,12 +1,66 @@
-# 마이크로컨트롤러 배포 가이드
+# 마이크로컨트롤러 / 엣지 배포 가이드
 
 ## 개요
 
-이 가이드는 TFLite 모델을 ESP32 마이크로컨트롤러에 배포하는 방법을 설명합니다.
+이 가이드는 TFLite 모델을 **라즈베리 파이** 또는 **ESP32**에서 돌리는 방법을 설명합니다.
 
-## 사전 준비
+- **라즈베리 파이**: Python + TFLite 런타임으로 바로 추론 (권장: 먼저 여기서 검증)
+- **ESP32**: TFLite Micro, C 배열로 변환 후 플래시
 
-### 1. 테스트 모델 생성
+## 1. 로컬에서 엣지 동작 확인 (IDS 모델)
+
+학습·압축으로 만든 TFLite 모델(예: `saved_model_qat_ptq.tflite`)이 제대로 로드·추론되는지 먼저 확인합니다.
+
+```bash
+# 프로젝트 루트에서
+python scripts/run_on_edge_test.py --model models/tflite/saved_model_qat_ptq.tflite
+```
+
+- 입력 차원(예: 78)을 자동으로 읽어서 더미 입력으로 추론합니다.
+- 평균/최소/최대 지연 시간(ms)을 출력합니다.
+- **라즈베리 파이 / ESP32**에서 할 작업 요약도 함께 출력됩니다.
+
+다른 모델을 쓰려면 `--model` 경로만 바꾸면 됩니다.
+
+---
+
+## 2. 라즈베리 파이에서 확인
+
+1. **TFLite 파일 복사**
+   ```bash
+   scp models/tflite/saved_model_qat_ptq.tflite pi@<라즈베리파이IP>:~/TinyML/
+   ```
+
+2. **라즈베리 파이에서 런타임 설치**
+   ```bash
+   pip3 install tflite-runtime
+   # 또는 (무거움): pip3 install tensorflow
+   ```
+
+3. **추론 스크립트 예시** (RPi에서 실행)
+   ```python
+   import numpy as np
+   import tflite_runtime.interpreter as tflite
+
+   interp = tflite.Interpreter(model_path="saved_model_qat_ptq.tflite")
+   interp.allocate_tensors()
+   inp = interp.get_input_details()[0]
+   out = interp.get_output_details()[0]
+   # 입력: (1, 78) float32 (CIC-IDS2017 특징 벡터)
+   x = np.random.randn(1, 78).astype(np.float32)
+   interp.set_tensor(inp["index"], x)
+   interp.invoke()
+   pred = interp.get_tensor(out["index"])
+   print("Output:", pred)
+   ```
+
+4. **지연 시간 측정**: 위 루프를 여러 번 돌려서 `time.time()`으로 평균 ms를 재면 됩니다.
+
+---
+
+## 3. ESP32 배포 (사전 준비)
+
+### 3.1 테스트 모델 생성
 
 ```bash
 # 가상 환경 활성화
@@ -19,17 +73,23 @@ python scripts/create_test_model.py
 이 스크립트는 다음을 생성합니다:
 - `data/processed/microcontroller/hello_world_model.tflite` - 간단한 Hello World 모델
 
-### 2. TFLite 모델을 C 배열로 변환
+### 3.2 TFLite 모델을 C 배열로 변환
 
+**실제 IDS 모델(78차원)을 ESP32용으로 변환:**
+```bash
+python scripts/deploy_microcontroller.py --model models/tflite/saved_model_qat_ptq.tflite --output data/processed/microcontroller/ids_model_data.c
+```
+
+**테스트용 Hello World 모델:**
 ```bash
 python scripts/deploy_microcontroller.py
 ```
 
-이 스크립트는 다음을 생성합니다:
+생성되는 파일:
 - `data/processed/microcontroller/model_data.c` - C 소스 파일
 - `data/processed/microcontroller/model_data.h` - C 헤더 파일
 
-### 3. 로컬에서 추론 테스트 (하드웨어 없이 검증)
+### 3.3 로컬에서 추론 테스트 (하드웨어 없이 검증)
 
 실제 하드웨어가 없어도 배포 파이프라인이 제대로 작동하는지 검증할 수 있습니다:
 
