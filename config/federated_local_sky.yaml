@@ -1,8 +1,7 @@
 # config/federated_local.yaml
-# Local environment config — sweep baseline
-# Hyperparams synced with federated_local_sky.yaml
+# Local environment config
 
-# Version (for result/analysis folder naming)
+# Version (for result/analysis folder naming, e.g. v1, v2_balanced)
 version: "sweep_run1"
 
 data:
@@ -15,9 +14,9 @@ data:
   # Number of clients (4 devices)
   num_clients: 4
 
-  # Limit samples (null = no limit; set to e.g. 1500000 to match sky config)
-  max_samples: 1500000
-
+  # Limit samples to avoid long training (increase for more attack samples)
+  max_samples: 1500000 
+  
   # For CIC-IDS2017: binary (BENIGN vs ATTACK) or multi-class
   binary: true
   use_smote: true
@@ -28,46 +27,41 @@ model:
   name: mlp
 
 federated:
+  # Increased rounds/epochs for better accuracy
   num_rounds: 60
 
   # Fraction of clients participating per round (1.0 = all)
   fraction_fit: 1.0
   fraction_evaluate: 1.0
-
-  # Local training parameters
   local_epochs: 2
   batch_size: 128
   learning_rate: 0.001
-
-  # Class balancing — focal loss handles imbalance; don't stack both (causes NaN)
-  use_class_weights: false
+  use_class_weights: false   # focal loss already handles imbalance; stacking both causes NaN
   use_focal_loss: true
-  focal_loss_alpha: 0.35
+  focal_loss_alpha: 0.35     # matches federated_local.yaml; 0.7 + class_weights explodes
+  use_distillation: false
   server_momentum: 0.5
-  server_learning_rate: 0.1
-
-  # Learning rate decay (synced with sky config)
+  server_learning_rate: 0.1  # 1.0 + momentum=0.5 → weight explosion after round 1 → NaN
   lr_decay_type: cosine
   lr_decay_rate: 0.97
   lr_drop_rate: 0.5
   lr_epochs_drop: 5
   lr_min: 0.0001
-
-  # Quantization-Aware Training (QAT — communication compression only)
   use_qat: true
-
-  # For strategy internal use (same as 4 devices)
   min_fit_clients: 4
   min_evaluate_clients: 4
   min_available_clients: 4
+
+compression:
+  always_build_traditional: true
+  traditional_model_path: null
 
 # Distillation hyperparams (used by run_experiment_sweep.py)
 distillation:
   epochs: 10
   temperature: 3.0
-  alpha: 0.3       # weight on distillation loss vs hard-label loss
+  alpha: 0.3
 
 # Pruning hyperparams (used by run_experiment_sweep.py)
 pruning:
-  finetune_epochs: 2  # epochs of fine-tuning after each pruning step
-
+  finetune_epochs: 2
