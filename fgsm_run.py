@@ -52,11 +52,14 @@ CONFIG_PATH   = "config/federated_local.yaml"
 # Data is StandardScaler-normalised (std≈0.85, range≈[-1, 50+]).
 # eps=0.1 equals ~12% of a std-dev and completely collapses all models.
 # eps=0.01 (~1% std-dev) produces meaningful, non-trivial degradation.
-EPSILON       = 0.01
-PGD_ALPHA     = 0.001   # alpha = epsilon/10 (standard PGD ratio)
-PGD_STEPS     = 10
-EVAL_SAMPLES  = 5000   # subset of test set to keep runtime manageable
-THRESHOLD     = 0.5
+EPSILON             = 0.01
+PGD_ALPHA           = 0.001   # alpha = epsilon/10 (standard PGD ratio)
+PGD_STEPS           = 10
+EVAL_SAMPLES        = 5000    # test subset size
+FGI_PRIOR_BATCHES   = 20      # number of training batches to build the EMA prior
+FGI_PRIOR_BATCH_SIZE = 512    # samples per prior update batch
+GA_GLOBAL_SAMPLES   = 10000   # training samples to approximate global gradient
+THRESHOLD           = 0.5
 
 # ── load FL config ────────────────────────────────────────────────────────────
 with open(CONFIG_PATH, encoding="utf-8") as f:
@@ -122,16 +125,21 @@ def _load_model(model_path: str):
     return load_model_for_at(model_path, fed_cfg)
 
 
-def _get_test_data(max_samples: int) -> Tuple[np.ndarray, np.ndarray]:
-    """Load the test split from CIC-IDS2017 (same preprocessing as FL)."""
+def _load_data() -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Load train + test splits from CIC-IDS2017 (same preprocessing as FL)."""
     kwargs = {k: v for k, v in data_cfg.items() if k not in {"name", "num_clients"}}
     if "path" in kwargs and "data_path" not in kwargs:
         kwargs["data_path"] = kwargs.pop("path")
-    _, _, x_test, y_test = load_dataset(data_cfg["name"], **kwargs)
-    if max_samples and len(x_test) > max_samples:
-        idx = np.random.default_rng(42).choice(len(x_test), max_samples, replace=False)
-        x_test, y_test = x_test[idx], y_test[idx]
-    return x_test.astype(np.float32), y_test.astype(np.float32)
+    x_train, y_train, x_test, y_test = load_dataset(data_cfg["name"], **kwargs)
+    return (x_train.astype(np.float32), y_train.astype(np.float32),
+            x_test.astype(np.float32),  y_test.astype(np.float32))
+
+
+def _subsample(x, y, n, seed=42):
+    if n and len(x) > n:
+        idx = np.random.default_rng(seed).choice(len(x), n, replace=False)
+        return x[idx], y[idx]
+    return x, y
 
 
 def _f1_acc(model, x: np.ndarray, y: np.ndarray) -> Tuple[float, float]:
@@ -169,12 +177,22 @@ def run_fgsm(model, x, y) -> Tuple[np.ndarray, float]:
     return x_adv, time.perf_counter() - t0
 
 
-def run_fgi(model, x, y) -> Tuple[np.ndarray, float]:
-    """Prior-Guided FGSM: seed prior on this batch, then attack."""
+def run_fgi(model, x, y, x_train, y_train) -> Tuple[np.ndarray, float]:
+    """Prior-Guided FGSM.
+
+    Simulates FL round history by calling prior.update() on multiple
+    random batches drawn from the training set (FGI_PRIOR_BATCHES batches
+    of FGI_PRIOR_BATCH_SIZE samples each).  This builds a genuine EMA of
+    gradient directions across the training distribution before the attack.
+    The prior is then blended 50/50 with the current test-batch gradient.
+    """
     clip_min, clip_max = _data_bounds(x)
     t0 = time.perf_counter()
     prior = GradientPrior(decay=0.9)
-    prior.update(model, x, y)
+    rng = np.random.default_rng(0)
+    for _ in range(FGI_PRIOR_BATCHES):
+        idx = rng.choice(len(x_train), FGI_PRIOR_BATCH_SIZE, replace=False)
+        prior.update(model, x_train[idx], y_train[idx])
     x_adv, _ = prior_guided_fgsm(
         model, x, y,
         epsilon=EPSILON,
@@ -186,11 +204,20 @@ def run_fgi(model, x, y) -> Tuple[np.ndarray, float]:
     return x_adv, time.perf_counter() - t0
 
 
-def run_gradient_aligned(model, x, y) -> Tuple[np.ndarray, float]:
-    """Gradient-Aligned FGSM: use the same model as both local and global."""
+def run_gradient_aligned(model, x, y, x_train, y_train) -> Tuple[np.ndarray, float]:
+    """Gradient-Aligned FGSM.
+
+    Computes the 'global' gradient as the mean gradient over a large
+    random sample of the full training set (GA_GLOBAL_SAMPLES samples),
+    approximating the true global model gradient direction.  Only features
+    where the local gradient (on the test batch) and global gradient agree
+    in sign are perturbed — sparser, more targeted attack.
+    """
     clip_min, clip_max = _data_bounds(x)
     t0 = time.perf_counter()
-    global_grads = compute_gradients(model, x, y)
+    x_global, y_global = _subsample(x_train, y_train, GA_GLOBAL_SAMPLES, seed=1)
+    # Mean over samples → (78,) vector representing the global gradient direction
+    global_grads = compute_gradients(model, x_global, y_global).mean(axis=0)
     x_adv, _, _ = gradient_aligned_fgsm_single_model(
         model, x, y,
         global_gradients=global_grads,
@@ -215,14 +242,6 @@ def run_pgd(model, x, y) -> Tuple[np.ndarray, float]:
     return x_adv, time.perf_counter() - t0
 
 
-ATTACKS = {
-    "fgsm": run_fgsm,
-    "fgi":  run_fgi,
-    "ga":   run_gradient_aligned,
-    "pgd":  run_pgd,
-}
-
-
 # ── main ──────────────────────────────────────────────────────────────────────
 
 def main():
@@ -241,10 +260,22 @@ def main():
         print(f"    clean_f1={info['clean_f1']:.4f}  clean_acc={info['clean_acc']:.4f}  tflite={info['tflite_kb']:.2f} KB")
     print()
 
-    # Load test data once
-    print(f"Loading test data (up to {EVAL_SAMPLES} samples)...")
-    x_test, y_test = _get_test_data(EVAL_SAMPLES)
-    print(f"  Test shape: {x_test.shape}\n")
+    # Load train + test data once
+    print(f"Loading data (test up to {EVAL_SAMPLES} samples)...")
+    x_train, y_train, x_test_full, y_test_full = _load_data()
+    x_test, y_test = _subsample(x_test_full, y_test_full, EVAL_SAMPLES)
+    print(f"  Train shape: {x_train.shape}  Test shape: {x_test.shape}\n")
+
+    # attack dispatch — fgsm/pgd only need test data; fgi/ga also need train data
+    def dispatch(name, model, x, y):
+        if name == "fgsm":
+            return run_fgsm(model, x, y)
+        elif name == "fgi":
+            return run_fgi(model, x, y, x_train, y_train)
+        elif name == "ga":
+            return run_gradient_aligned(model, x, y, x_train, y_train)
+        else:
+            return run_pgd(model, x, y)
 
     rows = []
 
@@ -255,17 +286,15 @@ def main():
 
         model = _load_model(info["model_path"])
 
-        # Verify clean metrics on this subset
         clean_f1, clean_acc = _f1_acc(model, x_test, y_test)
         print(f"  Clean F1={clean_f1:.4f}  Acc={clean_acc:.4f}")
 
-        # Run each attack, record time
         attack_times: Dict[str, float] = {}
         attack_results: Dict[str, Tuple[float, float]] = {}
 
-        for attack_name, attack_fn in ATTACKS.items():
+        for attack_name in ("fgsm", "fgi", "ga", "pgd"):
             print(f"  Running {attack_name.upper()}...", end=" ", flush=True)
-            x_adv, elapsed = attack_fn(model, x_test, y_test)
+            x_adv, elapsed = dispatch(attack_name, model, x_test, y_test)
             adv_f1, adv_acc = _f1_acc(model, x_adv, y_test)
             attack_times[attack_name]   = elapsed
             attack_results[attack_name] = (adv_f1, adv_acc)
@@ -273,7 +302,7 @@ def main():
 
         fgsm_time = attack_times["fgsm"]
 
-        for attack_name in ATTACKS:
+        for attack_name in ("fgsm", "fgi", "ga", "pgd"):
             adv_f1, adv_acc = attack_results[attack_name]
             elapsed = attack_times[attack_name]
             rows.append({
