@@ -1,0 +1,1 @@
+tag,fl_qat,distillation,pruning,ptq,fl_acc,fl_f1,fl_prec,fl_rec,fl_size_kb,dist_acc,dist_f1,prune_acc,prune_f1,final_acc,final_f1,final_prec,final_rec,tflite_size_kb,final_size_kb

@@ -9,7 +9,7 @@ data:
   name: cicids2017
 
   # Data path (same folder contains both Bot-IoT and CIC-IDS2017)
-  path: "data/raw/Bot-IoT"
+  path: "data/raw/MachineLearningCVE"
 
   # Number of clients (4 devices)
   num_clients: 4

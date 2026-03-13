@@ -1,0 +1,22 @@
+{
+  "tag": "yes_qat__distill_direct__prune_10x2__ptq_yes",
+  "fl_qat": true,
+  "distillation": "direct",
+  "pruning": "prune_10x2",
+  "ptq": true,
+  "fl_acc": 0.846421759990464,
+  "fl_f1": 0.3271041765272315,
+  "fl_prec": 0.7130354347516721,
+  "fl_rec": 0.2122328822246225,
+  "fl_size_kb": 864.109375,
+  "dist_acc": 0.8461461096045535,
+  "dist_f1": 0.3202383107585458,
+  "prune_acc": 0.9912611377655929,
+  "prune_f1": 0.9755584264044007,
+  "final_acc": 0.9381425633995888,
+  "final_f1": 0.7896483583299554,
+  "final_prec": 0.9824124562675324,
+  "final_rec": 0.6601224135374971,
+  "tflite_size_kb": 50.09375,
+  "final_size_kb": 585.8671875
+}

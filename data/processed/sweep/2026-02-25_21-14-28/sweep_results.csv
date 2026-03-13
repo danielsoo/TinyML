@@ -1,0 +1,2 @@
+tag,fl_qat,distillation,pruning,ptq,fl_acc,fl_f1,fl_prec,fl_rec,fl_size_kb,dist_acc,dist_f1,prune_acc,prune_f1,final_acc,final_f1,final_prec,final_rec,tflite_size_kb,final_size_kb
+no_qat__distill_direct__prune_10x5__ptq_yes,False,direct,prune_10x5,True,0.6667200584080818,0.5131863169177697,0.3453050405646838,0.9987716288624859,864.109375,0.9882140834997168,0.9673086460571996,0.9882140834997168,0.9673086460571996,0.9736679381351134,0.9248817809893205,0.9281265995563897,0.9216595717644069,69.5,269.5

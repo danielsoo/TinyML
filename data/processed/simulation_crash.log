@@ -1,0 +1,17 @@
+=== Simulation Crash ===
+
+Traceback (most recent call last):
+  File "C:\Users\mistf\TinyML\src\federated\client.py", line 971, in main
+    history = fl.simulation.start_simulation(
+        client_fn=client_fn,
+    ...<3 lines>...
+        client_resources=client_resources,
+    )
+  File "C:\Users\mistf\anaconda3\Lib\site-packages\flwr\simulation\__init__.py", line 38, in start_simulation
+    raise ImportError(RAY_IMPORT_ERROR)
+ImportError: Unable to import module `ray`.
+
+To install the necessary dependencies, install `flwr` with the `simulation` extra:
+
+    pip install -U "flwr[simulation]"
+
