@@ -656,51 +656,18 @@ def test_saved_model_pruning(
     print(f"✅ Accuracy: {orig_acc:.2%}")
     print(f"✅ Loss: {orig_loss:.4f}\n")
 
-    # Apply pruning
-    print("✂️  Applying 50% structured pruning...")
-    pruned_model = apply_structured_pruning(
-        model,
-        pruning_ratio=0.5,
-        skip_last_layer=True,
-        verbose=True
-    )
+    # pruning_presets 있으면 10x5·10x2·5x10 세 개 만들어서 스윕에서 한 번에 비교. 없으면 기존처럼 0.5 한 개
+    comp_cfg = cfg.get("compression", {})
+    pruning_presets = comp_cfg.get("pruning_presets") or [{"name": "default", "ratio": 0.5}]
 
-    compare_models(model, pruned_model)
-
-    # Evaluate
-    print("📊 Evaluating pruned model...")
-    pruned_loss, pruned_acc = pruned_model.evaluate(x_test, y_test, verbose=0)
-    print(f"✅ Accuracy: {pruned_acc:.2%}")
-    print(f"✅ Loss: {pruned_loss:.4f}")
-    print(f"⚠️  Accuracy change: {(pruned_acc - orig_acc)*100:+.2f}%\n")
-
-    # Apply quantization
-    print("🔢 Applying quantization...")
-    quantized_layers = quantize_model(
-        pruned_model,
-        symmetric=True,
-        verbose=True
-    )
-
-    compare_model_sizes(pruned_model, quantized_layers)
-
-    # Export to TFLite
-    print("\n💾 Exporting to TFLite...")
     output_dir = Path("models/tflite")
     output_dir.mkdir(parents=True, exist_ok=True)
-
-    # Use larger representative dataset for better calibration
     x_train_sub = x_train[:10000] if len(x_train) >= 10000 else x_train
     y_train_sub = y_train[:10000] if len(y_train) >= 10000 else y_train
 
-    # Export original (float32) - Baseline
-    # NOTE: Always use stripped model (float32 Keras) for Baseline TFLite
-    # This ensures compatibility and avoids issues with QuantizeWrapper conversion
     print(f"   [Baseline] Model has {len(model.layers)} layers")
-    print(f"   [Baseline] Evaluating model before TFLite export...")
     baseline_loss, baseline_acc = safe_evaluate(model, x_test, y_test, verbose=0)
-    print(f"   [Baseline] Keras model accuracy: {baseline_acc:.4f} (loss: {baseline_loss:.4f})")
-    
+    print(f"   [Baseline] Keras model accuracy: {baseline_acc:.4f}")
     tflite_orig_size = export_tflite(
         model,
         str(output_dir / "saved_model_original.tflite"),
@@ -708,35 +675,70 @@ def test_saved_model_pruning(
     )
     print(f"✅ Original (baseline): {tflite_orig_size/1024:.2f} KB")
 
-    # (1) QAT-trained + Pruning + Fine-tune + PTQ
-    print("   Evaluating pruned model before PTQ fine-tuning...")
-    pruned_loss, pruned_acc = safe_evaluate(pruned_model, x_test, y_test, verbose=0)
-    print(f"   Pruned model accuracy: {pruned_acc:.2%}")
-    
-    print("   Fine-tuning pruned model (3 epochs before PTQ)...")
-    pruned_model.fit(
-        x_train_sub, y_train_sub,
-        epochs=3,
-        batch_size=128,
-        validation_split=0.1,
-        verbose=1
-    )
-    tflite_qat_ptq_size = export_tflite(
-        pruned_model,
-        str(output_dir / "saved_model_qat_ptq.tflite"),
-        quantize=True,
-        representative_data=x_train_sub
-    )
-    # Keep legacy name for backward compatibility
-    export_tflite(
-        pruned_model,
-        str(output_dir / "saved_model_pruned_quantized.tflite"),
-        quantize=True,
-        representative_data=x_train_sub
-    )
+    tflite_qat_ptq_size = None
+    first_pruned_model = None
+    pruned_acc = orig_acc
+    for idx, preset in enumerate(pruning_presets):
+        ratio = float(preset.get("ratio", 0.5))
+        name = str(preset.get("name", "default"))
+        print(f"\n✂️  Pruning preset «{name}» (ratio={ratio:.0%})...")
+        model_copy = keras.models.clone_model(model)
+        model_copy.set_weights(model.get_weights())
+        model_copy.compile(optimizer="adam", loss=loss, metrics=["accuracy"])
+        pruned_model = apply_structured_pruning(
+            model_copy,
+            pruning_ratio=ratio,
+            skip_last_layer=True,
+            verbose=True
+        )
+        compare_models(model, pruned_model)
+        pruned_loss, pruned_acc = safe_evaluate(pruned_model, x_test, y_test, verbose=0)
+        print(f"   Pruned accuracy: {pruned_acc:.2%}")
+        print("   Fine-tuning pruned model (3 epochs before PTQ)...")
+        pruned_model.fit(
+            x_train_sub, y_train_sub,
+            epochs=3,
+            batch_size=128,
+            validation_split=0.1,
+            verbose=1
+        )
+        if idx == 0:
+            first_pruned_model = pruned_model
+            tflite_qat_ptq_size = export_tflite(
+                pruned_model,
+                str(output_dir / "saved_model_qat_ptq.tflite"),
+                quantize=True,
+                representative_data=x_train_sub
+            )
+            export_tflite(
+                pruned_model,
+                str(output_dir / "saved_model_pruned_quantized.tflite"),
+                quantize=True,
+                representative_data=x_train_sub
+            )
+        if TFMOT_AVAILABLE:
+            try:
+                pruned_for_qat = _strip_bn_dropout_for_qat(pruned_model)
+                q_aware = tfmot.quantization.keras.quantize_model(pruned_for_qat)
+                q_aware.compile(optimizer="adam", loss=loss, metrics=["accuracy"])
+                q_aware.fit(
+                    x_train_sub, y_train_sub,
+                    epochs=2,
+                    batch_size=128,
+                    validation_split=0.1,
+                    verbose=0
+                )
+                export_tflite_qat(q_aware, str(output_dir / f"saved_model_pruned_{name}_qat.tflite"))
+                print(f"   ✅ saved_model_pruned_{name}_qat.tflite")
+                if idx == 0:
+                    export_tflite_qat(q_aware, str(output_dir / "saved_model_pruned_qat.tflite"))
+            except Exception as e:
+                print(f"   ⚠️  QAT for {name} failed: {e}")
+
+    tflite_qat_size = (output_dir / "saved_model_pruned_qat.tflite").stat().st_size if (output_dir / "saved_model_pruned_qat.tflite").exists() else None
+    pruning_ratio = float(pruning_presets[0].get("ratio", 0.5))  # Traditional 경로에서 사용
 
     # (3) No-QAT + PTQ: Traditional model → Prune → PTQ (when traditional_model_path is set)
-    comp_cfg = cfg.get("compression", {})
     traditional_model_path = comp_cfg.get("traditional_model_path")
     if traditional_model_path is None:
         traditional_model_path = "models/global_model_traditional.h5"
@@ -760,7 +762,7 @@ def test_saved_model_pruning(
             
             trad_pruned = apply_structured_pruning(
                 trad_model,
-                pruning_ratio=0.5,
+                pruning_ratio=pruning_ratio,
                 skip_last_layer=True,
                 verbose=False
             )
@@ -815,65 +817,6 @@ def test_saved_model_pruning(
         else:
             tflite_trad_qat_size = None
 
-    # QAT-trained: Quantization-Aware Training (fine-tune with quantization simulation)
-    print("\n🎓 Applying QAT (Quantization-Aware Training)...")
-    try:
-        if not TFMOT_AVAILABLE:
-            raise ImportError("tensorflow_model_optimization not available")
-        
-        print(f"   [QAT] Pruned model type before stripping: {type(pruned_model).__name__}")
-        print(f"   [QAT] Pruned model layers: {len(pruned_model.layers)}")
-        
-        # For QAT, we need to disable it temporarily and recreate a fresh model
-        # because tfmot is very picky about model structure
-        print("   [QAT] Creating fresh model from pruned weights...")
-        
-        # Save pruned model weights
-        temp_weights = pruned_model.get_weights()
-        
-        # Strip BN/Dropout and create pure functional model
-        pruned_for_qat = _strip_bn_dropout_for_qat(pruned_model)
-        
-        print(f"   [QAT] Stripped model type: {type(pruned_for_qat).__name__}")
-        print(f"   [QAT] Stripped model module: {type(pruned_for_qat).__module__}")
-        print(f"   [QAT] Stripped model layers: {len(pruned_for_qat.layers)}")
-        
-        # Verify it's a Functional model
-        if hasattr(pruned_for_qat, '_is_graph_network'):
-            print(f"   [QAT] Is graph network: {pruned_for_qat._is_graph_network}")
-        
-        print(f"   [QAT] Attempting to quantize model...")
-        
-        q_aware_model = tfmot.quantization.keras.quantize_model(pruned_for_qat)
-        print(f"   ✅ Model quantized successfully!")
-        
-        q_aware_model.compile(optimizer="adam", loss=loss, metrics=["accuracy"])
-        print("   Fine-tuning QAT model (2 epochs)...")
-        q_aware_model.fit(
-            x_train_sub, y_train_sub,
-            epochs=2,
-            batch_size=128,
-            validation_split=0.1,
-            verbose=1
-        )
-        tflite_qat_size = export_tflite_qat(
-            q_aware_model,
-            str(output_dir / "saved_model_pruned_qat.tflite")
-        )
-        print(f"✅ QAT-trained + Pruning + QAT: {tflite_qat_size/1024:.2f} KB")
-    except Exception as e:
-        import traceback
-        msg = str(e)
-        print(f"\n⚠️ QAT failed: {e}")
-        print("   Full traceback:")
-        traceback.print_exc()
-        if "tf_keras" in msg.lower():
-            print("   → Install: pip install tf-keras")
-        else:
-            print(f"   → Error type: {type(e).__name__}")
-        print("   → Skipping QAT export")
-        tflite_qat_size = None
-
     # Config has use_qat: QAT TFLite is required — abort if missing
     if use_qat and tflite_qat_size is None:
         qat_path = output_dir / "saved_model_pruned_qat.tflite"
@@ -916,9 +859,11 @@ def test_saved_model_pruning(
         print(f"   • QAT-trained + Pruning + QAT:        {tflite_qat_size/1024:.2f} KB")
     print(f"\n{'='*80}")
 
-    # Save pruned model
-    pruned_model.save(Path("models/test_pruned_model.h5"))
-    print(f"✅ Pruned model saved to models/test_pruned_model.h5\n")
+    # Save first preset pruned model (for tests)
+    to_save = first_pruned_model if first_pruned_model is not None else pruned_model
+    if to_save is not None:
+        to_save.save(Path("models/test_pruned_model.h5"))
+        print(f"✅ Pruned model saved to models/test_pruned_model.h5\n")
 
     print("="*80 + "\n")
 

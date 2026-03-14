@@ -36,8 +36,11 @@ evaluation:
     - models/tflite/saved_model_original.tflite
     - models/tflite/saved_model_no_qat_ptq.tflite            # QAT 없이 학습 → Pruning + PTQ
     - models/tflite/saved_model_traditional_qat.tflite       # QAT 없이 학습 → Pruning + QAT 파인튜닝
-    - models/tflite/saved_model_qat_ptq.tflite               # QAT로 학습 → Pruning + PTQ
-    - models/tflite/saved_model_pruned_qat.tflite            # QAT로 학습 → Pruning + QAT 파인튜닝
+    - models/tflite/saved_model_qat_ptq.tflite               # QAT → Pruning + PTQ (첫 프리셋)
+    - models/tflite/saved_model_pruned_qat.tflite            # QAT → Pruning + QAT (첫 프리셋, 호환)
+    - models/tflite/saved_model_pruned_10x5_qat.tflite
+    - models/tflite/saved_model_pruned_10x2_qat.tflite
+    - models/tflite/saved_model_pruned_5x10_qat.tflite
 
 # Adversarial fine-tuning: 학습 직후·압축 직전에 1회 실행
 adversarial_training:
@@ -52,10 +55,18 @@ adversarial_training:
 
 # Traditional 모델(FL without QAT) 자동 생성 후 saved_model_traditional_qat 등 생성
 # distillation_first: true 시 디스틸 4회(no_QAT/qat × direct/progressive) 저장 후, 저장된 4개에 대해 prune+PTQ만 실행
+# pruning_presets: 한 run에 10x5·10x2·5x10 세 개 만들어서 스윕/PGD에서 한 번에 비교
 compression:
   always_build_traditional: true
   traditional_model_path: null
   distillation_first: false   # true면 run.py Step 2에서 run_distillation_first.py 사용
+  pruning_presets:
+    - name: "10x5"
+      ratio: 0.10   # 10%
+    - name: "10x2"
+      ratio: 0.02   # 2%
+    - name: "5x10"
+      ratio: 0.05   # 5%
 
 federated:
   # Increased rounds/epochs for better accuracy
