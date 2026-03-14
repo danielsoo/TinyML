@@ -283,7 +283,7 @@ def main():
         print(f"  ⏭️  SKIPPING STEP 3: Analysis")
         print(f"{'='*80}\n")
 
-    # Step 3b: FGSM (write run_dir/fgsm/fgsm_report.md + fgsm_results.json) — compare all models
+    # Step 3b: FGSM (write run_dir/fgsm/fgsm_report.md + fgsm_results.json) — compare all or top-N models
     if current_runs_dir is not None and not args.skip_fgsm:
         fgsm_out = current_runs_dir / "fgsm"
         fgsm_model = Path("models/global_model.h5")
@@ -292,8 +292,34 @@ def main():
                 _eval_cfg = yaml.safe_load(f).get("evaluation", {})
             _raw = _eval_cfg.get("ratio_sweep_models")
             ratio_list = [m.strip() for m in _raw] if _raw and isinstance(_raw, list) else []
-            fgsm_models = [str(fgsm_model)] + [m for m in ratio_list if m]
-            fgsm_models = [p for p in fgsm_models if Path(p).exists()]
+            fgsm_top_n = int(_eval_cfg.get("fgsm_top_n", 0))
+            fgsm_metric = (_eval_cfg.get("fgsm_metric") or "f1_score").strip().lower()
+            if fgsm_top_n > 0 and (analysis_json := current_runs_dir / "analysis" / "compression_analysis.json").exists():
+                try:
+                    import json
+                    with open(analysis_json, encoding="utf-8") as fj:
+                        data = json.load(fj)
+                    results = data.get("results") or []
+                    candidates = [
+                        (r["model_path"], float(r.get(fgsm_metric, r.get("f1_score", 0))))
+                        for r in results
+                        if str(r.get("model_path", "")).endswith(".tflite") and Path(r["model_path"]).exists()
+                    ]
+                    candidates.sort(key=lambda x: x[1], reverse=True)
+                    top_paths = [p for p, _ in candidates[:fgsm_top_n]]
+                    if top_paths:
+                        fgsm_models = [str(fgsm_model)] + top_paths
+                        print(f"   📌 FGSM: using top {fgsm_top_n} models by {fgsm_metric} (from compression_analysis.json)")
+                    else:
+                        fgsm_models = [str(fgsm_model)] + [m for m in ratio_list if m]
+                        fgsm_models = [p for p in fgsm_models if Path(p).exists()]
+                except Exception as e:
+                    print(f"   ⚠️  Could not read top-N from analysis JSON: {e}, using full ratio_sweep_models")
+                    fgsm_models = [str(fgsm_model)] + [m for m in ratio_list if m]
+                    fgsm_models = [p for p in fgsm_models if Path(p).exists()]
+            else:
+                fgsm_models = [str(fgsm_model)] + [m for m in ratio_list if m]
+                fgsm_models = [p for p in fgsm_models if Path(p).exists()]
             fgsm_cmd = [
                 sys.executable, "scripts/run_fgsm.py",
                 "--models", *fgsm_models,

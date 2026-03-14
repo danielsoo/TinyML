@@ -26,6 +26,24 @@ model:
   # mlp or cnn (usually mlp for Bot-IoT)
   name: mlp
 
+# Evaluation: ratio sweep 및 FGSM에 쓸 모델 목록 (Traditional+QAT 파인튜닝 포함)
+evaluation:
+  prediction_threshold: 0.3
+  # FGSM: 성능 상위 N개만 사용 (compression_analysis.json 기준). 0이면 전체 ratio_sweep_models 사용
+  fgsm_top_n: 4
+  fgsm_metric: f1_score   # or "accuracy"
+  ratio_sweep_models:
+    - models/tflite/saved_model_original.tflite
+    - models/tflite/saved_model_no_qat_ptq.tflite            # QAT 없이 학습 → Pruning + PTQ
+    - models/tflite/saved_model_traditional_qat.tflite       # QAT 없이 학습 → Pruning + QAT 파인튜닝
+    - models/tflite/saved_model_qat_ptq.tflite               # QAT로 학습 → Pruning + PTQ
+    - models/tflite/saved_model_pruned_qat.tflite            # QAT로 학습 → Pruning + QAT 파인튜닝
+
+# Traditional 모델(FL without QAT) 자동 생성 후 saved_model_traditional_qat 등 생성
+compression:
+  always_build_traditional: true
+  traditional_model_path: null
+
 federated:
   # Increased rounds/epochs for better accuracy
   num_rounds: 70

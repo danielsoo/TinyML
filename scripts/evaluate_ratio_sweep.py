@@ -35,6 +35,8 @@ def get_display_name(model_path: Path) -> str:
         return "QAT+PTQ"
     if stem == "saved_model_no_qat_ptq":
         return "noQAT+PTQ"
+    if stem == "saved_model_traditional_qat":
+        return "Traditional+QAT (no QAT in FL, QAT fine-tune)"
     if stem == "saved_model_pruned_qat":
         return "Compressed (QAT)"
     if stem == "saved_model_pruned_quantized":
