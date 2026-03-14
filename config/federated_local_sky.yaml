@@ -2,7 +2,7 @@
 # Local environment config
 
 # Version (for result/analysis folder naming, e.g. v1, v2_balanced)
-version: "v12"
+version: "v1_PGD"
 
 data:
   # Choose cicids2017, bot_iot, or mnist
@@ -26,12 +26,12 @@ model:
   # mlp or cnn (usually mlp for Bot-IoT)
   name: mlp
 
-# Evaluation: ratio sweep 및 FGSM에 쓸 모델 목록 (Traditional+QAT 파인튜닝 포함)
+# Evaluation: ratio sweep 및 PGD에 쓸 모델 목록 (Traditional+QAT 파인튜닝 포함)
 evaluation:
   prediction_threshold: 0.3
-  # FGSM: 성능 상위 N개만 사용 (compression_analysis.json 기준). 0이면 전체 ratio_sweep_models 사용
-  fgsm_top_n: 4
-  fgsm_metric: f1_score   # or "accuracy"
+  # PGD: 성능 상위 N개만 사용 (compression_analysis.json 기준). 0이면 전체 ratio_sweep_models 사용
+  pgd_top_n: 4
+  pgd_metric: f1_score   # or "accuracy"
   ratio_sweep_models:
     - models/tflite/saved_model_original.tflite
     - models/tflite/saved_model_no_qat_ptq.tflite            # QAT 없이 학습 → Pruning + PTQ
@@ -39,10 +39,23 @@ evaluation:
     - models/tflite/saved_model_qat_ptq.tflite               # QAT로 학습 → Pruning + PTQ
     - models/tflite/saved_model_pruned_qat.tflite            # QAT로 학습 → Pruning + QAT 파인튜닝
 
+# Adversarial fine-tuning: 학습 직후·압축 직전에 1회 실행
+adversarial_training:
+  enabled: true
+  attack: pgd      # "fgsm" | "pgd" (PGD = multi-step, 논문에서 많이 사용)
+  epochs: 3
+  epsilon: 0.05
+  adv_ratio: 0.5   # 훈련 데이터 중 adversarial 비율
+  # PGD 전용 (attack: pgd 일 때)
+  pgd_steps: 10
+  pgd_alpha: null  # null 이면 2.5*epsilon/steps 사용
+
 # Traditional 모델(FL without QAT) 자동 생성 후 saved_model_traditional_qat 등 생성
+# distillation_first: true 시 디스틸 4회(no_QAT/qat × direct/progressive) 저장 후, 저장된 4개에 대해 prune+PTQ만 실행
 compression:
   always_build_traditional: true
   traditional_model_path: null
+  distillation_first: false   # true면 run.py Step 2에서 run_distillation_first.py 사용
 
 federated:
   # Increased rounds/epochs for better accuracy
@@ -74,6 +87,9 @@ federated:
 
   # Quantization-Aware Training (QAT)
   use_qat: true
+
+  # (준비만) 학습 중 AT: true 시 로컬 fit에서 adversarial 배치 혼합 가능. 현재는 미구현.
+  use_adversarial_training: false
 
   # For strategy internal use (same as 4 devices)
   min_fit_clients: 4

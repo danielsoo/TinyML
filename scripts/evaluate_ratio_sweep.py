@@ -23,7 +23,7 @@ import yaml
 
 
 def get_display_name(model_path: Path) -> str:
-    """Short display name for report (match compression_analysis / FGSM)."""
+    """Short display name for report (match compression_analysis / PGD)."""
     stem = model_path.stem
     if stem == "global_model":
         return "Keras (global_model.h5)"
@@ -297,6 +297,9 @@ def _write_multi_model_report(all_results, output_path: Path, config_path: str, 
     data_cfg = cfg.get("data", {})
     fed_cfg = cfg.get("federated", {})
     model_cfg = cfg.get("model", {})
+    eval_cfg = cfg.get("evaluation", {})
+    at_cfg = cfg.get("adversarial_training", {})
+    comp_cfg = cfg.get("compression", {})
     br = data_cfg.get("balance_ratio")
     br_desc = {1.0: "50:50", 4.0: "normal:attack 8:2", 9.0: "9:1", 19.0: "19:1"}.get(br) if br is not None else None
     br_str = f"{br} ({br_desc})" if br_desc else (str(br) if br is not None else "-")
@@ -318,7 +321,19 @@ def _write_multi_model_report(all_results, output_path: Path, config_path: str, 
         f.write(f"| **Local epochs** | {fed_cfg.get('local_epochs', '-')} |\n")
         f.write(f"| **Batch size** | {fed_cfg.get('batch_size', '-')} |\n")
         f.write(f"| **Learning rate** | {fed_cfg.get('learning_rate', '-')} |\n")
-        f.write(f"| **Use QAT** | {fed_cfg.get('use_qat', '-')} |\n\n")
+        f.write(f"| **Use QAT** | {fed_cfg.get('use_qat', '-')} |\n")
+        f.write(f"| **Prediction threshold** | {eval_cfg.get('prediction_threshold', '-')} |\n")
+        rs_models = eval_cfg.get("ratio_sweep_models")
+        rs_str = f"{len(rs_models)} models" if isinstance(rs_models, list) else (str(rs_models) if rs_models is not None else "-")
+        f.write(f"| **Ratio sweep models** | {rs_str} |\n")
+        f.write(f"| **PGD top-N** | {eval_cfg.get('pgd_top_n', eval_cfg.get('fgsm_top_n', '-'))} |\n")
+        f.write(f"| **PGD metric** | {eval_cfg.get('pgd_metric', eval_cfg.get('fgsm_metric', '-'))} |\n")
+        f.write(f"| **Adversarial training enabled** | {at_cfg.get('enabled', '-')} |\n")
+        f.write(f"| **AT attack** | {at_cfg.get('attack', '-')} |\n")
+        f.write(f"| **AT epsilon** | {at_cfg.get('epsilon', '-')} |\n")
+        f.write(f"| **Distillation first** | {comp_cfg.get('distillation_first', '-')} |\n")
+        f.write("\n")
+        f.write("전체 실험 설정: 이 run 디렉터리의 `run_config.yaml` 및 `experiment_record.md` 참조 (run pipeline으로 실행한 경우).\n\n")
         f.write("## Summary\n\n")
         f.write(f"Total models: {len(all_results)}, Total ratios: {len(ratios)}\n\n")
 
@@ -377,6 +392,9 @@ def _write_markdown_report(rows, output_path: Path, model_path: str, config_path
     data_cfg = cfg.get("data", {})
     fed_cfg = cfg.get("federated", {})
     model_cfg = cfg.get("model", {})
+    eval_cfg = cfg.get("evaluation", {})
+    at_cfg = cfg.get("adversarial_training", {})
+    comp_cfg = cfg.get("compression", {})
 
     with open(output_path, "w", encoding="utf-8") as f:
         f.write("# Ratio Sweep Report\n\n")
@@ -400,7 +418,18 @@ def _write_markdown_report(rows, output_path: Path, model_path: str, config_path
         f.write(f"| **Batch size** | {fed_cfg.get('batch_size', '-')} |\n")
         f.write(f"| **Learning rate** | {fed_cfg.get('learning_rate', '-')} |\n")
         f.write(f"| **Use QAT** | {fed_cfg.get('use_qat', '-')} |\n")
+        f.write(f"| **Prediction threshold** | {eval_cfg.get('prediction_threshold', '-')} |\n")
+        rs_models = eval_cfg.get("ratio_sweep_models")
+        rs_str = f"{len(rs_models)} models" if isinstance(rs_models, list) else (str(rs_models) if rs_models is not None else "-")
+        f.write(f"| **Ratio sweep models** | {rs_str} |\n")
+        f.write(f"| **PGD top-N** | {eval_cfg.get('pgd_top_n', eval_cfg.get('fgsm_top_n', '-'))} |\n")
+        f.write(f"| **PGD metric** | {eval_cfg.get('pgd_metric', eval_cfg.get('fgsm_metric', '-'))} |\n")
+        f.write(f"| **Adversarial training enabled** | {at_cfg.get('enabled', '-')} |\n")
+        f.write(f"| **AT attack** | {at_cfg.get('attack', '-')} |\n")
+        f.write(f"| **AT epsilon** | {at_cfg.get('epsilon', '-')} |\n")
+        f.write(f"| **Distillation first** | {comp_cfg.get('distillation_first', '-')} |\n")
         f.write("\n")
+        f.write("전체 실험 설정: 이 run 디렉터리의 `run_config.yaml` 및 `experiment_record.md` 참조 (run pipeline으로 실행한 경우).\n\n")
         f.write("## Summary\n\n")
         f.write(f"Total ratios evaluated: {len(rows)}\n\n")
         f.write("## Comparison Table\n\n")

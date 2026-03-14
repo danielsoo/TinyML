@@ -7,7 +7,7 @@ collects QAT+PTQ metrics into one report under a single sweep run dir.
 Usage:
   python scripts/sweep_hyperparams.py --config config/federated.yaml
   python scripts/sweep_hyperparams.py --config config/federated.yaml --quick
-  python scripts/sweep_hyperparams.py --config config/federated.yaml --skip-viz --skip-fgsm
+  python scripts/sweep_hyperparams.py --config config/federated.yaml --skip-viz --skip-pgd
 """
 
 import argparse
@@ -169,7 +169,7 @@ def main():
         help="Use 2 values per param (32 runs) instead of full grid (162 runs)",
     )
     parser.add_argument("--skip-viz", action="store_true", help="Pass --skip-viz to run.py each time")
-    parser.add_argument("--skip-fgsm", action="store_true", help="Pass --skip-fgsm to run.py each time")
+    parser.add_argument("--skip-pgd", action="store_true", help="Pass --skip-pgd to run.py each time")
     parser.add_argument("--skip-ratio-sweep", action="store_true", help="Pass --skip-ratio-sweep to run.py each time")
     parser.add_argument(
         "--output-report",
@@ -232,8 +232,8 @@ def main():
     extra = []
     if args.skip_viz:
         extra.append("--skip-viz")
-    if args.skip_fgsm:
-        extra.append("--skip-fgsm")
+    if args.skip_pgd:
+        extra.append("--skip-pgd")
     if args.skip_ratio_sweep:
         extra.append("--skip-ratio-sweep")
 
@@ -245,7 +245,7 @@ def main():
     total = len(combos)
     print(f"\nSweep run dir: {sweep_base}")
     print(f"  총 {total} runs (Run 1/{total} ~ Run {total}/{total})")
-    print(f"  Each run: run_<slug>/ (analysis/, fgsm/, eval/, models/)\n")
+    print(f"  Each run: run_<slug>/ (analysis/, pgd/, eval/, models/)\n")
 
     sweep_config_dir = Path("config/hyperparam_sweep")
     sweep_config_dir.mkdir(parents=True, exist_ok=True)
@@ -331,7 +331,7 @@ def main():
         f"num_rounds={best['num_rounds']}, batch_size={best['batch_size']}, local_epochs={best['local_epochs']}, "
         f"learning_rate={best['learning_rate']}, focal_loss_alpha={best['focal_loss_alpha']}",
         "",
-        "이 스윕 run 아래 `run_<slug>/` 에 조합별 보고서(analysis/, fgsm/, eval/, models/)가 있습니다.",
+        "이 스윕 run 아래 `run_<slug>/` 에 조합별 보고서(analysis/, pgd/, eval/, models/)가 있습니다.",
         "",
         "| num_rounds | batch_size | local_epochs | learning_rate | focal_loss_alpha | Accuracy | F1-Score | Normal Recall | Best? |",
         "|-------------|------------|--------------|---------------|------------------|----------|----------|---------------|-------|",

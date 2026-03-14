@@ -6,7 +6,7 @@ Executes the full workflow:
 2. Compress model (compression.py)
 3. Analyze compression results (analyze_compression.py)
 4. Ratio sweep (evaluate_ratio_sweep.py) → ratio_sweep_report.md
-3b. FGSM (run_fgsm.py) → run_dir/fgsm/fgsm_report.md + fgsm_results.json
+3b. PGD (run_pgd.py) → run_dir/pgd/pgd_report.md + pgd_results.json
 4. Ratio sweep (evaluate_ratio_sweep.py) → ratio_sweep_report.md
 4b. Threshold tuning (tune_threshold_all_ratios.py) → appended to ratio_sweep_report.md (full sweep + best per ratio)
 5. Visualize results (visualize_results.py)
@@ -53,6 +53,56 @@ def run_command(command: list, description: str) -> bool:
         return False
 
 
+def write_experiment_record(run_cfg: dict, runs_dir: Path) -> None:
+    """Write experiment_record.md with all config used in this run (실험에 사용된 모든 요소 기록)."""
+    data_cfg = run_cfg.get("data", {})
+    model_cfg = run_cfg.get("model", {})
+    eval_cfg = run_cfg.get("evaluation", {})
+    at_cfg = run_cfg.get("adversarial_training", {})
+    comp_cfg = run_cfg.get("compression", {})
+    fed_cfg = run_cfg.get("federated", {})
+
+    def row(key: str, val) -> str:
+        v = val if val is not None else "null"
+        return f"| {key} | {v} |\n"
+
+    lines = [
+        "# 실험 설정 기록 (Experiment Record)",
+        "",
+        f"- **생성 시각:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+        "- **전체 설정 파일:** 이 디렉터리의 `run_config.yaml`",
+        "",
+        "## Data",
+        "| 항목 | 값 |",
+        "|------|-----|",
+    ]
+    for k, v in data_cfg.items():
+        lines.append(row(k, v))
+    lines.extend(["", "## Model", "| 항목 | 값 |", "|------|-----|"])
+    for k, v in model_cfg.items():
+        lines.append(row(k, v))
+    lines.extend(["", "## Evaluation", "| 항목 | 값 |", "|------|-----|"])
+    for k, v in eval_cfg.items():
+        if isinstance(v, list):
+            lines.append(row(k, ", ".join(str(x) for x in v)))
+        else:
+            lines.append(row(k, v))
+    lines.extend(["", "## Adversarial training (학습 직후·압축 직전 AT)", "| 항목 | 값 |", "|------|-----|"])
+    for k, v in at_cfg.items():
+        lines.append(row(k, v))
+    lines.extend(["", "## Compression", "| 항목 | 값 |", "|------|-----|"])
+    for k, v in comp_cfg.items():
+        lines.append(row(k, v))
+    lines.extend(["", "## Federated", "| 항목 | 값 |", "|------|-----|"])
+    for k, v in fed_cfg.items():
+        lines.append(row(k, v))
+    lines.append("")
+
+    out = runs_dir / "experiment_record.md"
+    out.write_text("\n".join(lines), encoding="utf-8")
+    print(f"   📋 Saved experiment record: {out}\n")
+
+
 def get_eval_dir_for_model(model_path: str) -> Path | None:
     """If model is under data/processed/runs/<version>/<datetime>/models/..., return runs/<version>/<datetime>/eval."""
     p = Path(model_path).resolve()
@@ -95,9 +145,9 @@ def main():
         help="Skip ratio sweep (100%%–0%% normal:attack report)"
     )
     parser.add_argument(
-        "--skip-fgsm",
+        "--skip-pgd",
         action="store_true",
-        help="Skip FGSM attack step (run_dir/fgsm/)"
+        help="Skip PGD attack step (run_dir/pgd/)"
     )
     parser.add_argument(
         "--config",
@@ -158,6 +208,7 @@ def main():
     print(f"Skip compression: {args.skip_compression}")
     print(f"Skip analysis: {args.skip_analysis}")
     print(f"Skip ratio sweep: {args.skip_ratio_sweep}")
+    print(f"Skip PGD: {args.skip_pgd}")
     print(f"Skip visualization: {args.skip_viz}")
     print(f"Eval model: {args.model or '(default: models/tflite/saved_model_original.tflite or src/models/global_model.h5)'}")
     
@@ -217,6 +268,23 @@ def main():
                         print(f"   📋 Restored QAT model to {src_model}\n")
             finally:
                 Path(tmp_path).unlink(missing_ok=True)
+
+        # Adversarial fine-tuning (학습 직후·압축 직전): config에 enabled 시 1회 실행
+        with open(args.config, encoding="utf-8") as f:
+            _at_cfg = yaml.safe_load(f).get("adversarial_training", {})
+        if _at_cfg.get("enabled", False) and dst_model.exists():
+            at_cmd = [
+                sys.executable, "scripts/run_at_after_training.py",
+                "--config", args.config,
+                "--model", str(dst_model),
+            ]
+            success_at = run_command(at_cmd, "STEP 1b: Adversarial fine-tuning (before compression)")
+            if success_at and dst_model.exists():
+                # 압축이 AT된 모델 쓰도록 복사 유지 (이미 덮어썼을 수 있음)
+                shutil.copy(dst_model, src_model)
+                print(f"   📋 Updated {src_model} with AT model\n")
+            step_results.append(("STEP 1b: AT", success_at))
+            all_success = all_success and success_at
     else:
         print(f"\n{'='*80}")
         print(f"  ⏭️  SKIPPING STEP 1: Training (using existing model)")
@@ -224,18 +292,26 @@ def main():
 
     # Step 2: Model Compression (compress trained model only, skip integration test)
     if not args.skip_compression:
-        success = run_command(
-            [sys.executable, "compression.py", "--use-trained", "--config", args.config],
-            "STEP 2: Model Compression"
-        )
+        with open(args.config, encoding="utf-8") as f:
+            _comp_cfg = yaml.safe_load(f).get("compression", {})
+        if _comp_cfg.get("distillation_first", False):
+            success = run_command(
+                [sys.executable, "scripts/run_distillation_first.py", "--config", args.config],
+                "STEP 2: Distillation-first (4 distilled → prune+PTQ each)"
+            )
+        else:
+            success = run_command(
+                [sys.executable, "compression.py", "--use-trained", "--config", args.config],
+                "STEP 2: Model Compression"
+            )
         step_results.append(("STEP 2: Compression", success))
         if not success:
             print("⚠️  Compression failed. Stopping pipeline.")
             return 1
-        # Require QAT TFLite when use_qat: abort if missing so runs are not silently incomplete
+        # Require QAT TFLite when use_qat and not distillation_first (distillation_first produces different outputs)
         with open(args.config, encoding="utf-8") as f:
             run_cfg = yaml.safe_load(f)
-        if run_cfg.get("federated", {}).get("use_qat", False):
+        if not run_cfg.get("compression", {}).get("distillation_first", False) and run_cfg.get("federated", {}).get("use_qat", False):
             qat_tflite = Path("models/tflite/saved_model_pruned_qat.tflite")
             if not qat_tflite.exists():
                 print("\n" + "=" * 80)
@@ -265,6 +341,7 @@ def main():
         with open(run_config_path, "w", encoding="utf-8") as f:
             yaml.dump(run_cfg, f, default_flow_style=False, allow_unicode=True, sort_keys=False)
         print(f"   📋 Saved run config: {run_config_path}\n")
+        write_experiment_record(run_cfg, runs_dir)
         analysis_out = runs_dir / "analysis"
         analysis_cmd = [
             sys.executable, "scripts/analyze_compression.py",
@@ -283,56 +360,56 @@ def main():
         print(f"  ⏭️  SKIPPING STEP 3: Analysis")
         print(f"{'='*80}\n")
 
-    # Step 3b: FGSM (write run_dir/fgsm/fgsm_report.md + fgsm_results.json) — compare all or top-N models
-    if current_runs_dir is not None and not args.skip_fgsm:
-        fgsm_out = current_runs_dir / "fgsm"
-        fgsm_model = Path("models/global_model.h5")
-        if fgsm_model.exists():
+    # Step 3b: PGD (write run_dir/pgd/pgd_report.md + pgd_results.json) — compare all or top-N models
+    if current_runs_dir is not None and not args.skip_pgd:
+        pgd_out = current_runs_dir / "pgd"
+        pgd_keras_model = Path("models/global_model.h5")
+        if pgd_keras_model.exists():
             with open(args.config, encoding="utf-8") as f:
                 _eval_cfg = yaml.safe_load(f).get("evaluation", {})
             _raw = _eval_cfg.get("ratio_sweep_models")
             ratio_list = [m.strip() for m in _raw] if _raw and isinstance(_raw, list) else []
-            fgsm_top_n = int(_eval_cfg.get("fgsm_top_n", 0))
-            fgsm_metric = (_eval_cfg.get("fgsm_metric") or "f1_score").strip().lower()
-            if fgsm_top_n > 0 and (analysis_json := current_runs_dir / "analysis" / "compression_analysis.json").exists():
+            pgd_top_n = int(_eval_cfg.get("pgd_top_n", _eval_cfg.get("fgsm_top_n", 0)))
+            pgd_metric = (_eval_cfg.get("pgd_metric") or _eval_cfg.get("fgsm_metric") or "f1_score").strip().lower()
+            if pgd_top_n > 0 and (analysis_json := current_runs_dir / "analysis" / "compression_analysis.json").exists():
                 try:
                     import json
                     with open(analysis_json, encoding="utf-8") as fj:
                         data = json.load(fj)
                     results = data.get("results") or []
                     candidates = [
-                        (r["model_path"], float(r.get(fgsm_metric, r.get("f1_score", 0))))
+                        (r["model_path"], float(r.get(pgd_metric, r.get("f1_score", 0))))
                         for r in results
                         if str(r.get("model_path", "")).endswith(".tflite") and Path(r["model_path"]).exists()
                     ]
                     candidates.sort(key=lambda x: x[1], reverse=True)
-                    top_paths = [p for p, _ in candidates[:fgsm_top_n]]
+                    top_paths = [p for p, _ in candidates[:pgd_top_n]]
                     if top_paths:
-                        fgsm_models = [str(fgsm_model)] + top_paths
-                        print(f"   📌 FGSM: using top {fgsm_top_n} models by {fgsm_metric} (from compression_analysis.json)")
+                        pgd_models = [str(pgd_keras_model)] + top_paths
+                        print(f"   📌 PGD: using top {pgd_top_n} models by {pgd_metric} (from compression_analysis.json)")
                     else:
-                        fgsm_models = [str(fgsm_model)] + [m for m in ratio_list if m]
-                        fgsm_models = [p for p in fgsm_models if Path(p).exists()]
+                        pgd_models = [str(pgd_keras_model)] + [m for m in ratio_list if m]
+                        pgd_models = [p for p in pgd_models if Path(p).exists()]
                 except Exception as e:
                     print(f"   ⚠️  Could not read top-N from analysis JSON: {e}, using full ratio_sweep_models")
-                    fgsm_models = [str(fgsm_model)] + [m for m in ratio_list if m]
-                    fgsm_models = [p for p in fgsm_models if Path(p).exists()]
+                    pgd_models = [str(pgd_keras_model)] + [m for m in ratio_list if m]
+                    pgd_models = [p for p in pgd_models if Path(p).exists()]
             else:
-                fgsm_models = [str(fgsm_model)] + [m for m in ratio_list if m]
-                fgsm_models = [p for p in fgsm_models if Path(p).exists()]
-            fgsm_cmd = [
-                sys.executable, "scripts/run_fgsm.py",
-                "--models", *fgsm_models,
+                pgd_models = [str(pgd_keras_model)] + [m for m in ratio_list if m]
+                pgd_models = [p for p in pgd_models if Path(p).exists()]
+            pgd_cmd = [
+                sys.executable, "scripts/run_pgd.py",
+                "--models", *pgd_models,
                 "--config", args.config,
-                "--output-dir", str(fgsm_out),
+                "--output-dir", str(pgd_out),
             ]
-            success = run_command(fgsm_cmd, "STEP 3b: FGSM (run_dir/fgsm/)")
-            step_results.append(("STEP 3b: FGSM", success))
+            success = run_command(pgd_cmd, "STEP 3b: PGD (run_dir/pgd/)")
+            step_results.append(("STEP 3b: PGD", success))
             if not success:
-                print("⚠️  FGSM failed. Continuing...")
+                print("⚠️  PGD failed. Continuing...")
             all_success = all_success and success
         else:
-            print("⚠️  models/global_model.h5 not found. Skipping FGSM.")
+            print("⚠️  models/global_model.h5 not found. Skipping PGD.")
 
     # Step 4: Ratio sweep (100:0 → 0:100) + threshold tuning for one or all models
     eval_report_dir = None
@@ -471,6 +548,7 @@ def main():
                 shutil.rmtree(dst, ignore_errors=True)
                 shutil.copytree(Path(name), dst)
         print(f"📁 Run snapshot: data/processed/runs/{rel_path}/")
+        print(f"📋 실험 설정 전체: 해당 디렉터리의 experiment_record.md, run_config.yaml 참조.")
 
     # Run history (for tracking progress)
     runs_index = Path("data/processed/runs/RUNS.md")
@@ -501,11 +579,11 @@ def main():
     print(f"     - {_analysis_dir}/compression_analysis.json")
     print(f"     - {_analysis_dir}/compression_analysis.md")
     print(f"     - {_eval_dir}/ratio_sweep_report.md or ratio_sweep_<model>.md (one per model)")
-    _fgsm_dir = f"data/processed/runs/{rel_path}/fgsm"
-    if Path(_fgsm_dir).exists():
-        print(f"  🎯 FGSM ({rel_path}):")
-        print(f"     - {_fgsm_dir}/fgsm_report.md")
-        print(f"     - {_fgsm_dir}/fgsm_results.json")
+    _pgd_dir = f"data/processed/runs/{rel_path}/pgd"
+    if Path(_pgd_dir).exists():
+        print(f"  🎯 PGD ({rel_path}):")
+        print(f"     - {_pgd_dir}/pgd_report.md")
+        print(f"     - {_pgd_dir}/pgd_results.json")
     if eval_report_dir is not None:
         print(f"  📊 Eval report (--model): {eval_report_dir}/ratio_sweep_report.md")
     print(f"  📈 Visualizations:")

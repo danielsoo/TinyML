@@ -113,6 +113,81 @@ def generate_fgsm_attack(
     return x_adv, grad_sign
 
 
+def generate_pgd_attack(
+    model: keras.Model,
+    x: np.ndarray,
+    y: np.ndarray,
+    eps: float = 0.05,
+    steps: int = 10,
+    alpha: Optional[float] = None,
+    clip_min: float = 0.0,
+    clip_max: float = 1.0,
+    random_start: bool = True,
+) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Generate PGD (Projected Gradient Descent) adversarial examples.
+    Multi-step attack: iteratively move in gradient direction and project to epsilon-ball.
+
+    Args:
+        model: Trained Keras model
+        x: Original input data (batch_size, features)
+        y: True labels
+        eps: Max perturbation magnitude (Linf radius)
+        steps: Number of PGD steps
+        alpha: Step size per iteration (default: 2.5 * eps / steps, common choice)
+        clip_min, clip_max: Clip final x_adv to valid input range
+        random_start: If True, start from x + uniform(-eps, eps) (stronger)
+
+    Returns:
+        Tuple of (adversarial examples, gradient signs from last step)
+    """
+    if alpha is None:
+        alpha = 2.5 * eps / max(steps, 1)
+    x_adv = np.asarray(x, dtype=np.float32)
+    if random_start:
+        x_adv = x_adv + np.random.uniform(-eps, eps, x_adv.shape).astype(np.float32)
+        x_adv = np.clip(x_adv, clip_min, clip_max)
+    for _ in range(steps):
+        gradients = compute_gradients(model, x_adv, y)
+        grad_sign = np.sign(gradients)
+        grad_sign = np.nan_to_num(grad_sign, nan=0.0, posinf=0.0, neginf=0.0)
+        x_adv = x_adv + alpha * grad_sign
+        # Project to Linf epsilon-ball around original x
+        x_adv = np.clip(x_adv, x - eps, x + eps)
+        x_adv = np.clip(x_adv, clip_min, clip_max).astype(np.float32)
+    return x_adv, grad_sign
+
+
+def generate_adversarial_dataset_pgd(
+    model: keras.Model,
+    x: np.ndarray,
+    y: np.ndarray,
+    eps: float = 0.05,
+    steps: int = 10,
+    alpha: Optional[float] = None,
+    batch_size: int = 32,
+    clip_min: float = 0.0,
+    clip_max: float = 1.0,
+) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Generate adversarial dataset using PGD (for AT). Same interface as generate_adversarial_dataset.
+    """
+    x_adv_list = []
+    num_batches = (len(x) + batch_size - 1) // batch_size
+    for i in range(num_batches):
+        start_idx = i * batch_size
+        end_idx = min((i + 1) * batch_size, len(x))
+        x_batch = x[start_idx:end_idx]
+        y_batch = y[start_idx:end_idx]
+        x_adv_batch, _ = generate_pgd_attack(
+            model, x_batch, y_batch, eps=eps, steps=steps, alpha=alpha,
+            clip_min=clip_min, clip_max=clip_max,
+        )
+        x_adv_list.append(x_adv_batch)
+    x_adv = np.concatenate(x_adv_list, axis=0)
+    return x_adv, y
+
+
 def evaluate_attack_success(
     model: keras.Model,
     x_original: np.ndarray,

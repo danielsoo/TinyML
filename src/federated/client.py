@@ -198,6 +198,7 @@ class KerasClient(fl.client.NumPyClient):
         num_classes: int,
         use_class_weights: bool = False,
         use_qat: bool = False,
+        use_adversarial_training: bool = False,
         learning_rate: float = 0.001,
     ):
         self.x_train = x_train
@@ -208,6 +209,7 @@ class KerasClient(fl.client.NumPyClient):
         self.num_classes = num_classes
         self.use_class_weights = use_class_weights
         self.use_qat = use_qat
+        self.use_adversarial_training = use_adversarial_training
         self.learning_rate = learning_rate
 
         # Apply QAT if enabled
@@ -403,6 +405,10 @@ class KerasClient(fl.client.NumPyClient):
         if self.class_weight is not None:
             fit_kwargs['class_weight'] = self.class_weight
 
+        # (준비만) use_adversarial_training True 시 여기서 x_train 일부를 FGSM adversarial로 대체 후 fit 가능. 현재 미구현.
+        if self.use_adversarial_training:
+            pass  # TODO: generate FGSM adv batch, mix with self.x_train, then fit on combined data
+
         self.model.fit(**fit_kwargs)
 
         # Quantize weights before sending to server if QAT is enabled
@@ -560,9 +566,12 @@ def simulate_clients(config: dict = None):
     focal_loss_alpha = float(fed_cfg.get("focal_loss_alpha", 0.75))
     learning_rate = float(fed_cfg.get("learning_rate", 0.001))
     use_qat = fed_cfg.get("use_qat", False)
+    use_adversarial_training = fed_cfg.get("use_adversarial_training", False)
 
     if use_qat:
         print("[Config] QAT (Quantization-Aware Training) enabled for clients")
+    if use_adversarial_training:
+        print("[Config] Adversarial training during FL enabled (stub: not implemented yet)")
 
     # State to use in client_fn
     state = {
@@ -577,6 +586,7 @@ def simulate_clients(config: dict = None):
         "focal_loss_alpha": focal_loss_alpha,
         "learning_rate": learning_rate,
         "use_qat": use_qat,
+        "use_adversarial_training": use_adversarial_training,
     }
 
     def client_fn(context: fl.common.Context) -> fl.client.Client:
@@ -626,6 +636,7 @@ def simulate_clients(config: dict = None):
             num_classes=state["num_classes"],
             use_class_weights=state["use_class_weights"],
             use_qat=state.get("use_qat", False),
+            use_adversarial_training=state.get("use_adversarial_training", False),
             learning_rate=state["learning_rate"],
         )
 

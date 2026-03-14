@@ -929,6 +929,53 @@ def test_saved_model_pruning(
     }
 
 
+def compress_one_distilled_model(
+    config_path: str,
+    model_path: str,
+    output_tflite_path: str,
+    dataset_override: str = None,
+) -> bool:
+    """
+    Load one distilled model (float32), prune 50%%, fine-tune, PTQ export to a single TFLite.
+    Used by run_distillation_first.py for each of the 4 saved distilled models.
+    """
+    model_path = Path(model_path)
+    output_tflite_path = Path(output_tflite_path)
+    if not model_path.exists():
+        print(f"⚠️  Model not found: {model_path}")
+        return False
+    cfg_path = Path(config_path)
+    if not cfg_path.exists():
+        cfg_path = Path("config/federated_local.yaml")
+    with open(cfg_path, encoding="utf-8") as f:
+        cfg = yaml.safe_load(f)
+    data_cfg = cfg.get("data", {})
+    dataset_name = dataset_override or data_cfg.get("name", "cicids2017")
+    dataset_kwargs = {k: v for k, v in data_cfg.items() if k not in {"name", "num_clients"}}
+    if "path" in dataset_kwargs and "data_path" not in dataset_kwargs:
+        dataset_kwargs["data_path"] = dataset_kwargs.pop("path")
+    x_train, y_train, x_test, y_test = load_dataset(dataset_name, **dataset_kwargs)
+    x_train_sub = x_train[:10000] if len(x_train) >= 10000 else x_train
+    y_train_sub = y_train[:10000] if len(y_train) >= 10000 else y_train
+
+    model = keras.models.load_model(model_path, compile=False)
+    last = model.layers[-1]
+    num_classes = getattr(last, "units", 2)
+    loss = "binary_crossentropy" if num_classes <= 2 else "sparse_categorical_crossentropy"
+    model.compile(optimizer="adam", loss=loss, metrics=["accuracy"])
+
+    pruned_model = apply_structured_pruning(model, pruning_ratio=0.5, skip_last_layer=True, verbose=False)
+    pruned_model.compile(optimizer="adam", loss=loss, metrics=["accuracy"])
+    pruned_model.fit(
+        x_train_sub, y_train_sub,
+        epochs=3, batch_size=128, validation_split=0.1, verbose=0
+    )
+    output_tflite_path.parent.mkdir(parents=True, exist_ok=True)
+    export_tflite(pruned_model, str(output_tflite_path), quantize=True, representative_data=x_train_sub)
+    print(f"   ✅ {output_tflite_path.name}: {output_tflite_path.stat().st_size / 1024:.2f} KB")
+    return True
+
+
 def main():
     import argparse
     parser = argparse.ArgumentParser(description="TinyML compression pipeline")
