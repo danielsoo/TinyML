@@ -4,7 +4,7 @@
 # Dataset: same as federated.yaml for comparable results
 data:
   name: cicids2017
-  path: "data/raw/CIC-IDS2017"
+  path: "data/raw/MachineLearningCVE"
   max_samples: 2000000   # match FL training for comparable evaluation
   binary: true
   balance_ratio: 4.0   # 80:20 normal:attack

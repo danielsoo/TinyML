@@ -34,15 +34,72 @@ from src.adversarial.fgsm_hook import (
 
 
 def load_model_with_qat(model_path: str, use_qat: bool) -> tf.keras.Model:
-    if use_qat:
-        try:
-            import tensorflow_model_optimization as tfmot
-            with tfmot.quantization.keras.quantize_scope():
-                model = tf.keras.models.load_model(model_path, compile=False)
-        except Exception:
+    # Try 1: tfmot quantize_scope (handles QAT-saved .h5 files)
+    try:
+        import tensorflow_model_optimization as tfmot
+        with tfmot.quantization.keras.quantize_scope():
             model = tf.keras.models.load_model(model_path, compile=False)
-    else:
+        model.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
+        return model
+    except ImportError:
+        pass
+    except Exception:
+        pass
+
+    # Try 2: plain load (works if model has no QAT layers)
+    try:
         model = tf.keras.models.load_model(model_path, compile=False)
+        model.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
+        return model
+    except Exception:
+        pass
+
+    # Try 3: model has QAT layers but tfmot unavailable — load weights only into a
+    # fresh equivalent architecture extracted from the .h5 file's weight arrays.
+    import h5py, numpy as np
+    print(f"  ℹ️  QAT model detected but tfmot unavailable. "
+          f"Rebuilding plain model from weights only: {model_path}")
+    with h5py.File(model_path, "r") as f:
+        # Collect Dense layer weight arrays in order
+        layer_weights = []
+        for key in sorted(f["model_weights"].keys()):
+            grp = f["model_weights"][key]
+            sublayers = [k for k in grp.keys() if len(grp[k].keys()) > 0]
+            for sub in sorted(sublayers):
+                ws = [grp[sub][w][()] for w in sorted(grp[sub].keys())]
+                if ws:
+                    layer_weights.append(ws)
+
+    # Infer architecture from weight shapes: each Dense = (in, out) kernel + (out,) bias
+    dense_specs = []
+    i = 0
+    while i < len(layer_weights):
+        ws = layer_weights[i]
+        if len(ws) >= 2 and ws[0].ndim == 2:
+            in_dim, out_dim = ws[0].shape
+            dense_specs.append((out_dim, ws))
+            i += 1
+        else:
+            i += 1
+
+    if not dense_specs:
+        raise RuntimeError(f"Could not extract weights from QAT model: {model_path}")
+
+    layers_list = []
+    for idx, (units, _) in enumerate(dense_specs):
+        if idx == 0:
+            layers_list.append(tf.keras.layers.Dense(
+                units, activation="relu" if idx < len(dense_specs) - 1 else "sigmoid",
+                input_shape=(dense_specs[0][1][0].shape[0],)))
+        elif idx < len(dense_specs) - 1:
+            layers_list.append(tf.keras.layers.Dense(units, activation="relu"))
+        else:
+            layers_list.append(tf.keras.layers.Dense(units, activation="sigmoid"))
+
+    model = tf.keras.Sequential(layers_list)
+    for layer, (_, ws) in zip([l for l in model.layers if "dense" in l.name.lower()], dense_specs):
+        layer.set_weights(ws[:2])  # kernel + bias only
+
     model.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
     return model
 

@@ -101,9 +101,18 @@ def strip_qat_layers(model):
                     'class_name': wrapped_layer.__class__.__name__,
                     'config': config
                 })
-                # Get weights from the wrapped layer
-                if wrapped_layer.get_weights():
-                    layer_weights.append(wrapped_layer.get_weights())
+                # QAT wrappers store weights on themselves (kernel, bias, then
+                # quantization scale/zero-point variables). The wrapped layer's
+                # get_weights() only returns the quant variables, not the actual
+                # kernel/bias. Instead, take the wrapper's weights and keep only
+                # the first N that the unwrapped layer expects (kernel + bias = 2
+                # for a Dense with bias, 1 without).
+                expected = len(wrapped_layer.weights) if hasattr(wrapped_layer, 'weights') and wrapped_layer.weights else 0
+                wrapper_weights = layer.get_weights()
+                if wrapper_weights and expected > 0:
+                    layer_weights.append(wrapper_weights[:expected])
+                elif wrapper_weights:
+                    layer_weights.append(wrapper_weights)
                 else:
                     layer_weights.append(None)
             elif 'QuantizeLayer' not in type(layer).__name__:
