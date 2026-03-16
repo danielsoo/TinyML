@@ -57,3 +57,20 @@
 
 현재 run.py는 “한 경로”만 돌리므로, 위 테이블을 만들려면 **이 스윕 전용 스크립트**가 필요함.  
 이 문서는 그 스윕 방식과 추가할 컬럼(AT, PGD, ratio sweep) 정의용이다.
+
+## 사용법 (구현됨)
+
+- **전제:** FL 학습 + (선택) `run_distillation_first.py`로 `models/global_model.h5`, `models/global_model_traditional.h5`, `models/distilled/*.h5` 존재.
+
+1. **48 스윕 + PGD 전체 + 병합 한 번에**
+   ```bash
+   python scripts/run_sweep_and_pgd.py --config config/federated_local_sky.yaml --version v1_PGD
+   ```
+   - `data/processed/runs/v1_PGD/<timestamp>/` 에 생성: `sweep_compression_grid.csv`, `pgd_model_list.txt`, `pgd/pgd_report.md`, `pgd/pgd_results.json`, `sweep_compression_grid_with_pgd.csv`.
+
+2. **단계별**
+   - 스윕만: `python scripts/sweep_compression_grid.py --config ... --run-dir data/processed/runs/v1_PGD/sweep_001`
+   - PGD만: `python scripts/run_pgd.py --models-file .../pgd_model_list.txt --config ... --output-dir .../pgd`
+   - 병합만: `python scripts/merge_sweep_pgd.py --run-dir ...`
+
+3. **PGD 컬럼:** 스윕 CSV의 `pgd_adv_acc`, `pgd_success_rate`는 `merge_sweep_pgd.py`로 `pgd_results.json`과 조인해 채운 최종 파일이 `sweep_compression_grid_with_pgd.csv` 이다.

@@ -2,7 +2,7 @@
 # Local environment config
 
 # Version (for result/analysis folder naming, e.g. v1, v2_balanced)
-version: "v1_PGD"
+version: "v2_PGD"
 
 data:
   # Choose cicids2017, bot_iot, or mnist

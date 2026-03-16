@@ -115,6 +115,7 @@ def main():
     parser = argparse.ArgumentParser(description="Compression grid sweep: fl_qat × distillation × pruning × ptq")
     parser.add_argument("--config", default="config/federated_local_sky.yaml")
     parser.add_argument("--output", default="data/processed/sweep_compression_grid.csv")
+    parser.add_argument("--run-dir", default=None, help="If set, write CSV and pgd_model_list.txt here for 48 PGD")
     parser.add_argument("--max-test", type=int, default=5000, help="Max test samples for eval")
     parser.add_argument("--quick", action="store_true", help="Run only 4 combinations (no_qat/none/none/no, yes_qat/none/10x5/no, ...)")
     args = parser.parse_args()
@@ -221,7 +222,7 @@ def main():
         tag = f"{fq}__distill_{dist}__{prune_name}__ptq_{'yes' if ptq else 'no'}"
         base = bases.get((fq, dist))
         if base is None:
-            rows.append({"tag": tag, "fl_qat": fl_qat, "distillation": dist, "pruning": prune_name, "ptq": ptq})
+            rows.append({"tag": tag, "tflite_path": "", "fl_qat": fl_qat, "distillation": dist, "pruning": prune_name, "ptq": ptq})
             continue
 
         # Prune
@@ -255,8 +256,10 @@ def main():
             dist_acc = da
             dist_f1 = df
 
+        tflite_path_str = str(tflite_path.resolve() if tflite_path.is_absolute() else tflite_path)
         row = {
             "tag": tag,
+            "tflite_path": tflite_path_str,
             "fl_qat": fl_qat,
             "distillation": dist,
             "pruning": prune_name,
@@ -278,8 +281,9 @@ def main():
             "final_size_kb": round(tflite_size_kb, 4),
             "at_enabled": at_enabled,
             "at_attack": at_attack,
-            "pgd_adv_acc": "",   # fill from pgd_results.json per run/tag if available
-            "ratio_sweep_f1_50_50": "",  # fill from ratio_sweep report if available
+            "pgd_adv_acc": "",
+            "pgd_success_rate": "",
+            "ratio_sweep_f1_50_50": "",
         }
         rows.append(row)
         print(f"  {tag} -> final_f1={final_f1:.4f} tflite_kb={tflite_size_kb:.2f}")
@@ -287,20 +291,37 @@ def main():
     out_path = Path(args.output)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     fieldnames = [
-        "tag", "fl_qat", "distillation", "pruning", "ptq",
+        "tag", "tflite_path", "fl_qat", "distillation", "pruning", "ptq",
         "fl_acc", "fl_f1", "fl_prec", "fl_rec", "fl_size_kb",
         "dist_acc", "dist_f1",
         "prune_acc", "prune_f1",
         "final_acc", "final_f1", "final_prec", "final_rec",
         "tflite_size_kb", "final_size_kb",
         "at_enabled", "at_attack",
-        "pgd_adv_acc", "ratio_sweep_f1_50_50",
+        "pgd_adv_acc", "pgd_success_rate", "ratio_sweep_f1_50_50",
     ]
+    if getattr(args, "run_dir", None):
+        run_dir = Path(args.run_dir)
+        run_dir.mkdir(parents=True, exist_ok=True)
+        out_path = run_dir / "sweep_compression_grid.csv"
     with open(out_path, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
         w.writeheader()
         w.writerows(rows)
     print(f"\nWrote {out_path} ({len(rows)} rows)")
+
+    # Write pgd_model_list.txt for run_pgd.py --models-file (attack model first, then 48 TFLite)
+    if getattr(args, "run_dir", None):
+        run_dir = Path(args.run_dir)
+        list_path = run_dir / "pgd_model_list.txt"
+        keras_path = Path("models/global_model.h5").resolve()
+        with open(list_path, "w", encoding="utf-8") as f:
+            f.write(str(keras_path) + "\n")
+            for r in rows:
+                p = r.get("tflite_path", "").strip()
+                if p and Path(p).exists():
+                    f.write(p + "\n")
+        print(f"Wrote {list_path} (1 Keras + {sum(1 for r in rows if r.get('tflite_path'))} TFLite paths)")
     return 0
 
 

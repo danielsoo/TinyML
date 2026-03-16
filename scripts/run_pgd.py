@@ -166,7 +166,17 @@ def evaluate_attack_success_with_predictor(pred_fn, x_original, x_adversarial, y
 
 
 def resolve_model_list(args, fed_cfg, out_dir_base: Path):
-    """Resolve list of model paths: --models, or --model single, or from config (global_model.h5 + ratio_sweep_models)."""
+    """Resolve list of model paths: --models-file, --models, --model single, or from config."""
+    models_file = getattr(args, "models_file", None)
+    if models_file and Path(models_file).exists():
+        paths = []
+        with open(models_file, encoding="utf-8") as f:
+            for line in f:
+                p = line.strip()
+                if p and not p.startswith("#"):
+                    paths.append(Path(p))
+        if paths:
+            return paths
     if getattr(args, "models", None) and len(args.models) > 0:
         return [Path(p) for p in args.models]
     if getattr(args, "model", None) and args.model:
@@ -225,6 +235,7 @@ def main():
     parser = argparse.ArgumentParser(description="Run PGD (or FGSM) and write report (single or multi-model comparison)")
     parser.add_argument("--model", default="", help="Single model path (.h5) for backward compat")
     parser.add_argument("--models", nargs="*", default=None, help="Multiple model paths (.h5 and .tflite) for comparison")
+    parser.add_argument("--models-file", default=None, help="Path to file with one model path per line (first .h5 = attack model); for 48 sweep PGD")
     parser.add_argument("--config", default="config/federated.yaml", help="Federated/config for data + adversarial_training.attack")
     parser.add_argument("--fgsm-config", default="config/fgsm.yaml", help="Attack params (epsilon, threshold); also used for PGD epsilon range")
     parser.add_argument("--output-dir", required=True, help="Write pgd_report.md and pgd_results.json here")
