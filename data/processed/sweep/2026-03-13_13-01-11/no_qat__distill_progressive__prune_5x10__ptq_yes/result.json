@@ -1,0 +1,20 @@
+{
+  "label": "most_compressed",
+  "tag": "no_qat__distill_progressive__prune_5x10__ptq_yes",
+  "fl_qat": false,
+  "distillation": "progressive",
+  "pruning": "prune_5x10",
+  "ptq": true,
+  "fl_acc": 0.9383213636499091,
+  "fl_f1": 0.8503353399497441,
+  "dist_acc": 0.970401108561552,
+  "dist_f1": 0.9199395465994962,
+  "prune_acc": 0.9781081443514021,
+  "prune_f1": 0.9348541784443485,
+  "final_acc": 0.9516494323092052,
+  "final_f1": 0.8554565701559019,
+  "final_prec": 0.9020031467956696,
+  "final_rec": 0.8134781964123091,
+  "tflite_size_kb": 14.375,
+  "final_size_kb": 174.3671875
+}
