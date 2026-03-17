@@ -118,7 +118,21 @@ def main():
     parser.add_argument("--run-dir", default=None, help="If set, write CSV and pgd_model_list.txt here for 48 PGD")
     parser.add_argument("--max-test", type=int, default=5000, help="Max test samples for eval")
     parser.add_argument("--quick", action="store_true", help="Run only 4 combinations (no_qat/none/none/no, yes_qat/none/10x5/no, ...)")
+    parser.add_argument("--resume-csv", default=None, help="Path to a partial CSV from a previous run; skip tags already present")
     args = parser.parse_args()
+
+    # Load already-completed rows from a previous partial run (resume support)
+    resume_rows = []
+    done_tags = set()
+    if args.resume_csv:
+        resume_path = Path(args.resume_csv)
+        if resume_path.exists():
+            with open(resume_path, encoding="utf-8", newline="") as _rf:
+                for r in csv.DictReader(_rf):
+                    resume_rows.append(r)
+                    done_tags.add(r.get("tag", ""))
+            print(f"  [Resume] Loaded {len(resume_rows)} completed rows from {resume_path}")
+            print(f"  [Resume] Skipping tags: {sorted(done_tags)}\n")
 
     cfg = load_config(args.config)
     threshold = float(cfg.get("evaluation", {}).get("prediction_threshold", 0.5))
@@ -220,6 +234,9 @@ def main():
     for fl_qat, dist, prune_name, ptq in combos:
         fq = "yes_qat" if fl_qat else "no_qat"
         tag = f"{fq}__distill_{dist}__{prune_name}__ptq_{'yes' if ptq else 'no'}"
+        if tag in done_tags:
+            print(f"  [Resume] Skipping {tag} (already done)")
+            continue
         base = bases.get((fq, dist))
         if base is None:
             rows.append({"tag": tag, "tflite_path": "", "fl_qat": fl_qat, "distillation": dist, "pruning": prune_name, "ptq": ptq})
@@ -288,6 +305,9 @@ def main():
         rows.append(row)
         print(f"  {tag} -> final_f1={final_f1:.4f} tflite_kb={tflite_size_kb:.2f}")
 
+    # Merge resumed rows back in (prepend so order is preserved)
+    all_rows = resume_rows + rows
+
     out_path = Path(args.output)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     fieldnames = [
@@ -307,8 +327,8 @@ def main():
     with open(out_path, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
         w.writeheader()
-        w.writerows(rows)
-    print(f"\nWrote {out_path} ({len(rows)} rows)")
+        w.writerows(all_rows)
+    print(f"\nWrote {out_path} ({len(all_rows)} rows, {len(rows)} new + {len(resume_rows)} resumed)")
 
     # Write pgd_model_list.txt for run_pgd.py --models-file (attack model first, then 48 TFLite)
     if getattr(args, "run_dir", None):
@@ -317,11 +337,11 @@ def main():
         keras_path = Path("models/global_model.h5").resolve()
         with open(list_path, "w", encoding="utf-8") as f:
             f.write(str(keras_path) + "\n")
-            for r in rows:
+            for r in all_rows:
                 p = r.get("tflite_path", "").strip()
                 if p and Path(p).exists():
                     f.write(p + "\n")
-        print(f"Wrote {list_path} (1 Keras + {sum(1 for r in rows if r.get('tflite_path'))} TFLite paths)")
+        print(f"Wrote {list_path} (1 Keras + {sum(1 for r in all_rows if r.get('tflite_path'))} TFLite paths)")
     return 0
 
 
