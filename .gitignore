@@ -15,6 +15,8 @@ models/*.tflite
 models/tflite/
 
 # Python
+.venv/
+venv/
 __pycache__/
 *.pyc
 *.pyo

@@ -111,6 +111,16 @@ def _predict_proba_keras(model: tf.keras.Model, x: np.ndarray) -> np.ndarray:
     return np.asarray(out, dtype=np.float64)
 
 
+def _tflite_input_feature_dim(input_details) -> int | None:
+    """Return expected feature dimension from TFLite input (last dim, or None if dynamic)."""
+    sh = input_details[0].get("shape")
+    if not sh or len(sh) < 2:
+        return None
+    # shape is typically [batch, features] or [1, features]
+    feat = sh[-1]
+    return int(feat) if feat > 0 else None
+
+
 def _predict_proba_tflite(interpreter, input_details, output_details, x: np.ndarray) -> np.ndarray:
     in_dtype = input_details[0]["dtype"]
     out_dtype = output_details[0]["dtype"]
@@ -347,6 +357,7 @@ def main():
     best_eps = tune_res["best_epsilon"]
 
     # 3) Evaluate each model on (x_orig_eval, x_adv_full, y_eval)
+    data_feature_dim = x_orig_eval.shape[1] if x_orig_eval.ndim >= 2 else x_orig_eval.shape[0]
     comparison = []
     for model_path in model_paths:
         path_str = str(model_path)
@@ -354,26 +365,79 @@ def main():
         if path_str.endswith(".h5"):
             model = load_model_with_qat(path_str, use_qat)
             pred_fn = lambda x, m=model: _predict_proba_keras(m, x)
+            metrics = evaluate_attack_success_with_predictor(
+                pred_fn, x_orig_eval, x_adv_full, y_eval, threshold=threshold
+            )
+            comparison.append({
+                "model_path": path_str,
+                "display_name": display_name,
+                "original_accuracy": metrics["original_accuracy"],
+                "adversarial_accuracy": metrics["adversarial_accuracy"],
+                "attack_success_rate": metrics["attack_success_rate"],
+                "attack_success_count": metrics["attack_success_count"],
+                "total_samples": metrics["total_samples"],
+                "avg_perturbation": avg_perturb,
+                "max_perturbation": max_perturb,
+            })
         else:
             interp = tf.lite.Interpreter(model_path=path_str, experimental_preserve_all_tensors=True)
             interp.allocate_tensors()
             in_d = interp.get_input_details()
             out_d = interp.get_output_details()
+            model_feat = _tflite_input_feature_dim(in_d)
+            if model_feat is not None and model_feat != data_feature_dim:
+                print(
+                    f"  [PGD] Skip {model_path.name}: input dimension mismatch "
+                    f"(model expects {model_feat}, data has {data_feature_dim})",
+                    file=sys.stderr,
+                )
+                comparison.append({
+                    "model_path": path_str,
+                    "display_name": display_name + " [dim_mismatch]",
+                    "original_accuracy": None,
+                    "adversarial_accuracy": None,
+                    "attack_success_rate": None,
+                    "attack_success_count": None,
+                    "total_samples": len(y_eval),
+                    "avg_perturbation": avg_perturb,
+                    "max_perturbation": max_perturb,
+                })
+                continue
             pred_fn = lambda x, i=interp, id_=in_d, od_=out_d: _predict_proba_tflite(i, id_, od_, x)
-        metrics = evaluate_attack_success_with_predictor(
-            pred_fn, x_orig_eval, x_adv_full, y_eval, threshold=threshold
-        )
-        comparison.append({
-            "model_path": path_str,
-            "display_name": display_name,
-            "original_accuracy": metrics["original_accuracy"],
-            "adversarial_accuracy": metrics["adversarial_accuracy"],
-            "attack_success_rate": metrics["attack_success_rate"],
-            "attack_success_count": metrics["attack_success_count"],
-            "total_samples": metrics["total_samples"],
-            "avg_perturbation": avg_perturb,
-            "max_perturbation": max_perturb,
-        })
+            try:
+                metrics = evaluate_attack_success_with_predictor(
+                    pred_fn, x_orig_eval, x_adv_full, y_eval, threshold=threshold
+                )
+            except (ValueError, RuntimeError) as e:
+                if "shape" in str(e).lower() or "dimension" in str(e).lower() or "incompatible" in str(e).lower():
+                    print(
+                        f"  [PGD] Skip {model_path.name}: input/output error — {e}",
+                        file=sys.stderr,
+                    )
+                    comparison.append({
+                        "model_path": path_str,
+                        "display_name": display_name + " [eval_error]",
+                        "original_accuracy": None,
+                        "adversarial_accuracy": None,
+                        "attack_success_rate": None,
+                        "attack_success_count": None,
+                        "total_samples": len(y_eval),
+                        "avg_perturbation": avg_perturb,
+                        "max_perturbation": max_perturb,
+                    })
+                    continue
+                raise
+            comparison.append({
+                "model_path": path_str,
+                "display_name": display_name,
+                "original_accuracy": metrics["original_accuracy"],
+                "adversarial_accuracy": metrics["adversarial_accuracy"],
+                "attack_success_rate": metrics["attack_success_rate"],
+                "attack_success_count": metrics["attack_success_count"],
+                "total_samples": metrics["total_samples"],
+                "avg_perturbation": avg_perturb,
+                "max_perturbation": max_perturb,
+            })
 
     generated = datetime.now().isoformat()
     results = {
@@ -444,9 +508,15 @@ def main():
         "|-------|--------------|---------|--------------|-------------|-------------|",
     ])
     for c in comparison:
+        oa = c["original_accuracy"]
+        aa = c["adversarial_accuracy"]
+        sr = c["attack_success_rate"]
+        oa_s = f"{oa:.4f}" if oa is not None else "-"
+        aa_s = f"{aa:.4f}" if aa is not None else "-"
+        sr_s = f"{sr:.4f}" if sr is not None else "-"
         lines.append(
-            f"| {c['display_name']} | {c['original_accuracy']:.4f} | {c['adversarial_accuracy']:.4f} | "
-            f"{c['attack_success_rate']:.4f} | {c['avg_perturbation']:.6f} | {c['max_perturbation']:.6f} |"
+            f"| {c['display_name']} | {oa_s} | {aa_s} | {sr_s} | "
+            f"{c['avg_perturbation']:.6f} | {c['max_perturbation']:.6f} |"
         )
     lines.extend([
         "",
