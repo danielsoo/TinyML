@@ -1,0 +1,50 @@
+[
+  {
+    "role": "Best no-PTQ (PGD)",
+    "tag": "yes_qat__distill_direct__prune_5x10__ptq_no",
+    "tflite": "models\\tflite\\yes_qat_distill_direct_prune_5x10_ptq_no.tflite",
+    "ptq": false,
+    "final_f1": 0.9372783687943262,
+    "pgd_adv_acc": 0.9178
+  },
+  {
+    "role": "Best yes-PTQ (PGD)",
+    "tag": "yes_qat__distill_progressive__prune_none__ptq_yes",
+    "tflite": "models\\tflite\\yes_qat_distill_progressive_prune_none_ptq_yes.tflite",
+    "ptq": true,
+    "final_f1": 0.3335038543632804,
+    "pgd_adv_acc": 0.918
+  },
+  {
+    "role": "Fixed: extreme compression",
+    "tag": "yes_qat__distill_progressive__prune_5x10__ptq_yes",
+    "tflite": "models\\tflite\\yes_qat_distill_progressive_prune_5x10_ptq_yes.tflite",
+    "ptq": true,
+    "final_f1": 0.8665859679103769,
+    "pgd_adv_acc": 0.9176
+  },
+  {
+    "role": "Fixed: moderate accuracy",
+    "tag": "no_qat__distill_progressive__prune_10x5__ptq_no",
+    "tflite": "models\\tflite\\no_qat_distill_progressive_prune_10x5_ptq_no.tflite",
+    "ptq": false,
+    "final_f1": 0.9760401109451675,
+    "pgd_adv_acc": 0.1756
+  },
+  {
+    "role": "Fixed: compact+accurate",
+    "tag": "no_qat__distill_progressive__prune_none__ptq_yes",
+    "tflite": "models\\tflite\\no_qat_distill_progressive_prune_none_ptq_yes.tflite",
+    "ptq": true,
+    "final_f1": 0.9358999115790757,
+    "pgd_adv_acc": 0.2794
+  },
+  {
+    "role": "Additional pick",
+    "tag": "yes_qat__distill_direct__prune_10x2__ptq_no",
+    "tflite": "models\\tflite\\yes_qat_distill_direct_prune_10x2_ptq_no.tflite",
+    "ptq": false,
+    "final_f1": 0.9085519922254617,
+    "pgd_adv_acc": 0.9178
+  }
+]
