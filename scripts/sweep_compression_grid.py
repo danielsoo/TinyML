@@ -231,11 +231,19 @@ def main():
     at_enabled = at_cfg.get("enabled", False)
     at_attack = at_cfg.get("attack", "pgd")
 
+    MIN_TFLITE_BYTES = 10_000   # anything smaller is a corrupt/empty export
+
     for fl_qat, dist, prune_name, ptq in combos:
         fq = "yes_qat" if fl_qat else "no_qat"
         tag = f"{fq}__distill_{dist}__{prune_name}__ptq_{'yes' if ptq else 'no'}"
         if tag in done_tags:
-            print(f"  [Resume] Skipping {tag} (already done)")
+            print(f"  [Resume] Skipping {tag} (already done in CSV)")
+            continue
+        # Skip if a valid TFLite already exists on disk (resume from interrupted run)
+        tflite_name_check = tag.replace("__", "_").replace(".", "_") + ".tflite"
+        tflite_path_check = out_dir / tflite_name_check
+        if tflite_path_check.exists() and tflite_path_check.stat().st_size >= MIN_TFLITE_BYTES:
+            print(f"  [Skip] {tag} — TFLite exists ({tflite_path_check.stat().st_size // 1024}KB)")
             continue
         base = bases.get((fq, dist))
         if base is None:

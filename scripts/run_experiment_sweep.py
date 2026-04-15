@@ -709,14 +709,25 @@ def run_experiment(exp: Dict[str, Any], fl_model_path: Path, cfg: dict,
 
     # ── distillation ─────────────────────────────────────────────────────────
     if dist_cfg["mode"] != "none":
-        print(f"  Distillation: {dist_cfg['mode']} ...")
-        try:
-            model = run_distillation(dist_cfg["mode"], model,
-                                     x_tr, y_tr, x_te, y_te, cfg)
-            dist_path = exp_dir / "distilled_model.h5"
-            model.save(str(dist_path))
-        except Exception as e:
-            print(f"  ⚠️  Distillation failed: {e}")
+        # Cache distilled model by (fl_tag, dist_mode) so it is only trained once
+        fl_tag = exp["fl"]["tag"]
+        dist_cache_dir = Path("models/distilled")
+        dist_cache_dir.mkdir(parents=True, exist_ok=True)
+        dist_cache_path = dist_cache_dir / f"{fl_tag}_{dist_cfg['mode']}.h5"
+
+        if dist_cache_path.exists() and dist_cache_path.stat().st_size > 10_000:
+            print(f"  Distillation: {dist_cfg['mode']} [cached] ...")
+            model = load_keras_model(dist_cache_path, cfg)
+        else:
+            print(f"  Distillation: {dist_cfg['mode']} ...")
+            try:
+                model = run_distillation(dist_cfg["mode"], model,
+                                         x_tr, y_tr, x_te, y_te, cfg)
+                model.save(str(dist_cache_path))
+                print(f"  Saved distilled model -> {dist_cache_path}")
+            except Exception as e:
+                print(f"  Distillation failed: {e}")
+
         dist_metrics = evaluate_keras(model, x_te, y_te)
         print(f"  After distill  acc={dist_metrics['accuracy']:.4f}  "
               f"f1={dist_metrics['f1']:.4f}")
@@ -992,8 +1003,8 @@ def main():
         use_qat  = fl_var["use_qat"]
         model_path = models_dir / f"global_model_{qat_tag}.h5"
 
-        if args.skip_train and model_path.exists():
-            print(f"\n  [FL] Reusing {model_path}")
+        if model_path.exists() and model_path.stat().st_size > 100_000:
+            print(f"\n  [FL] Reusing existing {model_path} ({model_path.stat().st_size // 1024}KB)")
         else:
             print(f"\n{'='*70}")
             print(f"  STEP 1: FL Training — {qat_tag}  (use_qat={use_qat})")
