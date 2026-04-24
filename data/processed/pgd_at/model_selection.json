@@ -1,0 +1,58 @@
+[
+  {
+    "tag": "yes_qat__distill_progressive__prune_5x10__ptq_no",
+    "base_tag": "yes_qat__distill_progressive__prune_5x10",
+    "role": "Extreme compression",
+    "ptq_original": false,
+    "tflite_path": "C:\\Users\\mistf\\TinyML\\models\\tflite\\yes_qat_distill_progressive_prune_5x10_ptq_no.tflite"
+  },
+  {
+    "tag": "yes_qat__distill_progressive__prune_5x10__ptq_yes",
+    "base_tag": "yes_qat__distill_progressive__prune_5x10",
+    "role": "Extreme compression",
+    "ptq_original": true,
+    "tflite_path": "C:\\Users\\mistf\\TinyML\\models\\tflite\\yes_qat_distill_progressive_prune_5x10_ptq_yes.tflite"
+  },
+  {
+    "tag": "no_qat__distill_progressive__prune_10x5__ptq_no",
+    "base_tag": "no_qat__distill_progressive__prune_10x5",
+    "role": "Moderate accuracy",
+    "ptq_original": false,
+    "tflite_path": "C:\\Users\\mistf\\TinyML\\models\\tflite\\no_qat_distill_progressive_prune_10x5_ptq_no.tflite"
+  },
+  {
+    "tag": "no_qat__distill_progressive__prune_10x5__ptq_yes",
+    "base_tag": "no_qat__distill_progressive__prune_10x5",
+    "role": "Moderate accuracy",
+    "ptq_original": true,
+    "tflite_path": "C:\\Users\\mistf\\TinyML\\models\\tflite\\no_qat_distill_progressive_prune_10x5_ptq_yes.tflite"
+  },
+  {
+    "tag": "no_qat__distill_progressive__prune_none__ptq_no",
+    "base_tag": "no_qat__distill_progressive__prune_none",
+    "role": "Compact+accurate",
+    "ptq_original": false,
+    "tflite_path": "C:\\Users\\mistf\\TinyML\\models\\tflite\\no_qat_distill_progressive_prune_none_ptq_no.tflite"
+  },
+  {
+    "tag": "no_qat__distill_progressive__prune_none__ptq_yes",
+    "base_tag": "no_qat__distill_progressive__prune_none",
+    "role": "Compact+accurate",
+    "ptq_original": true,
+    "tflite_path": "C:\\Users\\mistf\\TinyML\\models\\tflite\\no_qat_distill_progressive_prune_none_ptq_yes.tflite"
+  },
+  {
+    "tag": "yes_qat__distill_direct__prune_none__ptq_no",
+    "base_tag": "yes_qat__distill_direct__prune_none",
+    "role": "Best PGD robust",
+    "ptq_original": false,
+    "tflite_path": "C:\\Users\\mistf\\TinyML\\models\\tflite\\yes_qat_distill_direct_prune_none_ptq_no.tflite"
+  },
+  {
+    "tag": "yes_qat__distill_direct__prune_none__ptq_yes",
+    "base_tag": "yes_qat__distill_direct__prune_none",
+    "role": "Best PGD robust",
+    "ptq_original": true,
+    "tflite_path": "C:\\Users\\mistf\\TinyML\\models\\tflite\\yes_qat_distill_direct_prune_none_ptq_yes.tflite"
+  }
+]

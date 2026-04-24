@@ -114,7 +114,7 @@ def _predict_proba_keras(model: tf.keras.Model, x: np.ndarray) -> np.ndarray:
 def _tflite_input_feature_dim(input_details) -> int | None:
     """Return expected feature dimension from TFLite input (last dim, or None if dynamic)."""
     sh = input_details[0].get("shape")
-    if not sh or len(sh) < 2:
+    if sh is None or len(sh) < 2:
         return None
     # shape is typically [batch, features] or [1, features]
     feat = sh[-1]

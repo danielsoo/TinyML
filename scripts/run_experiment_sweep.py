@@ -194,18 +194,24 @@ def load_keras_model(path: Path, cfg: dict):
     if use_qat:
         try:
             import tensorflow_model_optimization as tfmot
+            import tf_keras
             with tfmot.quantization.keras.quantize_scope():
-                model = _keras.saving.load_model(str(path), compile=False)
+                model = tf_keras.models.load_model(str(path), compile=False)
         except Exception:
-            model = _keras.saving.load_model(str(path), compile=False)
+            import tf_keras
+            model = tf_keras.models.load_model(str(path), compile=False)
+        model.compile(
+            optimizer=tf_keras.optimizers.Adam(learning_rate=0.001, clipnorm=1.0),
+            loss=loss,
+            metrics=["accuracy"],
+        )
     else:
         model = _keras.saving.load_model(str(path), compile=False)
-
-    model.compile(
-        optimizer=_keras.optimizers.Adam(learning_rate=0.001, clipnorm=1.0),
-        loss=loss,
-        metrics=["accuracy"],
-    )
+        model.compile(
+            optimizer=_keras.optimizers.Adam(learning_rate=0.001, clipnorm=1.0),
+            loss=loss,
+            metrics=["accuracy"],
+        )
     return model
 
 

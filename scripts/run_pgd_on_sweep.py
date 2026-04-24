@@ -31,7 +31,9 @@ from src.adversarial.fgsm_hook import (
     generate_adversarial_dataset_pgd,
 )
 
-CSV_PATH    = project_root / "sweep_results_3_4_2026 - sweep_results.csv"
+# Latest no_qat (Apr 16 02:39) + yes_qat (Apr 16 11:48)
+CSV_NOQAT   = project_root / "data" / "processed" / "sweep" / "2026-04-16_02-39-58" / "sweep_results.csv"
+CSV_YESQAT  = project_root / "data" / "processed" / "sweep" / "2026-04-16_11-48-23" / "sweep_results.csv"
 TFLITE_DIR  = project_root / "models" / "tflite"
 ATTACKER_H5 = project_root / "models" / "global_model.h5"
 OUT_DIR     = project_root / "data" / "processed" / "pgd_sweep"
@@ -131,11 +133,15 @@ def main():
     )
     print(f"  Done. x_adv shape: {x_adv.shape}")
 
-    # Load sweep CSV
-    rows = []
-    with open(CSV_PATH, encoding="utf-8", newline="") as f:
-        rows = list(csv.DictReader(f))
-    print(f"\nEvaluating {len(rows)} models ...")
+    # Load sweep CSVs: latest no_qat (Apr 16) + yes_qat from March
+    rows_noqat, rows_yesqat = [], []
+    with open(CSV_NOQAT, encoding="utf-8", newline="") as f:
+        rows_noqat = [r for r in csv.DictReader(f) if not _norm_ptq(r.get("fl_qat", "false"))]
+    with open(CSV_YESQAT, encoding="utf-8", newline="") as f:
+        rows_yesqat = [r for r in csv.DictReader(f) if _norm_ptq(r.get("fl_qat", "false"))]
+    rows = rows_noqat + rows_yesqat
+    print(f"\nLoaded {len(rows_noqat)} no_qat rows (Apr 16) + {len(rows_yesqat)} yes_qat rows (Mar)")
+    print(f"Evaluating {len(rows)} models ...")
 
     results = []
     for i, row in enumerate(rows):

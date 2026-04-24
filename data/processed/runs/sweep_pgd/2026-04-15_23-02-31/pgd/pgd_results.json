@@ -1,0 +1,239 @@
+{
+  "dataset": "cicids2017",
+  "data_path": "data/raw/MachineLearningCVE",
+  "max_samples": 2000000,
+  "threshold": 0.3,
+  "epsilon_used": 0.1,
+  "attack_model": "/mnt/c/Users/mistf/TinyML/models/global_model.h5",
+  "epsilon_sweep": [
+    {
+      "epsilon": 0.01,
+      "original_accuracy": 0.763,
+      "adversarial_accuracy": 0.8432,
+      "attack_success_rate": -0.0802,
+      "avg_perturbation": 0.2625988643549835
+    },
+    {
+      "epsilon": 0.05,
+      "original_accuracy": 0.763,
+      "adversarial_accuracy": 0.8064,
+      "attack_success_rate": -0.0434,
+      "avg_perturbation": 0.26892853415764517
+    },
+    {
+      "epsilon": 0.1,
+      "original_accuracy": 0.763,
+      "adversarial_accuracy": 0.752,
+      "attack_success_rate": 0.011,
+      "avg_perturbation": 0.27733626932253835
+    },
+    {
+      "epsilon": 0.15,
+      "original_accuracy": 0.763,
+      "adversarial_accuracy": 0.7036,
+      "attack_success_rate": 0.0594,
+      "avg_perturbation": 0.28607907263828
+    },
+    {
+      "epsilon": 0.2,
+      "original_accuracy": 0.763,
+      "adversarial_accuracy": 0.6252,
+      "attack_success_rate": 0.1378,
+      "avg_perturbation": 0.2952691189033004
+    }
+  ],
+  "tuning": {
+    "best_epsilon": 0.2,
+    "target_success_rate": 0.5
+  },
+  "comparison": [
+    {
+      "model_path": "/mnt/c/Users/mistf/TinyML/models/global_model.h5",
+      "display_name": "Keras (global_model.h5)",
+      "original_accuracy": 0.76335,
+      "adversarial_accuracy": 0.8043,
+      "attack_success_rate": -0.04095,
+      "attack_success_count": -819,
+      "total_samples": 20000,
+      "avg_perturbation": 0.26579177537676907,
+      "max_perturbation": 148.70213317871094
+    },
+    {
+      "model_path": "models/tflite/yes_qat_distill_direct_prune_none_ptq_no.tflite",
+      "display_name": "yes_qat_distill_direct_prune_none_ptq_no",
+      "original_accuracy": 0.92945,
+      "adversarial_accuracy": 0.8978,
+      "attack_success_rate": 0.03165,
+      "attack_success_count": 633,
+      "total_samples": 20000,
+      "avg_perturbation": 0.26579177537676907,
+      "max_perturbation": 148.70213317871094
+    },
+    {
+      "model_path": "models/tflite/yes_qat_distill_direct_prune_none_ptq_yes.tflite",
+      "display_name": "yes_qat_distill_direct_prune_none_ptq_yes",
+      "original_accuracy": 0.9158,
+      "adversarial_accuracy": 0.89745,
+      "attack_success_rate": 0.01835,
+      "attack_success_count": 367,
+      "total_samples": 20000,
+      "avg_perturbation": 0.26579177537676907,
+      "max_perturbation": 148.70213317871094
+    },
+    {
+      "model_path": "models/tflite/yes_qat_distill_direct_prune_10x5_ptq_no.tflite",
+      "display_name": "yes_qat_distill_direct_prune_10x5_ptq_no",
+      "original_accuracy": 0.92265,
+      "adversarial_accuracy": 0.89775,
+      "attack_success_rate": 0.0249,
+      "attack_success_count": 498,
+      "total_samples": 20000,
+      "avg_perturbation": 0.26579177537676907,
+      "max_perturbation": 148.70213317871094
+    },
+    {
+      "model_path": "models/tflite/yes_qat_distill_direct_prune_10x5_ptq_yes.tflite",
+      "display_name": "yes_qat_distill_direct_prune_10x5_ptq_yes",
+      "original_accuracy": 0.9237,
+      "adversarial_accuracy": 0.89795,
+      "attack_success_rate": 0.02575,
+      "attack_success_count": 515,
+      "total_samples": 20000,
+      "avg_perturbation": 0.26579177537676907,
+      "max_perturbation": 148.70213317871094
+    },
+    {
+      "model_path": "models/tflite/yes_qat_distill_direct_prune_10x2_ptq_no.tflite",
+      "display_name": "yes_qat_distill_direct_prune_10x2_ptq_no",
+      "original_accuracy": 0.92285,
+      "adversarial_accuracy": 0.89775,
+      "attack_success_rate": 0.0251,
+      "attack_success_count": 502,
+      "total_samples": 20000,
+      "avg_perturbation": 0.26579177537676907,
+      "max_perturbation": 148.70213317871094
+    },
+    {
+      "model_path": "models/tflite/yes_qat_distill_direct_prune_10x2_ptq_yes.tflite",
+      "display_name": "yes_qat_distill_direct_prune_10x2_ptq_yes",
+      "original_accuracy": 0.92375,
+      "adversarial_accuracy": 0.8979,
+      "attack_success_rate": 0.02585,
+      "attack_success_count": 517,
+      "total_samples": 20000,
+      "avg_perturbation": 0.26579177537676907,
+      "max_perturbation": 148.70213317871094
+    },
+    {
+      "model_path": "models/tflite/yes_qat_distill_direct_prune_5x10_ptq_no.tflite",
+      "display_name": "yes_qat_distill_direct_prune_5x10_ptq_no",
+      "original_accuracy": 0.92265,
+      "adversarial_accuracy": 0.89775,
+      "attack_success_rate": 0.0249,
+      "attack_success_count": 498,
+      "total_samples": 20000,
+      "avg_perturbation": 0.26579177537676907,
+      "max_perturbation": 148.70213317871094
+    },
+    {
+      "model_path": "models/tflite/yes_qat_distill_direct_prune_5x10_ptq_yes.tflite",
+      "display_name": "yes_qat_distill_direct_prune_5x10_ptq_yes",
+      "original_accuracy": 0.92345,
+      "adversarial_accuracy": 0.89785,
+      "attack_success_rate": 0.0256,
+      "attack_success_count": 512,
+      "total_samples": 20000,
+      "avg_perturbation": 0.26579177537676907,
+      "max_perturbation": 148.70213317871094
+    },
+    {
+      "model_path": "models/tflite/yes_qat_distill_progressive_prune_none_ptq_no.tflite",
+      "display_name": "yes_qat_distill_progressive_prune_none_ptq_no",
+      "original_accuracy": 0.9209,
+      "adversarial_accuracy": 0.89825,
+      "attack_success_rate": 0.02265,
+      "attack_success_count": 453,
+      "total_samples": 20000,
+      "avg_perturbation": 0.26579177537676907,
+      "max_perturbation": 148.70213317871094
+    },
+    {
+      "model_path": "models/tflite/yes_qat_distill_progressive_prune_none_ptq_yes.tflite",
+      "display_name": "yes_qat_distill_progressive_prune_none_ptq_yes",
+      "original_accuracy": 0.93775,
+      "adversarial_accuracy": 0.8979,
+      "attack_success_rate": 0.03985,
+      "attack_success_count": 797,
+      "total_samples": 20000,
+      "avg_perturbation": 0.26579177537676907,
+      "max_perturbation": 148.70213317871094
+    },
+    {
+      "model_path": "models/tflite/yes_qat_distill_progressive_prune_10x5_ptq_no.tflite",
+      "display_name": "yes_qat_distill_progressive_prune_10x5_ptq_no",
+      "original_accuracy": 0.9201,
+      "adversarial_accuracy": 0.89795,
+      "attack_success_rate": 0.02215,
+      "attack_success_count": 443,
+      "total_samples": 20000,
+      "avg_perturbation": 0.26579177537676907,
+      "max_perturbation": 148.70213317871094
+    },
+    {
+      "model_path": "models/tflite/yes_qat_distill_progressive_prune_10x5_ptq_yes.tflite",
+      "display_name": "yes_qat_distill_progressive_prune_10x5_ptq_yes",
+      "original_accuracy": 0.93075,
+      "adversarial_accuracy": 0.89815,
+      "attack_success_rate": 0.0326,
+      "attack_success_count": 652,
+      "total_samples": 20000,
+      "avg_perturbation": 0.26579177537676907,
+      "max_perturbation": 148.70213317871094
+    },
+    {
+      "model_path": "models/tflite/yes_qat_distill_progressive_prune_10x2_ptq_no.tflite",
+      "display_name": "yes_qat_distill_progressive_prune_10x2_ptq_no",
+      "original_accuracy": 0.91995,
+      "adversarial_accuracy": 0.89795,
+      "attack_success_rate": 0.022,
+      "attack_success_count": 440,
+      "total_samples": 20000,
+      "avg_perturbation": 0.26579177537676907,
+      "max_perturbation": 148.70213317871094
+    },
+    {
+      "model_path": "models/tflite/yes_qat_distill_progressive_prune_10x2_ptq_yes.tflite",
+      "display_name": "yes_qat_distill_progressive_prune_10x2_ptq_yes",
+      "original_accuracy": 0.9347,
+      "adversarial_accuracy": 0.8982,
+      "attack_success_rate": 0.0365,
+      "attack_success_count": 730,
+      "total_samples": 20000,
+      "avg_perturbation": 0.26579177537676907,
+      "max_perturbation": 148.70213317871094
+    },
+    {
+      "model_path": "models/tflite/yes_qat_distill_progressive_prune_5x10_ptq_no.tflite",
+      "display_name": "yes_qat_distill_progressive_prune_5x10_ptq_no",
+      "original_accuracy": 0.9202,
+      "adversarial_accuracy": 0.89795,
+      "attack_success_rate": 0.02225,
+      "attack_success_count": 445,
+      "total_samples": 20000,
+      "avg_perturbation": 0.26579177537676907,
+      "max_perturbation": 148.70213317871094
+    },
+    {
+      "model_path": "models/tflite/yes_qat_distill_progressive_prune_5x10_ptq_yes.tflite",
+      "display_name": "yes_qat_distill_progressive_prune_5x10_ptq_yes",
+      "original_accuracy": 0.93485,
+      "adversarial_accuracy": 0.8982,
+      "attack_success_rate": 0.03665,
+      "attack_success_count": 733,
+      "total_samples": 20000,
+      "avg_perturbation": 0.26579177537676907,
+      "max_perturbation": 148.70213317871094
+    }
+  ],
+  "generated": "2026-04-15T23:07:28.049908"
+}

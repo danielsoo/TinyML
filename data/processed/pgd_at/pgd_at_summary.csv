@@ -1,0 +1,25 @@
+tag,role,ptq_original,phase,mean_adv_acc,mean_adv_f1,mean_adv_rec,min_adv_acc,max_adv_acc
+no_qat__distill_progressive__prune_10x5__ptq_no,Moderate accuracy,False,post_AT_no_ptq,0.1756,0.2987,1.0,0.1756,0.1756
+no_qat__distill_progressive__prune_10x5__ptq_no,Moderate accuracy,False,post_AT_ptq_after,0.8793,0.6247,0.5647,0.8108,0.9216
+no_qat__distill_progressive__prune_10x5__ptq_no,Moderate accuracy,False,pre_AT,0.1756,0.2987,1.0,0.1756,0.1756
+no_qat__distill_progressive__prune_10x5__ptq_yes,Moderate accuracy,True,post_AT_no_ptq,0.1756,0.2987,1.0,0.1756,0.1756
+no_qat__distill_progressive__prune_10x5__ptq_yes,Moderate accuracy,True,post_AT_ptq_before,0.1756,0.2987,1.0,0.1756,0.1756
+no_qat__distill_progressive__prune_10x5__ptq_yes,Moderate accuracy,True,pre_AT,0.1756,0.2987,1.0,0.1756,0.1756
+no_qat__distill_progressive__prune_none__ptq_no,Compact+accurate,False,post_AT_no_ptq,0.3507,0.3437,0.9685,0.3202,0.372
+no_qat__distill_progressive__prune_none__ptq_no,Compact+accurate,False,post_AT_ptq_after,0.8793,0.6246,0.5647,0.8104,0.9216
+no_qat__distill_progressive__prune_none__ptq_no,Compact+accurate,False,pre_AT,0.3519,0.3493,0.9903,0.335,0.3708
+no_qat__distill_progressive__prune_none__ptq_yes,Compact+accurate,True,post_AT_no_ptq,0.2939,0.3301,0.9897,0.2452,0.3308
+no_qat__distill_progressive__prune_none__ptq_yes,Compact+accurate,True,post_AT_ptq_before,0.2934,0.33,0.9903,0.245,0.3288
+no_qat__distill_progressive__prune_none__ptq_yes,Compact+accurate,True,pre_AT,0.302,0.333,0.992,0.287,0.3158
+yes_qat__distill_direct__prune_none__ptq_no,Best PGD robust,False,post_AT_no_ptq,0.9004,0.6096,0.4497,0.8766,0.9104
+yes_qat__distill_direct__prune_none__ptq_no,Best PGD robust,False,post_AT_ptq_after,0.879,0.6244,0.5649,0.8084,0.9216
+yes_qat__distill_direct__prune_none__ptq_no,Best PGD robust,False,pre_AT,0.9012,0.6111,0.448,0.8796,0.9106
+yes_qat__distill_direct__prune_none__ptq_yes,Best PGD robust,True,post_AT_no_ptq,0.9022,0.6228,0.4651,0.8836,0.9116
+yes_qat__distill_direct__prune_none__ptq_yes,Best PGD robust,True,post_AT_ptq_before,0.9027,0.6255,0.4677,0.8844,0.9116
+yes_qat__distill_direct__prune_none__ptq_yes,Best PGD robust,True,pre_AT,0.9004,0.6097,0.4486,0.881,0.9106
+yes_qat__distill_progressive__prune_5x10__ptq_no,Extreme compression,False,post_AT_no_ptq,0.8804,0.4977,0.3429,0.8542,0.9082
+yes_qat__distill_progressive__prune_5x10__ptq_no,Extreme compression,False,post_AT_ptq_after,0.8789,0.6241,0.5645,0.8082,0.9216
+yes_qat__distill_progressive__prune_5x10__ptq_no,Extreme compression,False,pre_AT,0.8758,0.4392,0.2971,0.8422,0.9078
+yes_qat__distill_progressive__prune_5x10__ptq_yes,Extreme compression,True,post_AT_no_ptq,0.8844,0.5244,0.3688,0.859,0.9074
+yes_qat__distill_progressive__prune_5x10__ptq_yes,Extreme compression,True,post_AT_ptq_before,0.8852,0.5302,0.374,0.8594,0.9078
+yes_qat__distill_progressive__prune_5x10__ptq_yes,Extreme compression,True,pre_AT,0.8804,0.4737,0.3252,0.844,0.9072
