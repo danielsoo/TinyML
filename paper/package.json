@@ -1,0 +1,11 @@
+{
+  "name": "tinyml-paper-build",
+  "private": true,
+  "description": "Builds TinyML_Federated_IDS_Revised.docx from main.js",
+  "scripts": {
+    "build": "node main.js"
+  },
+  "dependencies": {
+    "docx": "^9.0.0"
+  }
+}

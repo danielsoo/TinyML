@@ -27,6 +27,7 @@ if str(ROOT) not in sys.path:
 
 from scripts.ablation_utils import (
     apply_quick_mode,
+    load_keras_for_eval,
     load_yaml,
     make_output_dir,
     rows_to_csv,
@@ -60,12 +61,9 @@ def _evaluate_keras_path(
     row_id: str,
     label: str,
 ) -> Dict[str, Any]:
-    import tensorflow as tf
-
     threshold = float(cfg.get("evaluation", {}).get("prediction_threshold", 0.3))
     x_test, y_test = _load_test_data(cfg)
-    model = tf.keras.models.load_model(str(model_path), compile=False)
-    model.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
+    model = load_keras_for_eval(model_path)
     metrics = evaluate_keras_model(model, x_test, y_test, threshold=threshold)
     size_kb = model_path.stat().st_size / 1024.0
     result = {
@@ -187,6 +185,11 @@ def _run_pgd_on_models(
 def main():
     parser = argparse.ArgumentParser(description="Reviewer B baseline ablation")
     parser.add_argument("--base-config", default="config/ablation/base.yaml")
+    parser.add_argument(
+        "--config-dir",
+        default="config/ablation",
+        help="Directory holding centralized.yaml, fl_baseline.yaml, failed_config.yaml",
+    )
     parser.add_argument("--output-dir", default=None)
     parser.add_argument("--quick", action="store_true", help="Fewer FL rounds for smoke test")
     parser.add_argument("--skip-train", action="store_true")
@@ -209,7 +212,7 @@ def main():
 
     # --- (a) Centralized ---
     cfg_a = configs_dir / "a_centralized.yaml"
-    shutil.copy2(ROOT / "config" / "ablation" / "centralized.yaml", cfg_a)
+    shutil.copy2(ROOT / args.config_dir / "centralized.yaml", cfg_a)
     save_yaml(cfg_a, apply_quick_mode(load_yaml(cfg_a), args.quick))
     model_a = models_dir / "a_centralized.h5"
     if not args.skip_train:
@@ -229,7 +232,7 @@ def main():
 
     # --- (b) FL ---
     cfg_b = configs_dir / "b_fl.yaml"
-    shutil.copy2(ROOT / "config" / "ablation" / "fl_baseline.yaml", cfg_b)
+    shutil.copy2(ROOT / args.config_dir / "fl_baseline.yaml", cfg_b)
     save_yaml(cfg_b, apply_quick_mode(load_yaml(cfg_b), args.quick))
     model_b = models_dir / "b_fl.h5"
     if not args.skip_train:
@@ -257,12 +260,15 @@ def main():
         _run_compression(cfg_b, model_b, tflite_dir, trad_copy)
         ptq_path = tflite_c if tflite_c.exists() else tflite_ptq_main
         rows.append(_evaluate_tflite_path(ptq_path, load_yaml(cfg_b), "c", "FL+compression+PTQ"))
-        rows.append(_evaluate_tflite_path(tflite_d, load_yaml(cfg_b), "d", "FL+compression+QAT"))
+        # QAT-trained FL models (paper_v12) emit pruned_qat instead of traditional_qat
+        qat_path = tflite_d if tflite_d.exists() else tflite_dir / "saved_model_pruned_qat.tflite"
+        rows.append(_evaluate_tflite_path(qat_path, load_yaml(cfg_b), "d", "FL+compression+QAT"))
     elif args.skip_compression:
         for path, rid, lbl in [
             (tflite_c, "c", "FL+compression+PTQ"),
             (tflite_d, "d", "FL+compression+QAT"),
             (tflite_ptq_main, "c_alt", "FL+compression+PTQ (main)"),
+            (tflite_dir / "saved_model_pruned_qat.tflite", "d_alt", "FL+compression+QAT (QAT-trained)"),
         ]:
             if path.exists():
                 rows.append(_evaluate_tflite_path(path, load_yaml(cfg_b), rid, lbl))
@@ -270,7 +276,7 @@ def main():
     # --- failed narrative ---
     if args.with_failed:
         cfg_f = configs_dir / "failed.yaml"
-        shutil.copy2(ROOT / "config" / "ablation" / "failed_config.yaml", cfg_f)
+        shutil.copy2(ROOT / args.config_dir / "failed_config.yaml", cfg_f)
         save_yaml(cfg_f, apply_quick_mode(load_yaml(cfg_f), args.quick))
         model_f = models_dir / "failed_fl.h5"
         if not args.skip_train:
@@ -284,12 +290,12 @@ def main():
                     "--save-model",
                     str(model_f),
                 ],
-                "Failed config FL (no cosine/focal)",
+                "Failed config FL (fixed LR)",
             )
         if model_f.exists():
             rows.append(
                 _evaluate_keras_path(
-                    model_f, load_yaml(cfg_f), "failed", "FL fixed LR no focal (narrative)"
+                    model_f, load_yaml(cfg_f), "failed", "FL fixed LR (narrative)"
                 )
             )
 

@@ -24,6 +24,24 @@ def load_yaml(path: str | Path) -> dict:
         return yaml.safe_load(f)
 
 
+def load_keras_for_eval(path: str | Path):
+    """Load a saved .h5 for evaluation; QAT checkpoints need tf_keras + quantize_scope."""
+    import tensorflow as tf
+
+    try:
+        model = tf.keras.models.load_model(str(path), compile=False)
+    except ValueError as err:
+        if "Quantize" not in str(err):
+            raise
+        import tensorflow_model_optimization as tfmot
+        import tf_keras
+
+        with tfmot.quantization.keras.quantize_scope():
+            model = tf_keras.models.load_model(str(path), compile=False)
+    model.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
+    return model
+
+
 def save_yaml(path: str | Path, cfg: dict) -> None:
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -69,11 +87,16 @@ def write_config_variant(base_path: Path, overrides: dict, out_path: Path) -> Pa
     return out_path
 
 
+def _union_keys(rows: List[Dict[str, Any]]) -> List[str]:
+    # Rows can differ (e.g. a "missing_model" row has no metric columns)
+    return list(dict.fromkeys(k for row in rows for k in row))
+
+
 def rows_to_csv(rows: List[Dict[str, Any]], path: Path) -> None:
     if not rows:
         return
     path.parent.mkdir(parents=True, exist_ok=True)
-    fieldnames = list(rows[0].keys())
+    fieldnames = _union_keys(rows)
     with open(path, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
@@ -83,7 +106,7 @@ def rows_to_csv(rows: List[Dict[str, Any]], path: Path) -> None:
 def rows_to_markdown(rows: List[Dict[str, Any]], path: Path, title: str) -> None:
     if not rows:
         return
-    cols = list(rows[0].keys())
+    cols = _union_keys(rows)
     lines = [f"# {title}", ""]
     lines.append("| " + " | ".join(cols) + " |")
     lines.append("| " + " | ".join(["---"] * len(cols)) + " |")

@@ -19,6 +19,7 @@ if str(ROOT) not in sys.path:
 
 from scripts.ablation_utils import (
     apply_quick_mode,
+    load_keras_for_eval,
     load_yaml,
     make_output_dir,
     rows_to_csv,
@@ -134,15 +135,12 @@ def main():
                 )
                 continue
 
-            import tensorflow as tf
-
             threshold = float(cfg.get("evaluation", {}).get("prediction_threshold", 0.3))
             kwargs = {k: v for k, v in cfg["data"].items() if k not in {"name", "num_clients"}}
             if "path" in kwargs:
                 kwargs["data_path"] = kwargs.pop("path")
             _, _, x_test, y_test = load_dataset(cfg["data"]["name"], **kwargs)
-            model = tf.keras.models.load_model(str(model_path), compile=False)
-            model.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
+            model = load_keras_for_eval(model_path)
             metrics = evaluate_keras_model(model, x_test, y_test, threshold=threshold)
 
             row = {

@@ -10,6 +10,7 @@ Usage:
     python run.py --config config/federated_scratch.yaml --centralized
 """
 import argparse
+import math
 import os
 import sys
 from pathlib import Path
@@ -114,10 +115,9 @@ def main():
 
     epochs = args.epochs
     if epochs is None:
-        # Roughly match FL effort: local_epochs per round, num_rounds iterations
-        # Centralized uses single model, so total epochs should be comparable
-        epochs = min(100, num_rounds * 2)
-        print(f"\n  Auto epochs: {epochs} (from num_rounds={num_rounds})")
+        # Match FL effort: num_rounds rounds x local_epochs per round
+        epochs = int(num_rounds) * int(local_epochs)
+        print(f"\n  Auto epochs: {epochs} (num_rounds={num_rounds} x local_epochs={local_epochs})")
 
     # Class weights for imbalanced data (same logic as FL client)
     class_weight = None
@@ -144,6 +144,25 @@ def main():
     )
     if class_weight is not None:
         fit_kwargs["class_weight"] = class_weight
+
+    # LR schedule: same per-round formula the FL client applies (src/federated/client.py),
+    # with each block of local_epochs epochs treated as one "round".
+    lr_decay_type = (fed_cfg.get("lr_decay_type") or "none").strip().lower()
+    lr_min = float(fed_cfg.get("lr_min", 1e-6))
+    epochs_per_round = max(int(local_epochs), 1)
+    sched_rounds = max(math.ceil(epochs / epochs_per_round), 1)
+    if lr_decay_type == "cosine":
+        def _lr_for_epoch(epoch, _lr=None):
+            t = min(epoch // epochs_per_round + 1, sched_rounds)
+            lr = lr_min + 0.5 * (float(learning_rate) - lr_min) * (1.0 + math.cos(math.pi * t / sched_rounds))
+            return max(float(lr), 1e-6)
+
+        import tensorflow as tf
+        fit_kwargs["callbacks"] = [tf.keras.callbacks.LearningRateScheduler(_lr_for_epoch)]
+        print(f"\n  LR schedule: cosine over {sched_rounds} rounds x {epochs_per_round} epochs "
+              f"({learning_rate} -> {lr_min})")
+    elif lr_decay_type != "none":
+        print(f"\n  ⚠️ lr_decay_type={lr_decay_type} not implemented for centralized; using constant LR")
 
     print(f"\n🚀 Training...")
     print(f"  - Epochs: {epochs}")

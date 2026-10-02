@@ -1,5 +1,5 @@
 # (b) FL + cosine LR + focal loss, no QAT during training
-<<: include base settings via run_baseline_ablation.py
+# (self-contained; mirrors base.yaml)
 
 data:
   name: cicids2017
