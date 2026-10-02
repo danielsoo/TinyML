@@ -31,3 +31,5 @@ FETCH_HEAD
 src/models/*.h5
 training_log.txt
 esp32_tflite_project/src/model_data.*
+esp32_tflite_project/include/model_data.h
+esp32_tflite_project/.pio/
