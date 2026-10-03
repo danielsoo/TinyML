@@ -1,0 +1,8 @@
+Output: data/processed/revision/2026-10-03_toniot_full
+▶ baseline_ablation  (2026-10-03 19:31:37)
+✅ baseline_ablation finished in 17 min
+▶ non_iid  (2026-10-03 19:48:40)
+✅ non_iid finished in 7 min
+
+Summary: data/processed/revision/2026-10-03_toniot_full/SUMMARY.md
+All steps OK.

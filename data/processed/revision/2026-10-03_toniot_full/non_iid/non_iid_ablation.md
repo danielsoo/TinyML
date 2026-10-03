@@ -1,0 +1,5 @@
+# Non-IID FL Ablation
+
+| strategy | num_clients | client_distribution | accuracy | precision | recall | attack_recall | f1 | fn | fp | missed_attacks | false_alarm_rate |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| dirichlet | 4 | [{'client': 0, 'total': 49871, 'attack_pct': 0.43, 'normal_pct': 99.57}, {'client': 1, 'total': 62856, 'attack_pct': 92.75, 'normal_pct': 7.25}, {'client': 2, 'total': 8594, 'attack_pct': 65.46, 'normal_pct': 34.54}, {'client': 3, 'total': 8389, 'attack_pct': 8.5, 'normal_pct': 91.5}] | 0.9741395702605058 | 0.9762932344538326 | 0.9905026210299106 | 0.9905026210299106 | 0.983346598910182 | 154 | 390 | 154 | 0.08089607965152458 |
