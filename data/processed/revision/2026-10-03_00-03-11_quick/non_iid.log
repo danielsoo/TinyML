@@ -1,0 +1,592 @@
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1791000315.104278    3221 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+I0000 00:00:1791000315.105718    3221 cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1791000316.172443    3221 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+I0000 00:00:1791000316.173669    3221 cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+E0000 00:00:1791000317.067660    3221 cuda_platform.cc:52] failed call to cuInit: INTERNAL: CUDA error: Failed call to cuInit: CUDA_ERROR_NO_DEVICE: no CUDA-capable device is detected
+[93mWARNING [0m:   DEPRECATED FEATURE: flwr.simulation.start_simulation() is deprecated.
+	Instead, use the `flwr run` CLI command to start a local simulation in your Flower app, as shown for example below:
+
+		$ flwr new  # Create a new Flower app from a template
+
+		$ flwr run  # Run the Flower app in Simulation Mode
+
+	Using `start_simulation()` is deprecated.
+
+            This is a deprecated feature. It will be removed
+            entirely in future versions of Flower.
+        
+[92mINFO [0m:      Starting Flower simulation, config: num_rounds=5, no round_timeout
+2026-10-03 00:07:25,853	INFO worker.py:2012 -- Started a local Ray instance.
+[2026-10-03 00:07:25,860 I 3221 3221] logging.cc:303: Set ray log level from environment variable RAY_BACKEND_LOG_LEVEL to 1
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/ray/_private/worker.py:2051: FutureWarning: Tip: In future versions of Ray, Ray will no longer override accelerator visible devices env var if num_gpus=0 or num_gpus=None (default). To enable this behavior and turn off this error message, set RAY_ACCEL_ENV_VAR_OVERRIDE_ON_ZERO=0
+  warnings.warn(
+[33m(raylet)[0m [2026-10-03 00:07:28,309 I 3574 3574] logging.cc:303: Set ray log level from environment variable RAY_BACKEND_LOG_LEVEL to 1
+[92mINFO [0m:      Flower VCE: Ray initialized with resources: {'node:__internal_head__': 1.0, 'node:172.22.205.158': 1.0, 'object_store_memory': 6360064819.0, 'CPU': 16.0, 'GPU': 1.0, 'accelerator_type:G': 1.0, 'memory': 14840151245.0}
+[92mINFO [0m:      Optimize your simulation with Flower VCE: https://flower.ai/docs/framework/how-to-run-simulations.html
+[92mINFO [0m:      Flower VCE: Resources for each Virtual Client: {'num_gpus': 0.0, 'num_cpus': 1}
+[92mINFO [0m:      Flower VCE: Creating VirtualClientEngineActorPool with 16 actors
+[92mINFO [0m:      [INIT]
+[92mINFO [0m:      Using initial global parameters provided by strategy
+[92mINFO [0m:      Starting evaluation of initial global parameters
+[92mINFO [0m:      Evaluation returned no results (`None`)
+[92mINFO [0m:      
+[92mINFO [0m:      [ROUND 1]
+[92mINFO [0m:      configure_fit: strategy sampled 4 clients (out of 4)
+[36m(pid=3581)[0m WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+[36m(pid=3581)[0m I0000 00:00:1791000450.202337    3581 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+[36m(pid=3581)[0m I0000 00:00:1791000450.203336    3581 cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+[33m(raylet)[0m [2026-10-03 00:07:28,355 I 3585 3585] logging.cc:303: Set ray log level from environment variable RAY_BACKEND_LOG_LEVEL to 1[32m [repeated 3x across cluster] (Ray deduplicates logs by default. Set RAY_DEDUP_LOGS=0 to disable log deduplication, or see https://docs.ray.io/en/master/ray-observability/user-guides/configure-logging.html#log-deduplication for more options.)[0m
+[36m(pid=3572)[0m WARNING: All log messages before absl::InitializeLog() is called are written to STDERR[32m [repeated 16x across cluster][0m
+[36m(pid=3572)[0m I0000 00:00:1791000455.180982    3572 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.[32m [repeated 16x across cluster][0m
+[36m(pid=3572)[0m I0000 00:00:1791000455.181545    3572 cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.[32m [repeated 16x across cluster][0m
+[36m(ClientAppActor pid=3577)[0m /home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow_model_optimization/__init__.py:65: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
+[36m(ClientAppActor pid=3577)[0m   if (distutils.version.LooseVersion(tf.version.VERSION) <
+[36m(ClientAppActor pid=3582)[0m E0000 00:00:1791000458.035133    3582 cuda_platform.cc:52] failed call to cuInit: INTERNAL: CUDA error: Failed call to cuInit: CUDA_ERROR_NO_DEVICE: no CUDA-capable device is detected
+[92mINFO [0m:      aggregate_fit: received 4 results and 0 failures
+[93mWARNING [0m:   No fit_metrics_aggregation_fn provided
+[92mINFO [0m:      configure_evaluate: strategy sampled 4 clients (out of 4)
+[92mINFO [0m:      aggregate_evaluate: received 4 results and 0 failures
+[92mINFO [0m:      
+[92mINFO [0m:      [ROUND 2]
+[92mINFO [0m:      configure_fit: strategy sampled 4 clients (out of 4)
+[load_cicids2017] data_path=data/raw/CIC-IDS2017
+[load_cicids2017] Found 8 CSV files
+[load_cicids2017] Loaded 225,745 rows from Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv
+[load_cicids2017] Loaded 286,467 rows from Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv
+[load_cicids2017] Loaded 191,033 rows from Friday-WorkingHours-Morning.pcap_ISCX.csv
+[load_cicids2017] Loaded 529,918 rows from Monday-WorkingHours.pcap_ISCX.csv
+[load_cicids2017] Loaded 288,602 rows from Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv
+[load_cicids2017] Loaded 170,366 rows from Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv
+[load_cicids2017] Loaded 445,909 rows from Tuesday-WorkingHours.pcap_ISCX.csv
+[load_cicids2017] Loaded 692,703 rows from Wednesday-workingHours.pcap_ISCX.csv
+[load_cicids2017] Total samples loaded: 2,830,743
+[load_cicids2017] Removed 331,200 duplicates (2,499,543 unique)
+[load_cicids2017] Found 15 unique labels
+[load_cicids2017] Binary mode: BENIGN=0, ATTACK=1
+[load_cicids2017] Label distribution: BENIGN=2073680, ATTACK=425863
+[load_cicids2017] Shuffled full pool (random_state=42)
+[load_cicids2017] Balanced training set: majority 1658944 -> 1362760 (ratio<=4.0), total=1,703,450
+[load_cicids2017] StandardScaler applied (fit on train).
+[load_cicids2017] SMOTE applied: train -> 2,725,520 (BENIGN=1,362,760, ATTACK=1,362,760)
+[load_cicids2017] Final feature shape: 78 features
+[load_cicids2017] Train samples: 2,725,520, Test samples: 499,909
+
+============================================================
+CLIENT DATA DISTRIBUTION
+============================================================
+Client 0: Total=9,373 samples
+  - Class 0: 9,363 (99.89%)
+  - Class 1: 10 (0.11%)
+Client 1: Total=1,981,913 samples
+  - Class 0: 802,177 (40.47%)
+  - Class 1: 1,179,736 (59.53%)
+Client 2: Total=6,730 samples
+  - Class 0: 6,556 (97.41%)
+  - Class 1: 174 (2.59%)
+Client 3: Total=727,504 samples
+  - Class 0: 544,664 (74.87%)
+  - Class 1: 182,840 (25.13%)
+============================================================
+
+[Config] QAT (Quantization-Aware Training) enabled for clients
+[Strategy] Initial model with QAT applied
+[Strategy] FedAvgM (momentum=0.5)
+[36m(ClientAppActor pid=3574)[0m [Client 0] ✅ Real QAT applied: 6 QuantizeWrapper layers
+[36m(ClientAppActor pid=3574)[0m [Client 0] QAT enabled - model quantization-aware
+[36m(ClientAppActor pid=3574)[0m [Client 0] Class weights (smoothed): {0: 0.0632931029448033, 1: 1.9367068970551966}
+[36m(ClientAppActor pid=3577)[0m [Client 0] ✅ Real QAT applied: 6 QuantizeWrapper layers
+[36m(ClientAppActor pid=3577)[0m [Client 0] QAT enabled - model quantization-aware
+[36m(ClientAppActor pid=3582)[0m [Client 3] Class weights (smoothed): {0: 0.733688617397354, 1: 1.266311382602646}[32m [repeated 4x across cluster][0m
+[36m(ClientAppActor pid=3577)[0m [Client 0] ✅ Real QAT applied: 6 QuantizeWrapper layers
+[36m(ClientAppActor pid=3577)[0m [Client 0] QAT enabled - model quantization-aware
+[DEBUG] evaluate_metrics_aggregation_fn called with 4 results
+[DEBUG] results type: <class 'list'>
+[DEBUG] First result type: <class 'tuple'>
+[DEBUG] First result length: 2
+[DEBUG] results[0][0] type: <class 'int'>
+[DEBUG] results[0][1] type: <class 'flwr.app.message.configrecord.ConfigRecord'>
+[DEBUG _get_metrics] res_item[1] type: ConfigRecord
+[DEBUG _get_metrics] res_item[1] has metrics attr: False
+[DEBUG _get_metrics] res_item[1].__dict__: {'_check_key_fn': <function _check_key at 0x70beb79e09a0>, '_check_value_fn': <function _check_value at 0x70bead1cca40>, '_data': {'accuracy': 0.7784217596054077, 'loss': 0.9328469634056091, 'total_samples': 16563, 'actual_attack': 16559, 'actual_normal': 4, 'predicted_attack': 12889, 'predicted_normal': 3674, 'true_positives': 12889, 'true_negatives': 4, 'false_positives': 0, 'false_negatives': 3670, 'precision': 1.0, 'recall': 0.7783682589528353, 'f1_score': 0.8753735397989677}}
+[DEBUG _get_metrics] res_item[1].keys(): ['accuracy', 'loss', 'total_samples', 'actual_attack', 'actual_normal', 'predicted_attack', 'predicted_normal', 'true_positives', 'true_negatives', 'false_positives', 'false_negatives', 'precision', 'recall', 'f1_score']
+[DEBUG _get_metrics] Extracted from ConfigRecord._data
+[DEBUG _get_metrics] res_item[1] type: ConfigRecord
+[DEBUG _get_metrics] res_item[1] has metrics attr: False
+[DEBUG _get_metrics] res_item[1].__dict__: {'_check_key_fn': <function _check_key at 0x70beb79e09a0>, '_check_value_fn': <function _check_value at 0x70bead1cca40>, '_data': {'accuracy': 0.8642969131469727, 'loss': 0.9224408864974976, 'total_samples': 140100, 'actual_attack': 35544, 'actual_normal': 104556, 'predicted_attack': 38861, 'predicted_normal': 101239, 'true_positives': 27696, 'true_negatives': 93391, 'false_positives': 11165, 'false_negatives': 7848, 'precision': 0.7126939605259772, 'recall': 0.7792032410533424, 'f1_score': 0.7444660977084873}}
+[DEBUG _get_metrics] res_item[1].keys(): ['accuracy', 'loss', 'total_samples', 'actual_attack', 'actual_normal', 'predicted_attack', 'predicted_normal', 'true_positives', 'true_negatives', 'false_positives', 'false_negatives', 'precision', 'recall', 'f1_score']
+[DEBUG _get_metrics] Extracted from ConfigRecord._data
+[DEBUG _get_metrics] res_item[1] type: ConfigRecord
+[DEBUG _get_metrics] res_item[1] has metrics attr: False
+[DEBUG _get_metrics] res_item[1].__dict__: {'_check_key_fn': <function _check_key at 0x70beb79e09a0>, '_check_value_fn': <function _check_value at 0x70bead1cca40>, '_data': {'accuracy': 0.8899919986724854, 'loss': 0.9178449511528015, 'total_samples': 136681, 'actual_attack': 4456, 'actual_normal': 132225, 'predicted_attack': 17442, 'predicted_normal': 119239, 'true_positives': 3431, 'true_negatives': 118214, 'false_positives': 14011, 'false_negatives': 1025, 'precision': 0.19670909299392272, 'recall': 0.7699730700179533, 'f1_score': 0.31336195086309254}}
+[DEBUG _get_metrics] res_item[1].keys(): ['accuracy', 'loss', 'total_samples', 'actual_attack', 'actual_normal', 'predicted_attack', 'predicted_normal', 'true_positives', 'true_negatives', 'false_positives', 'false_negatives', 'precision', 'recall', 'f1_score']
+[DEBUG _get_metrics] Extracted from ConfigRecord._data
+[DEBUG _get_metrics] res_item[1] type: ConfigRecord
+[DEBUG _get_metrics] res_item[1] has metrics attr: False
+[DEBUG _get_metrics] res_item[1].__dict__: {'_check_key_fn': <function _check_key at 0x70beb79e09a0>, '_check_value_fn': <function _check_value at 0x70bead1cca40>, '_data': {'accuracy': 0.8899919986724854, 'loss': 0.9178449511528015, 'total_samples': 136681, 'actual_attack': 4456, 'actual_normal': 132225, 'predicted_attack': 17442, 'predicted_normal': 119239, 'true_positives': 3431, 'true_negatives': 118214, 'false_positives': 14011, 'false_negatives': 1025, 'precision': 0.19670909299392272, 'recall': 0.7699730700179533, 'f1_score': 0.31336195086309254}}
+[DEBUG _get_metrics] res_item[1].keys(): ['accuracy', 'loss', 'total_samples', 'actual_attack', 'actual_normal', 'predicted_attack', 'predicted_normal', 'true_positives', 'true_negatives', 'false_positives', 'false_negatives', 'precision', 'recall', 'f1_score']
+[DEBUG _get_metrics] Extracted from ConfigRecord._data
+[DEBUG] Extracted 4 metrics from results
+
+[Evaluation Summary]
+============================================================
+Round: 1 / 5
+Accuracy (mean):  0.8557  (85.57%)
+Loss:             0.9227
+[Per-Device Accuracy]
+  - Device 0:  0.7784  (77.84%)
+  - Device 1:  0.8643  (86.43%)
+  - Device 2:  0.8900  (89.00%)
+  - Device 3:  0.8900  (89.00%)
+
+[Ground Truth]
+  - Attack samples: 16559
+  - Normal samples: 4
+  - Total samples:  16563
+
+[Predictions]
+  - Predicted Attack:  12889
+  - Predicted Normal:  3674
+
+[Confusion Matrix]
+  - True Positives (TP):  12889
+  - True Negatives (TN):  4
+  - False Positives (FP): 0
+  - False Negatives (FN): 3670
+
+[Metrics]
+  - Precision:  0.5265  (52.65%)
+  - Recall:     0.7744  (77.44%)
+  - F1-Score:   0.5616  (56.16%)
+============================================================
+
+[36m(ClientAppActor pid=3574)[0m [Client 0] Class weights (smoothed): {0: 0.0632931029448033, 1: 1.9367068970551966}[32m [repeated 4x across cluster][0m
+[36m(ClientAppActor pid=3574)[0m [Client 0] ✅ Real QAT applied: 6 QuantizeWrapper layers[32m [repeated 2x across cluster][0m[92mINFO [0m:      aggregate_fit: received 4 results and 0 failures
+[92mINFO [0m:      configure_evaluate: strategy sampled 4 clients (out of 4)
+[92mINFO [0m:      aggregate_evaluate: received 4 results and 0 failures
+[92mINFO [0m:      
+[92mINFO [0m:      [ROUND 3]
+[92mINFO [0m:      configure_fit: strategy sampled 4 clients (out of 4)
+[92mINFO [0m:      aggregate_fit: received 4 results and 0 failures
+[92mINFO [0m:      configure_evaluate: strategy sampled 4 clients (out of 4)
+[92mINFO [0m:      aggregate_evaluate: received 4 results and 0 failures
+
+[36m(ClientAppActor pid=3574)[0m [Client 0] QAT enabled - model quantization-aware[32m [repeated 2x across cluster][0m
+[36m(ClientAppActor pid=3577)[0m [Client 0] Class weights (smoothed): {0: 0.0632931029448033, 1: 1.9367068970551966}[32m [repeated 4x across cluster][0m
+[36m(ClientAppActor pid=3577)[0m [Client 0] ✅ Real QAT applied: 6 QuantizeWrapper layers[32m [repeated 2x across cluster][0m
+[36m(ClientAppActor pid=3577)[0m [Client 0] QAT enabled - model quantization-aware[32m [repeated 2x across cluster][0m
+[DEBUG] evaluate_metrics_aggregation_fn called with 4 results
+[DEBUG] results type: <class 'list'>
+[DEBUG] First result type: <class 'tuple'>
+[DEBUG] First result length: 2
+[DEBUG] results[0][0] type: <class 'int'>
+[DEBUG] results[0][1] type: <class 'flwr.app.message.configrecord.ConfigRecord'>
+[DEBUG _get_metrics] res_item[1] type: ConfigRecord
+[DEBUG _get_metrics] res_item[1] has metrics attr: False
+[DEBUG _get_metrics] res_item[1].__dict__: {'_check_key_fn': <function _check_key at 0x70beb79e09a0>, '_check_value_fn': <function _check_value at 0x70bead1cca40>, '_data': {'accuracy': 0.6751192212104797, 'loss': 1.8245849609375, 'total_samples': 16563, 'actual_attack': 16559, 'actual_normal': 4, 'predicted_attack': 11178, 'predicted_normal': 5385, 'true_positives': 11178, 'true_negatives': 4, 'false_positives': 0, 'false_negatives': 5381, 'precision': 1.0, 'recall': 0.6750407633311191, 'f1_score': 0.8059992068356348}}
+[DEBUG _get_metrics] res_item[1].keys(): ['accuracy', 'loss', 'total_samples', 'actual_attack', 'actual_normal', 'predicted_attack', 'predicted_normal', 'true_positives', 'true_negatives', 'false_positives', 'false_negatives', 'precision', 'recall', 'f1_score']
+[DEBUG _get_metrics] Extracted from ConfigRecord._data
+[DEBUG _get_metrics] res_item[1] type: ConfigRecord
+[DEBUG _get_metrics] res_item[1] has metrics attr: False
+[DEBUG _get_metrics] res_item[1].__dict__: {'_check_key_fn': <function _check_key at 0x70beb79e09a0>, '_check_value_fn': <function _check_value at 0x70bead1cca40>, '_data': {'accuracy': 0.8171663284301758, 'loss': 1.5019304752349854, 'total_samples': 140100, 'actual_attack': 35544, 'actual_normal': 104556, 'predicted_attack': 38155, 'predicted_normal': 101945, 'true_positives': 24042, 'true_negatives': 90443, 'false_positives': 14113, 'false_negatives': 11502, 'precision': 0.630114008648932, 'recall': 0.6764010803511141, 'f1_score': 0.6524376178781258}}
+[DEBUG _get_metrics] res_item[1].keys(): ['accuracy', 'loss', 'total_samples', 'actual_attack', 'actual_normal', 'predicted_attack', 'predicted_normal', 'true_positives', 'true_negatives', 'false_positives', 'false_negatives', 'precision', 'recall', 'f1_score']
+[DEBUG _get_metrics] Extracted from ConfigRecord._data
+[DEBUG _get_metrics] res_item[1] type: ConfigRecord
+[DEBUG _get_metrics] res_item[1] has metrics attr: False
+[DEBUG _get_metrics] res_item[1].__dict__: {'_check_key_fn': <function _check_key at 0x70beb79e09a0>, '_check_value_fn': <function _check_value at 0x70bead1cca40>, '_data': {'accuracy': 0.861187756061554, 'loss': 1.384374976158142, 'total_samples': 136681, 'actual_attack': 4456, 'actual_normal': 132225, 'predicted_attack': 20515, 'predicted_normal': 116166, 'true_positives': 2999, 'true_negatives': 114709, 'false_positives': 17516, 'false_negatives': 1457, 'precision': 0.1461857177674872, 'recall': 0.6730251346499102, 'f1_score': 0.2401986304112771}}
+[DEBUG _get_metrics] res_item[1].keys(): ['accuracy', 'loss', 'total_samples', 'actual_attack', 'actual_normal', 'predicted_attack', 'predicted_normal', 'true_positives', 'true_negatives', 'false_positives', 'false_negatives', 'precision', 'recall', 'f1_score']
+[DEBUG _get_metrics] Extracted from ConfigRecord._data
+[DEBUG _get_metrics] res_item[1] type: ConfigRecord
+[DEBUG _get_metrics] res_item[1] has metrics attr: False
+[DEBUG _get_metrics] res_item[1].__dict__: {'_check_key_fn': <function _check_key at 0x70beb79e09a0>, '_check_value_fn': <function _check_value at 0x70bead1cca40>, '_data': {'accuracy': 0.861187756061554, 'loss': 1.384374976158142, 'total_samples': 136681, 'actual_attack': 4456, 'actual_normal': 132225, 'predicted_attack': 20515, 'predicted_normal': 116166, 'true_positives': 2999, 'true_negatives': 114709, 'false_positives': 17516, 'false_negatives': 1457, 'precision': 0.1461857177674872, 'recall': 0.6730251346499102, 'f1_score': 0.2401986304112771}}
+[DEBUG _get_metrics] res_item[1].keys(): ['accuracy', 'loss', 'total_samples', 'actual_attack', 'actual_normal', 'predicted_attack', 'predicted_normal', 'true_positives', 'true_negatives', 'false_positives', 'false_negatives', 'precision', 'recall', 'f1_score']
+[DEBUG _get_metrics] Extracted from ConfigRecord._data
+[DEBUG] Extracted 4 metrics from results
+
+[Evaluation Summary]
+============================================================
+Round: 2 / 5
+Accuracy (mean):  0.8037  (80.37%)
+Loss:             1.5238
+[Per-Device Accuracy]
+  - Device 0:  0.6751  (67.51%)
+  - Device 1:  0.8172  (81.72%)
+  - Device 2:  0.8612  (86.12%)
+  - Device 3:  0.8612  (86.12%)
+
+[Ground Truth]
+  - Attack samples: 16559
+  - Normal samples: 4
+  - Total samples:  16563
+
+[Predictions]
+  - Predicted Attack:  11178
+  - Predicted Normal:  5385
+
+[Confusion Matrix]
+  - True Positives (TP):  11178
+  - True Negatives (TN):  4
+  - False Positives (FP): 0
+  - False Negatives (FN): 5381
+
+[Metrics]
+  - Precision:  0.4806  (48.06%)
+  - Recall:     0.6744  (67.44%)
+  - F1-Score:   0.4847  (48.47%)
+============================================================
+
+[36m(ClientAppActor pid=3585)[0m [Client 2] Class weights (smoothed): {0: 0.28018056355304055, 1: 1.7198194364469597}[32m [repeated 4x across cluster][0m
+[36m(ClientAppActor pid=3574)[0m [Client 0] ✅ Real QAT applied: 6 QuantizeWrapper layers
+[36m(ClientAppActor pid=3574)[0m [Client 0] QAT enabled - model quantization-aware
+[36m(ClientAppActor pid=3574)[0m [Client 0] ✅ Real QAT applied: 6 QuantizeWrapper layers
+[36m(ClientAppActor pid=3574)[0m [Client 0] QAT enabled - model quantization-aware
+[36m(ClientAppActor pid=3577)[0m [Client 0] Class weights (smoothed): {0: 0.0632931029448033, 1: 1.9367068970551966}[32m [repeated 4x across cluster][0m
+[36m(ClientAppActor pid=3577)[0m [Client 0] ✅ Real QAT applied: 6 QuantizeWrapper layers[32m [repeated 2x across cluster][0m
+[36m(ClientAppActor pid=3577)[0m [Client 0] QAT enabled - model quantization-aware[32m [repeated 2x across cluster][0m
+[DEBUG] evaluate_metrics_aggregation_fn called with 4 results
+[DEBUG] results type: <class 'list'>
+[DEBUG] First result type: <class 'tuple'>
+[DEBUG] First result length: 2
+[DEBUG] results[0][0] type: <class 'int'>
+[DEBUG] results[0][1] type: <class 'flwr.app.message.configrecord.ConfigRecord'>
+[DEBUG _get_metrics] res_item[1] type: ConfigRecord
+[DEBUG _get_metrics] res_item[1] has metrics attr: False
+[DEBUG _get_metrics] res_item[1].__dict__: {'_check_key_fn': <function _check_key at 0x70beb79e09a0>, '_check_value_fn': <function _check_value at 0x70bead1cca40>, '_data': {'accuracy': 0.7607921361923218, 'loss': 1.3494526147842407, 'total_samples': 16563, 'actual_attack': 16559, 'actual_normal': 4, 'predicted_attack': 12597, 'predicted_normal': 3966, 'true_positives': 12597, 'true_negatives': 4, 'false_positives': 0, 'false_negatives': 3962, 'precision': 1.0, 'recall': 0.7607343438613443, 'f1_score': 0.8641103031965977}}
+[DEBUG _get_metrics] res_item[1].keys(): ['accuracy', 'loss', 'total_samples', 'actual_attack', 'actual_normal', 'predicted_attack', 'predicted_normal', 'true_positives', 'true_negatives', 'false_positives', 'false_negatives', 'precision', 'recall', 'f1_score']
+[DEBUG _get_metrics] Extracted from ConfigRecord._data
+[DEBUG _get_metrics] res_item[1] type: ConfigRecord
+[DEBUG _get_metrics] res_item[1] has metrics attr: False
+[DEBUG _get_metrics] res_item[1].__dict__: {'_check_key_fn': <function _check_key at 0x70beb79e09a0>, '_check_value_fn': <function _check_value at 0x70bead1cca40>, '_data': {'accuracy': 0.8480696082115173, 'loss': 1.5371885299682617, 'total_samples': 136681, 'actual_attack': 4456, 'actual_normal': 132225, 'predicted_attack': 23076, 'predicted_normal': 113605, 'true_positives': 3383, 'true_negatives': 112532, 'false_positives': 19693, 'false_negatives': 1073, 'precision': 0.1466025307678974, 'recall': 0.7592010771992819, 'f1_score': 0.24575039953508643}}[92mINFO [0m:      
+[92mINFO [0m:      [ROUND 4]
+[92mINFO [0m:      configure_fit: strategy sampled 4 clients (out of 4)
+[92mINFO [0m:      aggregate_fit: received 4 results and 0 failures
+[92mINFO [0m:      configure_evaluate: strategy sampled 4 clients (out of 4)
+[92mINFO [0m:      aggregate_evaluate: received 4 results and 0 failures
+
+[DEBUG _get_metrics] res_item[1].keys(): ['accuracy', 'loss', 'total_samples', 'actual_attack', 'actual_normal', 'predicted_attack', 'predicted_normal', 'true_positives', 'true_negatives', 'false_positives', 'false_negatives', 'precision', 'recall', 'f1_score']
+[DEBUG _get_metrics] Extracted from ConfigRecord._data
+[DEBUG _get_metrics] res_item[1] type: ConfigRecord
+[DEBUG _get_metrics] res_item[1] has metrics attr: False
+[DEBUG _get_metrics] res_item[1].__dict__: {'_check_key_fn': <function _check_key at 0x70beb79e09a0>, '_check_value_fn': <function _check_value at 0x70bead1cca40>, '_data': {'accuracy': 0.8480696082115173, 'loss': 1.5371885299682617, 'total_samples': 136681, 'actual_attack': 4456, 'actual_normal': 132225, 'predicted_attack': 23076, 'predicted_normal': 113605, 'true_positives': 3383, 'true_negatives': 112532, 'false_positives': 19693, 'false_negatives': 1073, 'precision': 0.1466025307678974, 'recall': 0.7592010771992819, 'f1_score': 0.24575039953508643}}
+[DEBUG _get_metrics] res_item[1].keys(): ['accuracy', 'loss', 'total_samples', 'actual_attack', 'actual_normal', 'predicted_attack', 'predicted_normal', 'true_positives', 'true_negatives', 'false_positives', 'false_negatives', 'precision', 'recall', 'f1_score']
+[DEBUG _get_metrics] Extracted from ConfigRecord._data
+[DEBUG _get_metrics] res_item[1] type: ConfigRecord
+[DEBUG _get_metrics] res_item[1] has metrics attr: False
+[DEBUG _get_metrics] res_item[1].__dict__: {'_check_key_fn': <function _check_key at 0x70beb79e09a0>, '_check_value_fn': <function _check_value at 0x70bead1cca40>, '_data': {'accuracy': 0.8280014395713806, 'loss': 1.4968788623809814, 'total_samples': 140100, 'actual_attack': 35544, 'actual_normal': 104556, 'predicted_attack': 42713, 'predicted_normal': 97387, 'true_positives': 27080, 'true_negatives': 88923, 'false_positives': 15633, 'false_negatives': 8464, 'precision': 0.6339990166928101, 'recall': 0.7618726085977943, 'f1_score': 0.6920786638894924}}
+[DEBUG _get_metrics] res_item[1].keys(): ['accuracy', 'loss', 'total_samples', 'actual_attack', 'actual_normal', 'predicted_attack', 'predicted_normal', 'true_positives', 'true_negatives', 'false_positives', 'false_negatives', 'precision', 'recall', 'f1_score']
+[DEBUG _get_metrics] Extracted from ConfigRecord._data
+[DEBUG] Extracted 4 metrics from results
+
+[Evaluation Summary]
+============================================================
+Round: 3 / 5
+Accuracy (mean):  0.8212  (82.12%)
+Loss:             1.4802
+[Per-Device Accuracy]
+  - Device 0:  0.7608  (76.08%)
+  - Device 1:  0.8481  (84.81%)
+  - Device 2:  0.8481  (84.81%)
+  - Device 3:  0.8280  (82.80%)
+
+[Ground Truth]
+  - Attack samples: 16559
+  - Normal samples: 4
+  - Total samples:  16563
+
+[Predictions]
+  - Predicted Attack:  12597
+  - Predicted Normal:  3966
+
+[Confusion Matrix]
+  - True Positives (TP):  12597
+  - True Negatives (TN):  4
+  - False Positives (FP): 0
+  - False Negatives (FN): 3962
+
+[Metrics]
+  - Precision:  0.4818  (48.18%)
+  - Recall:     0.7603  (76.03%)
+  - F1-Score:   0.5119  (51.19%)
+============================================================
+
+[36m(ClientAppActor pid=3574)[0m [Client 0] Class weights (smoothed): {0: 0.0632931029448033, 1: 1.9367068970551966}[32m [repeated 4x across cluster][0m
+[36m(ClientAppActor pid=3574)[0m [Client 0] ✅ Real QAT applied: 6 QuantizeWrapper layers[32m [repeated 2x across cluster][0m
+[36m(ClientAppActor pid=3574)[0m [Client 0] QAT enabled - model quantization-aware[32m [repeated 2x across cluster][0m
+[36m(ClientAppActor pid=3577)[0m [Client 0] Class weights (smoothed): {0: 0.0632931029448033, 1: 1.9367068970551966}[32m [repeated 4x across cluster][0m
+[36m(ClientAppActor pid=3577)[0m [Client 0] ✅ Real QAT applied: 6 QuantizeWrapper layers[32m [repeated 2x across cluster][0m
+[36m(ClientAppActor pid=3577)[0m [Client 0] QAT enabled - model quantization-aware[32m [repeated 2x across cluster][0m
+[DEBUG] evaluate_metrics_aggregation_fn called with 4 results
+[DEBUG] results type: <class 'list'>
+[DEBUG] First result type: <class 'tuple'>
+[DEBUG] First result length: 2
+[DEBUG] results[0][0] type: <class 'int'>
+[DEBUG] results[0][1] type: <class 'flwr.app.message.configrecord.ConfigRecord'>
+[DEBUG _get_metrics] res_item[1] type: ConfigRecord
+[DEBUG _get_metrics] res_item[1] has metrics attr: False
+[DEBUG _get_metrics] res_item[1].__dict__: {'_check_key_fn': <function _check_key at 0x70beb79e09a0>, '_check_value_fn': <function _check_value at 0x70bead1cca40>, '_data': {'accuracy': 0.7656221985816956, 'loss': 1.3222044706344604, 'total_samples': 16563, 'actual_attack': 16559, 'actual_normal': 4, 'predicted_attack': 12677, 'predicted_normal': 3886, 'true_positives': 12677, 'true_negatives': 4, 'false_positives': 0, 'false_negatives': 3882, 'precision': 1.0, 'recall': 0.7655655534754514, 'f1_score': 0.8672184977425093}}
+[DEBUG _get_metrics] res_item[1].keys(): ['accuracy', 'loss', 'total_samples', 'actual_attack', 'actual_normal', 'predicted_attack', 'predicted_normal', 'true_positives', 'true_negatives', 'false_positives', 'false_negatives', 'precision', 'recall', 'f1_score']
+[DEBUG _get_metrics] Extracted from ConfigRecord._data
+[DEBUG _get_metrics] res_item[1] type: ConfigRecord
+[DEBUG _get_metrics] res_item[1] has metrics attr: False
+[DEBUG _get_metrics] res_item[1].__dict__: {'_check_key_fn': <function _check_key at 0x70beb79e09a0>, '_check_value_fn': <function _check_value at 0x70bead1cca40>, '_data': {'accuracy': 0.8725060820579529, 'loss': 1.2837510108947754, 'total_samples': 136681, 'actual_attack': 4456, 'actual_normal': 132225, 'predicted_attack': 19722, 'predicted_normal': 116959, 'true_positives': 3376, 'true_negatives': 115879, 'false_positives': 16346, 'false_negatives': 1080, 'precision': 0.17117939357063178, 'recall': 0.7576301615798923, 'f1_score': 0.2792621391347506}}
+[DEBUG _get_metrics] res_item[1].keys(): ['accuracy', 'loss', 'total_samples', 'actual_attack', 'actual_normal', 'predicted_attack', 'predicted_normal', 'true_positives', 'true_negatives', 'false_positives', 'false_negatives', 'precision', 'recall', 'f1_score']
+[DEBUG _get_metrics] Extracted from ConfigRecord._data
+[DEBUG _get_metrics] res_item[1] type: ConfigRecord
+[DEBUG _get_metrics] res_item[1] has metrics attr: False
+[DEBUG _get_metrics] res_item[1].__dict__: {'_check_key_fn': <function _check_key at 0x70beb79e09a0>, '_check_value_fn': <function _check_value at 0x70bead1cca40>, '_data': {'accuracy': 0.8479371666908264, 'loss': 1.2963930368423462, 'total_samples': 140100, 'actual_attack': 35544, 'actual_normal': 104556, 'predicted_attack': 40272, 'predicted_normal': 99828, 'true_positives': 27256, 'true_negatives': 91540, 'false_positives': 13016, 'false_negatives': 8288, 'precision': 0.676797775129122, 'recall': 0.766824217870808, 'f1_score': 0.7190039041890893}}
+[DEBUG _get_metrics] res_item[1].keys(): ['accuracy', 'loss', 'total_samples', 'actual_attack', 'actual_normal', 'predicted_attack', 'predicted_normal', 'true_positives', 'true_negatives', 'false_positives', 'false_negatives', 'precision', 'recall', 'f1_score']
+[DEBUG _get_metrics] Extracted from ConfigRecord._data
+[DEBUG _get_metrics] res_item[1] type: ConfigRecord
+[DEBUG _get_metrics] res_item[1] has metrics attr: False
+[DEBUG _get_metrics] res_item[1].__dict__: {'_check_key_fn': <function _check_key at 0x70beb79e09a0>, '_check_value_fn': <function _check_value at 0x70bead1cca40>, '_data': {'accuracy': 0.8725060820579529, 'loss': 1.2837510108947754, 'total_samples': 136681, 'actual_attack': 4456, 'actual_normal': 132225, 'predicted_attack': 19722, 'predicted_normal': 116959, 'true_positives': 3376, 'true_negatives': 115879, 'false_positives': 16346, 'false_negatives': 1080, 'precision': 0.17117939357063178, 'recall': 0.7576301615798923, 'f1_score': 0.2792621391347506}}
+[DEBUG _get_metrics] res_item[1].keys(): ['accuracy', 'loss', 'total_samples', 'actual_attack', 'actual_normal', 'predicted_attack', 'predicted_normal', 'true_positives', 'true_negatives', 'false_positives', 'false_negatives', 'precision', 'recall', 'f1_score']
+[DEBUG _get_metrics] Extracted from ConfigRecord._data
+[DEBUG] Extracted 4 metrics from results
+
+[Evaluation Summary][92mINFO [0m:      
+[92mINFO [0m:      [ROUND 5]
+[92mINFO [0m:      configure_fit: strategy sampled 4 clients (out of 4)
+[92mINFO [0m:      aggregate_fit: received 4 results and 0 failures
+[92mINFO [0m:      configure_evaluate: strategy sampled 4 clients (out of 4)
+[92mINFO [0m:      aggregate_evaluate: received 4 results and 0 failures
+[92mINFO [0m:      
+[92mINFO [0m:      [SUMMARY]
+[92mINFO [0m:      Run finished 5 round(s) in 158.25s
+[92mINFO [0m:      	History (loss, distributed):
+[92mINFO [0m:      		round 1: 0.9199201069477789
+[92mINFO [0m:      		round 2: 1.439629259975516
+[92mINFO [0m:      		round 3: 1.5168249362419182
+[92mINFO [0m:      		round 4: 1.2893508073924744
+[92mINFO [0m:      		round 5: 0.9162215354551958
+[92mINFO [0m:      	History (metrics, distributed, evaluate):
+[92mINFO [0m:      	{'accuracy': [(1, 0.8556756675243378),
+[92mINFO [0m:      	              (2, 0.8036652654409409),
+[92mINFO [0m:      	              (3, 0.8212331980466843),
+[92mINFO [0m:      	              (4, 0.8396428823471069),
+[92mINFO [0m:      	              (5, 0.8338553756475449)],
+[92mINFO [0m:      	 'actual_attack': [(1, 16559), (2, 16559), (3, 16559), (4, 16559), (5, 35544)],
+[92mINFO [0m:      	 'actual_normal': [(1, 4), (2, 4), (3, 4), (4, 4), (5, 104556)],
+[92mINFO [0m:      	 'f1_score': [(1, 0.56164088480841),
+[92mINFO [0m:      	              (2, 0.4847085213840787),
+[92mINFO [0m:      	              (3, 0.5119224415390657),
+[92mINFO [0m:      	              (4, 0.5361866700502749),
+[92mINFO [0m:      	              (5, 0.539882009103027)],
+[92mINFO [0m:      	 'false_negatives': [(1, 3670), (2, 5381), (3, 3962), (4, 3882), (5, 12691)],
+[92mINFO [0m:      	 'false_positives': [(1, 0), (2, 0), (3, 0), (4, 0), (5, 7381)],
+[92mINFO [0m:      	 'loss': [(1, 0.9227444380521774),
+[92mINFO [0m:      	          (2, 1.5238163471221924),
+[92mINFO [0m:      	          (3, 1.4801771342754364),
+[92mINFO [0m:      	          (4, 1.2965248823165894),
+[92mINFO [0m:      	          (5, 1.1612340807914734)],
+[92mINFO [0m:      	 'precision': [(1, 0.5265280366284557),
+[92mINFO [0m:      	               (2, 0.48062136104597664),
+[92mINFO [0m:      	               (3, 0.48180101955715116),
+[92mINFO [0m:      	               (4, 0.5047891405675964),
+[92mINFO [0m:      	               (5, 0.5557775344135781)],
+[92mINFO [0m:      	 'predicted_attack': [(1, 12889),
+[92mINFO [0m:      	                      (2, 11178),
+[92mINFO [0m:      	                      (3, 12597),
+[92mINFO [0m:      	                      (4, 12677),
+[92mINFO [0m:      	                      (5, 30234)],
+[92mINFO [0m:      	 'predicted_normal': [(1, 3674), (2, 5385), (3, 3966), (4, 3886), (5, 109866)],
+[92mINFO [0m:      	 'recall': [(1, 0.7743794100105211),
+[92mINFO [0m:      	            (2, 0.6743730282455135),
+[92mINFO [0m:      	            (3, 0.7602522767144256),
+[92mINFO [0m:      	            (4, 0.761912523626511),
+[92mINFO [0m:      	            (5, 0.6409813427156937)],
+[92mINFO [0m:      	 'total_samples': [(1, 16563), (2, 16563), (3, 16563), (4, 16563), (5, 140100)],
+[92mINFO [0m:      	 'true_negatives': [(1, 4), (2, 4), (3, 4), (4, 4), (5, 97175)],
+[92mINFO [0m:      	 'true_positives': [(1, 12889), (2, 11178), (3, 12597), (4, 12677), (5, 22853)]}
+[92mINFO [0m:      
+Saved: outputs/fl_evaluation_report.md
+Saved: outputs/fl_evaluation_plot.png
+[36m(pid=3582)[0m WARNING: All log messages before absl::InitializeLog() is called are written to STDERR[32m [repeated 15x across cluster][0m
+[36m(pid=3582)[0m I0000 00:00:1791000455.959269    3582 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.[32m [repeated 15x across cluster][0m
+[36m(pid=3582)[0m I0000 00:00:1791000455.959847    3582 cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.[32m [repeated 15x across cluster][0m
+[36m(ClientAppActor pid=3582)[0m /home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow_model_optimization/__init__.py:65: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.[32m [repeated 3x across cluster][0m
+[36m(ClientAppActor pid=3582)[0m   if (distutils.version.LooseVersion(tf.version.VERSION) <[32m [repeated 3x across cluster][0m
+[36m(ClientAppActor pid=3585)[0m E0000 00:00:1791000458.036716    3585 cuda_platform.cc:52] failed call to cuInit: INTERNAL: CUDA error: Failed call to cuInit: CUDA_ERROR_NO_DEVICE: no CUDA-capable device is detected[32m [repeated 3x across cluster][0m
+
+============================================================
+Round: 4 / 5
+Accuracy (mean):  0.8396  (83.96%)
+Loss:             1.2965
+[Per-Device Accuracy]
+  - Device 0:  0.7656  (76.56%)
+  - Device 1:  0.8725  (87.25%)
+  - Device 2:  0.8479  (84.79%)
+  - Device 3:  0.8725  (87.25%)
+
+[Ground Truth]
+  - Attack samples: 16559
+  - Normal samples: 4
+  - Total samples:  16563
+
+[Predictions]
+  - Predicted Attack:  12677
+  - Predicted Normal:  3886
+
+[Confusion Matrix]
+  - True Positives (TP):  12677
+  - True Negatives (TN):  4
+  - False Positives (FP): 0
+  - False Negatives (FN): 3882
+
+[Metrics]
+  - Precision:  0.5048  (50.48%)
+  - Recall:     0.7619  (76.19%)
+  - F1-Score:   0.5362  (53.62%)
+============================================================
+
+[36m(ClientAppActor pid=3585)[0m [Client 2] Class weights (smoothed): {0: 0.28018056355304055, 1: 1.7198194364469597}[32m [repeated 4x across cluster][0m
+[36m(ClientAppActor pid=3574)[0m [Client 0] ✅ Real QAT applied: 6 QuantizeWrapper layers
+[36m(ClientAppActor pid=3574)[0m [Client 0] QAT enabled - model quantization-aware
+[36m(ClientAppActor pid=3574)[0m [Client 0] ✅ Real QAT applied: 6 QuantizeWrapper layers
+[36m(ClientAppActor pid=3574)[0m [Client 0] QAT enabled - model quantization-aware
+[Round 5] Client contributions:
+  Client samples: 9,373 (weight: 0.0124)
+  Client samples: 6,730 (weight: 0.0089)
+  Client samples: 727,504 (weight: 0.9662)
+  Client samples: 9,373 (weight: 0.0124)
+[36m(ClientAppActor pid=3582)[0m [Client 3] Class weights (smoothed): {0: 0.733688617397354, 1: 1.266311382602646}[32m [repeated 4x across cluster][0m
+[36m(ClientAppActor pid=3577)[0m [Client 0] ✅ Real QAT applied: 6 QuantizeWrapper layers
+[36m(ClientAppActor pid=3577)[0m [Client 0] QAT enabled - model quantization-aware
+[36m(ClientAppActor pid=3574)[0m [Client 0] ✅ Real QAT applied: 6 QuantizeWrapper layers
+[36m(ClientAppActor pid=3574)[0m [Client 0] QAT enabled - model quantization-aware
+[DEBUG] evaluate_metrics_aggregation_fn called with 4 results
+[DEBUG] results type: <class 'list'>
+[DEBUG] First result type: <class 'tuple'>
+[DEBUG] First result length: 2
+[DEBUG] results[0][0] type: <class 'int'>
+[DEBUG] results[0][1] type: <class 'flwr.app.message.configrecord.ConfigRecord'>
+[DEBUG _get_metrics] res_item[1] type: ConfigRecord
+[DEBUG _get_metrics] res_item[1] has metrics attr: False
+[DEBUG _get_metrics] res_item[1].__dict__: {'_check_key_fn': <function _check_key at 0x70beb79e09a0>, '_check_value_fn': <function _check_value at 0x70bead1cca40>, '_data': {'accuracy': 0.8567308783531189, 'loss': 1.056957721710205, 'total_samples': 140100, 'actual_attack': 35544, 'actual_normal': 104556, 'predicted_attack': 30234, 'predicted_normal': 109866, 'true_positives': 22853, 'true_negatives': 97175, 'false_positives': 7381, 'false_negatives': 12691, 'precision': 0.7558708738506318, 'recall': 0.6429495836146748, 'f1_score': 0.6948523822554654}}
+[DEBUG _get_metrics] res_item[1].keys(): ['accuracy', 'loss', 'total_samples', 'actual_attack', 'actual_normal', 'predicted_attack', 'predicted_normal', 'true_positives', 'true_negatives', 'false_positives', 'false_negatives', 'precision', 'recall', 'f1_score']
+[DEBUG _get_metrics] Extracted from ConfigRecord._data
+[DEBUG _get_metrics] res_item[1] type: ConfigRecord
+[DEBUG _get_metrics] res_item[1] has metrics attr: False
+[DEBUG _get_metrics] res_item[1].__dict__: {'_check_key_fn': <function _check_key at 0x70beb79e09a0>, '_check_value_fn': <function _check_value at 0x70bead1cca40>, '_data': {'accuracy': 0.6391957998275757, 'loss': 2.0354161262512207, 'total_samples': 16563, 'actual_attack': 16559, 'actual_normal': 4, 'predicted_attack': 10583, 'predicted_normal': 5980, 'true_positives': 10583, 'true_negatives': 4, 'false_positives': 0, 'false_negatives': 5976, 'precision': 1.0, 'recall': 0.6391086418261972, 'f1_score': 0.7798246260408223}}
+[DEBUG _get_metrics] res_item[1].keys(): ['accuracy', 'loss', 'total_samples', 'actual_attack', 'actual_normal', 'predicted_attack', 'predicted_normal', 'true_positives', 'true_negatives', 'false_positives', 'false_negatives', 'precision', 'recall', 'f1_score']
+[DEBUG _get_metrics] Extracted from ConfigRecord._data
+[DEBUG _get_metrics] res_item[1] type: ConfigRecord
+[DEBUG _get_metrics] res_item[1] has metrics attr: False
+[DEBUG _get_metrics] res_item[1].__dict__: {'_check_key_fn': <function _check_key at 0x70beb79e09a0>, '_check_value_fn': <function _check_value at 0x70bead1cca40>, '_data': {'accuracy': 0.9197474122047424, 'loss': 0.7762812376022339, 'total_samples': 136681, 'actual_attack': 4456, 'actual_normal': 132225, 'predicted_attack': 12225, 'predicted_normal': 124456, 'true_positives': 2856, 'true_negatives': 122856, 'false_positives': 9369, 'false_negatives': 1600, 'precision': 0.23361963190184049, 'recall': 0.6409335727109515, 'f1_score': 0.34242551405791016}}
+[DEBUG _get_metrics] res_item[1].keys(): ['accuracy', 'loss', 'total_samples', 'actual_attack', 'actual_normal', 'predicted_attack', 'predicted_normal', 'true_positives', 'true_negatives', 'false_positives', 'false_negatives', 'precision', 'recall', 'f1_score']
+[DEBUG _get_metrics] Extracted from ConfigRecord._data
+[DEBUG _get_metrics] res_item[1] type: ConfigRecord
+[DEBUG _get_metrics] res_item[1] has metrics attr: False
+[DEBUG _get_metrics] res_item[1].__dict__: {'_check_key_fn': <function _check_key at 0x70beb79e09a0>, '_check_value_fn': <function _check_value at 0x70bead1cca40>, '_data': {'accuracy': 0.9197474122047424, 'loss': 0.7762812376022339, 'total_samples': 136681, 'actual_attack': 4456, 'actual_normal': 132225, 'predicted_attack': 12225, 'predicted_normal': 124456, 'true_positives': 2856, 'true_negatives': 122856, 'false_positives': 9369, 'false_negatives': 1600, 'precision': 0.23361963190184049, 'recall': 0.6409335727109515, 'f1_score': 0.34242551405791016}}
+[DEBUG _get_metrics] res_item[1].keys(): ['accuracy', 'loss', 'total_samples', 'actual_attack', 'actual_normal', 'predicted_attack', 'predicted_normal', 'true_positives', 'true_negatives', 'false_positives', 'false_negatives', 'precision', 'recall', 'f1_score']
+[DEBUG _get_metrics] Extracted from ConfigRecord._data
+[DEBUG] Extracted 4 metrics from results
+
+[Evaluation Summary]
+============================================================
+Round: 5 / 5
+Accuracy (mean):  0.8339  (83.39%)
+Loss:             1.1612
+[Per-Device Accuracy]
+  - Device 0:  0.8567  (85.67%)
+  - Device 1:  0.6392  (63.92%)
+  - Device 2:  0.9197  (91.97%)
+  - Device 3:  0.9197  (91.97%)
+
+[Ground Truth]
+  - Attack samples: 35544
+  - Normal samples: 104556
+  - Total samples:  140100
+
+[Predictions]
+  - Predicted Attack:  30234
+  - Predicted Normal:  109866
+
+[Confusion Matrix]
+  - True Positives (TP):  22853
+  - True Negatives (TN):  97175
+  - False Positives (FP): 7381
+  - False Negatives (FN): 12691
+
+[Metrics]
+  - Precision:  0.5558  (55.58%)
+  - Recall:     0.6410  (64.10%)
+  - F1-Score:   0.5399  (53.99%)
+============================================================
+
+[Report] Round-by-round metrics saved:
+  - CSV:  /mnt/c/Users/danie/Documents/Projects/TinyML/outputs/fl_evaluation_history.csv  (round, accuracy, device 0~3 accuracy_pct, ...)
+  - JSON: /mnt/c/Users/danie/Documents/Projects/TinyML/outputs/fl_evaluation_history.json  (same + per-device for scripts / graphs)
+  → Use these to find which round or which device accuracy drops.
+
+[Saving] Model with QAT layers (same as training architecture)
+[SUCCESS] Saved global model to data/processed/revision/2026-10-03_00-03-11_quick/non_iid/models/fl_dirichlet_c4.h5
+
+📝 Pipeline summary saved to: outputs/fl_training_summary.txt
+   → View this file to see QAT status, metrics, and next steps
+
+[36m(ClientAppActor pid=3585)[0m [Client 2] Class weights (smoothed): {0: 0.28018056355304055, 1: 1.7198194364469597}[32m [repeated 3x across cluster][0m
+[36m(ClientAppActor pid=3577)[0m [Client 0] ✅ Real QAT applied: 6 QuantizeWrapper layers
+[36m(ClientAppActor pid=3577)[0m [Client 0] QAT enabled - model quantization-aware
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1791000731.256320    3179 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+I0000 00:00:1791000731.258782    3179 cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+I0000 00:00:1791000731.338640    3179 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI AVX512_BF16 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1791000732.785676    3179 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+I0000 00:00:1791000732.786911    3179 cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+E0000 00:00:1791000733.568876    3179 cuda_executor.cc:1737] INTERNAL: CUDA Runtime error: Failed call to cudaGetRuntimeVersion: Error loading CUDA libraries. GPU will not be used.: Error loading CUDA libraries. GPU will not be used.
+W0000 00:00:1791000733.569760    8925 cuda_executor.cc:1755] Failed to determine cuDNN version (Note that this is expected if the application doesn't link the cuDNN plugin): INTERNAL: cuDNN error: CUDNN_STATUS_INTERNAL_ERROR
+W0000 00:00:1791000733.604356    3179 gpu_device.cc:2365] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+[load_cicids2017] data_path=data/raw/CIC-IDS2017
+[load_cicids2017] Found 8 CSV files
+[load_cicids2017] Loaded 225,745 rows from Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv
+[load_cicids2017] Loaded 286,467 rows from Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv
+[load_cicids2017] Loaded 191,033 rows from Friday-WorkingHours-Morning.pcap_ISCX.csv
+[load_cicids2017] Loaded 529,918 rows from Monday-WorkingHours.pcap_ISCX.csv
+[load_cicids2017] Loaded 288,602 rows from Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv
+[load_cicids2017] Loaded 170,366 rows from Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv
+[load_cicids2017] Loaded 445,909 rows from Tuesday-WorkingHours.pcap_ISCX.csv
+[load_cicids2017] Loaded 692,703 rows from Wednesday-workingHours.pcap_ISCX.csv
+[load_cicids2017] Total samples loaded: 2,830,743
+[load_cicids2017] Removed 331,200 duplicates (2,499,543 unique)
+[load_cicids2017] Found 15 unique labels
+[load_cicids2017] Binary mode: BENIGN=0, ATTACK=1
+[load_cicids2017] Label distribution: BENIGN=2073680, ATTACK=425863
+[load_cicids2017] Shuffled full pool (random_state=42)
+[load_cicids2017] Balanced training set: majority 1658944 -> 1362760 (ratio<=4.0), total=1,703,450
+[load_cicids2017] StandardScaler applied (fit on train).
+[load_cicids2017] SMOTE applied: train -> 2,725,520 (BENIGN=1,362,760, ATTACK=1,362,760)
+[load_cicids2017] Final feature shape: 78 features
+[load_cicids2017] Train samples: 2,725,520, Test samples: 499,909
+
+========================================================================
+  FL train dirichlet clients=4
+  $ /home/danielpark605/tinyml-venv/bin/python -m src.federated.client --config data/processed/revision/2026-10-03_00-03-11_quick/non_iid/configs/fl_dirichlet_c4.yaml --save-model data/processed/revision/2026-10-03_00-03-11_quick/non_iid/models/fl_dirichlet_c4.h5
+========================================================================
+
+✅ Done: FL train dirichlet clients=4
+[load_cicids2017] data_path=data/raw/CIC-IDS2017
+[load_cicids2017] Found 8 CSV files
+[load_cicids2017] Loaded 225,745 rows from Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv
+[load_cicids2017] Loaded 286,467 rows from Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv
+[load_cicids2017] Loaded 191,033 rows from Friday-WorkingHours-Morning.pcap_ISCX.csv
+[load_cicids2017] Loaded 529,918 rows from Monday-WorkingHours.pcap_ISCX.csv
+[load_cicids2017] Loaded 288,602 rows from Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv
+[load_cicids2017] Loaded 170,366 rows from Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv
+[load_cicids2017] Loaded 445,909 rows from Tuesday-WorkingHours.pcap_ISCX.csv
+[load_cicids2017] Loaded 692,703 rows from Wednesday-workingHours.pcap_ISCX.csv
+[load_cicids2017] Total samples loaded: 2,830,743
+[load_cicids2017] Removed 331,200 duplicates (2,499,543 unique)
+[load_cicids2017] Found 15 unique labels
+[load_cicids2017] Binary mode: BENIGN=0, ATTACK=1
+[load_cicids2017] Label distribution: BENIGN=2073680, ATTACK=425863
+[load_cicids2017] Shuffled full pool (random_state=42)
+[load_cicids2017] Balanced training set: majority 1658944 -> 1362760 (ratio<=4.0), total=1,703,450
+[load_cicids2017] StandardScaler applied (fit on train).
+[load_cicids2017] SMOTE applied: train -> 2,725,520 (BENIGN=1,362,760, ATTACK=1,362,760)
+[load_cicids2017] Final feature shape: 78 features
+[load_cicids2017] Train samples: 2,725,520, Test samples: 499,909
+✅ Non-IID ablation saved to data/processed/revision/2026-10-03_00-03-11_quick/non_iid

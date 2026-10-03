@@ -1,0 +1,50 @@
+# Paper recipe (LCTES revision, Sec. 3.2): mirrors v12/2026-02-06_23-25-39/federated_local_sky.yaml
+# 60 rounds x 3 local epochs, lr 1e-3 cosine -> 1e-4, focal alpha 0.35, balance_ratio 4.0,
+# FedAvgM (server momentum 0.5, server lr 0.1), full CIC-IDS2017 (max_samples: null).
+# Only the fields named in the header line below differ from that recipe.
+# Sec. 3c: non-IID Dirichlet(0.3) label partition. Differs from fl_baseline.yaml ONLY in partition_strategy.
+version: "paper_v12"
+
+data:
+  name: cicids2017
+  path: "data/raw/CIC-IDS2017"
+  num_clients: 4
+  max_samples: null
+  binary: true
+  use_smote: true
+  balance_ratio: 4.0
+  partition_strategy: dirichlet
+  dirichlet_alpha: 0.3
+
+model:
+  name: mlp
+
+evaluation:
+  prediction_threshold: 0.3
+
+federated:
+  num_rounds: 60
+  fraction_fit: 1.0
+  fraction_evaluate: 1.0
+  local_epochs: 3
+  batch_size: 128
+  learning_rate: 0.001
+  use_class_weights: true
+  use_focal_loss: true
+  focal_loss_alpha: 0.35
+  use_distillation: false
+  server_momentum: 0.5
+  server_learning_rate: 0.1
+  lr_decay_type: cosine
+  lr_decay_rate: 0.97
+  lr_drop_rate: 0.5
+  lr_epochs_drop: 5
+  lr_min: 0.0001
+  use_qat: true
+  min_fit_clients: 4
+  min_evaluate_clients: 4
+  min_available_clients: 4
+
+compression:
+  always_build_traditional: false
+  traditional_model_path: null
