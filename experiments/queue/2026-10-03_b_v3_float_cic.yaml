@@ -1,0 +1,5 @@
+id: 2026-10-03_b_v3_float_cic
+config_dir: config/paper_v12_float
+steps: baseline_ablation,non_iid
+flags: []
+why: "v2 showed training-time QAT is unusable on CIC-IDS2017: learned INT8 input range [-1231, 405] (heavy-tailed standardized features) flattens normal inputs; QAT Keras model 34.7% acc vs 89.4% for its float weights. Same recipe with use_qat: false (float FL + BN), compression afterwards."

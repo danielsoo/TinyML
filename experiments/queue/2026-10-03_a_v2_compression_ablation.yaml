@@ -1,0 +1,5 @@
+id: 2026-10-03_a_v2_compression_ablation
+config_dir: config/jobs/2026-10-03_a_v2_compression_ablation
+steps: compression_ablation
+flags: []
+why: "On bug-fixed v2 models: float FL model accuracy, pruning vs fine-tuning, pooled vs client-local fine-tuning. ~10 min."

@@ -1,13 +1,14 @@
-# TON_IoT (network) with the CIC-IDS2017 paper recipe (LCTES revision, Sec. 3.2): mirrors v12/2026-02-06_23-25-39/federated_local_sky.yaml
+# Paper recipe (LCTES revision, Sec. 3.2): mirrors v12/2026-02-06_23-25-39/federated_local_sky.yaml
 # 60 rounds x 3 local epochs, lr 1e-3 cosine -> 1e-4, focal alpha 0.35, balance_ratio 4.0,
-# FedAvgM (server momentum 0.5, server lr 0.1), full TON_IoT train_test_network.csv (max_samples: null).
+# FedAvgM (server momentum 0.5, server lr 0.1), full CIC-IDS2017 (max_samples: null).
 # Only the fields named in the header line below differ from that recipe.
+# FLOAT variant: training-time QAT off (use_qat: false), everything else identical.
 # Sec. 3c: non-IID Dirichlet(0.3) label partition. Differs from fl_baseline.yaml ONLY in partition_strategy.
-version: "paper_v12_toniot"
+version: "paper_v12_float"
 
 data:
-  name: ton_iot
-  path: "data/raw/TON_IoT"
+  name: cicids2017
+  path: "data/raw/CIC-IDS2017"
   num_clients: 4
   max_samples: null
   binary: true

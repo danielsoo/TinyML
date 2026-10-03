@@ -71,3 +71,29 @@ strip and is superseded.
 Open design decision: compression fine-tuning still uses 10k pooled training samples (server-side
 data). Options: fine-tune on one client's local data, no fine-tuning, or keep pooled and disclose it
 as a server-side proxy set. `scripts/compression_ablation.py` reports all of these once v2 models exist.
+
+## Run 2026-10-03_v2_cic_full (both bugs fixed, training-time QAT on)
+
+| Row | Model | Acc | Prec | Attack recall | F1 | FAR | Size |
+|---|---|---|---|---|---|---|---|
+| (a) | Centralized (Keras FP32) | 95.74% | 80.01% | 99.95% | 88.87% | 5.13% | — |
+| (b) | FL near-IID, QAT Keras model as trained | 34.74% | 20.70% | 99.97% | 34.30% | 78.66% | — |
+| (b') | same FL weights, QAT stripped to float (Keras evaluate @0.5) | 89.40% acc | | | | | |
+| (c) | FL → prune → FT (pooled 10k) → PTQ | 91.96% | 69.01% | 95.88% | 80.26% | 8.84% | 75.1 KB |
+| (d) | FL → prune → FT (pooled 10k) → QAT → INT8 | 94.85% | 81.04% | 91.08% | 85.76% | 4.38% | 65.4 KB |
+| non-IID | Dirichlet(0.3), QAT Keras model | 18.06% | 17.21% | 100% | 29.37% | 98.77% | — |
+
+Fix check: compression log now reports `4 layers with weights copied`; FL weights are |w| ≲ 10 (no ±127).
+
+**New finding — training-time QAT does not work on this data.** The QAT model's learned INT8 input
+range is [−1231, 405] (activations up to 2342): standardized CIC-IDS2017 features are heavy-tailed,
+and the moving-average min/max quantizers cover the outliers. One INT8 step ≈ 6.4 standard deviations,
+so ordinary inputs collapse to the zero point and the QAT model outputs ~constant (34.7% acc), while
+the same weights in float reach 89.4%. The earlier "QAT" results were produced by the bugs above,
+not by working QAT. PTQ calibration (min/max on representative data) is exposed to the same outliers.
+
+Next jobs: `2026-10-03_a_v2_compression_ablation` (float FL model accuracy at threshold 0.3; pooled vs
+client-local fine-tuning) and `2026-10-03_b_v3_float_cic` (same recipe, `use_qat: false`). TON_IoT
+config switched to `use_qat: false` for the same reason. Open: robust feature scaling (clipping or
+log transform before standardization) so INT8 ranges are not set by outliers — to be chosen on the
+validation split.

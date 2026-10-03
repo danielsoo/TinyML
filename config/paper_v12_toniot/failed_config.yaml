@@ -40,7 +40,7 @@ federated:
   lr_drop_rate: 0.5
   lr_epochs_drop: 5
   lr_min: 0.001
-  use_qat: true
+  use_qat: false
   min_fit_clients: 4
   min_evaluate_clients: 4
   min_available_clients: 4
