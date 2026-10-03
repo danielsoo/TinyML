@@ -1,5 +1,0 @@
-id: 2026-10-03_toniot_full
-config_dir: config/paper_v12_toniot
-steps: baseline_ablation,non_iid
-flags: []
-why: "Second dataset (reviewers: CIC-IDS2017-only evaluation). Same paper recipe on TON_IoT network data: centralized, FL near-IID + compression, Dirichlet(0.3) non-IID. Waits until data/raw/TON_IoT has the CSV."
