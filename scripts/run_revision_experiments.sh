@@ -7,6 +7,7 @@
 #   bash scripts/run_revision_experiments.sh --with-failed --with-scaling   # + fixed-LR row, 20/50 clients
 #   bash scripts/run_revision_experiments.sh --config-dir config/tuning/<job>   # alternate configs
 #   bash scripts/run_revision_experiments.sh --steps non_iid          # subset of: baseline_ablation,non_iid,client_scaling
+#   bash scripts/run_revision_experiments.sh --steps compression_ablation --config-dir <dir with compression_ablation.yaml>
 # Re-running with the same --out resumes: finished steps are skipped.
 set -uo pipefail
 
@@ -36,8 +37,8 @@ TAG=$([ -n "$QUICK" ] && echo quick || echo full)
 OUT="${OUT:-data/processed/revision/$(date +%Y-%m-%d_%H-%M-%S)_$TAG}"
 mkdir -p "$OUT"
 echo "Output: $OUT"
-git rev-parse HEAD > "$OUT/git_commit.txt" 2>/dev/null || true
-mkdir -p "$OUT/configs" && cp "$CONFIG_DIR"/*.yaml "$OUT/configs/"
+{ git rev-parse HEAD 2>/dev/null || git.exe rev-parse HEAD 2>/dev/null; } | tr -d '\r' > "$OUT/git_commit.txt" || true
+mkdir -p "$OUT/configs" && cp "$CONFIG_DIR"/*.yaml "$OUT/configs/" 2>/dev/null || true
 
 step() {  # step <name> <command...>
   local name="$1"; shift
@@ -70,6 +71,10 @@ if wanted non_iid; then
     --base-config "$CONFIG_DIR/fl_baseline.yaml" --strategies dirichlet --client-counts 4 \
     --output-dir "$OUT/non_iid" $QUICK || FAILED=1
 fi
+if wanted compression_ablation; then
+  step compression_ablation python scripts/compression_ablation.py \
+    --spec "$CONFIG_DIR/compression_ablation.yaml" --output-dir "$OUT/compression_ablation" || FAILED=1
+fi
 if wanted client_scaling; then
   step client_scaling python scripts/run_non_iid_ablation.py \
     --base-config "$CONFIG_DIR/fl_baseline.yaml" --strategies label_balanced,dirichlet \
@@ -84,7 +89,7 @@ fi
   echo "- host: $(uname -srm), $(nproc) cores"
   for f in "$OUT"/*.done; do [ -f "$f" ] && echo "- $(basename "$f" .done): $(( $(cat "$f") / 60 )) min"; done
   echo
-  for md in "$OUT"/baseline/baseline_ablation.md "$OUT"/non_iid/non_iid_ablation.md "$OUT"/client_scaling/non_iid_ablation.md; do
+  for md in "$OUT"/baseline/baseline_ablation.md "$OUT"/non_iid/non_iid_ablation.md "$OUT"/client_scaling/non_iid_ablation.md "$OUT"/compression_ablation/compression_ablation.md; do
     [ -f "$md" ] && { cat "$md"; echo; }
   done
 } > "$OUT/SUMMARY.md"
