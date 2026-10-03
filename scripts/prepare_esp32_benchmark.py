@@ -59,7 +59,7 @@ def main():
     for key, src in (("compressed", args.compressed), ("baseline", args.baseline)):
         dst = models_dir / TARGETS[key]
         if Path(src).resolve() != dst.resolve():
-            shutil.copy2(ROOT / src, dst)
+            shutil.copyfile(ROOT / src, dst)
         staged[key] = dst
         print(f"  {key}: {src} -> {dst.relative_to(ROOT)} ({dst.stat().st_size} B)")
 

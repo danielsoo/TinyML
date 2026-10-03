@@ -130,7 +130,8 @@ def _run_compression(
     comp = cfg.setdefault("compression", {})
     comp["traditional_model_path"] = str(traditional_copy)
     save_yaml(cfg_path, cfg)
-    shutil.copy2(model_path, traditional_copy)
+    # copyfile, not copy2: copying timestamps fails on WSL /mnt/c (EPERM on utime)
+    shutil.copyfile(model_path, traditional_copy)
 
     cmd = [
         sys.executable,
@@ -145,7 +146,7 @@ def _run_compression(
         raise RuntimeError(f"Compression failed for {model_path}")
 
     for src in project_models.glob("*.tflite"):
-        shutil.copy2(src, out_tflite_dir / src.name)
+        shutil.copyfile(src, out_tflite_dir / src.name)
 
 
 def _run_pgd_on_models(
@@ -212,7 +213,7 @@ def main():
 
     # --- (a) Centralized ---
     cfg_a = configs_dir / "a_centralized.yaml"
-    shutil.copy2(ROOT / args.config_dir / "centralized.yaml", cfg_a)
+    shutil.copyfile(ROOT / args.config_dir / "centralized.yaml", cfg_a)
     save_yaml(cfg_a, apply_quick_mode(load_yaml(cfg_a), args.quick))
     model_a = models_dir / "a_centralized.h5"
     if not args.skip_train:
@@ -232,7 +233,7 @@ def main():
 
     # --- (b) FL ---
     cfg_b = configs_dir / "b_fl.yaml"
-    shutil.copy2(ROOT / args.config_dir / "fl_baseline.yaml", cfg_b)
+    shutil.copyfile(ROOT / args.config_dir / "fl_baseline.yaml", cfg_b)
     save_yaml(cfg_b, apply_quick_mode(load_yaml(cfg_b), args.quick))
     model_b = models_dir / "b_fl.h5"
     if not args.skip_train:
@@ -276,7 +277,7 @@ def main():
     # --- failed narrative ---
     if args.with_failed:
         cfg_f = configs_dir / "failed.yaml"
-        shutil.copy2(ROOT / args.config_dir / "failed_config.yaml", cfg_f)
+        shutil.copyfile(ROOT / args.config_dir / "failed_config.yaml", cfg_f)
         save_yaml(cfg_f, apply_quick_mode(load_yaml(cfg_f), args.quick))
         model_f = models_dir / "failed_fl.h5"
         if not args.skip_train:
