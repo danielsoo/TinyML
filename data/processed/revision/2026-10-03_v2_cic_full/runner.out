@@ -1,0 +1,8 @@
+Output: data/processed/revision/2026-10-03_v2_cic_full
+▶ baseline_ablation  (2026-10-03 11:08:42)
+✅ baseline_ablation finished in 330 min
+▶ non_iid  (2026-10-03 16:39:37)
+✅ non_iid finished in 163 min
+
+Summary: data/processed/revision/2026-10-03_v2_cic_full/SUMMARY.md
+All steps OK.
