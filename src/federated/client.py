@@ -251,27 +251,23 @@ class KerasClient(fl.client.NumPyClient):
 
     def _quantize_weights(self, weights: List[np.ndarray]) -> List[np.ndarray]:
         """
-        Quantize float32 weights to int8 before sending to server.
-        Stores quantization params for potential later use.
+        Round each weight tensor to int8 precision (per-tensor symmetric) before sending.
+
+        The update is sent as the dequantized float32 values: sending the raw int8 arrays
+        without their scales made the server average int8 codes and treat them as weights,
+        which rescaled every tensor to max |w| = 127 each round.
         """
         if not self.use_qat:
             return weights
 
-        quantized = []
-        self.quant_params_cache = []
-
+        rounded = []
         for w in weights:
             if w.dtype in [np.float32, np.float64]:
                 params = calculate_quantization_params(w, symmetric=True)
-                q_w = quantize_array(w, params)
-                quantized.append(q_w)
-                self.quant_params_cache.append(params)
+                rounded.append(dequantize_array(quantize_array(w, params), params).astype(np.float32))
             else:
-                # Already quantized or non-float type
-                quantized.append(w)
-                self.quant_params_cache.append(None)
-
-        return quantized
+                rounded.append(w)
+        return rounded
 
     def _dequantize_weights(self, weights: List[np.ndarray]) -> List[np.ndarray]:
         """

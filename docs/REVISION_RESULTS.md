@@ -1,5 +1,8 @@
 # Revision experiment results (running log)
 
+> ⚠️ **2026-10-03: two pipeline bugs found; every number below this box from before the fix is invalid
+> as a federated result.** See "Bugs found" at the end. Rerun: job `2026-10-03_v2_cic_full`.
+
 All runs: paper recipe `config/paper_v12/` (60 rounds × 3 local epochs, lr 1e-3 cosine → 1e-4,
 focal α = 0.35, FedAvgM, full CIC-IDS2017, dedup, 80/20 stratified split, balance_ratio 4.0, SMOTE),
 test split, threshold 0.3, run on the user's PC (WSL2, 16 cores, CPU).
@@ -40,3 +43,31 @@ match the CIC-IDS2017 preprocessing: drop `ts`, `src_ip`, `dst_ip`, `src_port`; 
 columns with ≤ 50 values; drop high-cardinality free text (DNS query, URI, user agent, SSL subject…);
 deduplicate; stratified 80/20 split; same undersampling / scaling / SMOTE. The first run's log lists
 the kept features for review.
+
+## Bugs found (2026-10-03) — affect all earlier runs and the paper's compressed-model numbers
+
+1. **FL int8 communication (use_qat: true).** `FlowerClient._quantize_weights` sent raw int8 codes
+   without their scales; the server averaged the codes as if they were weights, so every tensor was
+   rescaled to max |w| = 127 each round (unit check: [0.10, −0.50, 0.25, 0.02] arrives as
+   [25, −127, 64, 5]). Saved FL models show every tensor at exactly ±127 / ±126.0 and all QAT
+   quantizer ranges at ±127. Fix: send the int8-rounded values dequantized with the sender's scale.
+2. **QAT stripping in compression (since the first commit).** `compression.strip_qat_layers` copied
+   weights positionally from `wrapper.layer.weights`, which lacks the kernel; every `set_weights`
+   failed and the log printed `QAT layers stripped manually (0/6 layers with weights)`. Every
+   compressed model therefore started from **random initialisation** and was then trained for
+   3 + 2 epochs on the first 10,000 pooled training samples. Evidence: compression ablation `fp32`
+   variant = 17% accuracy (all-attack) for a model that scores 90.6% unstripped; reproduction on a
+   trained model gives correlation −0.01 between QAT and stripped outputs. Fix: copy by variable
+   name, raise if nothing is copied; after both fixes the stripped model matches the QAT model
+   (corr 0.999).
+
+Consequences: the headline compressed results (paper Table 3, 96.02 / 89.32 / 93.85, and the
+reproduction 96.61 / 90.45 / 94.12 above) are a small centrally trained model, not the federated
+model; §5.6's "pruning improves recall" and the training-time-QAT findings built on QAT-trained
+models need to be re-derived. Model sizes / compression ratios and the ESP32 latency benchmark
+(architecture-only) are unaffected. The `2026-10-03_compression_ablation` job ran on the buggy
+strip and is superseded.
+
+Open design decision: compression fine-tuning still uses 10k pooled training samples (server-side
+data). Options: fine-tune on one client's local data, no fine-tuning, or keep pooled and disclose it
+as a server-side proxy set. `scripts/compression_ablation.py` reports all of these once v2 models exist.

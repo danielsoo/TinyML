@@ -1,0 +1,5 @@
+id: 2026-10-03_v2_cic_full
+config_dir: config/paper_v12
+steps: baseline_ablation,non_iid
+flags: []
+why: "Rerun of 2026-10-03_01-46-48_full after fixing two bugs: (1) FL int8 communication rescaled every weight tensor to max|w|=127 each round; (2) compression.py strip_qat_layers copied no weights, so every compressed model started from random init. Same recipe."

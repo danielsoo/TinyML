@@ -62,105 +62,65 @@ def has_qat_layers(model):
 
 def strip_qat_layers(model):
     """
-    Strip QAT layers to get the base model.
-    If model has QuantizeWrapper layers from tfmot.quantize_model(),
-    this extracts the underlying base model.
-    
-    Manual extraction approach: rebuild model from layer configs and weights.
+    Strip QAT layers to get the float base model.
+
+    Rebuilds a Sequential from the wrapped layers' configs and copies each weight by
+    its variable name suffix (kernel, bias, gamma, ...). The QuantizeWrapper owns the
+    wrapped layer's kernel, so wrapper.layer.weights is incomplete and positional
+    copying silently fails; this version raises instead of returning a model with
+    freshly initialised weights, and checks that outputs still match the QAT model.
     """
     if not has_qat_layers(model):
         return model
-    
+
     print("   Stripping QAT layers from FL-trained model...")
-    
-    # Manual extraction (most stable approach)
-    try:
-        import tensorflow as tf
-        from tensorflow.keras import Sequential, layers
-        
-        # Extract layer configs and weights from QAT model
-        layer_configs = []
-        layer_weights = []
-        
-        for layer in model.layers:
-            # Check if this is a QuantizeWrapper
-            if 'QuantizeWrapper' in type(layer).__name__:
-                # Extract the wrapped layer
-                wrapped_layer = layer.layer
-                config = wrapped_layer.get_config()
-                
-                # Fix QuantizeAwareActivation: extract the real activation
-                if 'activation' in config and isinstance(config['activation'], dict):
-                    if config['activation'].get('class_name') == 'QuantizeAwareActivation':
-                        # Extract the real activation from QuantizeAwareActivation config
-                        real_activation = config['activation'].get('config', {}).get('activation', 'relu')
-                        config['activation'] = real_activation
-                        print(f"      Fixed activation in {config.get('name', 'layer')}: QuantizeAwareActivation → {real_activation}")
-                
-                layer_configs.append({
-                    'class_name': wrapped_layer.__class__.__name__,
-                    'config': config
-                })
-                # QAT wrappers store weights on themselves (kernel, bias, then
-                # quantization scale/zero-point variables). The wrapped layer's
-                # get_weights() only returns the quant variables, not the actual
-                # kernel/bias. Instead, take the wrapper's weights and keep only
-                # the first N that the unwrapped layer expects (kernel + bias = 2
-                # for a Dense with bias, 1 without).
-                expected = len(wrapped_layer.weights) if hasattr(wrapped_layer, 'weights') and wrapped_layer.weights else 0
-                wrapper_weights = layer.get_weights()
-                if wrapper_weights and expected > 0:
-                    layer_weights.append(wrapper_weights[:expected])
-                elif wrapper_weights:
-                    layer_weights.append(wrapper_weights)
-                else:
-                    layer_weights.append(None)
-            elif 'QuantizeLayer' not in type(layer).__name__:
-                # Regular layer, keep it
-                layer_configs.append({
-                    'class_name': layer.__class__.__name__,
-                    'config': layer.get_config()
-                })
-                if layer.get_weights():
-                    layer_weights.append(layer.get_weights())
-                else:
-                    layer_weights.append(None)
-            # Skip QuantizeLayer input layers
-        
-        # Build new model from configs
-        base_model = Sequential(name=model.name)
-        for i, layer_config in enumerate(layer_configs):
-            layer_class = getattr(layers, layer_config['class_name'])
-            new_layer = layer_class.from_config(layer_config['config'])
-            base_model.add(new_layer)
-        
-        # Build the model with the correct input shape
-        if hasattr(model, 'input_shape') and model.input_shape:
-            base_model.build(model.input_shape)
-        
-        # Set weights with error checking
-        weight_idx = 0
-        weights_set_count = 0
-        for layer in base_model.layers:
-            if weight_idx >= len(layer_weights):
-                break
-            if layer_weights[weight_idx] is not None:
-                try:
-                    layer.set_weights(layer_weights[weight_idx])
-                    weights_set_count += 1
-                except Exception as we:
-                    print(f"      ⚠️  Failed to set weights for layer {layer.name}: {we}")
-            weight_idx += 1
-        
-        print(f"   ✅ QAT layers stripped manually ({weights_set_count}/{len(layer_weights)} layers with weights)")
-        return base_model
-        
-    except Exception as e:
-        print(f"   ⚠️ Could not strip QAT layers: {e}")
-        import traceback
-        traceback.print_exc()
-        print("   Using model as-is (may cause issues with compression)")
-        return model
+    from tensorflow.keras import Sequential, layers
+
+    configs, sources = [], []
+    for layer in model.layers:
+        name = type(layer).__name__
+        if "QuantizeLayer" in name:
+            continue
+        if "QuantizeWrapper" in name:
+            wrapped = layer.layer
+            config = wrapped.get_config()
+            act = config.get("activation")
+            if isinstance(act, dict) and act.get("class_name") == "QuantizeAwareActivation":
+                config["activation"] = act.get("config", {}).get("activation", "relu")
+            cls = wrapped.__class__.__name__
+        else:
+            config = layer.get_config()
+            cls = layer.__class__.__name__
+        configs.append((cls, config))
+        sources.append({w.name.split("/")[-1].split(":")[0]: w.numpy() for w in layer.weights})
+
+    base_model = Sequential(name=model.name)
+    for cls, config in configs:
+        base_model.add(getattr(layers, cls).from_config(config))
+    base_model.build(model.input_shape)
+
+    copied = 0
+    for new_layer, src in zip(base_model.layers, sources):
+        if not new_layer.weights:
+            continue
+        keys = [w.name.split("/")[-1].split(":")[0] for w in new_layer.weights]
+        missing = [k for k in keys if k not in src]
+        if missing:
+            raise ValueError(f"strip_qat_layers: {new_layer.name} has no source for {missing}; "
+                             f"available: {sorted(src)}")
+        new_layer.set_weights([src[k] for k in keys])
+        copied += 1
+
+    # Diagnostic: float model vs. QAT model (differs by fake-quant rounding/clipping)
+    x = np.random.default_rng(0).normal(size=(512,) + tuple(model.input_shape[1:])).astype("float32")
+    y_qat = np.asarray(model(x, training=False)).ravel()
+    y_float = np.asarray(base_model(x, training=False)).ravel()
+    corr = float(np.corrcoef(y_qat, y_float)[0, 1]) if y_qat.std() > 0 and y_float.std() > 0 else float("nan")
+    print(f"   ✅ QAT layers stripped ({copied} layers with weights copied); "
+          f"QAT vs float on N(0,1) inputs: corr={corr:.3f}, max|diff|={np.max(np.abs(y_qat - y_float)):.3f}")
+    if copied == 0:
+        raise ValueError("strip_qat_layers: no weights copied; refusing to return an untrained model")
+    return base_model
 
 
 def safe_evaluate(model, x, y, verbose=0):
