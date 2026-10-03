@@ -73,12 +73,17 @@ run_job() {
   push_results "$out" "Results: $id ($(cat "$out/JOB_STATUS"))"
 }
 
+SELF_SUM="$(md5sum scripts/pc_worker.sh | cut -d' ' -f1)"
 log "worker started in $REPO_DIR on branch $BRANCH (poll every ${POLL_SECONDS}s)"
 while true; do
   if pgrep -f "^bash scripts/run_revision_experiments.sh" >/dev/null; then
     log "another experiment run is active; waiting"
   else
     git_ pull -q --rebase --autostash origin "$BRANCH" || log "pull failed (will retry)"
+    if [ "$(md5sum scripts/pc_worker.sh | cut -d' ' -f1)" != "$SELF_SUM" ]; then
+      log "pc_worker.sh changed upstream; restarting"
+      exec bash scripts/pc_worker.sh
+    fi
     # Finished manual runs (SUMMARY.md present) that were never pushed
     for d in data/processed/revision/*/; do
       [ -f "$d/SUMMARY.md" ] || continue
