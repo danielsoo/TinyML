@@ -1,0 +1,39 @@
+# Revision experiments (full)
+
+- commit: 416a327f90353f8288e68a45ba4dd0edff059a66
+- configs: config/jobs/2026-10-03_compression_ablation (eval_split: )
+- host: Linux 6.18.40.1-microsoft-standard-WSL2 x86_64, 16 cores
+- compression_ablation: 7 min
+
+# Compression fine-tuning ablation
+
+| model | variant | description | ft_data | size_kb | accuracy | precision | attack_recall | f1 | false_alarm_rate | fp | fn | threshold |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| near_iid | fp32 | FL model, no compression | - | 798.42 | 0.17065505922077817 | 0.17042439522180203 | 1.0 | 0.29121811868848757 | 0.9996648470352224 | 414597 | 0 | 0.3 |
+| near_iid | ptq_only | INT8 PTQ only (no pruning, no fine-tune) | - | 212.24 | 0.17037700861556804 | 0.17037700861556804 | 1.0 | 0.29114893297007943 | 1.0 | 414736 | 0 | 0.3 |
+| near_iid | prune_noft_ptq | prune 50% -> PTQ (no fine-tune) | - | 67.45 | 0.17037700861556804 | 0.17037700861556804 | 1.0 | 0.29114893297007943 | 1.0 | 414736 | 0 | 0.3 |
+| near_iid | ftonly_pooled_ptq | fine-tune 3 ep (no pruning) -> PTQ | pooled | 226.91 | 0.9637954107647592 | 0.8692688835058358 | 0.9269017176804856 | 0.897160682527146 | 0.028627850005786815 | 11873 | 6226 | 0.3 |
+| near_iid | prune_ft_pooled_ptq | prune 50% -> fine-tune -> PTQ | pooled | 75.09 | 0.964017451176114 | 0.897060387929506 | 0.8910570251135923 | 0.8940486287814532 | 0.020998900505381737 | 8709 | 9279 | 0.3 |
+| near_iid | prune_ft_pooled_qat | prune -> fine-tune -> QAT 2 ep (deploy recipe) | pooled | 65.43 | 0.9657517668215615 | 0.8648040140663865 | 0.9470372066265131 | 0.9040544705651602 | 0.030404884070830602 | 12610 | 4511 | 0.3 |
+| near_iid | ftonly_client_ptq | fine-tune 3 ep (no pruning) -> PTQ | client | 226.91 | 0.9097795798835389 | 0.6549308299631145 | 0.9943878928768507 | 0.789726423363109 | 0.10759615755564986 | 44624 | 478 | 0.3 |
+| near_iid | prune_ft_client_ptq | prune 50% -> fine-tune -> PTQ | client | 75.09 | 0.9257384844041615 | 0.7005467673942986 | 0.9853122468387869 | 0.8188790445337808 | 0.0864959878091123 | 35873 | 1251 | 0.3 |
+| near_iid | prune_ft_client_qat | prune -> fine-tune -> QAT 2 ep (deploy recipe) | client | 65.44 | 0.9372985883430784 | 0.7331427581427581 | 0.9936717034741056 | 0.8437538943139278 | 0.07427857721538521 | 30806 | 539 | 0.3 |
+| dirichlet_c1 | fp32 | FL model, no compression | - | 798.46 | 0.17457377242658165 | 0.1706849078120883 | 0.9963603489368696 | 0.2914431523926616 | 0.9941938968403997 | 412328 | 310 | 0.3 |
+| dirichlet_c1 | ptq_only | INT8 PTQ only (no pruning, no fine-tune) | - | 212.27 | 0.17446175203887107 | 0.17060076556525308 | 0.9957850492526974 | 0.2912958809730699 | 0.994210775047259 | 412335 | 359 | 0.3 |
+| dirichlet_c1 | prune_noft_ptq | prune 50% -> PTQ (no fine-tune) | - | 67.45 | 0.17037700861556804 | 0.17037700861556804 | 1.0 | 0.29114893297007943 | 1.0 | 414736 | 0 | 0.3 |
+| dirichlet_c1 | ftonly_pooled_ptq | fine-tune 3 ep (no pruning) -> PTQ | pooled | 226.91 | 0.9634493477812962 | 0.8920455211373253 | 0.8936165216676646 | 0.8928303303303303 | 0.022209309054434627 | 9211 | 9061 | 0.3 |
+| dirichlet_c1 | prune_ft_pooled_ptq | prune 50% -> fine-tune -> PTQ | pooled | 75.1 | 0.9635573674408743 | 0.8862684466187449 | 0.9018350885844105 | 0.8939840085660083 | 0.023766926430307474 | 9857 | 8361 | 0.3 |
+| dirichlet_c1 | prune_ft_pooled_qat | prune -> fine-tune -> QAT 2 ep (deploy recipe) | pooled | 65.44 | 0.9650276350295753 | 0.8630736553026239 | 0.9445951181712514 | 0.9019961769371773 | 0.030776204621735272 | 12764 | 4719 | 0.3 |
+| dirichlet_c1 | ftonly_client_ptq | fine-tune 3 ep (no pruning) -> PTQ | client | 226.91 | 0.9357863131089859 | 0.7319945445961777 | 0.9830227889119791 | 0.8391370800030067 | 0.07391449018170596 | 30655 | 1446 | 0.3 |
+| dirichlet_c1 | prune_ft_client_ptq | prune 50% -> fine-tune -> PTQ | client | 75.1 | 0.9361783844659728 | 0.7333736396614269 | 0.9826705646155471 | 0.8399138982132373 | 0.07336956521739131 | 30429 | 1476 | 0.3 |
+| dirichlet_c1 | prune_ft_client_qat | prune -> fine-tune -> QAT 2 ep (deploy recipe) | client | 65.44 | 0.9394709837190368 | 0.7425315784824662 | 0.9869559602221362 | 0.847471809580458 | 0.07028085336213881 | 29148 | 1111 | 0.3 |
+| dirichlet_c3 | fp32 | FL model, no compression | - | 798.48 | 0.17105913276216272 | 0.1704933062165711 | 1.0 | 0.2913187205959561 | 0.9991777902087111 | 414395 | 0 | 0.3 |
+| dirichlet_c3 | ptq_only | INT8 PTQ only (no pruning, no fine-tune) | - | 212.27 | 0.17037700861556804 | 0.17037700861556804 | 1.0 | 0.29114893297007943 | 1.0 | 414736 | 0 | 0.3 |
+| dirichlet_c3 | prune_noft_ptq | prune 50% -> PTQ (no fine-tune) | - | 67.45 | 0.17037700861556804 | 0.17037700861556804 | 1.0 | 0.29114893297007943 | 1.0 | 414736 | 0 | 0.3 |
+| dirichlet_c3 | ftonly_pooled_ptq | fine-tune 3 ep (no pruning) -> PTQ | pooled | 226.91 | 0.9621451104100947 | 0.8809296548868981 | 0.8993812593192678 | 0.8900598384941614 | 0.024965279117318006 | 10354 | 8570 | 0.3 |
+| dirichlet_c3 | prune_ft_pooled_ptq | prune 50% -> fine-tune -> PTQ | pooled | 75.1 | 0.962779225819099 | 0.8735465768799102 | 0.9138224554729786 | 0.8932307356848164 | 0.027166679526252846 | 11267 | 7340 | 0.3 |
+| dirichlet_c3 | prune_ft_pooled_qat | prune -> fine-tune -> QAT 2 ep (deploy recipe) | pooled | 65.44 | 0.9657817722825555 | 0.8650840475858443 | 0.9468258720486539 | 0.9041111248136148 | 0.03032531538135103 | 12577 | 4529 | 0.3 |
+| dirichlet_c3 | ftonly_client_ptq | fine-tune 3 ep (no pruning) -> PTQ | client | 226.91 | 0.9603387816582618 | 0.8490928905699083 | 0.9330421612482829 | 0.8890902683381161 | 0.03405539909725705 | 14124 | 5703 | 0.3 |
+| dirichlet_c3 | prune_ft_client_ptq | prune 50% -> fine-tune -> PTQ | client | 75.1 | 0.9630812807931044 | 0.860901645551817 | 0.9342632054759137 | 0.8960834215445598 | 0.03100044365572316 | 12857 | 5599 | 0.3 |
+| dirichlet_c3 | prune_ft_client_qat | prune -> fine-tune -> QAT 2 ep (deploy recipe) | client | 65.44 | 0.9658137781076156 | 0.8639984602388768 | 0.9486809200098623 | 0.9043616461660716 | 0.030667701863354036 | 12719 | 4371 | 0.3 |
+

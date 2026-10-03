@@ -1,0 +1,826 @@
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1791036804.901725  123316 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+I0000 00:00:1791036804.902971  123316 cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+I0000 00:00:1791036805.275426  123316 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI AVX512_BF16 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1791036807.248341  123316 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+I0000 00:00:1791036807.249733  123316 cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+E0000 00:00:1791036932.261262  123316 cuda_executor.cc:1737] INTERNAL: CUDA Runtime error: Failed call to cudaGetRuntimeVersion: Error loading CUDA libraries. GPU will not be used.: Error loading CUDA libraries. GPU will not be used.
+W0000 00:00:1791036932.262136  123385 cuda_executor.cc:1755] Failed to determine cuDNN version (Note that this is expected if the application doesn't link the cuDNN plugin): INTERNAL: cuDNN error: CUDNN_STATUS_INTERNAL_ERROR
+W0000 00:00:1791036932.287404  123316 gpu_device.cc:2365] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+W0000 00:00:1791036933.462040  123316 tf_tfl_flatbuffer_helpers.cc:364] Ignored output_format.
+W0000 00:00:1791036933.462534  123316 tf_tfl_flatbuffer_helpers.cc:367] Ignored drop_control_dependency.
+I0000 00:00:1791036933.463284  123316 reader.cc:83] Reading SavedModel from: /tmp/tmp656dr8d2
+I0000 00:00:1791036933.464034  123316 reader.cc:52] Reading meta graph with tags { serve }
+I0000 00:00:1791036933.464524  123316 reader.cc:147] Reading SavedModel debug info (if present) from: /tmp/tmp656dr8d2
+I0000 00:00:1791036933.469078  123316 mlir_graph_optimization_pass.cc:437] MLIR V1 optimization pass is not enabled
+I0000 00:00:1791036933.469791  123316 loader.cc:236] Restoring SavedModel bundle.
+I0000 00:00:1791036933.483122  123316 loader.cc:220] Running initialization op on SavedModel bundle at path: /tmp/tmp656dr8d2
+I0000 00:00:1791036933.486886  123316 loader.cc:471] SavedModel load for tags { serve }; Status: success: OK. Took 23608 microseconds.
+I0000 00:00:1791036933.510912  123316 dump_mlir_util.cc:269] disabling MLIR crash reproducer, set env var `MLIR_CRASH_REPRODUCER_DIRECTORY` to enable.
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/interpreter.py:457: UserWarning:     Warning: tf.lite.Interpreter is deprecated and is scheduled for deletion in
+    TF 2.20. Please use the LiteRT interpreter from the ai_edge_litert package.
+    See the [migration guide](https://ai.google.dev/edge/litert/migration)
+    for details.
+    
+  warnings.warn(_INTERPRETER_DELETION_WARNING)
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/convert.py:846: UserWarning: Statistics for quantized inputs were expected, but not specified; continuing anyway.
+  warnings.warn(
+W0000 00:00:1791036939.673963  123316 tf_tfl_flatbuffer_helpers.cc:364] Ignored output_format.
+W0000 00:00:1791036939.674379  123316 tf_tfl_flatbuffer_helpers.cc:367] Ignored drop_control_dependency.
+I0000 00:00:1791036939.674850  123316 reader.cc:83] Reading SavedModel from: /tmp/tmp0klyezu8
+I0000 00:00:1791036939.675503  123316 reader.cc:52] Reading meta graph with tags { serve }
+I0000 00:00:1791036939.675846  123316 reader.cc:147] Reading SavedModel debug info (if present) from: /tmp/tmp0klyezu8
+I0000 00:00:1791036939.677939  123316 loader.cc:236] Restoring SavedModel bundle.
+I0000 00:00:1791036939.690004  123316 loader.cc:220] Running initialization op on SavedModel bundle at path: /tmp/tmp0klyezu8
+I0000 00:00:1791036939.693824  123316 loader.cc:471] SavedModel load for tags { serve }; Status: success: OK. Took 18980 microseconds.
+fully_quantize: 0, inference_type: 6, input_inference_type: FLOAT32, output_inference_type: FLOAT32
+W0000 00:00:1791036939.770335  123316 flatbuffer_export.cc:3851] Skipping runtime version metadata in the model. This will be generated by the exporter.
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/interpreter.py:457: UserWarning:     Warning: tf.lite.Interpreter is deprecated and is scheduled for deletion in
+    TF 2.20. Please use the LiteRT interpreter from the ai_edge_litert package.
+    See the [migration guide](https://ai.google.dev/edge/litert/migration)
+    for details.
+    
+  warnings.warn(_INTERPRETER_DELETION_WARNING)
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/convert.py:846: UserWarning: Statistics for quantized inputs were expected, but not specified; continuing anyway.
+  warnings.warn(
+W0000 00:00:1791036942.217846  123316 tf_tfl_flatbuffer_helpers.cc:364] Ignored output_format.
+W0000 00:00:1791036942.218272  123316 tf_tfl_flatbuffer_helpers.cc:367] Ignored drop_control_dependency.
+I0000 00:00:1791036942.218772  123316 reader.cc:83] Reading SavedModel from: /tmp/tmpnlnmt34m
+I0000 00:00:1791036942.219489  123316 reader.cc:52] Reading meta graph with tags { serve }
+I0000 00:00:1791036942.219874  123316 reader.cc:147] Reading SavedModel debug info (if present) from: /tmp/tmpnlnmt34m
+I0000 00:00:1791036942.222273  123316 loader.cc:236] Restoring SavedModel bundle.
+I0000 00:00:1791036942.234144  123316 loader.cc:220] Running initialization op on SavedModel bundle at path: /tmp/tmpnlnmt34m
+I0000 00:00:1791036942.238597  123316 loader.cc:471] SavedModel load for tags { serve }; Status: success: OK. Took 19830 microseconds.
+fully_quantize: 0, inference_type: 6, input_inference_type: FLOAT32, output_inference_type: FLOAT32
+W0000 00:00:1791036942.297540  123316 flatbuffer_export.cc:3851] Skipping runtime version metadata in the model. This will be generated by the exporter.
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/interpreter.py:457: UserWarning:     Warning: tf.lite.Interpreter is deprecated and is scheduled for deletion in
+    TF 2.20. Please use the LiteRT interpreter from the ai_edge_litert package.
+    See the [migration guide](https://ai.google.dev/edge/litert/migration)
+    for details.
+    
+  warnings.warn(_INTERPRETER_DELETION_WARNING)
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/convert.py:846: UserWarning: Statistics for quantized inputs were expected, but not specified; continuing anyway.
+  warnings.warn(
+W0000 00:00:1791036945.409488  123316 tf_tfl_flatbuffer_helpers.cc:364] Ignored output_format.
+W0000 00:00:1791036945.409845  123316 tf_tfl_flatbuffer_helpers.cc:367] Ignored drop_control_dependency.
+I0000 00:00:1791036945.410275  123316 reader.cc:83] Reading SavedModel from: /tmp/tmpol2xuo9j
+I0000 00:00:1791036945.410947  123316 reader.cc:52] Reading meta graph with tags { serve }
+I0000 00:00:1791036945.411346  123316 reader.cc:147] Reading SavedModel debug info (if present) from: /tmp/tmpol2xuo9j
+I0000 00:00:1791036945.413343  123316 loader.cc:236] Restoring SavedModel bundle.
+I0000 00:00:1791036945.423951  123316 loader.cc:220] Running initialization op on SavedModel bundle at path: /tmp/tmpol2xuo9j
+I0000 00:00:1791036945.427579  123316 loader.cc:471] SavedModel load for tags { serve }; Status: success: OK. Took 17310 microseconds.
+fully_quantize: 0, inference_type: 6, input_inference_type: FLOAT32, output_inference_type: FLOAT32
+W0000 00:00:1791036945.502113  123316 flatbuffer_export.cc:3851] Skipping runtime version metadata in the model. This will be generated by the exporter.
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/interpreter.py:457: UserWarning:     Warning: tf.lite.Interpreter is deprecated and is scheduled for deletion in
+    TF 2.20. Please use the LiteRT interpreter from the ai_edge_litert package.
+    See the [migration guide](https://ai.google.dev/edge/litert/migration)
+    for details.
+    
+  warnings.warn(_INTERPRETER_DELETION_WARNING)
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/convert.py:846: UserWarning: Statistics for quantized inputs were expected, but not specified; continuing anyway.
+  warnings.warn(
+W0000 00:00:1791036948.902738  123316 tf_tfl_flatbuffer_helpers.cc:364] Ignored output_format.
+W0000 00:00:1791036948.903174  123316 tf_tfl_flatbuffer_helpers.cc:367] Ignored drop_control_dependency.
+I0000 00:00:1791036948.903691  123316 reader.cc:83] Reading SavedModel from: /tmp/tmpthpt2j1h
+I0000 00:00:1791036948.904594  123316 reader.cc:52] Reading meta graph with tags { serve }
+I0000 00:00:1791036948.905042  123316 reader.cc:147] Reading SavedModel debug info (if present) from: /tmp/tmpthpt2j1h
+I0000 00:00:1791036948.907459  123316 loader.cc:236] Restoring SavedModel bundle.
+I0000 00:00:1791036948.919009  123316 loader.cc:220] Running initialization op on SavedModel bundle at path: /tmp/tmpthpt2j1h
+I0000 00:00:1791036948.922921  123316 loader.cc:471] SavedModel load for tags { serve }; Status: success: OK. Took 19239 microseconds.
+fully_quantize: 0, inference_type: 6, input_inference_type: FLOAT32, output_inference_type: FLOAT32
+W0000 00:00:1791036948.977981  123316 flatbuffer_export.cc:3851] Skipping runtime version metadata in the model. This will be generated by the exporter.
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/interpreter.py:457: UserWarning:     Warning: tf.lite.Interpreter is deprecated and is scheduled for deletion in
+    TF 2.20. Please use the LiteRT interpreter from the ai_edge_litert package.
+    See the [migration guide](https://ai.google.dev/edge/litert/migration)
+    for details.
+    
+  warnings.warn(_INTERPRETER_DELETION_WARNING)
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/convert.py:846: UserWarning: Statistics for quantized inputs were expected, but not specified; continuing anyway.
+  warnings.warn(
+W0000 00:00:1791036952.424312  123316 tf_tfl_flatbuffer_helpers.cc:364] Ignored output_format.
+W0000 00:00:1791036952.424692  123316 tf_tfl_flatbuffer_helpers.cc:367] Ignored drop_control_dependency.
+I0000 00:00:1791036952.425141  123316 reader.cc:83] Reading SavedModel from: /tmp/tmps00yo5qr
+I0000 00:00:1791036952.426681  123316 reader.cc:52] Reading meta graph with tags { serve }
+I0000 00:00:1791036952.427119  123316 reader.cc:147] Reading SavedModel debug info (if present) from: /tmp/tmps00yo5qr
+I0000 00:00:1791036952.439132  123316 loader.cc:236] Restoring SavedModel bundle.
+I0000 00:00:1791036952.482066  123316 loader.cc:220] Running initialization op on SavedModel bundle at path: /tmp/tmps00yo5qr
+I0000 00:00:1791036952.492573  123316 loader.cc:471] SavedModel load for tags { serve }; Status: success: OK. Took 67441 microseconds.
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/interpreter.py:457: UserWarning:     Warning: tf.lite.Interpreter is deprecated and is scheduled for deletion in
+    TF 2.20. Please use the LiteRT interpreter from the ai_edge_litert package.
+    See the [migration guide](https://ai.google.dev/edge/litert/migration)
+    for details.
+    
+  warnings.warn(_INTERPRETER_DELETION_WARNING)
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/convert.py:846: UserWarning: Statistics for quantized inputs were expected, but not specified; continuing anyway.
+  warnings.warn(
+W0000 00:00:1791036955.568323  123316 tf_tfl_flatbuffer_helpers.cc:364] Ignored output_format.
+W0000 00:00:1791036955.568697  123316 tf_tfl_flatbuffer_helpers.cc:367] Ignored drop_control_dependency.
+I0000 00:00:1791036955.569135  123316 reader.cc:83] Reading SavedModel from: /tmp/tmpmkagx0lr
+I0000 00:00:1791036955.569775  123316 reader.cc:52] Reading meta graph with tags { serve }
+I0000 00:00:1791036955.570120  123316 reader.cc:147] Reading SavedModel debug info (if present) from: /tmp/tmpmkagx0lr
+I0000 00:00:1791036955.572024  123316 loader.cc:236] Restoring SavedModel bundle.
+I0000 00:00:1791036955.582518  123316 loader.cc:220] Running initialization op on SavedModel bundle at path: /tmp/tmpmkagx0lr
+I0000 00:00:1791036955.586126  123316 loader.cc:471] SavedModel load for tags { serve }; Status: success: OK. Took 16997 microseconds.
+fully_quantize: 0, inference_type: 6, input_inference_type: FLOAT32, output_inference_type: FLOAT32
+W0000 00:00:1791036955.660792  123316 flatbuffer_export.cc:3851] Skipping runtime version metadata in the model. This will be generated by the exporter.
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/interpreter.py:457: UserWarning:     Warning: tf.lite.Interpreter is deprecated and is scheduled for deletion in
+    TF 2.20. Please use the LiteRT interpreter from the ai_edge_litert package.
+    See the [migration guide](https://ai.google.dev/edge/litert/migration)
+    for details.
+    
+  warnings.warn(_INTERPRETER_DELETION_WARNING)
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/convert.py:846: UserWarning: Statistics for quantized inputs were expected, but not specified; continuing anyway.
+  warnings.warn(
+W0000 00:00:1791036957.315884  123316 tf_tfl_flatbuffer_helpers.cc:364] Ignored output_format.
+W0000 00:00:1791036957.316279  123316 tf_tfl_flatbuffer_helpers.cc:367] Ignored drop_control_dependency.
+I0000 00:00:1791036957.316813  123316 reader.cc:83] Reading SavedModel from: /tmp/tmpu0pqakt8
+I0000 00:00:1791036957.317498  123316 reader.cc:52] Reading meta graph with tags { serve }
+I0000 00:00:1791036957.317835  123316 reader.cc:147] Reading SavedModel debug info (if present) from: /tmp/tmpu0pqakt8
+I0000 00:00:1791036957.319806  123316 loader.cc:236] Restoring SavedModel bundle.
+I0000 00:00:1791036957.331619  123316 loader.cc:220] Running initialization op on SavedModel bundle at path: /tmp/tmpu0pqakt8
+I0000 00:00:1791036957.335701  123316 loader.cc:471] SavedModel load for tags { serve }; Status: success: OK. Took 18894 microseconds.
+fully_quantize: 0, inference_type: 6, input_inference_type: FLOAT32, output_inference_type: FLOAT32
+W0000 00:00:1791036957.388235  123316 flatbuffer_export.cc:3851] Skipping runtime version metadata in the model. This will be generated by the exporter.
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/interpreter.py:457: UserWarning:     Warning: tf.lite.Interpreter is deprecated and is scheduled for deletion in
+    TF 2.20. Please use the LiteRT interpreter from the ai_edge_litert package.
+    See the [migration guide](https://ai.google.dev/edge/litert/migration)
+    for details.
+    
+  warnings.warn(_INTERPRETER_DELETION_WARNING)
+[load_cicids2017] data_path=data/raw/CIC-IDS2017
+[load_cicids2017] Found 8 CSV files
+[load_cicids2017] Loaded 225,745 rows from Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv
+[load_cicids2017] Loaded 286,467 rows from Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv
+[load_cicids2017] Loaded 191,033 rows from Friday-WorkingHours-Morning.pcap_ISCX.csv
+[load_cicids2017] Loaded 529,918 rows from Monday-WorkingHours.pcap_ISCX.csv
+[load_cicids2017] Loaded 288,602 rows from Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv
+[load_cicids2017] Loaded 170,366 rows from Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv
+[load_cicids2017] Loaded 445,909 rows from Tuesday-WorkingHours.pcap_ISCX.csv
+[load_cicids2017] Loaded 692,703 rows from Wednesday-workingHours.pcap_ISCX.csv
+[load_cicids2017] Total samples loaded: 2,830,743
+[load_cicids2017] Removed 331,200 duplicates (2,499,543 unique)
+[load_cicids2017] Found 15 unique labels
+[load_cicids2017] Binary mode: BENIGN=0, ATTACK=1
+[load_cicids2017] Label distribution: BENIGN=2073680, ATTACK=425863
+[load_cicids2017] Shuffled full pool (random_state=42)
+[load_cicids2017] Balanced training set: majority 1658944 -> 1362760 (ratio<=4.0), total=1,703,450
+[load_cicids2017] StandardScaler applied (fit on train).
+[load_cicids2017] SMOTE applied: train -> 2,725,520 (BENIGN=1,362,760, ATTACK=1,362,760)
+[load_cicids2017] Final feature shape: 78 features
+[load_cicids2017] Train samples: 2,725,520, Test samples: 499,909
+[near_iid] pooled FT set: 10000 (attack 20.0%); client 0 FT set: 10000 (attack 50.4%)
+   Stripping QAT layers from FL-trained model...
+      Fixed activation in dense_4: QuantizeAwareActivation → relu
+      Fixed activation in dense_5: QuantizeAwareActivation → relu
+      Fixed activation in dense_6: QuantizeAwareActivation → relu
+      Fixed activation in dense_7: QuantizeAwareActivation → sigmoid
+      ⚠️  Failed to set weights for layer dense_4: You called `set_weights(weights)` on layer "dense_4" with a weight list of length 1, but the layer was expecting 2 weights. Provided weights: [array([[-3.5000000e+01, -1.9000000e+01, -2.000000...
+      ⚠️  Failed to set weights for layer dropout_3: You called `set_weights(weights)` on layer "dropout_3" with a weight list of length 1, but the layer was expecting 0 weights. Provided weights: [-1]...
+      ⚠️  Failed to set weights for layer dense_5: You called `set_weights(weights)` on layer "dense_5" with a weight list of length 1, but the layer was expecting 2 weights. Provided weights: [array([[ -7.       , -34.       ,  33.       , .....
+      ⚠️  Failed to set weights for layer dropout_4: You called `set_weights(weights)` on layer "dropout_4" with a weight list of length 1, but the layer was expecting 0 weights. Provided weights: [-1]...
+      ⚠️  Failed to set weights for layer dense_6: You called `set_weights(weights)` on layer "dense_6" with a weight list of length 1, but the layer was expecting 2 weights. Provided weights: [array([[-7.4000000e+01,  6.3000000e+01, -3.000000...
+      ⚠️  Failed to set weights for layer dense_7: You called `set_weights(weights)` on layer "dense_7" with a weight list of length 1, but the layer was expecting 2 weights. Provided weights: [array([[-3.00000000e+00],
+       [ 6.00000000e+00...
+   ✅ QAT layers stripped manually (0/6 layers with weights)
+✅ BN/Dropout stripped for TFLite export
+✅ Saved: data/processed/revision/2026-10-03_compression_ablation/compression_ablation/near_iid/fp32.tflite (798.42 KB)
+   Quantization: 0/10 tensors (0.0%)
+   Input: <class 'numpy.float32'>, Output: <class 'numpy.float32'>
+  fp32                   acc=0.1707 f1=0.2912 recall=1.0000 far=0.9997
+✅ BN/Dropout stripped for TFLite export
+Applying full integer quantization (int8 weights + activations with calibration)...
+✅ Saved: data/processed/revision/2026-10-03_compression_ablation/compression_ablation/near_iid/ptq_only.tflite (212.24 KB)
+   Quantization: 10/12 tensors (83.3%)
+   Input: <class 'numpy.float32'>, Output: <class 'numpy.float32'>
+  ptq_only               acc=0.1704 f1=0.2911 recall=1.0000 far=1.0000
+✅ BN/Dropout stripped for TFLite export
+Applying full integer quantization (int8 weights + activations with calibration)...
+✅ Saved: data/processed/revision/2026-10-03_compression_ablation/compression_ablation/near_iid/prune_noft_ptq.tflite (67.45 KB)
+   Quantization: 10/12 tensors (83.3%)
+   Input: <class 'numpy.float32'>, Output: <class 'numpy.float32'>
+  prune_noft_ptq         acc=0.1704 f1=0.2911 recall=1.0000 far=1.0000
+✅ BN/Dropout stripped for TFLite export
+Applying full integer quantization (int8 weights + activations with calibration)...
+✅ Saved: data/processed/revision/2026-10-03_compression_ablation/compression_ablation/near_iid/ftonly_pooled_ptq.tflite (226.91 KB)
+   Quantization: 10/16 tensors (62.5%)
+   Input: <class 'numpy.float32'>, Output: <class 'numpy.float32'>
+  ftonly_pooled_ptq      acc=0.9638 f1=0.8972 recall=0.9269 far=0.0286
+✅ BN/Dropout stripped for TFLite export
+Applying full integer quantization (int8 weights + activations with calibration)...
+✅ Saved: data/processed/revision/2026-10-03_compression_ablation/compression_ablation/near_iid/prune_ft_pooled_ptq.tflite (75.09 KB)
+   Quantization: 10/16 tensors (62.5%)
+   Input: <class 'numpy.float32'>, Output: <class 'numpy.float32'>
+  prune_ft_pooled_ptq    acc=0.9640 f1=0.8940 recall=0.8911 far=0.0210
+   [QAT Strip] Input model type: Functional
+   [QAT Strip] Input model class: tf_keras.src.engine.functional.Functional
+   [QAT Strip] Creating TF.Keras Functional model with input shape: (78,)
+   [QAT Strip] TF_USE_LEGACY_KERAS=1
+   [QAT Strip] Skipping InputLayer
+   [QAT Strip] Copied Dense: 256 units, activation=<function relu at 0x7d0b9441be20>
+   [QAT Strip] Skipping Dropout
+   [QAT Strip] Copied Dense: 128 units, activation=<function relu at 0x7d0b9441be20>
+   [QAT Strip] Skipping Dropout
+   [QAT Strip] Copied Dense: 64 units, activation=<function relu at 0x7d0b9441be20>
+   [QAT Strip] Copied Dense: 1 units, activation=<function sigmoid at 0x7d0b94434400>
+   [QAT Strip] Created model type: Functional
+   [QAT Strip] Model class: tf_keras.src.engine.functional.Functional
+   [QAT Strip] Total layers: 5
+   [QAT Strip] Is tensorflow.keras model: False
+   [QAT Strip] WARNING: Model is not tensorflow.keras! QAT may fail.
+✅ Saved (QAT): data/processed/revision/2026-10-03_compression_ablation/compression_ablation/near_iid/prune_ft_pooled_qat.tflite (65.43 KB)
+   Quantization: 10/16 tensors (62.5%)
+   Input: <class 'numpy.float32'>, Output: <class 'numpy.float32'>
+  prune_ft_pooled_qat    acc=0.9658 f1=0.9041 recall=0.9470 far=0.0304
+✅ BN/Dropout stripped for TFLite export
+Applying full integer quantization (int8 weights + activations with calibration)...
+✅ Saved: data/processed/revision/2026-10-03_compression_ablation/compression_ablation/near_iid/ftonly_client_ptq.tflite (226.91 KB)
+   Quantization: 10/16 tensors (62.5%)
+   Input: <class 'numpy.float32'>, Output: <class 'numpy.float32'>
+  ftonly_client_ptq      acc=0.9098 f1=0.7897 recall=0.9944 far=0.1076
+✅ BN/Dropout stripped for TFLite export
+Applying full integer quantization (int8 weights + activations with calibration)...
+✅ Saved: data/processed/revision/2026-10-03_compression_ablation/compression_ablation/near_iid/prune_ft_client_ptq.tflite (75.09 KB)
+   Quantization: 10/16 tensors (62.5%)
+   Input: <class 'numpy.float32'>, Output: <class 'numpy.float32'>
+  prune_ft_client_ptq    acc=0.9257 f1=0.8189 recall=0.9853 far=0.0865
+   [QAT Strip] Input model type: Functional
+   [QAT Strip] Input model class: tf_keras.src.engine.functional.Functional
+   [QAT Strip] Creating TF.Keras Functional model with input shape: (78,)
+   [QAT Strip] TF_USE_LEGACY_KERAS=1
+   [QAT Strip] Skipping InputLayer
+   [QAT Strip] Copied Dense: 256 units, activation=<function relu at 0x7d0b9441be20>
+   [QAT Strip] Skipping Dropout
+   [QAT Strip] Copied Dense: 128 units, activation=<function relu at 0x7d0b9441be20>
+   [QAT Strip] Skipping Dropout
+   [QAT Strip] Copied Dense: 64 units, activation=<function relu at 0x7d0b9441be20>
+   [QAT Strip] Copied Dense: 1 units, activation=<function sigmoid at 0x7d0b94434400>/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/convert.py:846: UserWarning: Statistics for quantized inputs were expected, but not specified; continuing anyway.
+  warnings.warn(
+W0000 00:00:1791036960.932311  123316 tf_tfl_flatbuffer_helpers.cc:364] Ignored output_format.
+W0000 00:00:1791036960.932705  123316 tf_tfl_flatbuffer_helpers.cc:367] Ignored drop_control_dependency.
+I0000 00:00:1791036960.933154  123316 reader.cc:83] Reading SavedModel from: /tmp/tmpvhpaz_8o
+I0000 00:00:1791036960.935229  123316 reader.cc:52] Reading meta graph with tags { serve }
+I0000 00:00:1791036960.935593  123316 reader.cc:147] Reading SavedModel debug info (if present) from: /tmp/tmpvhpaz_8o
+I0000 00:00:1791036960.945839  123316 loader.cc:236] Restoring SavedModel bundle.
+I0000 00:00:1791036960.987335  123316 loader.cc:220] Running initialization op on SavedModel bundle at path: /tmp/tmpvhpaz_8o
+I0000 00:00:1791036960.998282  123316 loader.cc:471] SavedModel load for tags { serve }; Status: success: OK. Took 65136 microseconds.
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/interpreter.py:457: UserWarning:     Warning: tf.lite.Interpreter is deprecated and is scheduled for deletion in
+    TF 2.20. Please use the LiteRT interpreter from the ai_edge_litert package.
+    See the [migration guide](https://ai.google.dev/edge/litert/migration)
+    for details.
+    
+  warnings.warn(_INTERPRETER_DELETION_WARNING)
+W0000 00:00:1791037080.529473  123316 tf_tfl_flatbuffer_helpers.cc:364] Ignored output_format.
+W0000 00:00:1791037080.530018  123316 tf_tfl_flatbuffer_helpers.cc:367] Ignored drop_control_dependency.
+I0000 00:00:1791037080.530821  123316 reader.cc:83] Reading SavedModel from: /tmp/tmpwrtgn2bb
+I0000 00:00:1791037080.531565  123316 reader.cc:52] Reading meta graph with tags { serve }
+I0000 00:00:1791037080.531949  123316 reader.cc:147] Reading SavedModel debug info (if present) from: /tmp/tmpwrtgn2bb
+I0000 00:00:1791037080.534183  123316 loader.cc:236] Restoring SavedModel bundle.
+I0000 00:00:1791037080.546097  123316 loader.cc:220] Running initialization op on SavedModel bundle at path: /tmp/tmpwrtgn2bb
+I0000 00:00:1791037080.549931  123316 loader.cc:471] SavedModel load for tags { serve }; Status: success: OK. Took 19115 microseconds.
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/interpreter.py:457: UserWarning:     Warning: tf.lite.Interpreter is deprecated and is scheduled for deletion in
+    TF 2.20. Please use the LiteRT interpreter from the ai_edge_litert package.
+    See the [migration guide](https://ai.google.dev/edge/litert/migration)
+    for details.
+    
+  warnings.warn(_INTERPRETER_DELETION_WARNING)
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/convert.py:846: UserWarning: Statistics for quantized inputs were expected, but not specified; continuing anyway.
+  warnings.warn(
+W0000 00:00:1791037086.371351  123316 tf_tfl_flatbuffer_helpers.cc:364] Ignored output_format.
+W0000 00:00:1791037086.371733  123316 tf_tfl_flatbuffer_helpers.cc:367] Ignored drop_control_dependency.
+I0000 00:00:1791037086.372174  123316 reader.cc:83] Reading SavedModel from: /tmp/tmpuwbch3pi
+I0000 00:00:1791037086.372908  123316 reader.cc:52] Reading meta graph with tags { serve }
+I0000 00:00:1791037086.373292  123316 reader.cc:147] Reading SavedModel debug info (if present) from: /tmp/tmpuwbch3pi
+I0000 00:00:1791037086.376361  123316 loader.cc:236] Restoring SavedModel bundle.
+I0000 00:00:1791037086.388753  123316 loader.cc:220] Running initialization op on SavedModel bundle at path: /tmp/tmpuwbch3pi
+I0000 00:00:1791037086.392602  123316 loader.cc:471] SavedModel load for tags { serve }; Status: success: OK. Took 20436 microseconds.
+fully_quantize: 0, inference_type: 6, input_inference_type: FLOAT32, output_inference_type: FLOAT32
+W0000 00:00:1791037086.467701  123316 flatbuffer_export.cc:3851] Skipping runtime version metadata in the model. This will be generated by the exporter.
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/interpreter.py:457: UserWarning:     Warning: tf.lite.Interpreter is deprecated and is scheduled for deletion in
+    TF 2.20. Please use the LiteRT interpreter from the ai_edge_litert package.
+    See the [migration guide](https://ai.google.dev/edge/litert/migration)
+    for details.
+    
+  warnings.warn(_INTERPRETER_DELETION_WARNING)
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/convert.py:846: UserWarning: Statistics for quantized inputs were expected, but not specified; continuing anyway.
+  warnings.warn(
+W0000 00:00:1791037088.912449  123316 tf_tfl_flatbuffer_helpers.cc:364] Ignored output_format.
+W0000 00:00:1791037088.912818  123316 tf_tfl_flatbuffer_helpers.cc:367] Ignored drop_control_dependency.
+I0000 00:00:1791037088.913276  123316 reader.cc:83] Reading SavedModel from: /tmp/tmpwlgrhm79
+I0000 00:00:1791037088.914137  123316 reader.cc:52] Reading meta graph with tags { serve }
+I0000 00:00:1791037088.914593  123316 reader.cc:147] Reading SavedModel debug info (if present) from: /tmp/tmpwlgrhm79
+I0000 00:00:1791037088.917116  123316 loader.cc:236] Restoring SavedModel bundle.
+I0000 00:00:1791037088.929107  123316 loader.cc:220] Running initialization op on SavedModel bundle at path: /tmp/tmpwlgrhm79
+I0000 00:00:1791037088.933372  123316 loader.cc:471] SavedModel load for tags { serve }; Status: success: OK. Took 20101 microseconds.
+fully_quantize: 0, inference_type: 6, input_inference_type: FLOAT32, output_inference_type: FLOAT32
+W0000 00:00:1791037088.986737  123316 flatbuffer_export.cc:3851] Skipping runtime version metadata in the model. This will be generated by the exporter.
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/interpreter.py:457: UserWarning:     Warning: tf.lite.Interpreter is deprecated and is scheduled for deletion in
+    TF 2.20. Please use the LiteRT interpreter from the ai_edge_litert package.
+    See the [migration guide](https://ai.google.dev/edge/litert/migration)
+    for details.
+    
+  warnings.warn(_INTERPRETER_DELETION_WARNING)
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/convert.py:846: UserWarning: Statistics for quantized inputs were expected, but not specified; continuing anyway.
+  warnings.warn(
+W0000 00:00:1791037092.039778  123316 tf_tfl_flatbuffer_helpers.cc:364] Ignored output_format.
+W0000 00:00:1791037092.040193  123316 tf_tfl_flatbuffer_helpers.cc:367] Ignored drop_control_dependency.
+I0000 00:00:1791037092.040642  123316 reader.cc:83] Reading SavedModel from: /tmp/tmphd5lz41j
+I0000 00:00:1791037092.041640  123316 reader.cc:52] Reading meta graph with tags { serve }
+I0000 00:00:1791037092.042032  123316 reader.cc:147] Reading SavedModel debug info (if present) from: /tmp/tmphd5lz41j
+I0000 00:00:1791037092.044159  123316 loader.cc:236] Restoring SavedModel bundle.
+I0000 00:00:1791037092.054966  123316 loader.cc:220] Running initialization op on SavedModel bundle at path: /tmp/tmphd5lz41j
+I0000 00:00:1791037092.058597  123316 loader.cc:471] SavedModel load for tags { serve }; Status: success: OK. Took 17960 microseconds.
+fully_quantize: 0, inference_type: 6, input_inference_type: FLOAT32, output_inference_type: FLOAT32
+W0000 00:00:1791037092.139280  123316 flatbuffer_export.cc:3851] Skipping runtime version metadata in the model. This will be generated by the exporter.
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/interpreter.py:457: UserWarning:     Warning: tf.lite.Interpreter is deprecated and is scheduled for deletion in
+    TF 2.20. Please use the LiteRT interpreter from the ai_edge_litert package.
+    See the [migration guide](https://ai.google.dev/edge/litert/migration)
+    for details.
+    
+  warnings.warn(_INTERPRETER_DELETION_WARNING)
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/convert.py:846: UserWarning: Statistics for quantized inputs were expected, but not specified; continuing anyway.
+  warnings.warn(
+W0000 00:00:1791037095.751800  123316 tf_tfl_flatbuffer_helpers.cc:364] Ignored output_format.
+W0000 00:00:1791037095.752201  123316 tf_tfl_flatbuffer_helpers.cc:367] Ignored drop_control_dependency.
+I0000 00:00:1791037095.752611  123316 reader.cc:83] Reading SavedModel from: /tmp/tmpv29bj8od
+I0000 00:00:1791037095.753368  123316 reader.cc:52] Reading meta graph with tags { serve }
+I0000 00:00:1791037095.753684  123316 reader.cc:147] Reading SavedModel debug info (if present) from: /tmp/tmpv29bj8od
+I0000 00:00:1791037095.755985  123316 loader.cc:236] Restoring SavedModel bundle.
+I0000 00:00:1791037095.766566  123316 loader.cc:220] Running initialization op on SavedModel bundle at path: /tmp/tmpv29bj8od
+I0000 00:00:1791037095.770995  123316 loader.cc:471] SavedModel load for tags { serve }; Status: success: OK. Took 18400 microseconds.
+fully_quantize: 0, inference_type: 6, input_inference_type: FLOAT32, output_inference_type: FLOAT32
+W0000 00:00:1791037095.827270  123316 flatbuffer_export.cc:3851] Skipping runtime version metadata in the model. This will be generated by the exporter.
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/interpreter.py:457: UserWarning:     Warning: tf.lite.Interpreter is deprecated and is scheduled for deletion in
+    TF 2.20. Please use the LiteRT interpreter from the ai_edge_litert package.
+    See the [migration guide](https://ai.google.dev/edge/litert/migration)
+    for details.
+    
+  warnings.warn(_INTERPRETER_DELETION_WARNING)
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/convert.py:846: UserWarning: Statistics for quantized inputs were expected, but not specified; continuing anyway.
+  warnings.warn(
+W0000 00:00:1791037099.201188  123316 tf_tfl_flatbuffer_helpers.cc:364] Ignored output_format.
+W0000 00:00:1791037099.201649  123316 tf_tfl_flatbuffer_helpers.cc:367] Ignored drop_control_dependency.
+I0000 00:00:1791037099.202164  123316 reader.cc:83] Reading SavedModel from: /tmp/tmpppzh94ci
+I0000 00:00:1791037099.204224  123316 reader.cc:52] Reading meta graph with tags { serve }
+I0000 00:00:1791037099.204644  123316 reader.cc:147] Reading SavedModel debug info (if present) from: /tmp/tmpppzh94ci
+I0000 00:00:1791037099.217636  123316 loader.cc:236] Restoring SavedModel bundle.
+I0000 00:00:1791037099.264486  123316 loader.cc:220] Running initialization op on SavedModel bundle at path: /tmp/tmpppzh94ci
+I0000 00:00:1791037099.275527  123316 loader.cc:471] SavedModel load for tags { serve }; Status: success: OK. Took 73372 microseconds.
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/interpreter.py:457: UserWarning:     Warning: tf.lite.Interpreter is deprecated and is scheduled for deletion in
+    TF 2.20. Please use the LiteRT interpreter from the ai_edge_litert package.
+    See the [migration guide](https://ai.google.dev/edge/litert/migration)
+    for details.
+    
+  warnings.warn(_INTERPRETER_DELETION_WARNING)
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/convert.py:846: UserWarning: Statistics for quantized inputs were expected, but not specified; continuing anyway.
+  warnings.warn(
+W0000 00:00:1791037102.324035  123316 tf_tfl_flatbuffer_helpers.cc:364] Ignored output_format.
+W0000 00:00:1791037102.324407  123316 tf_tfl_flatbuffer_helpers.cc:367] Ignored drop_control_dependency.
+I0000 00:00:1791037102.324830  123316 reader.cc:83] Reading SavedModel from: /tmp/tmpa57h05i4
+I0000 00:00:1791037102.325507  123316 reader.cc:52] Reading meta graph with tags { serve }
+I0000 00:00:1791037102.325874  123316 reader.cc:147] Reading SavedModel debug info (if present) from: /tmp/tmpa57h05i4
+I0000 00:00:1791037102.327970  123316 loader.cc:236] Restoring SavedModel bundle.
+I0000 00:00:1791037102.339620  123316 loader.cc:220] Running initialization op on SavedModel bundle at path: /tmp/tmpa57h05i4
+I0000 00:00:1791037102.343271  123316 loader.cc:471] SavedModel load for tags { serve }; Status: success: OK. Took 18449 microseconds.
+fully_quantize: 0, inference_type: 6, input_inference_type: FLOAT32, output_inference_type: FLOAT32
+W0000 00:00:1791037102.423679  123316 flatbuffer_export.cc:3851] Skipping runtime version metadata in the model. This will be generated by the exporter.
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/interpreter.py:457: UserWarning:     Warning: tf.lite.Interpreter is deprecated and is scheduled for deletion in
+    TF 2.20. Please use the LiteRT interpreter from the ai_edge_litert package.
+    See the [migration guide](https://ai.google.dev/edge/litert/migration)
+    for details.
+    
+  warnings.warn(_INTERPRETER_DELETION_WARNING)
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/convert.py:846: UserWarning: Statistics for quantized inputs were expected, but not specified; continuing anyway.
+  warnings.warn(
+W0000 00:00:1791037105.661833  123316 tf_tfl_flatbuffer_helpers.cc:364] Ignored output_format.
+W0000 00:00:1791037105.662254  123316 tf_tfl_flatbuffer_helpers.cc:367] Ignored drop_control_dependency.
+I0000 00:00:1791037105.662685  123316 reader.cc:83] Reading SavedModel from: /tmp/tmpy9bnikwz
+I0000 00:00:1791037105.663526  123316 reader.cc:52] Reading meta graph with tags { serve }
+I0000 00:00:1791037105.663879  123316 reader.cc:147] Reading SavedModel debug info (if present) from: /tmp/tmpy9bnikwz
+I0000 00:00:1791037105.666604  123316 loader.cc:236] Restoring SavedModel bundle.
+I0000 00:00:1791037105.677216  123316 loader.cc:220] Running initialization op on SavedModel bundle at path: /tmp/tmpy9bnikwz
+I0000 00:00:1791037105.680838  123316 loader.cc:471] SavedModel load for tags { serve }; Status: success: OK. Took 18159 microseconds.
+fully_quantize: 0, inference_type: 6, input_inference_type: FLOAT32, output_inference_type: FLOAT32
+W0000 00:00:1791037105.733273  123316 flatbuffer_export.cc:3851] Skipping runtime version metadata in the model. This will be generated by the exporter.
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/interpreter.py:457: UserWarning:     Warning: tf.lite.Interpreter is deprecated and is scheduled for deletion in
+    TF 2.20. Please use the LiteRT interpreter from the ai_edge_litert package.
+    See the [migration guide](https://ai.google.dev/edge/litert/migration)
+    for details.
+    
+  warnings.warn(_INTERPRETER_DELETION_WARNING)
+
+   [QAT Strip] Created model type: Functional
+   [QAT Strip] Model class: tf_keras.src.engine.functional.Functional
+   [QAT Strip] Total layers: 5
+   [QAT Strip] Is tensorflow.keras model: False
+   [QAT Strip] WARNING: Model is not tensorflow.keras! QAT may fail.
+✅ Saved (QAT): data/processed/revision/2026-10-03_compression_ablation/compression_ablation/near_iid/prune_ft_client_qat.tflite (65.44 KB)
+   Quantization: 10/16 tensors (62.5%)
+   Input: <class 'numpy.float32'>, Output: <class 'numpy.float32'>
+  prune_ft_client_qat    acc=0.9373 f1=0.8438 recall=0.9937 far=0.0743
+[load_cicids2017] data_path=data/raw/CIC-IDS2017
+[load_cicids2017] Found 8 CSV files
+[load_cicids2017] Loaded 225,745 rows from Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv
+[load_cicids2017] Loaded 286,467 rows from Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv
+[load_cicids2017] Loaded 191,033 rows from Friday-WorkingHours-Morning.pcap_ISCX.csv
+[load_cicids2017] Loaded 529,918 rows from Monday-WorkingHours.pcap_ISCX.csv
+[load_cicids2017] Loaded 288,602 rows from Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv
+[load_cicids2017] Loaded 170,366 rows from Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv
+[load_cicids2017] Loaded 445,909 rows from Tuesday-WorkingHours.pcap_ISCX.csv
+[load_cicids2017] Loaded 692,703 rows from Wednesday-workingHours.pcap_ISCX.csv
+[load_cicids2017] Total samples loaded: 2,830,743
+[load_cicids2017] Removed 331,200 duplicates (2,499,543 unique)
+[load_cicids2017] Found 15 unique labels
+[load_cicids2017] Binary mode: BENIGN=0, ATTACK=1
+[load_cicids2017] Label distribution: BENIGN=2073680, ATTACK=425863
+[load_cicids2017] Shuffled full pool (random_state=42)
+[load_cicids2017] Balanced training set: majority 1658944 -> 1362760 (ratio<=4.0), total=1,703,450
+[load_cicids2017] StandardScaler applied (fit on train).
+[load_cicids2017] SMOTE applied: train -> 2,725,520 (BENIGN=1,362,760, ATTACK=1,362,760)
+[load_cicids2017] Final feature shape: 78 features
+[load_cicids2017] Train samples: 2,725,520, Test samples: 499,909
+[dirichlet_c1] pooled FT set: 10000 (attack 20.0%); client 1 FT set: 10000 (attack 59.7%)
+   Stripping QAT layers from FL-trained model...
+      Fixed activation in dense_4: QuantizeAwareActivation → relu
+      Fixed activation in dense_5: QuantizeAwareActivation → relu
+      Fixed activation in dense_6: QuantizeAwareActivation → relu
+      Fixed activation in dense_7: QuantizeAwareActivation → sigmoid
+      ⚠️  Failed to set weights for layer dense_4: You called `set_weights(weights)` on layer "dense_4" with a weight list of length 1, but the layer was expecting 2 weights. Provided weights: [array([[ 8.9235182e+00, -3.8533530e-03,  2.000000...
+      ⚠️  Failed to set weights for layer dropout_3: You called `set_weights(weights)` on layer "dropout_3" with a weight list of length 1, but the layer was expecting 0 weights. Provided weights: [-1]...
+      ⚠️  Failed to set weights for layer dense_5: You called `set_weights(weights)` on layer "dense_5" with a weight list of length 1, but the layer was expecting 2 weights. Provided weights: [array([[  5.939639  ,  -3.0000021 , -35.694073  ,...
+      ⚠️  Failed to set weights for layer dropout_4: You called `set_weights(weights)` on layer "dropout_4" with a weight list of length 1, but the layer was expecting 0 weights. Provided weights: [-1]...
+      ⚠️  Failed to set weights for layer dense_6: You called `set_weights(weights)` on layer "dense_6" with a weight list of length 1, but the layer was expecting 2 weights. Provided weights: [array([[-2.9614222e+00,  8.9235182e+00,  1.000000...
+      ⚠️  Failed to set weights for layer dense_7: You called `set_weights(weights)` on layer "dense_7" with a weight list of length 1, but the layer was expecting 2 weights. Provided weights: [array([[ 8.7299271e+00],
+       [ 8.6311668e+01],...
+   ✅ QAT layers stripped manually (0/6 layers with weights)
+✅ BN/Dropout stripped for TFLite export
+✅ Saved: data/processed/revision/2026-10-03_compression_ablation/compression_ablation/dirichlet_c1/fp32.tflite (798.46 KB)
+   Quantization: 0/10 tensors (0.0%)
+   Input: <class 'numpy.float32'>, Output: <class 'numpy.float32'>
+  fp32                   acc=0.1746 f1=0.2914 recall=0.9964 far=0.9942
+✅ BN/Dropout stripped for TFLite export
+Applying full integer quantization (int8 weights + activations with calibration)...
+✅ Saved: data/processed/revision/2026-10-03_compression_ablation/compression_ablation/dirichlet_c1/ptq_only.tflite (212.27 KB)
+   Quantization: 10/12 tensors (83.3%)
+   Input: <class 'numpy.float32'>, Output: <class 'numpy.float32'>
+  ptq_only               acc=0.1745 f1=0.2913 recall=0.9958 far=0.9942
+✅ BN/Dropout stripped for TFLite export
+Applying full integer quantization (int8 weights + activations with calibration)...
+✅ Saved: data/processed/revision/2026-10-03_compression_ablation/compression_ablation/dirichlet_c1/prune_noft_ptq.tflite (67.45 KB)
+   Quantization: 10/12 tensors (83.3%)
+   Input: <class 'numpy.float32'>, Output: <class 'numpy.float32'>
+  prune_noft_ptq         acc=0.1704 f1=0.2911 recall=1.0000 far=1.0000
+✅ BN/Dropout stripped for TFLite export
+Applying full integer quantization (int8 weights + activations with calibration)...
+✅ Saved: data/processed/revision/2026-10-03_compression_ablation/compression_ablation/dirichlet_c1/ftonly_pooled_ptq.tflite (226.91 KB)
+   Quantization: 10/16 tensors (62.5%)
+   Input: <class 'numpy.float32'>, Output: <class 'numpy.float32'>
+  ftonly_pooled_ptq      acc=0.9634 f1=0.8928 recall=0.8936 far=0.0222
+✅ BN/Dropout stripped for TFLite export
+Applying full integer quantization (int8 weights + activations with calibration)...
+✅ Saved: data/processed/revision/2026-10-03_compression_ablation/compression_ablation/dirichlet_c1/prune_ft_pooled_ptq.tflite (75.10 KB)
+   Quantization: 10/16 tensors (62.5%)
+   Input: <class 'numpy.float32'>, Output: <class 'numpy.float32'>
+  prune_ft_pooled_ptq    acc=0.9636 f1=0.8940 recall=0.9018 far=0.0238
+   [QAT Strip] Input model type: Functional
+   [QAT Strip] Input model class: tf_keras.src.engine.functional.Functional
+   [QAT Strip] Creating TF.Keras Functional model with input shape: (78,)
+   [QAT Strip] TF_USE_LEGACY_KERAS=1
+   [QAT Strip] Skipping InputLayer
+   [QAT Strip] Copied Dense: 256 units, activation=<function relu at 0x7d0b9441be20>
+   [QAT Strip] Skipping Dropout
+   [QAT Strip] Copied Dense: 128 units, activation=<function relu at 0x7d0b9441be20>
+   [QAT Strip] Skipping Dropout
+   [QAT Strip] Copied Dense: 64 units, activation=<function relu at 0x7d0b9441be20>
+   [QAT Strip] Copied Dense: 1 units, activation=<function sigmoid at 0x7d0b94434400>
+   [QAT Strip] Created model type: Functional
+   [QAT Strip] Model class: tf_keras.src.engine.functional.Functional
+   [QAT Strip] Total layers: 5
+   [QAT Strip] Is tensorflow.keras model: False
+   [QAT Strip] WARNING: Model is not tensorflow.keras! QAT may fail.
+✅ Saved (QAT): data/processed/revision/2026-10-03_compression_ablation/compression_ablation/dirichlet_c1/prune_ft_pooled_qat.tflite (65.44 KB)
+   Quantization: 10/16 tensors (62.5%)
+   Input: <class 'numpy.float32'>, Output: <class 'numpy.float32'>
+  prune_ft_pooled_qat    acc=0.9650 f1=0.9020 recall=0.9446 far=0.0308
+✅ BN/Dropout stripped for TFLite export
+Applying full integer quantization (int8 weights + activations with calibration)...
+✅ Saved: data/processed/revision/2026-10-03_compression_ablation/compression_ablation/dirichlet_c1/ftonly_client_ptq.tflite (226.91 KB)
+   Quantization: 10/16 tensors (62.5%)
+   Input: <class 'numpy.float32'>, Output: <class 'numpy.float32'>
+  ftonly_client_ptq      acc=0.9358 f1=0.8391 recall=0.9830 far=0.0739
+✅ BN/Dropout stripped for TFLite export
+Applying full integer quantization (int8 weights + activations with calibration)...
+✅ Saved: data/processed/revision/2026-10-03_compression_ablation/compression_ablation/dirichlet_c1/prune_ft_client_ptq.tflite (75.10 KB)
+   Quantization: 10/16 tensors (62.5%)
+   Input: <class 'numpy.float32'>, Output: <class 'numpy.float32'>
+  prune_ft_client_ptq    acc=0.9362 f1=0.8399 recall=0.9827 far=0.0734/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/convert.py:846: UserWarning: Statistics for quantized inputs were expected, but not specified; continuing anyway.
+  warnings.warn(
+W0000 00:00:1791037109.251783  123316 tf_tfl_flatbuffer_helpers.cc:364] Ignored output_format.
+W0000 00:00:1791037109.252113  123316 tf_tfl_flatbuffer_helpers.cc:367] Ignored drop_control_dependency.
+I0000 00:00:1791037109.252635  123316 reader.cc:83] Reading SavedModel from: /tmp/tmpu86ihkfr
+I0000 00:00:1791037109.254804  123316 reader.cc:52] Reading meta graph with tags { serve }
+I0000 00:00:1791037109.255109  123316 reader.cc:147] Reading SavedModel debug info (if present) from: /tmp/tmpu86ihkfr
+I0000 00:00:1791037109.265737  123316 loader.cc:236] Restoring SavedModel bundle.
+I0000 00:00:1791037109.307005  123316 loader.cc:220] Running initialization op on SavedModel bundle at path: /tmp/tmpu86ihkfr
+I0000 00:00:1791037109.317472  123316 loader.cc:471] SavedModel load for tags { serve }; Status: success: OK. Took 64845 microseconds.
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/interpreter.py:457: UserWarning:     Warning: tf.lite.Interpreter is deprecated and is scheduled for deletion in
+    TF 2.20. Please use the LiteRT interpreter from the ai_edge_litert package.
+    See the [migration guide](https://ai.google.dev/edge/litert/migration)
+    for details.
+    
+  warnings.warn(_INTERPRETER_DELETION_WARNING)
+W0000 00:00:1791037228.259848  123316 tf_tfl_flatbuffer_helpers.cc:364] Ignored output_format.
+W0000 00:00:1791037228.260399  123316 tf_tfl_flatbuffer_helpers.cc:367] Ignored drop_control_dependency.
+I0000 00:00:1791037228.260932  123316 reader.cc:83] Reading SavedModel from: /tmp/tmp4xsh97wq
+I0000 00:00:1791037228.261578  123316 reader.cc:52] Reading meta graph with tags { serve }
+I0000 00:00:1791037228.261948  123316 reader.cc:147] Reading SavedModel debug info (if present) from: /tmp/tmp4xsh97wq
+I0000 00:00:1791037228.264267  123316 loader.cc:236] Restoring SavedModel bundle.
+I0000 00:00:1791037228.279032  123316 loader.cc:220] Running initialization op on SavedModel bundle at path: /tmp/tmp4xsh97wq
+I0000 00:00:1791037228.283162  123316 loader.cc:471] SavedModel load for tags { serve }; Status: success: OK. Took 22237 microseconds.
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/interpreter.py:457: UserWarning:     Warning: tf.lite.Interpreter is deprecated and is scheduled for deletion in
+    TF 2.20. Please use the LiteRT interpreter from the ai_edge_litert package.
+    See the [migration guide](https://ai.google.dev/edge/litert/migration)
+    for details.
+    
+  warnings.warn(_INTERPRETER_DELETION_WARNING)
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/convert.py:846: UserWarning: Statistics for quantized inputs were expected, but not specified; continuing anyway.
+  warnings.warn(
+W0000 00:00:1791037232.857957  123316 tf_tfl_flatbuffer_helpers.cc:364] Ignored output_format.
+W0000 00:00:1791037232.858488  123316 tf_tfl_flatbuffer_helpers.cc:367] Ignored drop_control_dependency.
+I0000 00:00:1791037232.859001  123316 reader.cc:83] Reading SavedModel from: /tmp/tmp_arv8_5_
+I0000 00:00:1791037232.859748  123316 reader.cc:52] Reading meta graph with tags { serve }
+I0000 00:00:1791037232.860122  123316 reader.cc:147] Reading SavedModel debug info (if present) from: /tmp/tmp_arv8_5_
+I0000 00:00:1791037232.862405  123316 loader.cc:236] Restoring SavedModel bundle.
+I0000 00:00:1791037232.875070  123316 loader.cc:220] Running initialization op on SavedModel bundle at path: /tmp/tmp_arv8_5_
+I0000 00:00:1791037232.879206  123316 loader.cc:471] SavedModel load for tags { serve }; Status: success: OK. Took 20212 microseconds.
+fully_quantize: 0, inference_type: 6, input_inference_type: FLOAT32, output_inference_type: FLOAT32
+W0000 00:00:1791037232.965940  123316 flatbuffer_export.cc:3851] Skipping runtime version metadata in the model. This will be generated by the exporter.
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/interpreter.py:457: UserWarning:     Warning: tf.lite.Interpreter is deprecated and is scheduled for deletion in
+    TF 2.20. Please use the LiteRT interpreter from the ai_edge_litert package.
+    See the [migration guide](https://ai.google.dev/edge/litert/migration)
+    for details.
+    
+  warnings.warn(_INTERPRETER_DELETION_WARNING)
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/convert.py:846: UserWarning: Statistics for quantized inputs were expected, but not specified; continuing anyway.
+  warnings.warn(
+W0000 00:00:1791037235.408998  123316 tf_tfl_flatbuffer_helpers.cc:364] Ignored output_format.
+W0000 00:00:1791037235.409468  123316 tf_tfl_flatbuffer_helpers.cc:367] Ignored drop_control_dependency.
+I0000 00:00:1791037235.409950  123316 reader.cc:83] Reading SavedModel from: /tmp/tmpnoonegk2
+I0000 00:00:1791037235.410641  123316 reader.cc:52] Reading meta graph with tags { serve }
+I0000 00:00:1791037235.411015  123316 reader.cc:147] Reading SavedModel debug info (if present) from: /tmp/tmpnoonegk2
+I0000 00:00:1791037235.413227  123316 loader.cc:236] Restoring SavedModel bundle.
+I0000 00:00:1791037235.425248  123316 loader.cc:220] Running initialization op on SavedModel bundle at path: /tmp/tmpnoonegk2
+I0000 00:00:1791037235.429661  123316 loader.cc:471] SavedModel load for tags { serve }; Status: success: OK. Took 19718 microseconds.
+fully_quantize: 0, inference_type: 6, input_inference_type: FLOAT32, output_inference_type: FLOAT32
+W0000 00:00:1791037235.481963  123316 flatbuffer_export.cc:3851] Skipping runtime version metadata in the model. This will be generated by the exporter.
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/interpreter.py:457: UserWarning:     Warning: tf.lite.Interpreter is deprecated and is scheduled for deletion in
+    TF 2.20. Please use the LiteRT interpreter from the ai_edge_litert package.
+    See the [migration guide](https://ai.google.dev/edge/litert/migration)
+    for details.
+    
+  warnings.warn(_INTERPRETER_DELETION_WARNING)
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/convert.py:846: UserWarning: Statistics for quantized inputs were expected, but not specified; continuing anyway.
+  warnings.warn(
+W0000 00:00:1791037238.527968  123316 tf_tfl_flatbuffer_helpers.cc:364] Ignored output_format.
+W0000 00:00:1791037238.528368  123316 tf_tfl_flatbuffer_helpers.cc:367] Ignored drop_control_dependency.
+I0000 00:00:1791037238.528835  123316 reader.cc:83] Reading SavedModel from: /tmp/tmpznkia86h
+I0000 00:00:1791037238.529566  123316 reader.cc:52] Reading meta graph with tags { serve }
+I0000 00:00:1791037238.529954  123316 reader.cc:147] Reading SavedModel debug info (if present) from: /tmp/tmpznkia86h
+I0000 00:00:1791037238.532042  123316 loader.cc:236] Restoring SavedModel bundle.
+I0000 00:00:1791037238.543166  123316 loader.cc:220] Running initialization op on SavedModel bundle at path: /tmp/tmpznkia86h
+I0000 00:00:1791037238.546871  123316 loader.cc:471] SavedModel load for tags { serve }; Status: success: OK. Took 18043 microseconds.
+fully_quantize: 0, inference_type: 6, input_inference_type: FLOAT32, output_inference_type: FLOAT32
+W0000 00:00:1791037238.623849  123316 flatbuffer_export.cc:3851] Skipping runtime version metadata in the model. This will be generated by the exporter.
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/interpreter.py:457: UserWarning:     Warning: tf.lite.Interpreter is deprecated and is scheduled for deletion in
+    TF 2.20. Please use the LiteRT interpreter from the ai_edge_litert package.
+    See the [migration guide](https://ai.google.dev/edge/litert/migration)
+    for details.
+    
+  warnings.warn(_INTERPRETER_DELETION_WARNING)
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/convert.py:846: UserWarning: Statistics for quantized inputs were expected, but not specified; continuing anyway.
+  warnings.warn(
+W0000 00:00:1791037241.882922  123316 tf_tfl_flatbuffer_helpers.cc:364] Ignored output_format.
+W0000 00:00:1791037241.883284  123316 tf_tfl_flatbuffer_helpers.cc:367] Ignored drop_control_dependency.
+I0000 00:00:1791037241.883753  123316 reader.cc:83] Reading SavedModel from: /tmp/tmpgdf36aj9
+I0000 00:00:1791037241.884580  123316 reader.cc:52] Reading meta graph with tags { serve }
+I0000 00:00:1791037241.884956  123316 reader.cc:147] Reading SavedModel debug info (if present) from: /tmp/tmpgdf36aj9
+I0000 00:00:1791037241.887052  123316 loader.cc:236] Restoring SavedModel bundle.
+I0000 00:00:1791037241.897359  123316 loader.cc:220] Running initialization op on SavedModel bundle at path: /tmp/tmpgdf36aj9
+I0000 00:00:1791037241.901600  123316 loader.cc:471] SavedModel load for tags { serve }; Status: success: OK. Took 17853 microseconds.
+fully_quantize: 0, inference_type: 6, input_inference_type: FLOAT32, output_inference_type: FLOAT32
+W0000 00:00:1791037241.956426  123316 flatbuffer_export.cc:3851] Skipping runtime version metadata in the model. This will be generated by the exporter.
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/interpreter.py:457: UserWarning:     Warning: tf.lite.Interpreter is deprecated and is scheduled for deletion in
+    TF 2.20. Please use the LiteRT interpreter from the ai_edge_litert package.
+    See the [migration guide](https://ai.google.dev/edge/litert/migration)
+    for details.
+    
+  warnings.warn(_INTERPRETER_DELETION_WARNING)
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/convert.py:846: UserWarning: Statistics for quantized inputs were expected, but not specified; continuing anyway.
+  warnings.warn(
+W0000 00:00:1791037245.725857  123316 tf_tfl_flatbuffer_helpers.cc:364] Ignored output_format.
+W0000 00:00:1791037245.726262  123316 tf_tfl_flatbuffer_helpers.cc:367] Ignored drop_control_dependency.
+I0000 00:00:1791037245.726736  123316 reader.cc:83] Reading SavedModel from: /tmp/tmp_hm7mtcu
+I0000 00:00:1791037245.729048  123316 reader.cc:52] Reading meta graph with tags { serve }
+I0000 00:00:1791037245.729456  123316 reader.cc:147] Reading SavedModel debug info (if present) from: /tmp/tmp_hm7mtcu
+I0000 00:00:1791037245.739887  123316 loader.cc:236] Restoring SavedModel bundle.
+I0000 00:00:1791037245.781592  123316 loader.cc:220] Running initialization op on SavedModel bundle at path: /tmp/tmp_hm7mtcu
+I0000 00:00:1791037245.792811  123316 loader.cc:471] SavedModel load for tags { serve }; Status: success: OK. Took 66092 microseconds.
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/interpreter.py:457: UserWarning:     Warning: tf.lite.Interpreter is deprecated and is scheduled for deletion in
+    TF 2.20. Please use the LiteRT interpreter from the ai_edge_litert package.
+    See the [migration guide](https://ai.google.dev/edge/litert/migration)
+    for details.
+    
+  warnings.warn(_INTERPRETER_DELETION_WARNING)
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/convert.py:846: UserWarning: Statistics for quantized inputs were expected, but not specified; continuing anyway.
+  warnings.warn(
+W0000 00:00:1791037248.839536  123316 tf_tfl_flatbuffer_helpers.cc:364] Ignored output_format.
+W0000 00:00:1791037248.839910  123316 tf_tfl_flatbuffer_helpers.cc:367] Ignored drop_control_dependency.
+I0000 00:00:1791037248.840387  123316 reader.cc:83] Reading SavedModel from: /tmp/tmph3gjf2n3
+I0000 00:00:1791037248.841190  123316 reader.cc:52] Reading meta graph with tags { serve }
+I0000 00:00:1791037248.841558  123316 reader.cc:147] Reading SavedModel debug info (if present) from: /tmp/tmph3gjf2n3
+I0000 00:00:1791037248.844643  123316 loader.cc:236] Restoring SavedModel bundle.
+I0000 00:00:1791037248.855796  123316 loader.cc:220] Running initialization op on SavedModel bundle at path: /tmp/tmph3gjf2n3
+I0000 00:00:1791037248.859680  123316 loader.cc:471] SavedModel load for tags { serve }; Status: success: OK. Took 19299 microseconds.
+fully_quantize: 0, inference_type: 6, input_inference_type: FLOAT32, output_inference_type: FLOAT32
+W0000 00:00:1791037248.938420  123316 flatbuffer_export.cc:3851] Skipping runtime version metadata in the model. This will be generated by the exporter.
+
+   [QAT Strip] Input model type: Functional
+   [QAT Strip] Input model class: tf_keras.src.engine.functional.Functional
+   [QAT Strip] Creating TF.Keras Functional model with input shape: (78,)
+   [QAT Strip] TF_USE_LEGACY_KERAS=1
+   [QAT Strip] Skipping InputLayer
+   [QAT Strip] Copied Dense: 256 units, activation=<function relu at 0x7d0b9441be20>
+   [QAT Strip] Skipping Dropout
+   [QAT Strip] Copied Dense: 128 units, activation=<function relu at 0x7d0b9441be20>
+   [QAT Strip] Skipping Dropout
+   [QAT Strip] Copied Dense: 64 units, activation=<function relu at 0x7d0b9441be20>
+   [QAT Strip] Copied Dense: 1 units, activation=<function sigmoid at 0x7d0b94434400>
+   [QAT Strip] Created model type: Functional
+   [QAT Strip] Model class: tf_keras.src.engine.functional.Functional
+   [QAT Strip] Total layers: 5
+   [QAT Strip] Is tensorflow.keras model: False
+   [QAT Strip] WARNING: Model is not tensorflow.keras! QAT may fail.
+✅ Saved (QAT): data/processed/revision/2026-10-03_compression_ablation/compression_ablation/dirichlet_c1/prune_ft_client_qat.tflite (65.44 KB)
+   Quantization: 10/16 tensors (62.5%)
+   Input: <class 'numpy.float32'>, Output: <class 'numpy.float32'>
+  prune_ft_client_qat    acc=0.9395 f1=0.8475 recall=0.9870 far=0.0703
+[load_cicids2017] data_path=data/raw/CIC-IDS2017
+[load_cicids2017] Found 8 CSV files
+[load_cicids2017] Loaded 225,745 rows from Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv
+[load_cicids2017] Loaded 286,467 rows from Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv
+[load_cicids2017] Loaded 191,033 rows from Friday-WorkingHours-Morning.pcap_ISCX.csv
+[load_cicids2017] Loaded 529,918 rows from Monday-WorkingHours.pcap_ISCX.csv
+[load_cicids2017] Loaded 288,602 rows from Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv
+[load_cicids2017] Loaded 170,366 rows from Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv
+[load_cicids2017] Loaded 445,909 rows from Tuesday-WorkingHours.pcap_ISCX.csv
+[load_cicids2017] Loaded 692,703 rows from Wednesday-workingHours.pcap_ISCX.csv
+[load_cicids2017] Total samples loaded: 2,830,743
+[load_cicids2017] Removed 331,200 duplicates (2,499,543 unique)
+[load_cicids2017] Found 15 unique labels
+[load_cicids2017] Binary mode: BENIGN=0, ATTACK=1
+[load_cicids2017] Label distribution: BENIGN=2073680, ATTACK=425863
+[load_cicids2017] Shuffled full pool (random_state=42)
+[load_cicids2017] Balanced training set: majority 1658944 -> 1362760 (ratio<=4.0), total=1,703,450
+[load_cicids2017] StandardScaler applied (fit on train).
+[load_cicids2017] SMOTE applied: train -> 2,725,520 (BENIGN=1,362,760, ATTACK=1,362,760)
+[load_cicids2017] Final feature shape: 78 features
+[load_cicids2017] Train samples: 2,725,520, Test samples: 499,909
+[dirichlet_c3] pooled FT set: 10000 (attack 20.0%); client 3 FT set: 10000 (attack 24.9%)
+   Stripping QAT layers from FL-trained model...
+      Fixed activation in dense_4: QuantizeAwareActivation → relu
+      Fixed activation in dense_5: QuantizeAwareActivation → relu
+      Fixed activation in dense_6: QuantizeAwareActivation → relu
+      Fixed activation in dense_7: QuantizeAwareActivation → sigmoid
+      ⚠️  Failed to set weights for layer dense_4: You called `set_weights(weights)` on layer "dense_4" with a weight list of length 1, but the layer was expecting 2 weights. Provided weights: [array([[ 8.9235182e+00, -3.8533530e-03,  2.000000...
+      ⚠️  Failed to set weights for layer dropout_3: You called `set_weights(weights)` on layer "dropout_3" with a weight list of length 1, but the layer was expecting 0 weights. Provided weights: [-1]...
+      ⚠️  Failed to set weights for layer dense_5: You called `set_weights(weights)` on layer "dense_5" with a weight list of length 1, but the layer was expecting 2 weights. Provided weights: [array([[  5.939639  ,  -3.0000021 , -35.694073  ,...
+      ⚠️  Failed to set weights for layer dropout_4: You called `set_weights(weights)` on layer "dropout_4" with a weight list of length 1, but the layer was expecting 0 weights. Provided weights: [-1]...
+      ⚠️  Failed to set weights for layer dense_6: You called `set_weights(weights)` on layer "dense_6" with a weight list of length 1, but the layer was expecting 2 weights. Provided weights: [array([[-2.9614222e+00,  8.9235182e+00,  1.000000...
+      ⚠️  Failed to set weights for layer dense_7: You called `set_weights(weights)` on layer "dense_7" with a weight list of length 1, but the layer was expecting 2 weights. Provided weights: [array([[ 8.7299271e+00],
+       [ 8.6311668e+01],...
+   ✅ QAT layers stripped manually (0/6 layers with weights)
+✅ BN/Dropout stripped for TFLite export
+✅ Saved: data/processed/revision/2026-10-03_compression_ablation/compression_ablation/dirichlet_c3/fp32.tflite (798.48 KB)
+   Quantization: 0/10 tensors (0.0%)
+   Input: <class 'numpy.float32'>, Output: <class 'numpy.float32'>
+  fp32                   acc=0.1711 f1=0.2913 recall=1.0000 far=0.9992
+✅ BN/Dropout stripped for TFLite export
+Applying full integer quantization (int8 weights + activations with calibration)...
+✅ Saved: data/processed/revision/2026-10-03_compression_ablation/compression_ablation/dirichlet_c3/ptq_only.tflite (212.27 KB)
+   Quantization: 10/12 tensors (83.3%)
+   Input: <class 'numpy.float32'>, Output: <class 'numpy.float32'>
+  ptq_only               acc=0.1704 f1=0.2911 recall=1.0000 far=1.0000
+✅ BN/Dropout stripped for TFLite export
+Applying full integer quantization (int8 weights + activations with calibration)...
+✅ Saved: data/processed/revision/2026-10-03_compression_ablation/compression_ablation/dirichlet_c3/prune_noft_ptq.tflite (67.45 KB)
+   Quantization: 10/12 tensors (83.3%)
+   Input: <class 'numpy.float32'>, Output: <class 'numpy.float32'>
+  prune_noft_ptq         acc=0.1704 f1=0.2911 recall=1.0000 far=1.0000
+✅ BN/Dropout stripped for TFLite export
+Applying full integer quantization (int8 weights + activations with calibration)...
+✅ Saved: data/processed/revision/2026-10-03_compression_ablation/compression_ablation/dirichlet_c3/ftonly_pooled_ptq.tflite (226.91 KB)
+   Quantization: 10/16 tensors (62.5%)
+   Input: <class 'numpy.float32'>, Output: <class 'numpy.float32'>
+  ftonly_pooled_ptq      acc=0.9621 f1=0.8901 recall=0.8994 far=0.0250
+✅ BN/Dropout stripped for TFLite export
+Applying full integer quantization (int8 weights + activations with calibration)...
+✅ Saved: data/processed/revision/2026-10-03_compression_ablation/compression_ablation/dirichlet_c3/prune_ft_pooled_ptq.tflite (75.10 KB)
+   Quantization: 10/16 tensors (62.5%)
+   Input: <class 'numpy.float32'>, Output: <class 'numpy.float32'>
+  prune_ft_pooled_ptq    acc=0.9628 f1=0.8932 recall=0.9138 far=0.0272
+   [QAT Strip] Input model type: Functional
+   [QAT Strip] Input model class: tf_keras.src.engine.functional.Functional
+   [QAT Strip] Creating TF.Keras Functional model with input shape: (78,)
+   [QAT Strip] TF_USE_LEGACY_KERAS=1
+   [QAT Strip] Skipping InputLayer
+   [QAT Strip] Copied Dense: 256 units, activation=<function relu at 0x7d0b9441be20>
+   [QAT Strip] Skipping Dropout
+   [QAT Strip] Copied Dense: 128 units, activation=<function relu at 0x7d0b9441be20>
+   [QAT Strip] Skipping Dropout
+   [QAT Strip] Copied Dense: 64 units, activation=<function relu at 0x7d0b9441be20>
+   [QAT Strip] Copied Dense: 1 units, activation=<function sigmoid at 0x7d0b94434400>
+   [QAT Strip] Created model type: Functional
+   [QAT Strip] Model class: tf_keras.src.engine.functional.Functional
+   [QAT Strip] Total layers: 5
+   [QAT Strip] Is tensorflow.keras model: False
+   [QAT Strip] WARNING: Model is not tensorflow.keras! QAT may fail.
+✅ Saved (QAT): data/processed/revision/2026-10-03_compression_ablation/compression_ablation/dirichlet_c3/prune_ft_pooled_qat.tflite (65.44 KB)
+   Quantization: 10/16 tensors (62.5%)
+   Input: <class 'numpy.float32'>, Output: <class 'numpy.float32'>
+  prune_ft_pooled_qat    acc=0.9658 f1=0.9041 recall=0.9468 far=0.0303
+✅ BN/Dropout stripped for TFLite export
+Applying full integer quantization (int8 weights + activations with calibration)...
+✅ Saved: data/processed/revision/2026-10-03_compression_ablation/compression_ablation/dirichlet_c3/ftonly_client_ptq.tflite (226.91 KB)/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/interpreter.py:457: UserWarning:     Warning: tf.lite.Interpreter is deprecated and is scheduled for deletion in
+    TF 2.20. Please use the LiteRT interpreter from the ai_edge_litert package.
+    See the [migration guide](https://ai.google.dev/edge/litert/migration)
+    for details.
+    
+  warnings.warn(_INTERPRETER_DELETION_WARNING)
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/convert.py:846: UserWarning: Statistics for quantized inputs were expected, but not specified; continuing anyway.
+  warnings.warn(
+W0000 00:00:1791037252.242836  123316 tf_tfl_flatbuffer_helpers.cc:364] Ignored output_format.
+W0000 00:00:1791037252.243210  123316 tf_tfl_flatbuffer_helpers.cc:367] Ignored drop_control_dependency.
+I0000 00:00:1791037252.243657  123316 reader.cc:83] Reading SavedModel from: /tmp/tmp5omsq4ep
+I0000 00:00:1791037252.244316  123316 reader.cc:52] Reading meta graph with tags { serve }
+I0000 00:00:1791037252.244670  123316 reader.cc:147] Reading SavedModel debug info (if present) from: /tmp/tmp5omsq4ep
+I0000 00:00:1791037252.246752  123316 loader.cc:236] Restoring SavedModel bundle.
+I0000 00:00:1791037252.258253  123316 loader.cc:220] Running initialization op on SavedModel bundle at path: /tmp/tmp5omsq4ep
+I0000 00:00:1791037252.262063  123316 loader.cc:471] SavedModel load for tags { serve }; Status: success: OK. Took 18413 microseconds.
+fully_quantize: 0, inference_type: 6, input_inference_type: FLOAT32, output_inference_type: FLOAT32
+W0000 00:00:1791037252.318110  123316 flatbuffer_export.cc:3851] Skipping runtime version metadata in the model. This will be generated by the exporter.
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/interpreter.py:457: UserWarning:     Warning: tf.lite.Interpreter is deprecated and is scheduled for deletion in
+    TF 2.20. Please use the LiteRT interpreter from the ai_edge_litert package.
+    See the [migration guide](https://ai.google.dev/edge/litert/migration)
+    for details.
+    
+  warnings.warn(_INTERPRETER_DELETION_WARNING)
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/convert.py:846: UserWarning: Statistics for quantized inputs were expected, but not specified; continuing anyway.
+  warnings.warn(
+W0000 00:00:1791037255.629675  123316 tf_tfl_flatbuffer_helpers.cc:364] Ignored output_format.
+W0000 00:00:1791037255.630088  123316 tf_tfl_flatbuffer_helpers.cc:367] Ignored drop_control_dependency.
+I0000 00:00:1791037255.630556  123316 reader.cc:83] Reading SavedModel from: /tmp/tmpn1nh_63k
+I0000 00:00:1791037255.632339  123316 reader.cc:52] Reading meta graph with tags { serve }
+I0000 00:00:1791037255.632694  123316 reader.cc:147] Reading SavedModel debug info (if present) from: /tmp/tmpn1nh_63k
+I0000 00:00:1791037255.642583  123316 loader.cc:236] Restoring SavedModel bundle.
+I0000 00:00:1791037255.684982  123316 loader.cc:220] Running initialization op on SavedModel bundle at path: /tmp/tmpn1nh_63k
+I0000 00:00:1791037255.696848  123316 loader.cc:471] SavedModel load for tags { serve }; Status: success: OK. Took 66300 microseconds.
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/interpreter.py:457: UserWarning:     Warning: tf.lite.Interpreter is deprecated and is scheduled for deletion in
+    TF 2.20. Please use the LiteRT interpreter from the ai_edge_litert package.
+    See the [migration guide](https://ai.google.dev/edge/litert/migration)
+    for details.
+    
+  warnings.warn(_INTERPRETER_DELETION_WARNING)
+
+   Quantization: 10/16 tensors (62.5%)
+   Input: <class 'numpy.float32'>, Output: <class 'numpy.float32'>
+  ftonly_client_ptq      acc=0.9603 f1=0.8891 recall=0.9330 far=0.0341
+✅ BN/Dropout stripped for TFLite export
+Applying full integer quantization (int8 weights + activations with calibration)...
+✅ Saved: data/processed/revision/2026-10-03_compression_ablation/compression_ablation/dirichlet_c3/prune_ft_client_ptq.tflite (75.10 KB)
+   Quantization: 10/16 tensors (62.5%)
+   Input: <class 'numpy.float32'>, Output: <class 'numpy.float32'>
+  prune_ft_client_ptq    acc=0.9631 f1=0.8961 recall=0.9343 far=0.0310
+   [QAT Strip] Input model type: Functional
+   [QAT Strip] Input model class: tf_keras.src.engine.functional.Functional
+   [QAT Strip] Creating TF.Keras Functional model with input shape: (78,)
+   [QAT Strip] TF_USE_LEGACY_KERAS=1
+   [QAT Strip] Skipping InputLayer
+   [QAT Strip] Copied Dense: 256 units, activation=<function relu at 0x7d0b9441be20>
+   [QAT Strip] Skipping Dropout
+   [QAT Strip] Copied Dense: 128 units, activation=<function relu at 0x7d0b9441be20>
+   [QAT Strip] Skipping Dropout
+   [QAT Strip] Copied Dense: 64 units, activation=<function relu at 0x7d0b9441be20>
+   [QAT Strip] Copied Dense: 1 units, activation=<function sigmoid at 0x7d0b94434400>
+   [QAT Strip] Created model type: Functional
+   [QAT Strip] Model class: tf_keras.src.engine.functional.Functional
+   [QAT Strip] Total layers: 5
+   [QAT Strip] Is tensorflow.keras model: False
+   [QAT Strip] WARNING: Model is not tensorflow.keras! QAT may fail.
+✅ Saved (QAT): data/processed/revision/2026-10-03_compression_ablation/compression_ablation/dirichlet_c3/prune_ft_client_qat.tflite (65.44 KB)
+   Quantization: 10/16 tensors (62.5%)
+   Input: <class 'numpy.float32'>, Output: <class 'numpy.float32'>
+  prune_ft_client_qat    acc=0.9658 f1=0.9044 recall=0.9487 far=0.0307
+✅ Compression ablation saved to data/processed/revision/2026-10-03_compression_ablation/compression_ablation

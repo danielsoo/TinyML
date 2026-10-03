@@ -1,0 +1,18 @@
+# Where does the post-compression gain of the FL model come from?
+# compression.py fine-tunes on the first 10k samples of the POOLED training set (server-side data).
+# Variants: no fine-tune / fine-tune only / prune+fine-tune, with pooled vs one client's local data.
+ft_samples: 10000
+seed: 42
+models:
+  - name: near_iid
+    model: data/processed/revision/2026-10-03_01-46-48_full/baseline/models/b_fl.h5
+    config: data/processed/revision/2026-10-03_01-46-48_full/baseline/configs/b_fl.yaml
+    ft_client: 0
+  - name: dirichlet_c1
+    model: data/processed/revision/2026-10-03_01-46-48_full/non_iid/models/fl_dirichlet_c4.h5
+    config: data/processed/revision/2026-10-03_01-46-48_full/non_iid/configs/fl_dirichlet_c4.yaml
+    ft_client: 1        # largest client (1.98M samples, 59.5% attack)
+  - name: dirichlet_c3
+    model: data/processed/revision/2026-10-03_01-46-48_full/non_iid/models/fl_dirichlet_c4.h5
+    config: data/processed/revision/2026-10-03_01-46-48_full/non_iid/configs/fl_dirichlet_c4.yaml
+    ft_client: 3        # 0.73M samples, 25.1% attack (closest to global mix)

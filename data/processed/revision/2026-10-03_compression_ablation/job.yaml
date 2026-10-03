@@ -1,0 +1,5 @@
+id: 2026-10-03_compression_ablation
+config_dir: config/jobs/2026-10-03_compression_ablation
+steps: compression_ablation
+flags: []
+why: "Separate pruning vs. fine-tuning and pooled (server) vs. client-local fine-tuning in the post-compression gain (b: F1 0.779 -> d: 0.904). No retraining; reuses models from 2026-10-03_01-46-48_full."
