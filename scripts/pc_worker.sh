@@ -62,11 +62,13 @@ run_job() {
   out="data/processed/revision/$id"
   mkdir -p "$out"; cp "$f" "$out/job.yaml"
   log "▶ job $id: ${args[*]}"
-  if bash scripts/run_revision_experiments.sh "${args[@]}" > "$out/runner.out" 2>&1; then
-    echo ok > "$out/JOB_STATUS"
-  else
-    echo failed > "$out/JOB_STATUS"
+  bash scripts/run_revision_experiments.sh "${args[@]}" > "$out/runner.out" 2>&1
+  local rc=$?
+  if [ "$rc" -eq 3 ]; then
+    log "job $id waiting for its dataset: $(tail -n 1 "$out/runner.out")"
+    return 3
   fi
+  if [ "$rc" -eq 0 ]; then echo ok > "$out/JOB_STATUS"; else echo failed > "$out/JOB_STATUS"; fi
   log "job $id finished: $(cat "$out/JOB_STATUS")"
   push_results "$out" "Results: $id ($(cat "$out/JOB_STATUS"))"
 }
@@ -89,6 +91,7 @@ while true; do
       id="$(job_field "$f" id)"
       [ -f "data/processed/revision/$id/JOB_STATUS" ] && continue
       run_job "$f"
+      [ $? -eq 3 ] && continue   # dataset missing: try the next job, retry this one later
       break   # re-pull before the next job so new instructions are picked up
     done
   fi

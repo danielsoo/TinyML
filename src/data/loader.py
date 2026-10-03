@@ -678,6 +678,10 @@ def load_cicids2017(
 # TON_IoT (ToN_IoT) - UNSW Canberra IoT/IIoT Cybersecurity
 # -------------------------
 
+TON_IOT_ID_COLUMNS = ["ts", "src_ip", "dst_ip", "src_port"]
+TON_IOT_MAX_CATEGORIES = 50
+
+
 def load_ton_iot(
     data_path: str = "data/raw/TON_IoT",
     max_samples: int = None,
@@ -687,139 +691,144 @@ def load_ton_iot(
     binary: bool = True,
     balance_ratio: float = None,
     use_smote: bool = False,
+    eval_split: str = "test",
+    val_size: float = 0.1,
     **_,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    """Load TON_IoT (ToN_IoT) CSV and return (x_train, y_train, x_test, y_test).
+    """Load TON_IoT (ToN_IoT) network CSV and return (x_train, y_train, x_test, y_test).
 
     TON_IoT: Telemetry, OS (Windows/Ubuntu), Network datasets from UNSW Canberra.
-    Processed/Train_Test CSV have 'label' (normal vs attack) and optionally 'type' (attack sub-class).
-    Academic use free (Dr Nour Moustafa, UNSW).
+    Expected file: Train_Test_datasets/Train_Test_Network_dataset/train_test_network.csv
+    ('label' 0/1 and attack sub-class 'type'). Academic use free (Dr Nour Moustafa, UNSW).
+
+    Preprocessing mirrors load_cicids2017 (dedup -> shuffle -> stratified split ->
+    optional val hold-out -> majority undersampling -> StandardScaler -> SMOTE), plus:
+      - identifier/time columns are dropped (ts, src_ip, dst_ip, src_port): they let a
+        model memorise hosts and capture windows instead of traffic behaviour; dst_port is
+        kept, as CIC-IDS2017's Destination Port feature is;
+      - text columns with <= 50 distinct values (proto, service, conn_state, flags, ...)
+        are label-encoded; higher-cardinality free text (dns_query, http_uri,
+        ssl_subject, user agents, ...) is dropped;
+      - '-' / missing numeric fields become 0 (Zeek's "not present").
 
     Args:
-        data_path: Directory containing CSV (e.g. Train_Test_datasets or Processed)
+        data_path: Directory containing the CSV (searched recursively)
         label_col: Column name for label (default 'label')
-        binary: If True, normal=0 / attack=1. If False, use 'type' for multi-class when present.
+        binary: If True, normal=0 / attack=1. If False, use 'type' for multi-class.
+        eval_split: "test" (default) or "val" (hold out val_size of train, never load test)
     """
     root = _ensure_dir(data_path)
-    # Support both flat *.csv and subdirs like Train_Test_datasets/*.csv
-    csv_files = sorted(root.glob("*.csv"))
-    if not csv_files:
-        for sub in ["Train_Test_datasets", "Processed_datasets", "processed"]:
-            subdir = root / sub
-            if subdir.exists():
-                csv_files = sorted(subdir.glob("*.csv"))
-                if csv_files:
-                    break
+    csv_files = sorted(root.rglob("*.csv"))
+    network_files = [p for p in csv_files if "network" in p.name.lower()]
+    csv_files = network_files or csv_files
     if not csv_files:
         raise FileNotFoundError(
             f"TON_IoT CSV files not found under {root}. "
-            "Place CSV (e.g. from Train_Test_datasets) in data_path or data_path/Train_Test_datasets."
+            "Place train_test_network.csv (Train_Test_datasets/Train_Test_Network_dataset) there."
         )
+    print(f"[load_ton_iot] files: {[p.name for p in csv_files]}")
 
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=pd.errors.DtypeWarning)
-        dfs = [pd.read_csv(p, low_memory=False) for p in csv_files]
-    df = pd.concat(dfs, axis=0, ignore_index=True)
+        df = pd.concat([pd.read_csv(p, low_memory=False) for p in csv_files], ignore_index=True)
+    print(f"[load_ton_iot] rows: {len(df):,}, columns: {len(df.columns)}")
 
     if label_col not in df.columns:
-        for cand in ["label", "Label", "type", "Type", "attack"]:
-            if cand in df.columns:
-                label_col = cand
-                print(f"[load_ton_iot] Using label column '{label_col}'")
-                break
-        else:
-            raise KeyError(f"Label column not found. Available: {list(df.columns)[:10]}...")
-
-    y_raw = df[label_col]
-    feature_df = df.drop(columns=[label_col])
-    if "type" in feature_df.columns and binary:
-        feature_df = feature_df.drop(columns=["type"])
-
-    # Map label to 0/1 for binary (support string or numeric)
+        raise KeyError(f"Label column '{label_col}' not found. Available: {list(df.columns)}")
     if binary:
-        if pd.api.types.is_numeric_dtype(y_raw):
-            y = y_raw.values.astype(np.int64)
-            uniq = np.unique(y)
-            if len(uniq) > 2:
-                # Assume 0 = normal, others = attack
-                y = np.where(y == uniq[0], 0, 1).astype(np.int64)
-        else:
-            y_str = y_raw.astype(str).str.lower()
-            y = np.where(y_str.str.contains("normal|benign|0", regex=True), 0, 1).astype(np.int64)
-        print(f"[load_ton_iot] Binary labels: 0={np.sum(y==0):,}, 1={np.sum(y==1):,}")
+        y_raw = pd.to_numeric(df[label_col], errors="coerce")
+        if y_raw.isna().any():
+            raise ValueError(f"Non-numeric values in '{label_col}'")
+        y = (y_raw.values != 0).astype(np.int64)
     else:
         from sklearn.preprocessing import LabelEncoder
-        le = LabelEncoder()
-        y = le.fit_transform(y_raw.astype(str))
-        print(f"[load_ton_iot] Multi-class: {len(le.classes_)} classes")
+        y = LabelEncoder().fit_transform(df["type"].astype(str))
 
-    # Numeric features only
+    feature_df = df.drop(columns=[c for c in [label_col, "type"] if c in df.columns])
+    dropped_id = [c for c in TON_IOT_ID_COLUMNS if c in feature_df.columns]
+    feature_df = feature_df.drop(columns=dropped_id)
+
+    encoded, dropped_text = [], []
     for col in list(feature_df.columns):
-        if feature_df[col].dtype == "object" or not np.issubdtype(feature_df[col].dtype, np.number):
-            try:
-                feature_df[col] = pd.to_numeric(feature_df[col], errors="coerce")
-            except Exception:
-                feature_df = feature_df.drop(columns=[col])
-    numeric_df = feature_df.select_dtypes(include=[np.number])
-    all_nan = numeric_df.columns[numeric_df.isna().all()]
-    if len(all_nan) > 0:
-        numeric_df = numeric_df.drop(columns=all_nan)
-    medians = numeric_df.median(skipna=True).fillna(0)
-    numeric_df = numeric_df.fillna(medians)
-    X = numeric_df.values.astype("float32")
+        if pd.api.types.is_numeric_dtype(feature_df[col]):
+            continue
+        as_num = pd.to_numeric(feature_df[col].replace("-", np.nan), errors="coerce")
+        non_missing = feature_df[col].replace("-", np.nan).notna()
+        if non_missing.sum() and as_num[non_missing].notna().all():
+            feature_df[col] = as_num  # numeric column stored as text because of '-'
+        elif feature_df[col].nunique(dropna=False) <= TON_IOT_MAX_CATEGORIES:
+            feature_df[col] = pd.factorize(feature_df[col].astype(str), sort=True)[0]
+            encoded.append(col)
+        else:
+            feature_df = feature_df.drop(columns=[col])
+            dropped_text.append(col)
+    feature_df = feature_df.apply(pd.to_numeric, errors="coerce").fillna(0)
+    print(f"[load_ton_iot] dropped identifiers: {dropped_id}")
+    print(f"[load_ton_iot] label-encoded: {encoded}")
+    print(f"[load_ton_iot] dropped high-cardinality text: {dropped_text}")
+    print(f"[load_ton_iot] features ({feature_df.shape[1]}): {list(feature_df.columns)}")
+
+    X = feature_df.values.astype("float32")
+    n_before = len(X)
+    dedup = pd.DataFrame(X)
+    dedup["_y"] = y
+    dedup = dedup.drop_duplicates()
+    y = dedup.pop("_y").values.astype(np.int64)
+    X = dedup.values.astype("float32")
+    print(f"[load_ton_iot] Removed {n_before - len(X):,} duplicates ({len(X):,} unique); "
+          f"normal={np.sum(y == 0):,}, attack={np.sum(y == 1):,}")
+
+    rng = np.random.default_rng(random_state)
+    order = rng.permutation(len(X))
+    X, y = X[order], y[order]
 
     if max_samples is not None and len(X) > max_samples:
-        unique, counts = np.unique(y, return_counts=True)
-        use_stratify = counts.min() >= 2
         X, _, y, _ = train_test_split(
-            X, y, train_size=max_samples,
-            stratify=y if use_stratify else None,
-            random_state=random_state,
+            X, y, train_size=max_samples, stratify=y, random_state=random_state,
         )
 
-    unique, counts = np.unique(y, return_counts=True)
-    use_stratify = counts.min() >= 2
     x_train, x_test, y_train, y_test = train_test_split(
-        X, y, test_size=test_size,
-        stratify=y if use_stratify else None,
-        random_state=random_state,
+        X, y, test_size=test_size, stratify=y, random_state=random_state,
     )
+    if eval_split == "val":
+        x_train, x_test, y_train, y_test = train_test_split(
+            x_train, y_train, test_size=val_size, stratify=y_train, random_state=random_state,
+        )
+        print(f"[load_ton_iot] eval_split=val: evaluating on {len(y_test):,} held-out "
+              f"training samples (val_size={val_size}); test split not used")
+    elif eval_split != "test":
+        raise ValueError(f"eval_split must be 'test' or 'val', got {eval_split!r}")
 
     # Undersample majority (binary)
-    if binary and balance_ratio is not None and balance_ratio > 0 and len(unique) == 2:
-        rng = np.random.default_rng(random_state)
+    if binary and balance_ratio is not None and balance_ratio > 0 and len(np.unique(y_train)) == 2:
         counts = np.bincount(y_train.astype(int))
-        minority_class = np.argmin(counts)
+        minority_class = int(np.argmin(counts))
         majority_class = 1 - minority_class
         n_minority, n_majority = counts[minority_class], counts[majority_class]
         if n_majority > n_minority * balance_ratio:
             n_majority_target = int(n_minority * balance_ratio)
             majority_idx = np.where(y_train == majority_class)[0]
-            keep_idx = rng.choice(majority_idx, size=min(n_majority_target, len(majority_idx)), replace=False)
-            minority_idx = np.where(y_train == minority_class)[0]
-            balanced_idx = np.concatenate([minority_idx, keep_idx])
+            keep_idx = rng.choice(majority_idx, size=n_majority_target, replace=False)
+            balanced_idx = np.concatenate([np.where(y_train == minority_class)[0], keep_idx])
             rng.shuffle(balanced_idx)
-            x_train = x_train[balanced_idx]
-            y_train = y_train[balanced_idx]
-            print(f"[load_ton_iot] Balanced: majority {n_majority} -> {len(keep_idx)} (ratio<={balance_ratio}), total={len(y_train):,}")
+            x_train, y_train = x_train[balanced_idx], y_train[balanced_idx]
+            print(f"[load_ton_iot] Balanced: majority {n_majority} -> {n_majority_target} "
+                  f"(ratio<={balance_ratio}), total={len(y_train):,}")
 
     from sklearn.preprocessing import StandardScaler
     scaler = StandardScaler()
     x_train = scaler.fit_transform(x_train).astype("float32")
     x_test = scaler.transform(x_test).astype("float32")
-    print(f"[load_ton_iot] StandardScaler applied.")
+    print(f"[load_ton_iot] StandardScaler applied (fit on train).")
 
     if binary and use_smote and len(np.unique(y_train)) == 2:
-        try:
-            from imblearn.over_sampling import SMOTE
-            counts_before = np.bincount(y_train.astype(int))
-            k = max(1, min(5, int(counts_before.min()) - 1))
-            smote = SMOTE(random_state=random_state, k_neighbors=k)
-            x_train, y_train = smote.fit_resample(x_train, y_train)
-            x_train = x_train.astype("float32")
-            print(f"[load_ton_iot] SMOTE applied: train -> {len(y_train):,} (0={np.sum(y_train==0):,}, 1={np.sum(y_train==1):,})")
-        except Exception as e:
-            print(f"[load_ton_iot] SMOTE skipped: {e}")
+        from imblearn.over_sampling import SMOTE
+        counts_before = np.bincount(y_train.astype(int))
+        k = max(1, min(5, int(counts_before.min()) - 1))
+        x_train, y_train = SMOTE(random_state=random_state, k_neighbors=k).fit_resample(x_train, y_train)
+        x_train = x_train.astype("float32")
+        print(f"[load_ton_iot] SMOTE applied: train -> {len(y_train):,} "
+              f"(0={np.sum(y_train == 0):,}, 1={np.sum(y_train == 1):,})")
 
     print(f"[load_ton_iot] Features: {x_train.shape[1]}, Train: {len(y_train):,}, Test: {len(y_test):,}")
     return x_train, y_train, x_test, y_test

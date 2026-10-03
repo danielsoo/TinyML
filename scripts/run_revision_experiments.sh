@@ -29,8 +29,15 @@ done
 cd "$(dirname "$0")/.."
 # shellcheck disable=SC1091
 [ -f "$VENV/bin/activate" ] && source "$VENV/bin/activate"
-if [ "$(ls data/raw/CIC-IDS2017/*.pcap_ISCX.csv 2>/dev/null | wc -l)" -ne 8 ]; then
-  echo "❌ Need the 8 CIC-IDS2017 *.pcap_ISCX.csv files in data/raw/CIC-IDS2017/"; exit 1
+# Exit code 3 = dataset not in place yet (pc_worker.sh retries the job later)
+DATA_NAME=$(python3 -c "import yaml,sys; print(yaml.safe_load(open(sys.argv[1]))['data']['name'])" "$CONFIG_DIR/fl_baseline.yaml" 2>/dev/null || echo cicids2017)
+DATA_PATH=$(python3 -c "import yaml,sys; print(yaml.safe_load(open(sys.argv[1]))['data']['path'])" "$CONFIG_DIR/fl_baseline.yaml" 2>/dev/null || echo data/raw/CIC-IDS2017)
+if [ "$DATA_NAME" = "cicids2017" ]; then
+  if [ "$(ls "$DATA_PATH"/*.pcap_ISCX.csv 2>/dev/null | wc -l)" -ne 8 ]; then
+    echo "❌ Need the 8 CIC-IDS2017 *.pcap_ISCX.csv files in $DATA_PATH/"; exit 3
+  fi
+elif [ -z "$(find -L "$DATA_PATH" -name '*.csv' 2>/dev/null | head -1)" ]; then
+  echo "❌ No $DATA_NAME CSV files under $DATA_PATH/"; exit 3
 fi
 
 TAG=$([ -n "$QUICK" ] && echo quick || echo full)

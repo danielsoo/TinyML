@@ -32,3 +32,11 @@ Wall time: baseline ablation (a–d) 322 min, non-IID 155 min.
    regularizer; the gain may instead come from this server-side fine-tuning. Job
    `2026-10-03_compression_ablation` separates the two (no fine-tune / fine-tune only / prune + fine-tune,
    pooled vs. one client's local data). Paper text on §5.6 and Table 2 should wait for it.
+
+## Second dataset: TON_IoT (queued)
+Job `2026-10-03_toniot_full` runs the identical recipe (`config/paper_v12_toniot/`) on
+`train_test_network.csv`. Loader changes (`load_ton_iot`) so results are not shortcut-driven and
+match the CIC-IDS2017 preprocessing: drop `ts`, `src_ip`, `dst_ip`, `src_port`; label-encode text
+columns with ≤ 50 values; drop high-cardinality free text (DNS query, URI, user agent, SSL subject…);
+deduplicate; stratified 80/20 split; same undersampling / scaling / SMOTE. The first run's log lists
+the kept features for review.
