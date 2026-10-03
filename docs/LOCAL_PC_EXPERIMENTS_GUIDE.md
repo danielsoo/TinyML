@@ -85,3 +85,23 @@ push하면 Claude가 SUMMARY를 읽어서 논문 표 2 (a)행, non-IID 절, 7절
 | `bash: $'\r': command not found` | Windows에서 `git pull` 다시 (`.sh`는 LF로 받도록 설정돼 있음). 그래도 나면 `sed -i 's/\r$//' scripts/*.sh` |
 | `❌ Need the 8 CIC-IDS2017 ...` | 3단계 파일 위치/이름 확인 |
 | `❌ <step> failed` | 출력된 로그 마지막 25줄을 Claude에게 붙여넣기 |
+
+## 8. 자동 반복 모드 (Claude가 결과 확인 → 수정 → 재실행)
+PC에서 worker를 한 번 켜두면, 사람이 명령어를 칠 필요 없이 반복됩니다.
+
+```bash
+cd /mnt/c/Users/danie/Documents/Projects/TinyML
+nohup bash scripts/pc_worker.sh > worker.out 2>&1 &
+tail -f worker.out          # 확인용 (Ctrl+C 해도 worker는 계속)
+```
+- 10분마다 이 브랜치를 pull → `experiments/queue/`에 Claude가 넣어둔 새 작업이 있으면 실행 → 결과를 자동 commit/push.
+- 이미 돌고 있는 실험이 있으면 끝날 때까지 기다렸다가, 끝난 결과를 먼저 push합니다.
+- git은 Windows의 `git.exe`로 실행되므로 Windows에서 평소 쓰는 GitHub 로그인으로 push됩니다.
+- 끄기: `pkill -f "^bash scripts/pc_worker.sh"`
+- worker는 `scripts/run_revision_experiments.sh`만, 정해진 옵션으로만 실행합니다 (작업 파일은 설정값일 뿐 명령어가 아님).
+
+### 튜닝 규칙 (논문 신뢰성)
+- **고장 난 실행**(에러, NaN, 한 클래스로만 예측하는 붕괴)은 원인을 고쳐서 바로 재실행합니다.
+- **정상이지만 숫자가 낮은 결과**(예: non-IID에서 recall 하락)는 그 자체가 리뷰어 질문에 대한 답이므로 그대로 보고합니다.
+- 성능을 끌어올리는 튜닝은 **검증 데이터**(`eval_split: val`, 학습 데이터의 10%)로만 고르고, 고른 설정 하나만 마지막에 테스트셋으로 평가합니다. 시도한 설정 수는 논문에 적습니다.
+  테스트셋 점수를 보면서 고르면 리뷰어가 "test set에 과적합"이라고 지적할 수 있습니다.

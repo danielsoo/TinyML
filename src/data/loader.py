@@ -424,9 +424,15 @@ def load_cicids2017(
     balance_ratio: float = None,
     use_smote: bool = False,  # SMOTE oversamples minority class (train only)
     return_attack_labels: bool = False,
+    eval_split: str = "test",
+    val_size: float = 0.1,
     **_,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """Load CIC-IDS2017 CSV files and return (x_train, y_train, x_test, y_test).
+
+    eval_split="val" is for hyperparameter tuning: a stratified val_size share of the
+    training split is held out and returned in place of the test set, and the test
+    set is never loaded into the run. Preprocessing is then fit on the reduced train.
     
     Args:
         data_path: Directory containing .pcap_ISCX.csv files
@@ -601,6 +607,18 @@ def load_cicids2017(
         stratify=y if use_stratify else None,
         random_state=random_state,
     )
+
+    if eval_split == "val":
+        x_train, x_test, y_train, y_test, attack_train, attack_test = train_test_split(
+            x_train, y_train, attack_train,
+            test_size=val_size,
+            stratify=y_train if use_stratify else None,
+            random_state=random_state,
+        )
+        print(f"[load_cicids2017] eval_split=val: evaluating on {len(y_test):,} held-out "
+              f"training samples (val_size={val_size}); test split not used")
+    elif eval_split != "test":
+        raise ValueError(f"eval_split must be 'test' or 'val', got {eval_split!r}")
 
     # Undersample majority for severe imbalance (binary only)
     if binary and balance_ratio is not None and balance_ratio > 0:

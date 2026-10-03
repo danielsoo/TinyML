@@ -5,17 +5,21 @@
 #   bash scripts/run_revision_experiments.sh --quick     # ~10-20 min smoke test (5 rounds x 1 epoch)
 #   bash scripts/run_revision_experiments.sh            # full runs (many hours, CPU)
 #   bash scripts/run_revision_experiments.sh --with-failed --with-scaling   # + fixed-LR row, 20/50 clients
+#   bash scripts/run_revision_experiments.sh --config-dir config/tuning/<job>   # alternate configs
+#   bash scripts/run_revision_experiments.sh --steps non_iid          # subset of: baseline_ablation,non_iid,client_scaling
 # Re-running with the same --out resumes: finished steps are skipped.
 set -uo pipefail
 
 VENV="${VENV:-$HOME/tinyml-venv}"
-QUICK=""; WITH_FAILED=""; WITH_SCALING=0; OUT=""
+QUICK=""; WITH_FAILED=""; WITH_SCALING=0; OUT=""; CONFIG_DIR="config/paper_v12"; STEPS=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --quick) QUICK="--quick" ;;
     --with-failed) WITH_FAILED="--with-failed" ;;
     --with-scaling) WITH_SCALING=1 ;;
     --out) OUT="$2"; shift ;;
+    --config-dir) CONFIG_DIR="$2"; shift ;;
+    --steps) STEPS="$2"; shift ;;
     *) echo "unknown option: $1"; exit 1 ;;
   esac
   shift
@@ -33,7 +37,7 @@ OUT="${OUT:-data/processed/revision/$(date +%Y-%m-%d_%H-%M-%S)_$TAG}"
 mkdir -p "$OUT"
 echo "Output: $OUT"
 git rev-parse HEAD > "$OUT/git_commit.txt" 2>/dev/null || true
-cp -r config/paper_v12 "$OUT/configs"
+mkdir -p "$OUT/configs" && cp "$CONFIG_DIR"/*.yaml "$OUT/configs/"
 
 step() {  # step <name> <command...>
   local name="$1"; shift
@@ -50,15 +54,25 @@ step() {  # step <name> <command...>
   fi
 }
 
+if [ -z "$STEPS" ]; then
+  STEPS="baseline_ablation,non_iid"
+  [ "$WITH_SCALING" -eq 1 ] && STEPS="$STEPS,client_scaling"
+fi
+wanted() { [[ ",$STEPS," == *",$1,"* ]]; }
+
 FAILED=0
-step baseline_ablation python scripts/run_baseline_ablation.py \
-  --config-dir config/paper_v12 --output-dir "$OUT/baseline" $QUICK $WITH_FAILED || FAILED=1
-step non_iid python scripts/run_non_iid_ablation.py \
-  --base-config config/paper_v12/fl_baseline.yaml --strategies dirichlet --client-counts 4 \
-  --output-dir "$OUT/non_iid" $QUICK || FAILED=1
-if [ "$WITH_SCALING" -eq 1 ]; then
+if wanted baseline_ablation; then
+  step baseline_ablation python scripts/run_baseline_ablation.py \
+    --config-dir "$CONFIG_DIR" --output-dir "$OUT/baseline" $QUICK $WITH_FAILED || FAILED=1
+fi
+if wanted non_iid; then
+  step non_iid python scripts/run_non_iid_ablation.py \
+    --base-config "$CONFIG_DIR/fl_baseline.yaml" --strategies dirichlet --client-counts 4 \
+    --output-dir "$OUT/non_iid" $QUICK || FAILED=1
+fi
+if wanted client_scaling; then
   step client_scaling python scripts/run_non_iid_ablation.py \
-    --base-config config/paper_v12/fl_baseline.yaml --strategies label_balanced,dirichlet \
+    --base-config "$CONFIG_DIR/fl_baseline.yaml" --strategies label_balanced,dirichlet \
     --client-counts 20,50 --output-dir "$OUT/client_scaling" $QUICK || FAILED=1
 fi
 
@@ -66,6 +80,7 @@ fi
   echo "# Revision experiments ($TAG)"
   echo
   echo "- commit: $(cat "$OUT/git_commit.txt" 2>/dev/null)"
+  echo "- configs: $CONFIG_DIR (eval_split: $(grep -h "eval_split" "$OUT"/configs/*.yaml 2>/dev/null | sort -u | tr -d ' ' | tr '\n' ' ' || true))"
   echo "- host: $(uname -srm), $(nproc) cores"
   for f in "$OUT"/*.done; do [ -f "$f" ] && echo "- $(basename "$f" .done): $(( $(cat "$f") / 60 )) min"; done
   echo
