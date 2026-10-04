@@ -1,0 +1,16 @@
+# v2 (bug-fixed) models: float-stripped FL model, pruning vs fine-tuning, pooled vs client-local FT.
+ft_samples: 10000
+seed: 42
+models:
+  - name: near_iid
+    model: data/processed/revision/2026-10-03_v2_cic_full/baseline/models/b_fl.h5
+    config: data/processed/revision/2026-10-03_v2_cic_full/baseline/configs/b_fl.yaml
+    ft_client: 0
+  - name: dirichlet_c1
+    model: data/processed/revision/2026-10-03_v2_cic_full/non_iid/models/fl_dirichlet_c4.h5
+    config: data/processed/revision/2026-10-03_v2_cic_full/non_iid/configs/fl_dirichlet_c4.yaml
+    ft_client: 1
+  - name: dirichlet_c3
+    model: data/processed/revision/2026-10-03_v2_cic_full/non_iid/models/fl_dirichlet_c4.h5
+    config: data/processed/revision/2026-10-03_v2_cic_full/non_iid/configs/fl_dirichlet_c4.yaml
+    ft_client: 3
