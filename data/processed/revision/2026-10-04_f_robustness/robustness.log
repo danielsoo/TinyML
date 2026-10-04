@@ -1,0 +1,179 @@
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1791129594.618287  476208 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+I0000 00:00:1791129594.619369  476208 cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+I0000 00:00:1791129594.970747  476208 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI AVX512_BF16 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1791129596.903461  476208 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+I0000 00:00:1791129596.904631  476208 cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+E0000 00:00:1791129714.426733  476208 cuda_executor.cc:1737] INTERNAL: CUDA Runtime error: Failed call to cudaGetRuntimeVersion: Error loading CUDA libraries. GPU will not be used.: Error loading CUDA libraries. GPU will not be used.
+W0000 00:00:1791129714.427381  476253 cuda_executor.cc:1755] Failed to determine cuDNN version (Note that this is expected if the application doesn't link the cuDNN plugin): INTERNAL: cuDNN error: CUDNN_STATUS_INTERNAL_ERROR
+W0000 00:00:1791129714.450375  476208 gpu_device.cc:2365] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/interpreter.py:457: UserWarning:     Warning: tf.lite.Interpreter is deprecated and is scheduled for deletion in
+    TF 2.20. Please use the LiteRT interpreter from the ai_edge_litert package.
+    See the [migration guide](https://ai.google.dev/edge/litert/migration)
+    for details.
+    
+  warnings.warn(_INTERPRETER_DELETION_WARNING)
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/interpreter.py:465: UserWarning: Warning: Enabling `experimental_preserve_all_tensors` with the BUILTIN or AUTO op resolver is intended for debugging purposes only. Be aware that this can significantly increase memory usage by storing all intermediate tensors. If you encounter memory problems or are not actively debugging, consider disabling this option.
+  warnings.warn(
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+[load_cicids2017] data_path=data/raw/CIC-IDS2017
+[load_cicids2017] Found 8 CSV files
+[load_cicids2017] Loaded 225,745 rows from Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv
+[load_cicids2017] Loaded 286,467 rows from Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv
+[load_cicids2017] Loaded 191,033 rows from Friday-WorkingHours-Morning.pcap_ISCX.csv
+[load_cicids2017] Loaded 529,918 rows from Monday-WorkingHours.pcap_ISCX.csv
+[load_cicids2017] Loaded 288,602 rows from Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv
+[load_cicids2017] Loaded 170,366 rows from Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv
+[load_cicids2017] Loaded 445,909 rows from Tuesday-WorkingHours.pcap_ISCX.csv
+[load_cicids2017] Loaded 692,703 rows from Wednesday-workingHours.pcap_ISCX.csv
+[load_cicids2017] Total samples loaded: 2,830,743
+[load_cicids2017] Removed 331,200 duplicates (2,499,543 unique)
+[load_cicids2017] Found 15 unique labels
+[load_cicids2017] Binary mode: BENIGN=0, ATTACK=1
+[load_cicids2017] Label distribution: BENIGN=2073680, ATTACK=425863
+[load_cicids2017] Shuffled full pool (random_state=42)
+[load_cicids2017] Balanced training set: majority 1658944 -> 1362760 (ratio<=4.0), total=1,703,450
+[load_cicids2017] StandardScaler applied (fit on train).
+[load_cicids2017] SMOTE applied: train -> 2,725,520 (BENIGN=1,362,760, ATTACK=1,362,760)
+[load_cicids2017] Final feature shape: 78 features
+[load_cicids2017] Train samples: 2,725,520, Test samples: 499,909
+Wrote data/processed/revision/2026-10-04_f_robustness/robustness/cic/fgsm/pgd_report.md and pgd_results.json
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1791129723.104532  477151 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+I0000 00:00:1791129723.105854  477151 cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+I0000 00:00:1791129723.155651  477151 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI AVX512_BF16 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1791129724.023790  477151 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+I0000 00:00:1791129724.024883  477151 cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+E0000 00:00:1791129841.206270  477151 cuda_executor.cc:1737] INTERNAL: CUDA Runtime error: Failed call to cudaGetRuntimeVersion: Error loading CUDA libraries. GPU will not be used.: Error loading CUDA libraries. GPU will not be used.
+W0000 00:00:1791129841.206987  477195 cuda_executor.cc:1755] Failed to determine cuDNN version (Note that this is expected if the application doesn't link the cuDNN plugin): INTERNAL: cuDNN error: CUDNN_STATUS_INTERNAL_ERROR
+W0000 00:00:1791129841.224873  477151 gpu_device.cc:2365] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/interpreter.py:457: UserWarning:     Warning: tf.lite.Interpreter is deprecated and is scheduled for deletion in
+    TF 2.20. Please use the LiteRT interpreter from the ai_edge_litert package.
+    See the [migration guide](https://ai.google.dev/edge/litert/migration)
+    for details.
+    
+  warnings.warn(_INTERPRETER_DELETION_WARNING)
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/interpreter.py:465: UserWarning: Warning: Enabling `experimental_preserve_all_tensors` with the BUILTIN or AUTO op resolver is intended for debugging purposes only. Be aware that this can significantly increase memory usage by storing all intermediate tensors. If you encounter memory problems or are not actively debugging, consider disabling this option.
+  warnings.warn(
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+[load_cicids2017] data_path=data/raw/CIC-IDS2017
+[load_cicids2017] Found 8 CSV files
+[load_cicids2017] Loaded 225,745 rows from Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv
+[load_cicids2017] Loaded 286,467 rows from Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv
+[load_cicids2017] Loaded 191,033 rows from Friday-WorkingHours-Morning.pcap_ISCX.csv
+[load_cicids2017] Loaded 529,918 rows from Monday-WorkingHours.pcap_ISCX.csv
+[load_cicids2017] Loaded 288,602 rows from Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv
+[load_cicids2017] Loaded 170,366 rows from Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv
+[load_cicids2017] Loaded 445,909 rows from Tuesday-WorkingHours.pcap_ISCX.csv
+[load_cicids2017] Loaded 692,703 rows from Wednesday-workingHours.pcap_ISCX.csv
+[load_cicids2017] Total samples loaded: 2,830,743
+[load_cicids2017] Removed 331,200 duplicates (2,499,543 unique)
+[load_cicids2017] Found 15 unique labels
+[load_cicids2017] Binary mode: BENIGN=0, ATTACK=1
+[load_cicids2017] Label distribution: BENIGN=2073680, ATTACK=425863
+[load_cicids2017] Shuffled full pool (random_state=42)
+[load_cicids2017] Balanced training set: majority 1658944 -> 1362760 (ratio<=4.0), total=1,703,450
+[load_cicids2017] StandardScaler applied (fit on train).
+[load_cicids2017] SMOTE applied: train -> 2,725,520 (BENIGN=1,362,760, ATTACK=1,362,760)
+[load_cicids2017] Final feature shape: 78 features
+[load_cicids2017] Train samples: 2,725,520, Test samples: 499,909
+Wrote data/processed/revision/2026-10-04_f_robustness/robustness/cic/pgd/pgd_report.md and pgd_results.json
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1791129859.442851  478093 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+I0000 00:00:1791129859.443885  478093 cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+I0000 00:00:1791129859.478167  478093 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI AVX512_BF16 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1791129860.301411  478093 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+I0000 00:00:1791129860.302635  478093 cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+E0000 00:00:1791129863.935116  478093 cuda_executor.cc:1737] INTERNAL: CUDA Runtime error: Failed call to cudaGetRuntimeVersion: Error loading CUDA libraries. GPU will not be used.: Error loading CUDA libraries. GPU will not be used.
+W0000 00:00:1791129863.935694  478137 cuda_executor.cc:1755] Failed to determine cuDNN version (Note that this is expected if the application doesn't link the cuDNN plugin): INTERNAL: cuDNN error: CUDNN_STATUS_INTERNAL_ERROR
+W0000 00:00:1791129863.953731  478093 gpu_device.cc:2365] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/interpreter.py:457: UserWarning:     Warning: tf.lite.Interpreter is deprecated and is scheduled for deletion in
+    TF 2.20. Please use the LiteRT interpreter from the ai_edge_litert package.
+    See the [migration guide](https://ai.google.dev/edge/litert/migration)
+    for details.
+    
+  warnings.warn(_INTERPRETER_DELETION_WARNING)
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/interpreter.py:465: UserWarning: Warning: Enabling `experimental_preserve_all_tensors` with the BUILTIN or AUTO op resolver is intended for debugging purposes only. Be aware that this can significantly increase memory usage by storing all intermediate tensors. If you encounter memory problems or are not actively debugging, consider disabling this option.
+  warnings.warn(
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+[load_ton_iot] files: ['train_test_network.csv']
+[load_ton_iot] rows: 211,043, columns: 44
+[load_ton_iot] dropped identifiers: ['src_ip', 'dst_ip', 'src_port']
+[load_ton_iot] label-encoded: ['proto', 'service', 'conn_state', 'dns_AA', 'dns_RD', 'dns_RA', 'dns_rejected', 'ssl_version', 'ssl_cipher', 'ssl_resumed', 'ssl_established', 'ssl_subject', 'ssl_issuer', 'http_method', 'http_user_agent', 'http_orig_mime_types', 'http_resp_mime_types', 'weird_name', 'weird_notice']
+[load_ton_iot] dropped high-cardinality text: ['dns_query', 'http_uri']
+[load_ton_iot] features (37): ['dst_port', 'proto', 'service', 'duration', 'src_bytes', 'dst_bytes', 'conn_state', 'missed_bytes', 'src_pkts', 'src_ip_bytes', 'dst_pkts', 'dst_ip_bytes', 'dns_qclass', 'dns_qtype', 'dns_rcode', 'dns_AA', 'dns_RD', 'dns_RA', 'dns_rejected', 'ssl_version', 'ssl_cipher', 'ssl_resumed', 'ssl_established', 'ssl_subject', 'ssl_issuer', 'http_trans_depth', 'http_method', 'http_version', 'http_request_body_len', 'http_response_body_len', 'http_status_code', 'http_user_agent', 'http_orig_mime_types', 'http_resp_mime_types', 'weird_name', 'weird_addl', 'weird_notice']
+[load_ton_iot] Removed 105,867 duplicates (105,176 unique); normal=24,106, attack=81,070
+[load_ton_iot] StandardScaler applied (fit on train).
+[load_ton_iot] SMOTE applied: train -> 129,710 (0=64,855, 1=64,855)
+[load_ton_iot] Features: 37, Train: 129,710, Test: 21,036
+Wrote data/processed/revision/2026-10-04_f_robustness/robustness/ton_iot/fgsm/pgd_report.md and pgd_results.json
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1791129872.107598  479035 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+I0000 00:00:1791129872.108572  479035 cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+I0000 00:00:1791129872.145389  479035 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI AVX512_BF16 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1791129872.980618  479035 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+I0000 00:00:1791129872.981907  479035 cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+E0000 00:00:1791129876.528201  479035 cuda_executor.cc:1737] INTERNAL: CUDA Runtime error: Failed call to cudaGetRuntimeVersion: Error loading CUDA libraries. GPU will not be used.: Error loading CUDA libraries. GPU will not be used.
+W0000 00:00:1791129876.528898  479079 cuda_executor.cc:1755] Failed to determine cuDNN version (Note that this is expected if the application doesn't link the cuDNN plugin): INTERNAL: cuDNN error: CUDNN_STATUS_INTERNAL_ERROR
+W0000 00:00:1791129876.546377  479035 gpu_device.cc:2365] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/interpreter.py:457: UserWarning:     Warning: tf.lite.Interpreter is deprecated and is scheduled for deletion in
+    TF 2.20. Please use the LiteRT interpreter from the ai_edge_litert package.
+    See the [migration guide](https://ai.google.dev/edge/litert/migration)
+    for details.
+    
+  warnings.warn(_INTERPRETER_DELETION_WARNING)
+/home/danielpark605/tinyml-venv/lib/python3.12/site-packages/tensorflow/lite/python/interpreter.py:465: UserWarning: Warning: Enabling `experimental_preserve_all_tensors` with the BUILTIN or AUTO op resolver is intended for debugging purposes only. Be aware that this can significantly increase memory usage by storing all intermediate tensors. If you encounter memory problems or are not actively debugging, consider disabling this option.
+  warnings.warn(
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+[load_ton_iot] files: ['train_test_network.csv']
+[load_ton_iot] rows: 211,043, columns: 44
+[load_ton_iot] dropped identifiers: ['src_ip', 'dst_ip', 'src_port']
+[load_ton_iot] label-encoded: ['proto', 'service', 'conn_state', 'dns_AA', 'dns_RD', 'dns_RA', 'dns_rejected', 'ssl_version', 'ssl_cipher', 'ssl_resumed', 'ssl_established', 'ssl_subject', 'ssl_issuer', 'http_method', 'http_user_agent', 'http_orig_mime_types', 'http_resp_mime_types', 'weird_name', 'weird_notice']
+[load_ton_iot] dropped high-cardinality text: ['dns_query', 'http_uri']
+[load_ton_iot] features (37): ['dst_port', 'proto', 'service', 'duration', 'src_bytes', 'dst_bytes', 'conn_state', 'missed_bytes', 'src_pkts', 'src_ip_bytes', 'dst_pkts', 'dst_ip_bytes', 'dns_qclass', 'dns_qtype', 'dns_rcode', 'dns_AA', 'dns_RD', 'dns_RA', 'dns_rejected', 'ssl_version', 'ssl_cipher', 'ssl_resumed', 'ssl_established', 'ssl_subject', 'ssl_issuer', 'http_trans_depth', 'http_method', 'http_version', 'http_request_body_len', 'http_response_body_len', 'http_status_code', 'http_user_agent', 'http_orig_mime_types', 'http_resp_mime_types', 'weird_name', 'weird_addl', 'weird_notice']
+[load_ton_iot] Removed 105,867 duplicates (105,176 unique); normal=24,106, attack=81,070
+[load_ton_iot] StandardScaler applied (fit on train).
+[load_ton_iot] SMOTE applied: train -> 129,710 (0=64,855, 1=64,855)
+[load_ton_iot] Features: 37, Train: 129,710, Test: 21,036
+Wrote data/processed/revision/2026-10-04_f_robustness/robustness/ton_iot/pgd/pgd_report.md and pgd_results.json
+
+========================================================================
+  FGSM on cic
+  $ /home/danielpark605/tinyml-venv/bin/python /mnt/c/Users/danie/Documents/Projects/TinyML/scripts/run_pgd.py --models data/processed/revision/2026-10-03_b_v3_float_cic/baseline/models/b_fl.h5 data/processed/revision/2026-10-03_b_v3_float_cic/baseline/models/a_centralized.h5 data/processed/revision/2026-10-04_e_float_compression_ablation/compression_ablation/cic_near_iid/fp32.tflite data/processed/revision/2026-10-04_e_float_compression_ablation/compression_ablation/cic_near_iid/ptq_only.tflite data/processed/revision/2026-10-04_e_float_compression_ablation/compression_ablation/cic_near_iid/prune_ft_client_ptq.tflite data/processed/revision/2026-10-04_e_float_compression_ablation/compression_ablation/cic_near_iid/prune_ft_client_qat.tflite data/processed/revision/2026-10-04_e_float_compression_ablation/compression_ablation/cic_near_iid/prune_ft_pooled_qat.tflite --config data/processed/revision/2026-10-03_b_v3_float_cic/baseline/configs/b_fl.yaml --fgsm-config config/attack/default.yaml --attack fgsm --output-dir data/processed/revision/2026-10-04_f_robustness/robustness/cic/fgsm
+========================================================================
+
+✅ Done: FGSM on cic
+
+========================================================================
+  PGD on cic
+  $ /home/danielpark605/tinyml-venv/bin/python /mnt/c/Users/danie/Documents/Projects/TinyML/scripts/run_pgd.py --models data/processed/revision/2026-10-03_b_v3_float_cic/baseline/models/b_fl.h5 data/processed/revision/2026-10-03_b_v3_float_cic/baseline/models/a_centralized.h5 data/processed/revision/2026-10-04_e_float_compression_ablation/compression_ablation/cic_near_iid/fp32.tflite data/processed/revision/2026-10-04_e_float_compression_ablation/compression_ablation/cic_near_iid/ptq_only.tflite data/processed/revision/2026-10-04_e_float_compression_ablation/compression_ablation/cic_near_iid/prune_ft_client_ptq.tflite data/processed/revision/2026-10-04_e_float_compression_ablation/compression_ablation/cic_near_iid/prune_ft_client_qat.tflite data/processed/revision/2026-10-04_e_float_compression_ablation/compression_ablation/cic_near_iid/prune_ft_pooled_qat.tflite --config data/processed/revision/2026-10-03_b_v3_float_cic/baseline/configs/b_fl.yaml --fgsm-config config/attack/default.yaml --attack pgd --output-dir data/processed/revision/2026-10-04_f_robustness/robustness/cic/pgd
+========================================================================
+
+✅ Done: PGD on cic
+
+========================================================================
+  FGSM on ton_iot
+  $ /home/danielpark605/tinyml-venv/bin/python /mnt/c/Users/danie/Documents/Projects/TinyML/scripts/run_pgd.py --models data/processed/revision/2026-10-04_d_toniot_float/baseline/models/b_fl.h5 data/processed/revision/2026-10-04_d_toniot_float/baseline/models/a_centralized.h5 data/processed/revision/2026-10-04_e_float_compression_ablation/compression_ablation/ton_near_iid/fp32.tflite data/processed/revision/2026-10-04_e_float_compression_ablation/compression_ablation/ton_near_iid/ptq_only.tflite data/processed/revision/2026-10-04_e_float_compression_ablation/compression_ablation/ton_near_iid/prune_ft_client_ptq.tflite data/processed/revision/2026-10-04_e_float_compression_ablation/compression_ablation/ton_near_iid/prune_ft_client_qat.tflite data/processed/revision/2026-10-04_e_float_compression_ablation/compression_ablation/ton_near_iid/prune_ft_pooled_qat.tflite --config data/processed/revision/2026-10-04_d_toniot_float/baseline/configs/b_fl.yaml --fgsm-config config/attack/default.yaml --attack fgsm --output-dir data/processed/revision/2026-10-04_f_robustness/robustness/ton_iot/fgsm
+========================================================================
+
+✅ Done: FGSM on ton_iot
+
+========================================================================
+  PGD on ton_iot
+  $ /home/danielpark605/tinyml-venv/bin/python /mnt/c/Users/danie/Documents/Projects/TinyML/scripts/run_pgd.py --models data/processed/revision/2026-10-04_d_toniot_float/baseline/models/b_fl.h5 data/processed/revision/2026-10-04_d_toniot_float/baseline/models/a_centralized.h5 data/processed/revision/2026-10-04_e_float_compression_ablation/compression_ablation/ton_near_iid/fp32.tflite data/processed/revision/2026-10-04_e_float_compression_ablation/compression_ablation/ton_near_iid/ptq_only.tflite data/processed/revision/2026-10-04_e_float_compression_ablation/compression_ablation/ton_near_iid/prune_ft_client_ptq.tflite data/processed/revision/2026-10-04_e_float_compression_ablation/compression_ablation/ton_near_iid/prune_ft_client_qat.tflite data/processed/revision/2026-10-04_e_float_compression_ablation/compression_ablation/ton_near_iid/prune_ft_pooled_qat.tflite --config data/processed/revision/2026-10-04_d_toniot_float/baseline/configs/b_fl.yaml --fgsm-config config/attack/default.yaml --attack pgd --output-dir data/processed/revision/2026-10-04_f_robustness/robustness/ton_iot/pgd
+========================================================================
+
+✅ Done: PGD on ton_iot
+✅ Robustness results in data/processed/revision/2026-10-04_f_robustness/robustness
