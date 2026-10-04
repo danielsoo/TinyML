@@ -1,0 +1,15 @@
+# Compression-strength sweep on the float FL models (replaces the old 48-config sweep):
+# prune ratio x {no fine-tune, client fine-tune + PTQ, client fine-tune + QAT}.
+ft_samples: 10000
+seed: 42
+prune_ratios: [0.3, 0.5, 0.7, 0.85, 0.9]
+ft_sources: [client]
+models:
+  - name: cic_near_iid
+    model: data/processed/revision/2026-10-03_b_v3_float_cic/baseline/models/b_fl.h5
+    config: data/processed/revision/2026-10-03_b_v3_float_cic/baseline/configs/b_fl.yaml
+    ft_client: 0
+  - name: ton_near_iid
+    model: data/processed/revision/2026-10-04_d_toniot_float/baseline/models/b_fl.h5
+    config: data/processed/revision/2026-10-04_d_toniot_float/baseline/configs/b_fl.yaml
+    ft_client: 0

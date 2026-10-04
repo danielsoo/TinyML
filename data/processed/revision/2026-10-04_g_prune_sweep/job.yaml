@@ -1,0 +1,5 @@
+id: 2026-10-04_g_prune_sweep
+config_dir: config/jobs/2026-10-04_g_prune_sweep
+steps: compression_ablation
+flags: []
+why: "Compression-strength sweep (prune 30-90%, client-local FT, PTQ vs QAT) on CIC and TON_IoT float FL models."
