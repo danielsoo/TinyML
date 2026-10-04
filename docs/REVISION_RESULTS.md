@@ -199,3 +199,20 @@ Proposed paper pipeline: float FL (FedAvgM, cosine LR, focal α 0.35) → server
 one client fine-tunes (3 ep) + QAT fine-tunes (2 ep) on local data → INT8 TFLite (65 KB) → ESP32.
 Still to re-run on the final models: FGSM/PGD robustness (old robustness numbers used the buggy
 compressed models) and the ESP32 benchmark with the new deploy model.
+
+## Robustness of the final models (`2026-10-04_f_robustness`)
+Accuracy on 20k test samples, ε = 0.1 (standardized space), perturbations from the float FL model.
+
+| Model | CIC clean / FGSM / PGD | TON clean / FGSM / PGD |
+|---|---|---|
+| FL FP32 (source) | 94.3 / 68.6 / 55.6 | 99.1 / 23.0 / 23.0 |
+| Centralized | 95.1 / 30.8 / 29.0 | 99.2 / 23.0 / 23.0 |
+| INT8 PTQ only | 93.9 / 70.4 / 60.4 | 97.5 / 23.0 / 23.0 |
+| prune → client FT → PTQ | 94.8 / 32.5 / 23.9 | 86.1 / 23.0 / 23.0 |
+| prune → client FT → QAT (deployed) | 94.2 / 44.3 / 45.6 | 98.1 / 23.0 / 23.0 |
+| prune → pooled FT → QAT | 96.3 / 44.7 / 46.2 | 98.7 / 56.2 / 55.6 |
+
+PTQ keeps robustness; pruning+FT lowers it; QAT fine-tuning is more robust than PTQ after pruning;
+centralized is more fragile. On TON_IoT ε = 0.1 drives nearly all models to "all benign" (23.0% =
+benign share) — the unconstrained L∞ budget is too large for this feature space. Added to the paper
+as Table 5 with caveats (unconstrained perturbations, single seed).

@@ -45,7 +45,7 @@ const respItems = [
   ["No comparison to other baselines (81A); fix the baseline (81B-1)", "Section 5.1 adds a centralized baseline trained with the identical recipe, on both datasets. Comparison with published IDS systems on CIC-IDS2017 is discussed in Section 7 with the comparability caveats that apply."],
   ["Non-IID clients / client count (81B-2, 81D)", "Section 5.2 evaluates a Dirichlet(α = 0.3) label partition on both datasets. Client-count scaling remains open (Section 7)."],
   ["On-device measurement (81B-3)", "The ESP32 firmware and collection tooling are complete and verified against the same TensorFlow Lite Micro library on a host build (Section 6.1, Appendix B)."],
-  ["Missing FGSM results (81B-4, 81D-3)", "Section 5.7 re-evaluates FGSM and PGD on the corrected models."],
+  ["Missing FGSM results (81B-4, 81D-3)", "Section 5.7 (Table 5) reports FGSM and PGD on the corrected federated, centralized, and compressed models for both datasets."],
   ["Lead with QAT finding (81B-5)", "With the corrected pipeline, the earlier QAT finding does not hold. Section 5.6 reports what we now observe: training-time QAT inside FL collapses on CIC-IDS2017 because of heavy-tailed features, while it works on TON_IoT."],
   ["Decompose the compression ratio (81B-6)", "Section 5.3 separates INT8 quantization (3.5×) from structured pruning (a further 3.5×), and Section 5.5 sweeps the pruning ratio."],
   ["Dataset generalization (81B-7, 81C)", "Every experiment is repeated on TON_IoT (network), with identifier and timestamp columns removed (Section 3.1)."],
@@ -216,10 +216,21 @@ children.push(P(
 ));
 
 children.push(H2("5.7 Adversarial Robustness"));
-children.push(PP([
-  "Table 5 reports FGSM and PGD (ε = 0.1) transferred from the float federated model to the centralized model, the FP32 and PTQ TFLite exports, and the client- and pooled-fine-tuned INT8 deployment models, on both datasets. The FGSM/FGM/GA/PGD table and the PGD adversarial-training study of the WIP version were computed on the erroneous compressed models and are withdrawn. ",
-  PEND("Table 5 from job 2026-10-04_f_robustness"),
-]));
+children.push(P(
+  "Table 5 reports accuracy on 20,000 test samples before and after FGSM and PGD (ε = 0.1 in standardized feature space; PGD with 10 steps). The perturbations are computed white-box on the float federated model and applied unchanged to every other model. The FGSM/FGM/GA/PGD table and the PGD adversarial-training study of the WIP version were computed on the erroneous compressed models and are withdrawn."
+));
+children.push(makeTable(["Model", "CIC clean", "CIC FGSM", "CIC PGD", "TON clean", "TON FGSM", "TON PGD"], [
+  ["Federated FP32 (attack source)", "94.3%", "68.6%", "55.6%", "99.1%", "23.0%", "23.0%"],
+  ["Centralized FP32 (transfer)", "95.1%", "30.8%", "29.0%", "99.2%", "23.0%", "23.0%"],
+  ["INT8 PTQ only", "93.9%", "70.4%", "60.4%", "97.5%", "23.0%", "23.0%"],
+  ["Prune 50% → client FT → PTQ", "94.8%", "32.5%", "23.9%", "86.1%", "23.0%", "23.0%"],
+  ["Prune 50% → client FT → QAT FT (deployed)", "94.2%", "44.3%", "45.6%", "98.1%", "23.0%", "23.0%"],
+  ["Prune 50% → pooled FT → QAT FT (upper bound)", "96.3%", "44.7%", "46.2%", "98.7%", "56.2%", "55.6%"],
+], [3200, 950, 950, 950, 950, 950, 950]));
+children.push(caption("Table 5. Accuracy under FGSM and PGD (ε = 0.1, standardized features), perturbations computed on the federated FP32 model and transferred to the other models. On TON_IoT, 23.0% equals the benign share of the test set: those models label every perturbed record benign."));
+children.push(P(
+  "On CIC-IDS2017, INT8 PTQ preserves the federated model's robustness (PGD 55.6% → 60.4%). Pruning followed by fine-tuning reduces it. Of the pruned models, the QAT-fine-tuned deployment model (PGD 45.6%) is clearly more robust than the PTQ one (23.9%), which echoes the quantization-robustness interaction reported in [21–23]. The centralized model is markedly more fragile (PGD 29.0%) even though it is attacked only by transfer. On TON_IoT, ε = 0.1 is strong enough that every model except the pooled-fine-tuned one predicts all perturbed records as benign. Two caveats apply. First, these are unconstrained L∞ perturbations in standardized feature space that ignore feature semantics (integer counts, encoded categories), so they overstate what a network attacker can realize. Second, the per-model differences come from a single seed. We report them as relative robustness under a common perturbation, not as absolute security guarantees."
+));
 
 children.push(H2("5.8 Practical Significance"));
 children.push(P(
