@@ -1,0 +1,5 @@
+id: 2026-10-04_k_local_only
+config_dir: config/jobs/2026-10-04_k_local_only
+steps: local_only
+flags: []
+why: "Local-only baseline per client (near-IID and Dirichlet, both datasets): small students trained on one client's data beat the near-IID FL model on CIC, so the value of federation must be shown where clients lack data/attack types. ~30 min."
