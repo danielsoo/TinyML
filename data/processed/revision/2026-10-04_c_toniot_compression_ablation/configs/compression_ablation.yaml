@@ -1,0 +1,12 @@
+# TON_IoT (QAT FL, use_qat true run): pruning vs fine-tuning, pooled vs client-local fine-tuning.
+ft_samples: 10000
+seed: 42
+models:
+  - name: toniot_near_iid
+    model: data/processed/revision/2026-10-03_toniot_full/baseline/models/b_fl.h5
+    config: data/processed/revision/2026-10-03_toniot_full/baseline/configs/b_fl.yaml
+    ft_client: 0
+  - name: toniot_dirichlet
+    model: data/processed/revision/2026-10-03_toniot_full/non_iid/models/fl_dirichlet_c4.h5
+    config: data/processed/revision/2026-10-03_toniot_full/non_iid/configs/fl_dirichlet_c4.yaml
+    ft_client: 1

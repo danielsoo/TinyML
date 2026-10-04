@@ -1,0 +1,5 @@
+id: 2026-10-04_c_toniot_compression_ablation
+config_dir: config/jobs/2026-10-04_c_toniot_compression_ablation
+steps: compression_ablation
+flags: []
+why: "TON_IoT counterpart of the CIC compression ablation: does the compressed model reflect FL training or post-hoc fine-tuning? ~5 min."
