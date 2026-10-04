@@ -1,0 +1,15 @@
+# Paper Section 5.9: QAT fine-tuning over fine-tuning draws; PTQ calibration clipping + activation ranges.
+ft_samples: 10000
+ft_draws: 5
+calib_n: 2000
+calib_draws: 3
+clip_values: [null, 3, 5, 10]
+models:
+  - name: ton_near_iid
+    model: data/processed/revision/2026-10-04_d_toniot_float/baseline/models/b_fl.h5
+    config: data/processed/revision/2026-10-04_d_toniot_float/baseline/configs/b_fl.yaml
+    ft_client: 0
+  - name: cic_near_iid
+    model: data/processed/revision/2026-10-03_b_v3_float_cic/baseline/models/b_fl.h5
+    config: data/processed/revision/2026-10-03_b_v3_float_cic/baseline/configs/b_fl.yaml
+    ft_client: 0

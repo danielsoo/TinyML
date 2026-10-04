@@ -1,0 +1,5 @@
+id: 2026-10-04_m_qat_stability
+config_dir: config/jobs/2026-10-04_m_qat_stability
+steps: qat_stability
+flags: []
+why: "Job l showed INT8 PTQ F1 12-99 across calibration draws. Check that the deployed QAT recipe is stable over 5 fine-tuning draws, and whether clipping calibration inputs fixes PTQ (plus activation-range mechanism). ~45 min."
