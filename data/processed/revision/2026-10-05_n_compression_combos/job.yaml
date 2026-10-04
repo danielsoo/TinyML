@@ -1,0 +1,5 @@
+id: 2026-10-05_n_compression_combos
+config_dir: config/jobs/2026-10-05_n_compression_combos
+steps: compression_combos
+flags: []
+why: "Compression pipeline combinations requested by the user: PTQ vs clipped PTQ vs QAT, structured vs magnitude pruning, sparsity-preserving QAT, KD fine-tuning, quantize-before-prune order; 3 FT draws each, both datasets. ~1-1.5 h."

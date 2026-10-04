@@ -1,0 +1,15 @@
+# PTQ / QAT / structured + unstructured pruning / distillation combinations and order,
+# client-0 data only, 3 fine-tuning draws each (scripts/compression_combos.py).
+ft_samples: 10000
+draws: 3
+clip: 5.0
+sparsities: [0.5, 0.8]
+models:
+  - name: ton_near_iid
+    model: data/processed/revision/2026-10-04_d_toniot_float/baseline/models/b_fl.h5
+    config: data/processed/revision/2026-10-04_d_toniot_float/baseline/configs/b_fl.yaml
+    ft_client: 0
+  - name: cic_near_iid
+    model: data/processed/revision/2026-10-03_b_v3_float_cic/baseline/models/b_fl.h5
+    config: data/processed/revision/2026-10-03_b_v3_float_cic/baseline/configs/b_fl.yaml
+    ft_client: 0
