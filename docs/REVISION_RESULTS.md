@@ -225,3 +225,39 @@ from 50%. TON: client-FT QAT 98.94 → 98.67 from 30% to 90% (98/7.9 KB); client
 
 ## Fixed LR on TON_IoT (`2026-10-04_h_fixed_lr_toniot`)
 99.02 acc / 99.36 F1 / 99.73 recall / 3.38% FAR vs cosine 99.40 F1 — no cosine-LR effect on TON_IoT.
+
+## Fixed LR on CIC-IDS2017 (`2026-10-04_i_fixed_lr_cic`)
+95.01 acc / 77.40 prec / 99.84 recall / 87.20 F1 / 5.99% FAR vs cosine 85.70 F1. Fixed LR is equal or
+better on both datasets → the WIP claim "cosine LR raises Attack Recall 46.7% → 93.85%" is withdrawn
+(artifact of the weight-exchange bug). Paper Table 1 + paragraph updated.
+
+## Quantization methods + client-local distillation (`2026-10-04_j_quant_distill`)
+Calibration / fine-tuning / student training all use client 0's data only. F1 (size):
+
+| Method | CIC federated | CIC pruned50+clientFT | TON federated | TON pruned50+clientFT |
+|---|---|---|---|---|
+| fp32 | 85.70 (802 KB) | 89.39 (243) | 99.40 (721) | 99.35 (202) |
+| dynamic range | 85.58 (216) | 90.13 (69) | 99.40 (196) | 99.35 (59) |
+| float16 | 85.70 (404) | 89.35 (124) | 99.40 (363) | 99.35 (103) |
+| int8 full-integer | 85.02 (227) | 86.90 (75) | **91.24** (206, FAR 14.3%) | **90.50** (65, FAR 14.0%) |
+| int16x8 | 85.48 (238) | 89.61 (81) | 99.40 (217) | 99.35 (70) |
+
+8-bit activations are the only lossy step (int16x8 with the same int8 weights recovers fully). TON int8
+PTQ: 98.38 with 500 pooled calibration samples (Table 3) vs 91.24 with 500 client-0 samples →
+calibration-sensitive; job l (`2026-10-04_l_ptq_calibration`) isolates source/size/op set.
+TFLM on ESP32: fp32 + int8 only.
+
+Students (width ×1/2, ×1/4, ×1/8; F1 fp32 / int8 PTQ / int8 QAT):
+
+| Student | CIC KD | CIC scratch | TON KD | TON scratch |
+|---|---|---|---|---|
+| 1/2 | 87.90 / 87.64 / 87.36 | 89.75 / 89.36 / 87.21 | 99.35 / 99.31 / 98.90 | 99.35 / 97.06 / 98.93 |
+| 1/4 | 87.31 / 87.37 / 86.42 | 88.64 / 88.74 / 86.46 | 99.35 / 99.24 / 99.01 | 99.36 / 98.75 / 98.98 |
+| 1/8 | 86.30 / 86.07 / 86.55 | 88.29 / 88.51 / 91.10* | 99.16 / 99.16 / 98.82 | 99.14 / 98.70 / 98.81 |
+
+\* recall 96.32%, 3,137 missed attacks — outlier, not selected. KD students copy the teacher's
+recall-heavy operating point on CIC (FAR 5.6–6.5%), scratch students trade recall for precision.
+TON: KD makes PTQ robust (≤0.11 F1 loss); 1/8 KD student = 99.16 F1 at 11.2 KB.
+Key finding: a scratch student on one near-IID client's data matches/beats the FL model on CIC →
+the value of FL needs the local-only baseline under Dirichlet (job k, `2026-10-04_k_local_only`).
+Paper: Sections 5.9 (Table 6) and 5.10 (Table 7).

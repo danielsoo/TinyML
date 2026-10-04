@@ -1,0 +1,5 @@
+id: 2026-10-04_l_ptq_calibration
+config_dir: config/jobs/2026-10-04_l_ptq_calibration
+steps: ptq_calibration
+flags: []
+why: "INT8 PTQ on TON_IoT gave F1 98.38 with pooled calibration but 91.24 with client-0 calibration; isolate calibration source / size / op set (paper 5.9). ~30 min."
