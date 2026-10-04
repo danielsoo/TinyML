@@ -79,7 +79,7 @@ def strip_qat_layers(model):
     configs, sources = [], []
     for layer in model.layers:
         name = type(layer).__name__
-        if "QuantizeLayer" in name:
+        if "QuantizeLayer" in name or name == "InputLayer":  # functional QAT models list their InputLayer
             continue
         if "QuantizeWrapper" in name:
             wrapped = layer.layer
