@@ -1,0 +1,5 @@
+id: 2026-10-04_i_fixed_lr_cic
+config_dir: config/paper_v12_float
+steps: fixed_lr
+flags: []
+why: "Table 2 row (b) on CIC-IDS2017: same float recipe with a fixed learning rate (~2.7 h)."
