@@ -1,0 +1,29 @@
+# Float (use_qat: false) FL models from v3 (CIC) and the TON_IoT float run, re-compressed with
+# exact BatchNorm folding. FL training is unaffected by the folding bug, so models are reused.
+ft_samples: 10000
+seed: 42
+models:
+  - name: cic_centralized
+    model: data/processed/revision/2026-10-03_b_v3_float_cic/baseline/models/a_centralized.h5
+    config: data/processed/revision/2026-10-03_b_v3_float_cic/baseline/configs/a_centralized.yaml
+    ft_client: 0
+  - name: cic_near_iid
+    model: data/processed/revision/2026-10-03_b_v3_float_cic/baseline/models/b_fl.h5
+    config: data/processed/revision/2026-10-03_b_v3_float_cic/baseline/configs/b_fl.yaml
+    ft_client: 0
+  - name: cic_dirichlet_c3
+    model: data/processed/revision/2026-10-03_b_v3_float_cic/non_iid/models/fl_dirichlet_c4.h5
+    config: data/processed/revision/2026-10-03_b_v3_float_cic/non_iid/configs/fl_dirichlet_c4.yaml
+    ft_client: 3
+  - name: ton_centralized
+    model: data/processed/revision/2026-10-04_d_toniot_float/baseline/models/a_centralized.h5
+    config: data/processed/revision/2026-10-04_d_toniot_float/baseline/configs/a_centralized.yaml
+    ft_client: 0
+  - name: ton_near_iid
+    model: data/processed/revision/2026-10-04_d_toniot_float/baseline/models/b_fl.h5
+    config: data/processed/revision/2026-10-04_d_toniot_float/baseline/configs/b_fl.yaml
+    ft_client: 0
+  - name: ton_dirichlet_c2
+    model: data/processed/revision/2026-10-04_d_toniot_float/non_iid/models/fl_dirichlet_c4.h5
+    config: data/processed/revision/2026-10-04_d_toniot_float/non_iid/configs/fl_dirichlet_c4.yaml
+    ft_client: 2        # 8.6k samples, 65% attack (closest to the 50/50 training mix)

@@ -1,0 +1,5 @@
+id: 2026-10-04_e_float_compression_ablation
+config_dir: config/jobs/2026-10-04_e_float_compression_ablation
+steps: compression_ablation
+flags: []
+why: "Re-compress the float FL models (CIC v3, TON_IoT float) after fixing BatchNorm folding (BN sits after ReLU; it was folded into the preceding Dense, max output error 0.86) and BN stat loss in pruning. ~20 min."
