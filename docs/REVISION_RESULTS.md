@@ -167,3 +167,35 @@ job `2026-10-04_e_float_compression_ablation` re-compresses them.
 TON_IoT compression ablation on the QAT-trained models (`2026-10-04_c_…`, valid: no BN) — the FL
 QAT model as float is weak (F1 91.0, FAR 66%) and the deployable models again come from fine-tuning
 (pooled 99.3–99.4; client-local 98.7–99.2).
+
+## Float FL models re-compressed with all fixes (`2026-10-04_e_float_compression_ablation`)
+Test split, threshold 0.3; F1 / FAR in %. Log confirms BN folding (4 Dense layers) and the fp32
+rows reproduce the Keras FL numbers exactly (CIC near-IID 85.70, TON 99.40).
+
+| Model | fp32 | INT8 PTQ only (227/206 KB) | prune, no FT | prune+FT+QAT, **client-local** (65/55 KB) | prune+FT+QAT, pooled (65/55 KB) |
+|---|---|---|---|---|---|
+| CIC centralized | 87.35 / 5.92 | 83.82 / 7.85 | 42.05 | 81.84 / 8.84 | 87.84 / 3.32 |
+| CIC FL near-IID | 85.70 / 6.84 | 84.75 / 7.37 | 42.28 | **85.59 / 6.82** | 90.72 / 2.98 |
+| CIC FL Dirichlet (FT client 3) | 85.59 / 6.87 | 85.14 / 7.12 | 51.27 | **91.08 / 2.75** | 87.52 / 4.98 |
+| TON centralized | 99.48 / 2.28 | 98.11 / 2.18 | 86.65 | 98.94 / 2.47 | 99.11 / 4.56 |
+| TON FL near-IID | 99.40 / 2.76 | 98.38 / 2.70 | 96.78 | **98.74 / 2.88** | 99.17 / 3.28 |
+| TON FL Dirichlet (FT client 2) | 98.45 / 3.59 | 97.85 / 7.03 | 87.03 | **98.72 / 3.11** | 99.13 / 3.19 |
+
+Reading:
+1. **INT8 PTQ works on float FL models** (−0.5 to −1.1 F1 at 3.5×): heavy tails break *training-time*
+   QAT ranges, not post-training calibration of a float model. No robust-scaling change is required
+   for the PTQ/QAT-fine-tune pipeline.
+2. **FL-faithful compression is lossless at 12.3×**: prune 50% → fine-tune 3 ep + QAT 2 ep on one
+   participating client's own data → INT8 (65.4 KB vs 802.5 KB) keeps the FL model's accuracy
+   (CIC 85.59 vs 85.70; TON 98.74 vs 99.40; non-IID 91.08 / 98.72). Outcome depends on the chosen
+   client's class mix (CIC centralized model with a 50%-attack client: 81.84), which must be stated.
+3. Pooled (server-side) fine-tuning is an upper bound, not an FL result; its extra gain over fp32 on CIC
+   is mostly re-calibration toward precision (FAR 6.8 → 3.0).
+4. Pruning without fine-tuning is destructive (42–97 F1); §5.6's "pruning as regularizer" is not
+   supported.
+5. 802.5 / 65.4 KB = 12.27× — the paper's 12.28× ratio survives with the corrected pipeline.
+
+Proposed paper pipeline: float FL (FedAvgM, cosine LR, focal α 0.35) → server folds BN → prune 50% →
+one client fine-tunes (3 ep) + QAT fine-tunes (2 ep) on local data → INT8 TFLite (65 KB) → ESP32.
+Still to re-run on the final models: FGSM/PGD robustness (old robustness numbers used the buggy
+compressed models) and the ESP32 benchmark with the new deploy model.
