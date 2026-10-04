@@ -135,3 +135,35 @@ src_ip, dst_ip, src_port (no `ts` column in this file version); 37 features. Run
 Training-time QAT works on TON_IoT (FL QAT model 98.2% as trained), unlike CIC-IDS2017 — consistent
 with the heavy-tail diagnosis. Non-IID costs little in F1 but more than doubles false alarms
 (3.5% → 8.1%). Queued: TON_IoT compression ablation and a use_qat: false run for symmetry with v3.
+
+## v3: CIC-IDS2017 with training-time QAT off (`2026-10-03_b_v3_float_cic`) and TON_IoT float (`2026-10-04_d_toniot_float`)
+
+| Dataset | Row | Model | Acc | Prec | Recall | F1 | FAR |
+|---|---|---|---|---|---|---|---|
+| CIC | (a) | Centralized | 95.07% | 77.60% | 99.90% | 87.35% | 5.92% |
+| CIC | (b) | **FL near-IID (float)** | 94.32% | 75.01% | 99.94% | **85.70%** | 6.84% |
+| CIC | non-IID | FL Dirichlet(0.3) (float) | 94.27% | 74.91% | 99.83% | 85.59% | 6.87% |
+| CIC | (c) | FL → prune → FT → PTQ (old BN folding) | 22.03% | — | — | 30.41% | 93.98% |
+| CIC | (d) | FL → prune → FT → QAT (old BN folding) | 96.90% | 87.45% | 95.51% | 91.30% | 2.81% |
+| TON | (a) | Centralized | 99.20% | 99.32% | 99.64% | 99.48% | 2.28% |
+| TON | (b) | FL near-IID (float) | 99.08% | 99.18% | 99.62% | 99.40% | 2.76% |
+| TON | non-IID | FL Dirichlet(0.3) (float) | 97.63% | 98.92% | 97.99% | 98.45% | 3.59% |
+| TON | (c)/(d) | compressed (old BN folding) | 80.58 / 89.31% | | | 88.81 / 93.50% | 84.7 / 45.7% |
+
+Reading: **with QAT off, federated training is healthy**: CIC FL is within 1.7 F1 of centralized, and
+the Dirichlet(0.3) partition costs almost nothing on CIC (85.59 vs 85.70) and ~1 F1 on TON_IoT. The
+earlier "non-IID collapses" result was an artifact of the communication bug.
+
+**Bug 3 — BatchNorm folding.** `make_mlp` is Dense(ReLU) → BatchNorm → Dropout, but the TFLite/QAT
+export helpers folded each BN into the Dense *before* the ReLU, which is not equivalent (max output
+error 0.86, 11.6% label flips on the v3 FL model). This corrupted every TFLite export of a BN model
+(FP32 "original" exports, PTQ exports, (c) above). Fixed by folding each BN into the *next* Dense
+(`fold_batchnorm`; max error ≤ 2e-5 on v3/TON models).
+**Bug 4 — pruning drops BN statistics.** `apply_structured_pruning` re-creates BN layers from config
+(fresh γ=1, β=0, μ=0, σ²=1), so pruned BN models fell to 32.7% before fine-tuning. Fixed by folding
+BN before pruning. FL training is unaffected by bugs 3–4, so v3/TON float models are reused:
+job `2026-10-04_e_float_compression_ablation` re-compresses them.
+
+TON_IoT compression ablation on the QAT-trained models (`2026-10-04_c_…`, valid: no BN) — the FL
+QAT model as float is weak (F1 91.0, FAR 66%) and the deployable models again come from fine-tuning
+(pooled 99.3–99.4; client-local 98.7–99.2).

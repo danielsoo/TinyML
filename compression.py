@@ -558,6 +558,12 @@ def test_saved_model_pruning(
     num_classes = last_layer.units if hasattr(last_layer, "units") else 2
     loss = "binary_crossentropy" if num_classes == 1 else "sparse_categorical_crossentropy"
     model.compile(optimizer="adam", loss=loss, metrics=["accuracy"])
+    if any("BatchNormalization" in type(l).__name__ for l in model.layers):
+        # Fold BN (post-ReLU in make_mlp) into the next Dense before pruning: the pruner
+        # re-creates BN layers from config, which silently resets their statistics.
+        model = _strip_bn_dropout_for_qat(model)
+        model.compile(optimizer="adam", loss=loss, metrics=["accuracy"])
+        print("   ✅ BatchNorm folded into Dense layers (exact) before compression")
     print("✅ Model loaded\n")
 
     # Load test data (use same config as training)
@@ -722,6 +728,8 @@ def test_saved_model_pruning(
             trad_model = None
         
         if trad_model is not None:
+            if any("BatchNormalization" in type(l).__name__ for l in trad_model.layers):
+                trad_model = _strip_bn_dropout_for_qat(trad_model)  # exact BN folding before pruning
             trad_model.compile(optimizer="adam", loss=loss, metrics=["accuracy"])
             
             # Evaluate Traditional model before pruning

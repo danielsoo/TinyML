@@ -60,6 +60,8 @@ def _load_fl_model(path: str) -> keras.Model:
         model = keras.models.load_model(path, compile=False)
     if has_qat_layers(model):
         model = strip_qat_layers(model)
+    if any("BatchNormalization" in type(l).__name__ for l in model.layers):
+        model = _strip_bn_dropout_for_qat(model)  # exact BN folding; pruner would reset BN stats
     model.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
     return model
 

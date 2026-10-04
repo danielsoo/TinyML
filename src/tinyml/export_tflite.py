@@ -63,9 +63,48 @@ def _is_dropout(layer):
 def _is_dense(layer):
     return "Dense" in type(layer).__name__
 
+
+def fold_batchnorm(model) -> list:
+    """
+    Return [(units, activation, [W, b]), ...] for a Dense/BatchNorm/Dropout MLP with every
+    BatchNorm folded away exactly (inference mode; Dropout is identity).
+
+    make_mlp puts BatchNorm *after* the ReLU (Dense(relu) -> BN -> Dropout), so a BN cannot be
+    folded into the Dense before it. It is an affine map h -> s*h + t, which folds exactly into
+    the next Dense: W' = s[:, None] * W, b' = b + t @ W.
+    """
+    specs = []
+    pending = None  # (s, t) of BatchNorms not yet absorbed by a Dense
+    for layer in model.layers:
+        if _is_dense(layer):
+            weights = layer.get_weights()
+            w = weights[0].astype(np.float64)
+            b = (weights[1] if len(weights) > 1 else np.zeros(w.shape[1])).astype(np.float64)
+            if pending is not None:
+                s, t = pending
+                b = b + t @ w
+                w = w * s[:, None]
+                pending = None
+            specs.append((layer.units, layer.activation, [w.astype(np.float32), b.astype(np.float32)]))
+        elif _is_bn(layer):
+            mean = layer.moving_mean.numpy().astype(np.float64)
+            var = layer.moving_variance.numpy().astype(np.float64)
+            gamma = layer.gamma.numpy().astype(np.float64) if layer.scale else np.ones_like(mean)
+            beta = layer.beta.numpy().astype(np.float64) if layer.center else np.zeros_like(mean)
+            s = gamma / np.sqrt(var + layer.epsilon)
+            t = beta - s * mean
+            pending = (s, t) if pending is None else (pending[0] * s, pending[1] * s + t)
+        elif _is_dropout(layer) or "InputLayer" in type(layer).__name__:
+            continue
+        else:
+            raise ValueError(f"fold_batchnorm: unsupported layer {type(layer).__name__}")
+    if pending is not None:
+        raise ValueError("fold_batchnorm: BatchNorm after the last Dense cannot be folded")
+    return specs
+
 def _strip_bn_dropout_for_tflite(model: tf.keras.Model) -> tf.keras.Model:
     """
-    Build inference-only model: fold BatchNorm into Dense, remove Dropout.
+    Build inference-only model: fold BatchNorm into the next Dense, remove Dropout.
     Avoids TFLite NaN from BatchNorm conversion.
     Keras 3 / tf.keras Dense does not accept weights in constructor; use set_weights() after build.
     """
@@ -73,35 +112,10 @@ def _strip_bn_dropout_for_tflite(model: tf.keras.Model) -> tf.keras.Model:
     input_shape = model.input_shape[1:]
     new_layers = [Input(shape=input_shape)]
     dense_layers_with_weights = []  # [(Dense layer, [w, b]), ...]
-    i = 0
-    while i < len(model.layers):
-        layer = model.layers[i]
-        if _is_dense(layer):
-            w, b = layer.get_weights()
-            if i + 1 < len(model.layers) and _is_bn(model.layers[i + 1]):
-                bn = model.layers[i + 1]
-                gamma, beta, mean, var = bn.get_weights()
-                eps = 1e-3
-                var_safe = np.maximum(var, eps)
-                scale = gamma / np.sqrt(var_safe)
-                w_new = w * scale
-                b_new = scale * (b - mean) + beta
-                d = layers.Dense(layer.units, activation=layer.activation)
-                dense_layers_with_weights.append((d, [w_new, b_new]))
-                new_layers.append(d)
-                i += 2
-            else:
-                d = layers.Dense(layer.units, activation=layer.activation)
-                dense_layers_with_weights.append((d, [w.copy(), b.copy()]))
-                new_layers.append(d)
-                i += 1
-        elif _is_bn(layer) or _is_dropout(layer):
-            i += 1
-        elif "InputLayer" in type(layer).__name__:
-            i += 1
-        else:
-            new_layers.append(layer)
-            i += 1
+    for units, activation, wb in fold_batchnorm(model):
+        d = layers.Dense(units, activation=activation)
+        dense_layers_with_weights.append((d, wb))
+        new_layers.append(d)
 
     seq = tf.keras.Sequential(new_layers)
     seq.build((None,) + input_shape)
@@ -130,42 +144,10 @@ def _strip_bn_dropout_for_qat(model: tf.keras.Model) -> tf.keras.Model:
     print(f"   [QAT Strip] Creating TF.Keras Functional model with input shape: {input_shape}")
     print(f"   [QAT Strip] TF_USE_LEGACY_KERAS={os.environ.get('TF_USE_LEGACY_KERAS', 'not set')}")
     
-    # Extract weights from input model first - collect layer info
-    dense_layers_info = []  # Store (units, activation, weights)
-    
-    i = 0
-    while i < len(model.layers):
-        layer = model.layers[i]
-        layer_type = type(layer).__name__
-        
-        if _is_dense(layer):
-            w, b = layer.get_weights()
-            # Check if next layer is BatchNorm and fold it
-            if i + 1 < len(model.layers) and _is_bn(model.layers[i + 1]):
-                bn = model.layers[i + 1]
-                gamma, beta, mean, var = bn.get_weights()
-                eps = bn.epsilon if hasattr(bn, 'epsilon') else 1e-3
-                var_safe = np.maximum(var, eps)
-                scale = gamma / np.sqrt(var_safe)
-                w_new = w * scale
-                b_new = scale * (b - mean) + beta
-                dense_layers_info.append((layer.units, layer.activation, [w_new, b_new]))
-                print(f"   [QAT Strip] Folded Dense+BN: {layer.units} units, activation={layer.activation}")
-                i += 2
-            else:
-                dense_layers_info.append((layer.units, layer.activation, [w.copy(), b.copy()]))
-                print(f"   [QAT Strip] Copied Dense: {layer.units} units, activation={layer.activation}")
-                i += 1
-        elif _is_bn(layer) or _is_dropout(layer):
-            print(f"   [QAT Strip] Skipping {layer_type}")
-            i += 1
-        elif "InputLayer" in layer_type:
-            print(f"   [QAT Strip] Skipping InputLayer")
-            i += 1
-        else:
-            print(f"   [QAT Strip] WARNING: Skipping unsupported layer type: {layer_type}")
-            i += 1
-    
+    # Dense-only layer specs with BatchNorm folded exactly (see fold_batchnorm)
+    dense_layers_info = fold_batchnorm(model)
+    print(f"   [QAT Strip] {len(dense_layers_info)} Dense layers after BatchNorm folding")
+
     # Now build model using ONLY tf.keras (not standalone keras)
     # Import tensorflow first, then use its keras submodule
     import tensorflow
