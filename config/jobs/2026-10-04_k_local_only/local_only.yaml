@@ -1,0 +1,14 @@
+# Each client trains alone on its own partition (same MLP/loss/optimizer), evaluated on the shared
+# test split; compare with the federated model trained on the same partition.
+max_samples_per_client: 200000
+epochs: 10
+seed: 42
+entries:
+  - name: cic_near_iid
+    config: data/processed/revision/2026-10-03_b_v3_float_cic/baseline/configs/b_fl.yaml
+  - name: cic_dirichlet
+    config: data/processed/revision/2026-10-03_b_v3_float_cic/non_iid/configs/fl_dirichlet_c4.yaml
+  - name: ton_near_iid
+    config: data/processed/revision/2026-10-04_d_toniot_float/baseline/configs/b_fl.yaml
+  - name: ton_dirichlet
+    config: data/processed/revision/2026-10-04_d_toniot_float/non_iid/configs/fl_dirichlet_c4.yaml
