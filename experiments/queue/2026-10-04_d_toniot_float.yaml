@@ -1,0 +1,5 @@
+id: 2026-10-04_d_toniot_float
+config_dir: config/paper_v12_toniot
+steps: baseline_ablation,non_iid
+flags: []
+why: "TON_IoT with use_qat: false, to match the CIC v3 float design (first TON_IoT run used use_qat: true). ~25 min."

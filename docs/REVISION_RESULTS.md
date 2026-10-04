@@ -97,3 +97,41 @@ client-local fine-tuning) and `2026-10-03_b_v3_float_cic` (same recipe, `use_qat
 config switched to `use_qat: false` for the same reason. Open: robust feature scaling (clipping or
 log transform before standardization) so INT8 ranges are not set by outliers — to be chosen on the
 validation split.
+
+## Compression ablation on v2 models (`2026-10-03_a_v2_compression_ablation`)
+Test split, threshold 0.3. FT = fine-tuning on 10k samples (pooled = first 10k of the pooled training
+set, 20% attack; client = 10k from one client's partition).
+
+| Model | fp32 (FL weights, float) | prune, no FT → PTQ | FT only → PTQ (pooled / client) | prune+FT → PTQ (pooled / client) | prune+FT → QAT (pooled / client) |
+|---|---|---|---|---|---|
+| near-IID FL | F1 46.8 (acc 61.5) | 30.8 | 80.6 / 72.7 | 80.3 / 70.4 | 82.7 / 74.6 |
+| Dirichlet FL, FT client 1 (60% attack) | 31.0 (acc 24.1) | 37.2 | 86.5 / 73.6 | 81.6 / 77.6 | 87.9 / 80.4 |
+| Dirichlet FL, FT client 3 (25% attack) | 31.0 | 37.2 | 86.5 / 82.9 | 81.6 / 81.7 | 87.9 / 87.6 |
+
+Reading:
+1. With training-time QAT on CIC-IDS2017, the FL model itself is poor both as trained (QAT, 34.7%)
+   and as float weights (F1 46.8 / 31.0 at threshold 0.3). Every usable compressed CIC model owes its
+   accuracy to the post-hoc fine-tuning, not to federated training — the non-IID model even ends up
+   *better* than near-IID after fine-tuning.
+2. Pruning without fine-tuning destroys the model; pruning does not act as a regularizer here (§5.6
+   is not supported).
+3. Client-local fine-tuning works only when that client's class mix resembles the global one
+   (client 3, 25% attack: F1 87.6 ≈ pooled 87.9; client 0, 50% attack: 74.6). Pooled fine-tuning is
+   server-side data and must be disclosed if used.
+→ The float-FL rerun (`2026-10-03_b_v3_float_cic`) is the decisive experiment for CIC-IDS2017.
+
+## TON_IoT (`2026-10-03_toniot_full`, use_qat: true, test split, threshold 0.3)
+Preprocessing log: 211,043 rows → 105,176 after dedup (normal 24,106 / attack 81,070); dropped
+src_ip, dst_ip, src_port (no `ts` column in this file version); 37 features. Runtime 24 min.
+
+| Row | Model | Acc | Prec | Attack recall | F1 | FAR |
+|---|---|---|---|---|---|---|
+| (a) | Centralized | 99.31% | 99.39% | 99.72% | 99.55% | 2.05% |
+| (b) | FL near-IID (QAT Keras) | 98.22% | 98.96% | 98.72% | 98.84% | 3.48% |
+| (c) | FL → prune → FT (pooled) → PTQ | 98.96% | 99.02% | 99.64% | 99.33% | 3.32% |
+| (d) | FL → prune → FT (pooled) → QAT | 98.91% | 98.99% | 99.59% | 99.29% | 3.40% |
+| non-IID | Dirichlet(0.3) FL | 97.41% | 97.63% | 99.05% | 98.33% | 8.09% |
+
+Training-time QAT works on TON_IoT (FL QAT model 98.2% as trained), unlike CIC-IDS2017 — consistent
+with the heavy-tail diagnosis. Non-IID costs little in F1 but more than doubles false alarms
+(3.5% → 8.1%). Queued: TON_IoT compression ablation and a use_qat: false run for symmetry with v3.
