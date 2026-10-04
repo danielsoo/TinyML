@@ -1,0 +1,25 @@
+# FGSM + PGD on the final (bug-fixed, float FL) models. Adversarial examples are generated on the
+# float FL Keras model and transferred to the centralized model and the TFLite variants.
+attack_config: config/attack/default.yaml
+attacks: [fgsm, pgd]
+entries:
+  - name: cic
+    config: data/processed/revision/2026-10-03_b_v3_float_cic/baseline/configs/b_fl.yaml
+    models:
+      - data/processed/revision/2026-10-03_b_v3_float_cic/baseline/models/b_fl.h5
+      - data/processed/revision/2026-10-03_b_v3_float_cic/baseline/models/a_centralized.h5
+      - data/processed/revision/2026-10-04_e_float_compression_ablation/compression_ablation/cic_near_iid/fp32.tflite
+      - data/processed/revision/2026-10-04_e_float_compression_ablation/compression_ablation/cic_near_iid/ptq_only.tflite
+      - data/processed/revision/2026-10-04_e_float_compression_ablation/compression_ablation/cic_near_iid/prune_ft_client_ptq.tflite
+      - data/processed/revision/2026-10-04_e_float_compression_ablation/compression_ablation/cic_near_iid/prune_ft_client_qat.tflite
+      - data/processed/revision/2026-10-04_e_float_compression_ablation/compression_ablation/cic_near_iid/prune_ft_pooled_qat.tflite
+  - name: ton_iot
+    config: data/processed/revision/2026-10-04_d_toniot_float/baseline/configs/b_fl.yaml
+    models:
+      - data/processed/revision/2026-10-04_d_toniot_float/baseline/models/b_fl.h5
+      - data/processed/revision/2026-10-04_d_toniot_float/baseline/models/a_centralized.h5
+      - data/processed/revision/2026-10-04_e_float_compression_ablation/compression_ablation/ton_near_iid/fp32.tflite
+      - data/processed/revision/2026-10-04_e_float_compression_ablation/compression_ablation/ton_near_iid/ptq_only.tflite
+      - data/processed/revision/2026-10-04_e_float_compression_ablation/compression_ablation/ton_near_iid/prune_ft_client_ptq.tflite
+      - data/processed/revision/2026-10-04_e_float_compression_ablation/compression_ablation/ton_near_iid/prune_ft_client_qat.tflite
+      - data/processed/revision/2026-10-04_e_float_compression_ablation/compression_ablation/ton_near_iid/prune_ft_pooled_qat.tflite

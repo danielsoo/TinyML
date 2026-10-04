@@ -1,0 +1,5 @@
+id: 2026-10-04_h_fixed_lr_toniot
+config_dir: config/paper_v12_toniot
+steps: fixed_lr
+flags: []
+why: "Table 2 row (b) on TON_IoT: same recipe with a fixed learning rate."

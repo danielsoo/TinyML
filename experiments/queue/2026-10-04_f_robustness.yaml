@@ -1,0 +1,5 @@
+id: 2026-10-04_f_robustness
+config_dir: config/jobs/2026-10-04_f_robustness
+steps: robustness
+flags: []
+why: "FGSM/PGD on the final float-FL models and their compressed TFLite variants (old robustness numbers used the buggy compressed models)."

@@ -17,6 +17,8 @@ Spec file (YAML):
       model: data/processed/revision/<run>/baseline/models/b_fl.h5
       config: data/processed/revision/<run>/baseline/configs/b_fl.yaml
       ft_client: 0        # client whose local partition is used for "client" variants
+  prune_ratios: [0.3, 0.5, 0.7, 0.85]   # optional: compression-strength sweep instead of the
+  ft_sources: [client]                  # default variant set (pooled and/or client fine-tuning)
 
 Usage:
   python scripts/compression_ablation.py --spec config/<dir>/compression_ablation.yaml \
@@ -132,6 +134,28 @@ def run_model(entry: dict, spec: dict, out_dir: Path) -> List[Dict[str, Any]]:
     p = tdir / "ptq_only.tflite"
     export_tflite(base, str(p), quantize=True, representative_data=pooled[0])
     add("ptq_only", "INT8 PTQ only (no pruning, no fine-tune)", p, "-")
+
+    ratios = spec.get("prune_ratios")
+    if ratios:  # compression-strength sweep
+        sources = {"pooled": pooled, "client": client}
+        for r in ratios:
+            rt = f"r{int(round(float(r) * 100))}"
+            pr = apply_structured_pruning(_clone(base), pruning_ratio=float(r), skip_last_layer=True, verbose=False)
+            p = tdir / f"prune_noft_ptq_{rt}.tflite"
+            export_tflite(pr, str(p), quantize=True, representative_data=pooled[0])
+            add(f"prune_noft_ptq_{rt}", f"prune {float(r):.0%} -> PTQ (no fine-tune)", p, "-")
+            for tag in spec.get("ft_sources", ["client"]):
+                xf, yf = sources[tag]
+                pr = apply_structured_pruning(_clone(base), pruning_ratio=float(r), skip_last_layer=True, verbose=False)
+                _fit(pr, xf, yf, PRUNE_FT_EPOCHS)
+                p = tdir / f"prune_ft_{tag}_ptq_{rt}.tflite"
+                export_tflite(pr, str(p), quantize=True, representative_data=xf)
+                add(f"prune_ft_{tag}_ptq_{rt}", f"prune {float(r):.0%} -> fine-tune -> PTQ", p, tag)
+                q = _qat(pr, xf, yf)
+                p = tdir / f"prune_ft_{tag}_qat_{rt}.tflite"
+                export_tflite_qat(q, str(p))
+                add(f"prune_ft_{tag}_qat_{rt}", f"prune {float(r):.0%} -> fine-tune -> QAT", p, tag)
+        return variants
 
     pruned = apply_structured_pruning(_clone(base), pruning_ratio=PRUNE_RATIO, skip_last_layer=True, verbose=False)
     p = tdir / "prune_noft_ptq.tflite"

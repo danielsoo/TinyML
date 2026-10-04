@@ -276,6 +276,8 @@ def main():
     dataset_name = data_cfg.get("name", "cicids2017")
     data_path = data_cfg.get("path", "data/raw/CIC-IDS2017")
     max_samples = data_cfg.get("max_samples", 2000000)
+    if max_samples is None:  # full dataset
+        max_samples = float("inf")
     threshold = attack_cfg.get("prediction_threshold", 0.3)
     epsilon_values = attack_cfg.get("epsilon_values", [0.01, 0.05, 0.1, 0.15, 0.2])
     epsilon_default = attack_cfg.get("epsilon_default", 0.1)
@@ -312,7 +314,7 @@ def main():
         y_test = y_test.values
     x_test = np.asarray(x_test, dtype=np.float32)
     y_test = np.asarray(y_test, dtype=np.float32)
-    x_test = x_test[: max(min(max_samples, len(x_test)), adv_subset + 1000)]
+    x_test = x_test[: int(max(min(max_samples, len(x_test)), adv_subset + 1000))]
     y_test = y_test[: len(x_test)]
 
     # 1) Generate adversarial examples using the Keras (attack) model (PGD or FGSM per config)
