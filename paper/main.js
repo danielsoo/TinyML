@@ -11,6 +11,7 @@ const PENDING_COLOR = "C00000";
 function PEND(text) { return { text: `[PENDING: ${text}]`, bold: true, color: PENDING_COLOR }; }
 function PP(parts, opts) { return RP(parts.map(p => (typeof p === "string" ? { text: p } : p)), opts); }
 
+const FIG = path.join(__dirname, "figures") + "/";
 const children = [];
 
 // ---------------- Title block ----------------
@@ -154,12 +155,13 @@ children.push(makeTable(t1h, [
   ["CIC-IDS2017 — federated, fixed LR", "pending", "", "", "", ""],
   ["TON_IoT — centralized", "99.20%", "99.32%", "99.64%", "99.48%", "2.28%"],
   ["TON_IoT — federated (near-IID)", "99.08%", "99.18%", "99.62%", "99.40%", "2.76%"],
-  ["TON_IoT — federated, fixed LR", "pending", "", "", "", ""],
+  ["TON_IoT — federated, fixed LR", "99.02%", "99.00%", "99.73%", "99.36%", "3.38%"],
 ], t1w));
 children.push(caption("Table 1. Federated vs. centralized training with the identical model, loss, and epoch budget (float models, before compression)."));
 children.push(PP([
   "Federated training comes within 1.65 F1 points of centralized training on CIC-IDS2017 and within 0.08 on TON_IoT. On CIC-IDS2017 the gap lies almost entirely in precision (FAR 6.84% vs. 5.92%); both models detect more than 99.9% of attacks. ",
-  PEND("fixed-learning-rate rows from jobs 2026-10-04_h/i, to test whether the cosine schedule's effect reported in the WIP version survives the corrected pipeline"),
+  "On TON_IoT, a fixed learning rate performs as well as the cosine schedule (F1 99.36 vs. 99.40), so the large effect of the cosine schedule reported in the WIP version is not visible on this dataset. ",
+  PEND("CIC-IDS2017 fixed-learning-rate row from job 2026-10-04_i"),
 ]));
 
 children.push(H2("5.2 Non-IID Clients"));
@@ -205,10 +207,11 @@ children.push(P(
 ));
 
 children.push(H2("5.5 Compression Strength"));
-children.push(PP([
-  "We sweep the structured-pruning ratio from 30% to 90%, each with no fine-tuning, client fine-tuning + PTQ, and client fine-tuning + QAT, on both datasets. This replaces the 48-configuration sweep of the WIP version, which was produced by the erroneous pipeline. ",
-  PEND("prune-ratio sweep results and figure from job 2026-10-04_g_prune_sweep"),
-]));
+children.push(P(
+  "We sweep the structured-pruning ratio from 30% to 90% on the near-IID federated models. Each ratio is tested with no fine-tuning, client fine-tuning + PTQ, and client fine-tuning + QAT fine-tuning (Figure 1). This replaces the 48-configuration sweep of the WIP version, which was produced by the erroneous pipeline. Without fine-tuning, pruning breaks the CIC-IDS2017 model from 50% onward (from 70% it predicts every flow as an attack) and steadily degrades the TON_IoT model. With client fine-tuning, CIC-IDS2017 degrades gracefully: 30% pruning (112–126 KB) gives F1 87.6–89.7, 70% pruning (31 KB, 26×) gives 84.4–85.0, 85% (14 KB, 57×) gives 81.3–82.9, and 90% (9.9 KB, 81×) gives 78.0. PTQ and QAT fine-tuning track each other closely. On TON_IoT, client fine-tuning + QAT holds F1 between 98.6 and 98.9 all the way to 90% pruning (7.9 KB, 91× smaller than FP32), whereas client fine-tuning + PTQ fluctuates between 90.5 and 98.4. QAT fine-tuning is therefore the choice that is reliable on both datasets. On CIC-IDS2017 the useful range ends around 70% pruning (31 KB) if F1 within about 1.3 points of the federated model is required."
+));
+children.push(img(FIG + "prune_sweep.png", 600, 249));
+children.push(caption("Figure 1. F1 vs. deployed INT8 model size for structured-pruning ratios 30–90% (labels), with fine-tuning on one client's local data followed by QAT fine-tuning or PTQ, and without fine-tuning. Dashed line: the uncompressed federated model."));
 
 children.push(H2("5.6 Training-Time QAT Inside FL: a Negative Result"));
 children.push(P(

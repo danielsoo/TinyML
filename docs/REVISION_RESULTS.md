@@ -216,3 +216,12 @@ PTQ keeps robustness; pruning+FT lowers it; QAT fine-tuning is more robust than 
 centralized is more fragile. On TON_IoT ε = 0.1 drives nearly all models to "all benign" (23.0% =
 benign share) — the unconstrained L∞ budget is too large for this feature space. Added to the paper
 as Table 5 with caveats (unconstrained perturbations, single seed).
+
+## Pruning-ratio sweep (`2026-10-04_g_prune_sweep`, client 0 fine-tuning)
+CIC (F1 client-FT QAT / PTQ, size): 30% 87.63/89.68 (112/126 KB) · 50% 85.59/86.90 (65/75 KB) ·
+70% 84.42/84.97 (31/37 KB) · 85% 81.25/82.86 (14/16 KB) · 90% 78.02/77.90 (9.9/11 KB); no FT collapses
+from 50%. TON: client-FT QAT 98.94 → 98.67 from 30% to 90% (98/7.9 KB); client-FT PTQ unstable
+(90.5–98.4); no FT degrades. Figure: paper/figures/prune_sweep.png (scripts/plot_prune_sweep.py).
+
+## Fixed LR on TON_IoT (`2026-10-04_h_fixed_lr_toniot`)
+99.02 acc / 99.36 F1 / 99.73 recall / 3.38% FAR vs cosine 99.40 F1 — no cosine-LR effect on TON_IoT.
