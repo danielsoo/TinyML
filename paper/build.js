@@ -22,7 +22,7 @@ function RP(parts, opts = {}) {
     alignment,
     spacing: { after: spacingAfter, before: spacingBefore },
     children: parts.map(p => new TextRun({
-      text: p.text, bold: p.bold, italics: p.italic, superScript: p.sup, size: p.size
+      text: p.text, bold: p.bold, italics: p.italic, superScript: p.sup, size: p.size, color: p.color
     })),
   });
 }
