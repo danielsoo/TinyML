@@ -1,0 +1,5 @@
+id: 2026-10-04_j_quant_distill
+config_dir: config/jobs/2026-10-04_j_quant_distill
+steps: quant_distill
+flags: []
+why: "Compare quantization methods (fp32, dynamic-range, float16, full int8, int16x8) on the FL model and the pruned model, and client-local knowledge distillation into 1/2, 1/4, 1/8-width students vs. the same students trained from scratch. ~30 min."

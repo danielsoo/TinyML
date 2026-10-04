@@ -1,0 +1,18 @@
+# Quantization-method comparison + client-local knowledge distillation on the float FL models.
+ft_samples: 10000
+kd_samples: 50000
+kd_epochs: 10
+kd_temperature: 2.0
+kd_alpha: 0.5
+student_ratios: [0.5, 0.25, 0.125]
+quant_methods: [fp32, dynamic_range, float16, int8, int16x8]
+seed: 42
+models:
+  - name: cic_near_iid
+    model: data/processed/revision/2026-10-03_b_v3_float_cic/baseline/models/b_fl.h5
+    config: data/processed/revision/2026-10-03_b_v3_float_cic/baseline/configs/b_fl.yaml
+    ft_client: 0
+  - name: ton_near_iid
+    model: data/processed/revision/2026-10-04_d_toniot_float/baseline/models/b_fl.h5
+    config: data/processed/revision/2026-10-04_d_toniot_float/baseline/configs/b_fl.yaml
+    ft_client: 0
