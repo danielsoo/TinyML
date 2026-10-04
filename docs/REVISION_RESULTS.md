@@ -293,3 +293,23 @@ min/max ranges stretched by heavy-tailed outliers). Paper 5.9 rewritten + Table 
 
 FL helps attack-poor clients (recall 45–93% alone → 98–99.8%) and the attack-heavy one (FAR 21% → 3.6%);
 data-rich representative clients gain nothing in F1 (operating-point differences). Paper 5.11 / Table 9.
+
+## QAT stability + clipped PTQ calibration (`2026-10-04_m_qat_stability`)
+Unclipped conversions reproduce job l exactly (same seeds).
+
+A — deployed recipe (prune 50 → client-0 FT → QAT) over 5 FT draws, F1:
+TON QAT 98.74–99.38 (PTQ of same pruned models 97.44–99.21); CIC QAT 86.77–89.28 (PTQ 79.37–89.05).
+QAT is more stable than PTQ but has ~2.5 F1 draw spread on CIC; Table 3's 85.59 is below all 5 draws
+(conservative, not cherry-picked).
+
+B — 15 calibration sets × 2,000 samples, calibration inputs clipped to ±c:
+| clip | TON F1 range | CIC F1 range |
+|---|---|---|
+| none | 12.28–99.35 | 29.16–84.99 |
+| ±3 | 96.71–96.85 | 83.04–84.73 |
+| ±5 | 99.32–99.35 | 83.02–84.85 |
+| ±10 | 99.34–99.37 | 83.06–84.95 |
+Mechanism: worst conversions have the widest float activation maxima (TON F1 12–22 ↔ ~500; CIC 29.16 ↔
+9,609; most others 52–230), not strictly monotonic. Clipped calibration = one-line fix.
+Paper 5.9 updated (Table 7 clipped row, mechanism, fix, QAT draw spread); abstract/contributions/
+6.3/conclusion mention the fix. Remaining PENDING: ESP32 only.
