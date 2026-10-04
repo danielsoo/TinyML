@@ -2,8 +2,8 @@
  * ESP32 TensorFlow Lite Micro — CIC-IDS2017 IDS on-device benchmark (78-dim input).
  *
  * Benchmarks both models from the paper's Table 3 in one flash:
- *   compressed : models/ids_compressed_int8.tflite (pruned + QAT, INT8, 66,600 B)
- *   baseline   : models/ids_baseline_fp32.tflite   (FP32, 817,528 B)   -> 12.28x
+ *   compressed : models/ids_compressed_int8.tflite (prune 50% -> client FT -> QAT, INT8, 67,008 B)
+ *   baseline   : models/ids_baseline_fp32.tflite   (FP32, 821,792 B)   -> 12.26x
  * Models are embedded automatically by gen_model_data.py at build time.
  *
  * Serial output (parsed by scripts/collect_esp32_benchmark.py):

@@ -112,5 +112,5 @@ static const float kTestInputs[kNumTestVectors][kTestInputDim] = {
   -1.41131055e+00f, 6.38520777e-01f, 7.10312605e-01f, -1.81647435e-01f, 4.64295357e-01f, 1.04731038e-01f},
 };
 
-static const float kExpected_compressed[kNumTestVectors] = {1.17187500e-02f, 3.90625000e-02f, 3.59375000e-01f, 1.17187500e-02f, 8.98437500e-02f, 1.17187500e-02f, 2.34375000e-02f, 9.96093750e-01f};
-static const float kExpected_baseline[kNumTestVectors] = {4.33533728e-01f, 3.80641907e-01f, 5.40480733e-01f, 3.64516675e-01f, 4.45900142e-01f, 5.16240120e-01f, 3.93614620e-01f, 5.07572055e-01f};
+static const float kExpected_compressed[kNumTestVectors] = {1.17187500e-02f, 2.85156250e-01f, 1.28906250e-01f, 1.79687500e-01f, 3.20312500e-01f, 0.00000000e+00f, 2.85156250e-01f, 8.82812500e-01f};
+static const float kExpected_baseline[kNumTestVectors] = {8.16256507e-10f, 1.01520181e-01f, 3.43448907e-01f, 2.57371157e-01f, 2.94774640e-02f, 1.02373936e-12f, 9.99903977e-01f, 1.00000000e+00f};

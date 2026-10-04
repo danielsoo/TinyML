@@ -3,12 +3,12 @@
 보드에 꽂고 명령어 3줄이면 끝나도록 준비돼 있습니다. 30분 정도면 됩니다.
 
 ## 무엇을 재나요?
-펌웨어 하나에 표 3의 두 모델이 같이 들어갑니다 (같은 FL run, 정확히 12.28× 쌍).
+펌웨어 하나에 수정본 표 3의 두 모델이 같이 들어갑니다 (CIC-IDS2017 near-IID 연합학습 모델: FP32 원본과, 50% pruning → 클라이언트 0 미세조정 → QAT → INT8 배포 모델. 12.26× 쌍, run `2026-10-04_e_float_compression_ablation`).
 
 | 이름 | 파일 | 크기 |
 |---|---|---|
-| `compressed` | `esp32_tflite_project/models/ids_compressed_int8.tflite` (pruned + QAT, INT8) | 66,600 B |
-| `baseline` | `esp32_tflite_project/models/ids_baseline_fp32.tflite` (FP32) | 817,528 B |
+| `compressed` | `esp32_tflite_project/models/ids_compressed_int8.tflite` (prune 50% → client FT → QAT, INT8) | 67,008 B |
+| `baseline` | `esp32_tflite_project/models/ids_baseline_fp32.tflite` (FP32) | 821,792 B |
 
 각 모델마다: ① 고정 입력 8개로 보드 출력 vs PC(TFLite) 출력 비교(parity) → ② warm-up 5회 → ③ 100회 latency 측정.
 
@@ -50,8 +50,8 @@ python scripts/collect_esp32_benchmark.py --port COM3
 ```
 ✅ ESP32 benchmark saved: ...\data\processed\ablation\esp32_benchmark.json (raw log: esp32_benchmark.log)
    Device: ESP32-D0WD-V3 @ 240 MHz, SDK v4.4.x
-   compressed  66600 B  mean x.xxx ms  median ...  parity max|Δ|=0.0039 labels 8/8
-   baseline    817528 B mean x.xxx ms  median ...  parity max|Δ|=0.0 labels 8/8
+   compressed  67008 B  mean x.xxx ms  median ...  parity max|Δ|=0.0039 labels 8/8
+   baseline    821792 B mean x.xxx ms  median ...  parity max|Δ|=0.0 labels 8/8
 ```
 아무것도 안 나오고 타임아웃이면 보드의 **EN(RST) 버튼**을 한 번 누르고 다시 실행.
 

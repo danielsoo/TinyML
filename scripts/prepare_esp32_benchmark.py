@@ -2,14 +2,14 @@
 """
 Stage models for the ESP32 benchmark and regenerate the parity test vectors.
 
-Only needed to benchmark *different* models: the repo already ships the paper's
-Table 3 pair (v12 run 2026-03-12_19-07-57) in esp32_tflite_project/models/ and the
-matching esp32_tflite_project/include/test_vectors.h.
+The defaults stage the revised paper's Table 3 pair (CIC-IDS2017 near-IID federated model:
+FP32 baseline and prune 50% -> client-0 FT -> QAT FT INT8 deployment model, run
+2026-10-04_e_float_compression_ablation); the repo ships them already staged together with
+the matching esp32_tflite_project/include/test_vectors.h.
 
 Usage:
   python scripts/prepare_esp32_benchmark.py \
-    --compressed models/tflite/saved_model_pruned_qat.tflite \
-    --baseline models/tflite/saved_model_original.tflite
+    --compressed <deployment INT8 .tflite> --baseline <FP32 .tflite>
 """
 from __future__ import annotations
 
@@ -21,14 +21,17 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parent.parent
 PROJECT = ROOT / "esp32_tflite_project"
-RUN = "data/processed/runs/v12/2026-03-12_19-07-57/models/tflite"
+RUN = "data/processed/revision/2026-10-04_e_float_compression_ablation/compression_ablation/cic_near_iid"
 TARGETS = {"compressed": "ids_compressed_int8.tflite", "baseline": "ids_baseline_fp32.tflite"}
 
 
 def _run_tflite(path: Path, xs: np.ndarray) -> list:
-    import tensorflow as tf
+    try:
+        from tensorflow.lite import Interpreter
+    except ImportError:  # light-weight runtime is enough here (pip install ai-edge-litert)
+        from ai_edge_litert.interpreter import Interpreter
 
-    interp = tf.lite.Interpreter(model_path=str(path))
+    interp = Interpreter(model_path=str(path))
     interp.allocate_tensors()
     inp = interp.get_input_details()[0]["index"]
     out = interp.get_output_details()[0]["index"]
@@ -47,8 +50,8 @@ def _fmt(values) -> str:
 
 def main():
     parser = argparse.ArgumentParser(description="Prepare ESP32 benchmark models")
-    parser.add_argument("--compressed", default=f"{RUN}/saved_model_pruned_qat.tflite")
-    parser.add_argument("--baseline", default=f"{RUN}/saved_model_original.tflite")
+    parser.add_argument("--compressed", default=f"{RUN}/prune_ft_client_qat.tflite")
+    parser.add_argument("--baseline", default=f"{RUN}/fp32.tflite")
     parser.add_argument("--num-vectors", type=int, default=8)
     parser.add_argument("--seed", type=int, default=2026)
     args = parser.parse_args()
