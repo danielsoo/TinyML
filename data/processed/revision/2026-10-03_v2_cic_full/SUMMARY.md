@@ -1,6 +1,6 @@
 # Revision experiments (full)
 
-- commit: dd97e2c1bc85a697a492d6db43ff3c7040ea90e5
+- commit: d3a26be094bf0ea2334fe49727bf6751ca8d6980
 - configs: config/paper_v12 (eval_split: )
 - host: Linux 6.18.40.1-microsoft-standard-WSL2 x86_64, 16 cores
 - baseline_ablation: 330 min
