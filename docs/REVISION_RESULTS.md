@@ -261,3 +261,35 @@ TON: KD makes PTQ robust (≤0.11 F1 loss); 1/8 KD student = 99.16 F1 at 11.2 KB
 Key finding: a scratch student on one near-IID client's data matches/beats the FL model on CIC →
 the value of FL needs the local-only baseline under Dirichlet (job k, `2026-10-04_k_local_only`).
 Paper: Sections 5.9 (Table 6) and 5.10 (Table 7).
+
+## INT8 PTQ calibration sensitivity (`2026-10-04_l_ptq_calibration`)
+45 full-integer PTQ conversions per model (5 sources × 3 sizes × 3 draws), plus the two single draws
+from Tables 3/6. Op set (BUILTINS vs BUILTINS_INT8) has no effect. Source has no effect (median F1 per
+source: TON 98.97–99.30, CIC 83.1–83.8). The draw has a huge effect, and more data is worse:
+
+| n | TON median / min / within 1 F1 of FP32 | CIC median / min / within 1 F1 |
+|---|---|---|
+| 100 | 99.31 / 90.99 / 12 of 15 | 84.60 / 81.47 / 5 of 15 |
+| 500 | 99.30 / 26.19 / 11 of 15 | 83.11 / 80.91 / 2 of 15 |
+| 2000 | 91.23 / 12.28 / 3 of 15 | 82.60 / 29.16 / 1 of 15 |
+
+→ The 5.9 claim "pooled vs client calibration" was wrong; it is draw-to-draw instability (likely
+min/max ranges stretched by heavy-tailed outliers). Paper 5.9 rewritten + Table 7. Follow-up job m
+(`2026-10-04_m_qat_stability`): QAT over 5 FT draws, clipped calibration, activation maxima.
+
+## Local-only baseline (`2026-10-04_k_local_only`, 10 epochs, ≤200k samples per client)
+| Partition / client | data (attack) | local F1 / recall / FAR (missed) | FL F1 / recall / FAR (missed) |
+|---|---|---|---|
+| CIC near-IID 0–3 | 681k (50%) | 88.3–90.0 / 98.85–99.78 / 4.5–5.2 (185–982) | 85.70 / 99.94 / 6.84 (52) |
+| CIC Dir c0 | 9.4k (0.1%) | 62.04 / 44.97 / 0.00 (46,872) | 85.59 / 99.83 / 6.87 (144) |
+| CIC Dir c1 | 1.98M (59.5%) | 90.70 / 99.75 / 4.15 (214) | |
+| CIC Dir c2 | 6.7k (2.6%) | 88.74 / 91.11 / 2.92 (7,572) | |
+| CIC Dir c3 | 728k (25.1%) | 89.80 / 99.60 / 4.56 (339) | |
+| TON near-IID 0–3 | 32k (50%) | 99.16–99.31 / 99.65–99.79 / 3.5–4.8 (34–57) | 99.40 / 99.62 / 2.76 (61) |
+| TON Dir c0 | 49.9k (0.4%) | 90.16 / 82.13 / 0.23 (2,897) | 98.45 / 97.99 / 3.59 (326) |
+| TON Dir c1 | 62.9k (92.8%) | 96.90 / 99.92 / 21.20 (13) | |
+| TON Dir c2 | 8.6k (65.5%) | 99.02 / 99.80 / 5.97 (33) | |
+| TON Dir c3 | 8.4k (8.5%) | 96.34 / 93.22 / 1.00 (1,099) | |
+
+FL helps attack-poor clients (recall 45–93% alone → 98–99.8%) and the attack-heavy one (FAR 21% → 3.6%);
+data-rich representative clients gain nothing in F1 (operating-point differences). Paper 5.11 / Table 9.
