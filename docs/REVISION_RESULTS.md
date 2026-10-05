@@ -402,3 +402,12 @@ Paper Table 12.
 | 98 KB p30 | val ≥99.9% | 21 (25) | 5.79 |
 FP32 test sweep t=0.2: 21 missed @ 5.85. → Same recipe works on both datasets; KD is what makes client-val
 thresholds usable (scores mid-range). Fed FT/p30 neutral on TON. Paper Table 13 + unified recommendation.
+
+## Final deployment models (user decision 2026-10-05: CIC 112 KB, TON new recipe)
+- CIC-IDS2017: `2026-10-05_p_recall_priority2/.../kdclip_p30_d0.tflite` (114,760 B), threshold 0.1914 (client-val
+  ≥99.99%): 27 / 85,173 missed (0.032%), FAR 10.02%.
+- TON_IoT: `2026-10-05_r_recall_priority_ton/.../kdclip_d0.tflite` (56,512 B), threshold 0.2148 (client-val ≥99.9%):
+  19 / 16,214 missed (0.12%), FAR 6.06%.
+ESP32 firmware now embeds cic_deploy / cic_fp32 / ton_deploy / ton_fp32 (1.7 MB); host build against TFLM
+(TensorFlowLite_ESP32 1.0.0): FP32 exact, INT8 ≤0.012 (3/256), 8/8 decisions at deployment thresholds,
+arena 2.2–4.6 KB. Paper: "deployed recipe" renamed "base recipe"; 5.8, 6.1, Appendix B, abstract updated.

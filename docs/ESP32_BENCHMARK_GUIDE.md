@@ -3,14 +3,17 @@
 보드에 꽂고 명령어 3줄이면 끝나도록 준비돼 있습니다. 30분 정도면 됩니다.
 
 ## 무엇을 재나요?
-펌웨어 하나에 수정본 표 3의 두 모델이 같이 들어갑니다 (CIC-IDS2017 near-IID 연합학습 모델: FP32 원본과, 50% pruning → 클라이언트 0 미세조정 → QAT → INT8 배포 모델. 12.26× 쌍, run `2026-10-04_e_float_compression_ablation`).
+펌웨어 하나에 논문의 최종 배포 모델 2개와, 그 모델들의 압축 전 원본(FP32) 2개가 같이 들어갑니다 (논문 5.8 / 5.13).
 
-| 이름 | 파일 | 크기 |
-|---|---|---|
-| `compressed` | `esp32_tflite_project/models/ids_compressed_int8.tflite` (prune 50% → client FT → QAT, INT8) | 67,008 B |
-| `baseline` | `esp32_tflite_project/models/ids_baseline_fp32.tflite` (FP32) | 821,792 B |
+| 이름 | 파일 | 크기 | 판정 기준값 |
+|---|---|---|---|
+| `cic_deploy` | `esp32_tflite_project/models/cic_deploy_int8.tflite` (CIC-IDS2017, 30% pruning + 증류 + 입력 자른 QAT, INT8) | 114,760 B | 0.1914 |
+| `cic_fp32` | `esp32_tflite_project/models/cic_fp32.tflite` (CIC-IDS2017 연합학습 원본, FP32) | 821,696 B | 0.3 |
+| `ton_deploy` | `esp32_tflite_project/models/ton_deploy_int8.tflite` (TON_IoT, 50% pruning + 증류 + 입력 자른 QAT, INT8) | 56,512 B | 0.2148 |
+| `ton_fp32` | `esp32_tflite_project/models/ton_fp32.tflite` (TON_IoT 연합학습 원본, FP32) | 737,728 B | 0.3 |
 
-각 모델마다: ① 고정 입력 8개로 보드 출력 vs PC(TFLite) 출력 비교(parity) → ② warm-up 5회 → ③ 100회 latency 측정.
+각 모델마다: ① 고정 입력 8개로 보드 출력 vs PC(TFLite) 출력 비교(parity, 판정 일치는 각 모델의 기준값으로) → ② warm-up 5회 → ③ 100회 latency 측정.
+PC에서 같은 TFLite Micro 라이브러리로 빌드해 확인한 결과: FP32는 출력이 정확히 같고, INT8은 최대 0.012(3/256) 차이, 판정은 8/8 일치, arena 사용량 2.2–4.6 KB.
 
 ## 0. 준비물 (한 번만)
 1. ESP32 보드 + **데이터 전송 가능한** USB 케이블 (충전 전용 케이블이면 포트가 안 잡힘)
@@ -50,8 +53,10 @@ python scripts/collect_esp32_benchmark.py --port COM3
 ```
 ✅ ESP32 benchmark saved: ...\data\processed\ablation\esp32_benchmark.json (raw log: esp32_benchmark.log)
    Device: ESP32-D0WD-V3 @ 240 MHz, SDK v4.4.x
-   compressed  67008 B  mean x.xxx ms  median ...  parity max|Δ|=0.0039 labels 8/8
-   baseline    821792 B mean x.xxx ms  median ...  parity max|Δ|=0.0 labels 8/8
+   cic_deploy   114760 B  mean x.xxx ms  median ...  parity max|Δ|=0.0039 labels 8/8
+   cic_fp32     821696 B  mean x.xxx ms  median ...  parity max|Δ|=0.0 labels 8/8
+   ton_deploy   56512 B   mean x.xxx ms  median ...  parity max|Δ|=0.0117 labels 8/8
+   ton_fp32     737728 B  mean x.xxx ms  median ...  parity max|Δ|=0.0 labels 8/8
 ```
 아무것도 안 나오고 타임아웃이면 보드의 **EN(RST) 버튼**을 한 번 누르고 다시 실행.
 

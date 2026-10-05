@@ -9,8 +9,10 @@ except NameError:  # plain `python gen_model_data.py`
     PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 MODELS = [
-    ("g_model_compressed", "models/ids_compressed_int8.tflite"),
-    ("g_model_baseline", "models/ids_baseline_fp32.tflite"),
+    ("g_model_cic_deploy", "models/cic_deploy_int8.tflite"),
+    ("g_model_cic_fp32", "models/cic_fp32.tflite"),
+    ("g_model_ton_deploy", "models/ton_deploy_int8.tflite"),
+    ("g_model_ton_fp32", "models/ton_fp32.tflite"),
 ]
 OUT_CC = os.path.join(PROJECT_DIR, "src", "model_data.cc")
 OUT_H = os.path.join(PROJECT_DIR, "include", "model_data.h")

@@ -1,15 +1,20 @@
 #!/usr/bin/env python3
 """
-Stage models for the ESP32 benchmark and regenerate the parity test vectors.
+Stage the paper's deployment models for the ESP32 benchmark and regenerate the parity vectors.
 
-The defaults stage the revised paper's Table 3 pair (CIC-IDS2017 near-IID federated model:
-FP32 baseline and prune 50% -> client-0 FT -> QAT FT INT8 deployment model, run
-2026-10-04_e_float_compression_ablation); the repo ships them already staged together with
-the matching esp32_tflite_project/include/test_vectors.h.
+Four models are embedded in one firmware image (esp32_tflite_project/models/):
+  cic_deploy  CIC-IDS2017 deployment model: prune 30% -> distillation + clipped-input fine-tuning
+              -> QAT -> INT8 (paper 5.13, Table 11; threshold chosen on client data)
+  cic_fp32    the CIC-IDS2017 federated FP32 model it was compressed from
+  ton_deploy  TON_IoT deployment model: prune 50% -> distillation + clipped-input fine-tuning
+              -> QAT -> INT8 (paper 5.13, Table 13)
+  ton_fp32    the TON_IoT federated FP32 model
+The repo ships them already staged together with esp32_tflite_project/include/test_vectors.h;
+rerun this script only to benchmark different models.
 
 Usage:
-  python scripts/prepare_esp32_benchmark.py \
-    --compressed <deployment INT8 .tflite> --baseline <FP32 .tflite>
+  python scripts/prepare_esp32_benchmark.py                       # defaults below
+  python scripts/prepare_esp32_benchmark.py --cic-deploy a.tflite --ton-deploy b.tflite ...
 """
 from __future__ import annotations
 
@@ -21,18 +26,29 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parent.parent
 PROJECT = ROOT / "esp32_tflite_project"
-RUN = "data/processed/revision/2026-10-04_e_float_compression_ablation/compression_ablation/cic_near_iid"
-TARGETS = {"compressed": "ids_compressed_int8.tflite", "baseline": "ids_baseline_fp32.tflite"}
+CIC = "data/processed/revision/2026-10-05_p_recall_priority2/recall_priority/cic_near_iid"
+TON = "data/processed/revision/2026-10-05_r_recall_priority_ton/recall_priority/ton_near_iid"
+# name -> (default source, staged file, dataset, decision threshold used on the device)
+MODELS = {
+    "cic_deploy": (f"{CIC}/kdclip_p30_d0.tflite", "cic_deploy_int8.tflite", "cic", 0.1914),
+    "cic_fp32": (f"{CIC}/fp32.tflite", "cic_fp32.tflite", "cic", 0.3),
+    "ton_deploy": (f"{TON}/kdclip_d0.tflite", "ton_deploy_int8.tflite", "ton", 0.2148),
+    "ton_fp32": (f"{TON}/fp32.tflite", "ton_fp32.tflite", "ton", 0.3),
+}
 
 
-def _run_tflite(path: Path, xs: np.ndarray) -> list:
+def _interpreter(path: Path):
     try:
         from tensorflow.lite import Interpreter
     except ImportError:  # light-weight runtime is enough here (pip install ai-edge-litert)
         from ai_edge_litert.interpreter import Interpreter
-
     interp = Interpreter(model_path=str(path))
     interp.allocate_tensors()
+    return interp
+
+
+def _run(path: Path, xs: np.ndarray) -> list:
+    interp = _interpreter(path)
     inp = interp.get_input_details()[0]["index"]
     out = interp.get_output_details()[0]["index"]
     ys = []
@@ -50,40 +66,51 @@ def _fmt(values) -> str:
 
 def main():
     parser = argparse.ArgumentParser(description="Prepare ESP32 benchmark models")
-    parser.add_argument("--compressed", default=f"{RUN}/prune_ft_client_qat.tflite")
-    parser.add_argument("--baseline", default=f"{RUN}/fp32.tflite")
+    for name, (src, *_rest) in MODELS.items():
+        parser.add_argument(f"--{name.replace('_', '-')}", default=src)
     parser.add_argument("--num-vectors", type=int, default=8)
     parser.add_argument("--seed", type=int, default=2026)
     args = parser.parse_args()
 
     models_dir = PROJECT / "models"
     models_dir.mkdir(parents=True, exist_ok=True)
-    staged = {}
-    for key, src in (("compressed", args.compressed), ("baseline", args.baseline)):
-        dst = models_dir / TARGETS[key]
-        if Path(src).resolve() != dst.resolve():
+    for old in models_dir.glob("*.tflite"):  # drop models that are no longer embedded
+        if old.name not in {m[1] for m in MODELS.values()}:
+            old.unlink()
+            print(f"  removed {old.relative_to(ROOT)}")
+    staged, dims = {}, {}
+    for name, (_src, target, ds, thr) in MODELS.items():
+        src = Path(getattr(args, name))
+        dst = models_dir / target
+        if (ROOT / src).resolve() != dst.resolve():
             shutil.copyfile(ROOT / src, dst)
-        staged[key] = dst
-        print(f"  {key}: {src} -> {dst.relative_to(ROOT)} ({dst.stat().st_size} B)")
+        dim = int(_interpreter(dst).get_input_details()[0]["shape"][-1])
+        if dims.setdefault(ds, dim) != dim:
+            raise SystemExit(f"{name}: input dim {dim} differs from other {ds} model ({dims[ds]})")
+        staged[name] = (dst, ds, thr)
+        print(f"  {name}: {src} -> {dst.relative_to(ROOT)} ({dst.stat().st_size} B, input {dim})")
 
-    # Inputs live in StandardScaler space (the loader standardizes features).
-    xs = np.random.default_rng(args.seed).normal(size=(args.num_vectors, 78)).astype(np.float32)
+    # Inputs live in StandardScaler space (the loaders standardize features).
+    rng = np.random.default_rng(args.seed)
+    xs = {ds: rng.normal(size=(args.num_vectors, d)).astype(np.float32) for ds, d in dims.items()}
     lines = [
         "// Auto-generated by scripts/prepare_esp32_benchmark.py (host TFLite interpreter).",
         "// Parity check: device outputs are compared with these host outputs.",
         "#pragma once",
         "",
         f"constexpr int kNumTestVectors = {args.num_vectors};",
-        "constexpr int kTestInputDim = 78;",
-        "",
-        "static const float kTestInputs[kNumTestVectors][kTestInputDim] = {",
     ]
-    lines += ["  {" + _fmt(x) + "}," for x in xs]
-    lines.append("};\n")
-    for key, path in staged.items():
-        ys = _run_tflite(path, xs)
-        lines.append(f"static const float kExpected_{key}[kNumTestVectors] = {{"
+    for ds, d in dims.items():
+        lines += ["", f"constexpr int k{ds.capitalize()}InputDim = {d};",
+                  f"static const float k{ds.capitalize()}Inputs[kNumTestVectors][k{ds.capitalize()}InputDim] = {{"]
+        lines += ["  {" + _fmt(x) + "}," for x in xs[ds]]
+        lines.append("};")
+    lines.append("")
+    for name, (path, ds, thr) in staged.items():
+        ys = _run(path, xs[ds])
+        lines.append(f"static const float kExpected_{name}[kNumTestVectors] = {{"
                      + ", ".join(f"{y:.8e}f" for y in ys) + "};")
+        lines.append(f"constexpr float kThreshold_{name} = {thr}f;")
     out = PROJECT / "include" / "test_vectors.h"
     out.write_text("\n".join(lines) + "\n", encoding="utf-8")
     print(f"✅ Wrote {out.relative_to(ROOT)}")

@@ -171,7 +171,7 @@ def main():
         if not s.get("count"):
             continue
         parity = info.get("parity", {})
-        print(f"   {name:<11} {info.get('bytes', '?')} B  "
+        print(f"   {name:<12} {info.get('bytes', '?')} B  "
               f"mean {s['latency_ms_mean']:.3f} ms  median {s['latency_us_median'] / 1000:.3f} ms  "
               f"p95 {s['latency_us_p95'] / 1000:.3f} ms  (n={s['count']}, arena {s['arena_used']} B)  "
               f"parity max|Δ|={parity.get('max_abs_diff', 'n/a')} labels {parity.get('label_agree', 'n/a')}")
