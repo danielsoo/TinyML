@@ -1,0 +1,5 @@
+id: 2026-10-05_x5_recall_fixed_cic
+config_dir: config/jobs/2026-10-05_x5_recall_fixed_cic
+steps: recall_priority
+flags: []
+why: "CIC deployed recipe (112 KB KD+clip, prune 30%) + fixed calibrated QAT ranges / CLE. ~10 min."
