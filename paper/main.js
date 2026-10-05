@@ -64,7 +64,7 @@ children.push(new Paragraph({ children: [new PageBreak()] }));
 // ---------------- Abstract ----------------
 children.push(H1("Abstract"));
 children.push(P(
-  "Federated Learning (FL) combined with TinyML is an attractive basis for privacy-preserving intrusion detection on microcontroller-class IoT devices, but the claim that a federated model can be compressed for such devices without losing detection quality is rarely tested end to end. We train a multilayer-perceptron intrusion detector with Flower (FedAvgM, cosine learning-rate decay, focal loss) on CIC-IDS2017 and TON_IoT, and compress it for TensorFlow Lite Micro using only data a federated deployment would actually hold. Three results stand out. First, federated training comes close to centralized training on the same recipe (F1 85.70 vs. 87.35 on CIC-IDS2017; 99.40 vs. 99.48 on TON_IoT), and a strongly non-IID Dirichlet(0.3) partition costs at most about one F1 point. Second, structured pruning followed by fine-tuning and QAT fine-tuning on a single participating client's local data yields a 65 KB INT8 model (12.3× smaller than FP32) with no loss relative to the federated model (F1 85.59, Attack Recall 99.66% on CIC-IDS2017; F1 98.74 on TON_IoT). How well this works depends on how closely that client's class mix matches the global one. When missed attacks must be minimized, distillation from the federated model and a threshold chosen on the client's own held-out data together with fine-tuning on all clients' local data, let the 65 KB model miss 27 of 85,173 attacks, about half as many as the FP32 model at its default threshold (52), at an 11.3% false-alarm rate; on TON_IoT the same recipe misses 19 of 16,214 attacks at 5.9%. For on-device deployment we use a 112 KB CIC-IDS2017 variant (23 of 85,173 missed at 9.7%, mean over fine-tuning draws) and the 55 KB TON_IoT model. Third, training-time quantization-aware training inside FL collapses on CIC-IDS2017 (34.7% accuracy): heavy-tailed standardized features drive the learned INT8 input range to [−1231, 405]. The same method works on TON_IoT, and full-integer post-training quantization of the float model avoids that collapse but is unstable across calibration draws (F1 between 12 and 99 for the same TON_IoT model) until the calibration inputs are clipped, after which it is stable (F1 99.32–99.35). A local-only baseline shows where federation pays off: clients with few local attacks detect 45–93% of attacks alone and 98–99.8% with the federated model. We also document four silent failure modes in a common TensorFlow, tfmot, and Flower toolchain that had invalidated the compressed-model results of our own earlier report, together with the checks that catch them.",
+  "Federated Learning (FL) combined with TinyML is an attractive basis for privacy-preserving intrusion detection on microcontroller-class IoT devices, but the claim that a federated model can be compressed for such devices without losing detection quality is rarely tested end to end. We train a multilayer-perceptron intrusion detector with Flower (FedAvgM, cosine learning-rate decay, focal loss) on CIC-IDS2017 and TON_IoT, and compress it for TensorFlow Lite Micro using only data a federated deployment would actually hold. Three results stand out. First, federated training comes close to centralized training on the same recipe (F1 85.70 vs. 87.35 on CIC-IDS2017; 99.40 vs. 99.48 on TON_IoT), and a strongly non-IID Dirichlet(0.3) partition costs at most about one F1 point. Second, structured pruning followed by fine-tuning and QAT fine-tuning on a single participating client's local data yields a 65 KB INT8 model (12.3× smaller than FP32) with no loss relative to the federated model (F1 85.59, Attack Recall 99.66% on CIC-IDS2017; F1 98.74 on TON_IoT). How well this works depends on how closely that client's class mix matches the global one. When missed attacks must be minimized, distillation from the federated model and a threshold chosen on the client's own held-out data together with fine-tuning on all clients' local data, let the 65 KB model miss 27 of 85,173 attacks, about half as many as the FP32 model at its default threshold (52), at an 11.3% false-alarm rate; on TON_IoT the same recipe misses 19 of 16,215 attacks at 5.9%. For on-device deployment we use a 112 KB CIC-IDS2017 variant (23 of 85,173 missed at 9.7%, mean over fine-tuning draws) and the 55 KB TON_IoT model. Third, training-time quantization-aware training inside FL collapses on CIC-IDS2017 (34.7% accuracy): heavy-tailed standardized features drive the learned INT8 input range to [−1231, 405]. The same method works on TON_IoT, and full-integer post-training quantization of the float model avoids that collapse but is unstable across calibration draws (F1 between 12 and 99 for the same TON_IoT model) until the calibration inputs are clipped, after which it is stable (F1 99.32–99.35). A local-only baseline shows where federation pays off: clients with few local attacks detect 45–93% of attacks alone and 98–99.8% with the federated model. We also document four silent failure modes in a common TensorFlow, tfmot, and Flower toolchain that had invalidated the compressed-model results of our own earlier report, together with the checks that catch them.",
   { spacingAfter: 200 }
 ));
 
@@ -153,9 +153,9 @@ children.push(makeTable(t1h, [
   ["CIC-IDS2017 — centralized", "95.07%", "77.60%", "99.90%", "87.35%", "5.92%", "88 / 85,173 (0.10%)"],
   ["CIC-IDS2017 — federated (near-IID)", "94.32%", "75.01%", "99.94%", "85.70%", "6.84%", "52 / 85,173 (0.061%)"],
   ["CIC-IDS2017 — federated, fixed LR", "95.01%", "77.40%", "99.84%", "87.20%", "5.99%", "136 / 85,173 (0.16%)"],
-  ["TON_IoT — centralized", "99.20%", "99.32%", "99.64%", "99.48%", "2.28%", "59 / 16,214 (0.36%)"],
-  ["TON_IoT — federated (near-IID)", "99.08%", "99.18%", "99.62%", "99.40%", "2.76%", "61 / 16,214 (0.38%)"],
-  ["TON_IoT — federated, fixed LR", "99.02%", "99.00%", "99.73%", "99.36%", "3.38%", "44 / 16,214 (0.27%)"],
+  ["TON_IoT — centralized", "99.20%", "99.32%", "99.64%", "99.48%", "2.28%", "59 / 16,215 (0.36%)"],
+  ["TON_IoT — federated (near-IID)", "99.08%", "99.18%", "99.62%", "99.40%", "2.76%", "61 / 16,215 (0.38%)"],
+  ["TON_IoT — federated, fixed LR", "99.02%", "99.00%", "99.73%", "99.36%", "3.38%", "44 / 16,215 (0.27%)"],
 ], t1w));
 children.push(caption("Table 1. Federated vs. centralized training with the identical model, loss, and epoch budget (float models, before compression)."));
 children.push(PP([
@@ -167,8 +167,8 @@ children.push(H2("5.2 Non-IID Clients"));
 children.push(makeTable(["Model", "Client sizes (attack share)", "Accuracy", "F1", "Attack Recall", "FAR", "Missed attacks / all"], [
   ["CIC-IDS2017 — near-IID", "4 × equal (≈ class ratio)", "94.32%", "85.70%", "99.94%", "6.84%", "52 / 85,173 (0.061%)"],
   ["CIC-IDS2017 — Dirichlet(0.3)", "9.4k (0.1%), 1.98M (59.5%), 6.7k (2.6%), 728k (25.1%)", "94.27%", "85.59%", "99.83%", "6.87%", "144 / 85,173 (0.17%)"],
-  ["TON_IoT — near-IID", "4 × equal (≈ class ratio)", "99.08%", "99.40%", "99.62%", "2.76%", "61 / 16,214 (0.38%)"],
-  ["TON_IoT — Dirichlet(0.3)", "49.9k (0.4%), 62.9k (92.8%), 8.6k (65.5%), 8.4k (8.5%)", "97.63%", "98.45%", "97.99%", "3.59%", "326 / 16,214 (2.01%)"],
+  ["TON_IoT — near-IID", "4 × equal (≈ class ratio)", "99.08%", "99.40%", "99.62%", "2.76%", "61 / 16,215 (0.38%)"],
+  ["TON_IoT — Dirichlet(0.3)", "49.9k (0.4%), 62.9k (92.8%), 8.6k (65.5%), 8.4k (8.5%)", "97.63%", "98.45%", "97.99%", "3.59%", "326 / 16,215 (2.01%)"],
 ], [2100, 2500, 900, 800, 1000, 800, 1800]));
 children.push(caption("Table 2. Effect of a Dirichlet(α = 0.3) label partition over four clients (float federated models). Client sizes are training samples after balancing and SMOTE."));
 children.push(P(
@@ -176,7 +176,7 @@ children.push(P(
 ));
 
 children.push(H2("5.3 Compression Without Pooled Data"));
-children.push(makeTable(["Variant (from the near-IID federated model)", "CIC size", "CIC F1 / FAR", "CIC missed of 85,173", "TON size", "TON F1 / FAR", "TON missed of 16,214"], [
+children.push(makeTable(["Variant (from the near-IID federated model)", "CIC size", "CIC F1 / FAR", "CIC missed of 85,173", "TON size", "TON F1 / FAR", "TON missed of 16,215"], [
   ["FP32 federated model (TFLite)", "802.5 KB", "85.70 / 6.84%", "52 (0.061%)", "720.6 KB", "99.40 / 2.76%", "61 (0.38%)"],
   ["INT8 PTQ only (no pruning)", "226.9 KB", "84.75 / 7.37%", "74 (0.087%)", "206.4 KB", "98.38 / 2.70%", "392 (2.42%)"],
   ["Prune 50%, no fine-tuning → PTQ", "75.1 KB", "42.28 / 56.04%", "46 (0.054%)", "64.9 KB", "96.78 / 18.15%", "192 (1.18%)"],
@@ -197,8 +197,8 @@ children.push(makeTable(["Federated model", "Fine-tuning client (attack share)",
   ["CIC-IDS2017 near-IID", "client 0 (50.4%)", "85.59", "6.82%", "291 / 85,173 (0.34%)"],
   ["CIC-IDS2017 Dirichlet(0.3)", "client 3 (24.9%)", "91.08", "2.75%", "4,415 / 85,173 (5.18%)"],
   ["CIC-IDS2017 centralized model (reference)", "client 0 (50.4%)", "81.84", "8.84%", "771 / 85,173 (0.91%)"],
-  ["TON_IoT near-IID", "client 0 (50.1%)", "98.74", "2.88%", "268 / 16,214 (1.65%)"],
-  ["TON_IoT Dirichlet(0.3)", "client 2 (65.5%)", "98.72", "3.11%", "264 / 16,214 (1.63%)"],
+  ["TON_IoT near-IID", "client 0 (50.1%)", "98.74", "2.88%", "268 / 16,215 (1.65%)"],
+  ["TON_IoT Dirichlet(0.3)", "client 2 (65.5%)", "98.72", "3.11%", "264 / 16,215 (1.63%)"],
 ], [2900, 2300, 1200, 900, 2000]));
 children.push(caption("Table 4. Compressed-model quality as a function of the client that performs fine-tuning (prune 50% → client FT → QAT FT → INT8)."));
 children.push(P(
@@ -236,7 +236,7 @@ children.push(P(
 
 children.push(H2("5.8 Practical Significance"));
 children.push(P(
-  "We deploy one model per dataset, chosen in Section 5.13 for recall priority: for CIC-IDS2017 the 112 KB INT8 model (30% pruning, distillation and QAT fine-tuning on clipped inputs, threshold 0.191 chosen on client data), and for TON_IoT the 55 KB INT8 model of the same recipe (50% pruning, threshold 0.215). On the test split the CIC-IDS2017 model misses 27 of 85,173 attacks (0.032%) and flags 10.0% of benign flows, about one in ten; the TON_IoT model misses 19 of 16,214 attacks (0.12%) and flags 6.1% of benign records, about one in sixteen. For comparison, the base recipe of Table 3 at the fixed 0.3 threshold misses 291 of 85,173 CIC-IDS2017 attacks (FAR 6.82%) and 268 of 16,214 TON_IoT attacks (FAR 2.88%). The trade-off is therefore explicit: roughly ten times fewer missed attacks for 1.5–2 times as many false alarms. A deployment with a fixed alert budget would choose the threshold on client data for that budget instead; Section 5.4 shows that the fine-tuning client's class mix shifts the trade-off as well."
+  "We deploy one model per dataset, chosen in Section 5.13 for recall priority: for CIC-IDS2017 the 112 KB INT8 model (30% pruning, distillation and QAT fine-tuning on clipped inputs, threshold 0.191 chosen on client data), and for TON_IoT the 55 KB INT8 model of the same recipe (50% pruning, threshold 0.215). On the test split the CIC-IDS2017 model misses 27 of 85,173 attacks (0.032%) and flags 10.0% of benign flows, about one in ten; the TON_IoT model misses 19 of 16,215 attacks (0.12%) and flags 6.1% of benign records, about one in sixteen. For comparison, the base recipe of Table 3 at the fixed 0.3 threshold misses 291 of 85,173 CIC-IDS2017 attacks (FAR 6.82%) and 268 of 16,215 TON_IoT attacks (FAR 2.88%). The trade-off is therefore explicit: roughly ten times fewer missed attacks for 1.5–2 times as many false alarms. A deployment with a fixed alert budget would choose the threshold on client data for that budget instead; Section 5.4 shows that the fine-tuning client's class mix shifts the trade-off as well."
 ));
 
 children.push(H2("5.9 Quantization Methods"));
@@ -307,13 +307,13 @@ children.push(makeTable(["Partition / client", "Local data (attack share)", "Loc
   ["CIC Dirichlet, client 1", "1.98M (59.5%)", "90.70 / 99.75% / 4.15%", "214 / 85,173 (0.25%)", "", ""],
   ["CIC Dirichlet, client 2", "6.7k (2.6%)", "88.74 / 91.11% / 2.92%", "7,572 / 85,173 (8.89%)", "", ""],
   ["CIC Dirichlet, client 3", "728k (25.1%)", "89.80 / 99.60% / 4.56%", "339 / 85,173 (0.40%)", "", ""],
-  ["TON near-IID, clients 0–3", "32k each (50%)", "99.16–99.31 / 99.65–99.79% / 3.5–4.8%", "34–57 / 16,214 (0.21–0.35%)", "99.40 / 99.62% / 2.76%", "61 / 16,214 (0.38%)"],
-  ["TON Dirichlet, client 0", "49.9k (0.4%)", "90.16 / 82.13% / 0.23%", "2,897 / 16,214 (17.87%)", "98.45 / 97.99% / 3.59%", "326 / 16,214 (2.01%)"],
-  ["TON Dirichlet, client 1", "62.9k (92.8%)", "96.90 / 99.92% / 21.20%", "13 / 16,214 (0.080%)", "", ""],
-  ["TON Dirichlet, client 2", "8.6k (65.5%)", "99.02 / 99.80% / 5.97%", "33 / 16,214 (0.20%)", "", ""],
-  ["TON Dirichlet, client 3", "8.4k (8.5%)", "96.34 / 93.22% / 1.00%", "1,099 / 16,214 (6.78%)", "", ""],
+  ["TON near-IID, clients 0–3", "32k each (50%)", "99.16–99.31 / 99.65–99.79% / 3.5–4.8%", "34–57 / 16,215 (0.21–0.35%)", "99.40 / 99.62% / 2.76%", "61 / 16,215 (0.38%)"],
+  ["TON Dirichlet, client 0", "49.9k (0.4%)", "90.16 / 82.13% / 0.23%", "2,897 / 16,215 (17.87%)", "98.45 / 97.99% / 3.59%", "326 / 16,215 (2.01%)"],
+  ["TON Dirichlet, client 1", "62.9k (92.8%)", "96.90 / 99.92% / 21.20%", "13 / 16,215 (0.080%)", "", ""],
+  ["TON Dirichlet, client 2", "8.6k (65.5%)", "99.02 / 99.80% / 5.97%", "33 / 16,215 (0.20%)", "", ""],
+  ["TON Dirichlet, client 3", "8.4k (8.5%)", "96.34 / 93.22% / 1.00%", "1,099 / 16,215 (6.78%)", "", ""],
 ], [1900, 1400, 2200, 1500, 1700, 1500]));
-children.push(caption("Table 9. Each client trained alone vs. the federated model of the same partition (float models, test split, threshold 0.3). Test attacks: 85,173 (CIC-IDS2017), 16,214 (TON_IoT). One federated model serves all clients of a partition."));
+children.push(caption("Table 9. Each client trained alone vs. the federated model of the same partition (float models, test split, threshold 0.3). Test attacks: 85,173 (CIC-IDS2017), 16,215 (TON_IoT). One federated model serves all clients of a partition."));
 children.push(P(
   "Federation pays off where the reviewers' non-IID concern points: clients whose local data contains few attacks. Alone, CIC-IDS2017 Dirichlet client 0 (0.1% attacks) detects 44.97% of attacks and client 2 (2.6%) 91.11%; TON_IoT client 0 (0.4%) detects 82.13% and client 3 (8.5%) 93.22%. On the same partitions the federated model detects 99.83% (CIC-IDS2017) and 97.99% (TON_IoT). The attack-heavy TON_IoT client 1 (92.8% attacks) has the opposite problem: alone, it flags 21.2% of benign records, against 3.59% for the federated model. Clients that already hold large, representative data gain little or nothing. On near-IID CIC-IDS2017 each client alone reaches F1 88.3–90.0 against 85.70 for the federated model, at a precision-heavier operating point that misses 3.6–19 times as many attacks (185–982 vs. 52). The near-IID partition, which gives every client several hundred thousand representative flows, is therefore the setting in which federation is least needed, and the Dirichlet partition is the one in which it is needed. Three caveats apply: local and federated training budgets are not matched (10 local epochs vs. 60 rounds × 3 epochs), each configuration ran once, and at the fixed 0.3 threshold the F1 differences among data-rich clients mainly reflect operating points."
 ));
@@ -404,21 +404,21 @@ children.push(makeTable(["Attack type (CIC-IDS2017)", "Test flows", "FP32, thres
 ], [2600, 1000, 1400, 1600, 1700, 1300]));
 children.push(caption("Table 12. Missed test flows per attack type (means over three fine-tuning draws for the compressed models; share of that type's test flows in parentheses where it exceeds 0.1%). DoS Hulk (34,487 test flows), DoS GoldenEye (2,006) and Web Attack – XSS (120) are not missed by any of these four models."));
 children.push(P(
-  "The same recipe also works on TON_IoT (Table 13), where the role of distillation is even clearer. The FP32 federated model and the base-recipe hard-label 55 KB model are so confident that a few client-validation attacks score near zero; reaching a 99.9% recall target on client data then pushes the threshold to almost zero, and FAR to 36–97%. Clipped inputs alone help up to a 99.9% target (21 missed at 7.0%) but collapse to a zero threshold at 99.99%. Distilled students keep their scores in the middle of the range, and their thresholds (0.16–0.22) carry over to the test split: the 55 KB distilled model with clipped inputs misses 19 of 16,214 attacks at a 5.9% FAR, the same trade-off as the FP32 model at threshold 0.2 on the test sweep (21 missed at 5.85%), and 7–10 attacks at an 11–13% FAR. Federated fine-tuning and lighter pruning bring no further gain on TON_IoT, where the 55 KB model already matches the FP32 curve. Here the selected thresholds slightly undershoot the recall targets on the test split (99.88% for a 99.9% target, 99.94–99.96% for 99.99%), because client 0's 8,000-sample validation set holds only about 4,000 attacks."
+  "The same recipe also works on TON_IoT (Table 13), where the role of distillation is even clearer. The FP32 federated model and the base-recipe hard-label 55 KB model are so confident that a few client-validation attacks score near zero; reaching a 99.9% recall target on client data then pushes the threshold to almost zero, and FAR to 36–97%. Clipped inputs alone help up to a 99.9% target (21 missed at 7.0%) but collapse to a zero threshold at 99.99%. Distilled students keep their scores in the middle of the range, and their thresholds (0.16–0.22) carry over to the test split: the 55 KB distilled model with clipped inputs misses 19 of 16,215 attacks at a 5.9% FAR, the same trade-off as the FP32 model at threshold 0.2 on the test sweep (21 missed at 5.85%), and 7–10 attacks at an 11–13% FAR. Federated fine-tuning and lighter pruning bring no further gain on TON_IoT, where the 55 KB model already matches the FP32 curve. Here the selected thresholds slightly undershoot the recall targets on the test split (99.88% for a 99.9% target, 99.94–99.96% for 99.99%), because client 0's 8,000-sample validation set holds only about 4,000 attacks."
 ));
 children.push(makeTable(["Model (TON_IoT)", "Threshold selection", "Threshold", "Missed attacks / all (mean)", "Missed share", "Worst of 3 draws", "FAR"], [
-  ["FP32 federated, 720 KB", "fixed", "0.30", "61 / 16,214", "0.38%", "", "2.76%"],
-  ["FP32 federated, 720 KB", "client val., recall ≥ 99.9%", "0.021", "2 / 16,214", "0.012%", "", "96.76%"],
-  ["55 KB, base recipe", "fixed", "0.30", "182 / 16,214", "1.12%", "233", "3.01%"],
-  ["55 KB, base recipe", "client val., recall ≥ 99.9%", "0.040", "16 / 16,214", "0.099%", "29", "36.44%"],
-  ["55 KB, QAT on clipped inputs", "fixed", "0.30", "80 / 16,214", "0.49%", "89", "2.33%"],
-  ["55 KB, QAT on clipped inputs", "client val., recall ≥ 99.9%", "0.038", "21 / 16,214", "0.13%", "25", "7.02%"],
-  ["55 KB, distillation + clipped inputs", "client val., recall ≥ 99.9%", "0.220", "19 / 16,214", "0.12%", "20", "5.94%"],
-  ["55 KB, distillation + clipped inputs", "client val., recall ≥ 99.99%", "0.171", "10 / 16,214", "0.062%", "10", "11.17%"],
-  ["55 KB, same + federated fine-tuning (4 clients)", "client val., recall ≥ 99.99%", "0.159", "7 / 16,214", "0.045%", "10", "12.60%"],
-  ["98 KB (prune 30%), distillation + clipped inputs", "client val., recall ≥ 99.9%", "0.210", "21 / 16,214", "0.13%", "25", "5.79%"],
+  ["FP32 federated, 720 KB", "fixed", "0.30", "61 / 16,215", "0.38%", "", "2.76%"],
+  ["FP32 federated, 720 KB", "client val., recall ≥ 99.9%", "0.021", "2 / 16,215", "0.012%", "", "96.76%"],
+  ["55 KB, base recipe", "fixed", "0.30", "182 / 16,215", "1.12%", "233", "3.01%"],
+  ["55 KB, base recipe", "client val., recall ≥ 99.9%", "0.040", "16 / 16,215", "0.099%", "29", "36.44%"],
+  ["55 KB, QAT on clipped inputs", "fixed", "0.30", "80 / 16,215", "0.49%", "89", "2.33%"],
+  ["55 KB, QAT on clipped inputs", "client val., recall ≥ 99.9%", "0.038", "21 / 16,215", "0.13%", "25", "7.02%"],
+  ["55 KB, distillation + clipped inputs", "client val., recall ≥ 99.9%", "0.220", "19 / 16,215", "0.12%", "20", "5.94%"],
+  ["55 KB, distillation + clipped inputs", "client val., recall ≥ 99.99%", "0.171", "10 / 16,215", "0.062%", "10", "11.17%"],
+  ["55 KB, same + federated fine-tuning (4 clients)", "client val., recall ≥ 99.99%", "0.159", "7 / 16,215", "0.045%", "10", "12.60%"],
+  ["98 KB (prune 30%), distillation + clipped inputs", "client val., recall ≥ 99.9%", "0.210", "21 / 16,215", "0.13%", "25", "5.79%"],
 ], [2700, 1900, 800, 1500, 900, 900, 800]));
-children.push(caption("Table 13. Recall-priority deployment on TON_IoT (16,214 test attacks), same procedure as Table 11; the client validation set is 8,000 held-out samples of client 0."));
+children.push(caption("Table 13. Recall-priority deployment on TON_IoT (16,215 test attacks), same procedure as Table 11; the client validation set is 8,000 held-out samples of client 0."));
 children.push(P(
   "For a recall-priority deployment we therefore recommend one recipe for both datasets: distillation from the federated model, QAT fine-tuning on clipped inputs, and a threshold chosen on client-held data for the required recall. Federated fine-tuning across clients helps on CIC-IDS2017 and is neutral on TON_IoT. On a 65 KB budget for CIC-IDS2017 the price is about one benign flow in nine raising an alert; where 112 KB of flash is available, 30% pruning lowers that to about one in ten at the same recall and keeps the rare Heartbleed attacks. On TON_IoT the 55 KB model reaches the FP32 model's trade-off at about one false alarm in seventeen benign records. These two models (the first fine-tuning draw of each) are the ones we deploy (Section 5.8) and benchmark on the ESP32 (Section 6.1)."
 ));

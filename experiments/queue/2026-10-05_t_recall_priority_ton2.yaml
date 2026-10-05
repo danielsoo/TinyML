@@ -1,0 +1,5 @@
+id: 2026-10-05_t_recall_priority_ton2
+config_dir: config/jobs/2026-10-05_t_recall_priority_ton2
+steps: recall_priority
+flags: []
+why: "Job s found a better TON_IoT federated model (test: 19 vs 61 missed at 0.3; FAR 4.5% vs 7.2% at 99.9% recall). Re-run the recall-priority compression on it to get the new TON deployment model. ~30 min."

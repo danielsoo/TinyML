@@ -389,7 +389,7 @@ Heartbleed 0/0/3.3/0 of 5 (compression-induced loss at 65 KB!); SQLi 1/1/0/0.3 o
 Paper Table 12.
 
 ## Recall-priority recipe on TON_IoT (`2026-10-05_r_recall_priority_ton`, val 8,000 samples)
-| Model | Selection | missed / 16,214 (max) | FAR |
+| Model | Selection | missed / 16,215 (max) | FAR |
 |---|---|---|---|
 | FP32 | fixed 0.3 | 61 | 2.76 |
 | FP32 | val ≥99.9% | 2 (t=0.021) | 96.76 |
@@ -407,7 +407,21 @@ thresholds usable (scores mid-range). Fed FT/p30 neutral on TON. Paper Table 13 
 - CIC-IDS2017: `2026-10-05_p_recall_priority2/.../kdclip_p30_d0.tflite` (114,760 B), threshold 0.1914 (client-val
   ≥99.99%): 27 / 85,173 missed (0.032%), FAR 10.02%.
 - TON_IoT: `2026-10-05_r_recall_priority_ton/.../kdclip_d0.tflite` (56,512 B), threshold 0.2148 (client-val ≥99.9%):
-  19 / 16,214 missed (0.12%), FAR 6.06%.
+  19 / 16,215 missed (0.12%), FAR 6.06%.
 ESP32 firmware now embeds cic_deploy / cic_fp32 / ton_deploy / ton_fp32 (1.7 MB); host build against TFLM
 (TensorFlowLite_ESP32 1.0.0): FP32 exact, INT8 ≤0.012 (3/256), 8/8 decisions at deployment thresholds,
 arena 2.2–4.6 KB. Paper: "deployed recipe" renamed "base recipe"; 5.8, 6.1, Appendix B, abstract updated.
+
+## TON_IoT federated-training sweep (`2026-10-05_s_ton_sweep`, selection on validation only)
+Validation (8,414 rows, 6,485 attacks): FAR at 99.9% val recall / F1@0.3:
+base 6.84 / 99.36 · alpha 0.5 3.78 / 99.35 · alpha 0.65 7.72 / 99.06 · no SMOTE 4.30 / 99.28 ·
+text features 3.21 / 99.45 · 100 rounds 5.18 / 99.36 · **text + alpha 0.5 3.01 / 99.39** · text + no SMOTE 3.06 / 99.41.
+Selected text + alpha 0.5 (6 row-local features from dns_query / http_uri; 43 inputs), retrained, test:
+| | F1@0.3 | missed@0.3 / 16,215 | FAR@0.3 | FAR at 99.9% test recall | ROC-AUC | PR-AUC |
+|---|---|---|---|---|---|---|
+| reference (current) | 99.40 | 61 | 2.76 | 7.16 | 0.99860 | 0.99937 |
+| new (text + α 0.5) | 99.41 | **19** | 3.61 | **4.52** | 0.99895 | 0.99959 |
+Missed by type @0.3 — reference: dos 16, mitm 14, ddos 10, xss 7, ransomware 4, backdoor 4, injection 4,
+password 2; new: mitm 5, scanning 4, ransomware 3, dos 3, xss 2, injection 1, ddos 1.
+Note: TON test split has 16,215 attacks (tp+fn), not 16,215 as written earlier — corrected in the paper.
+Job t queued: recall-priority compression on the new model.
