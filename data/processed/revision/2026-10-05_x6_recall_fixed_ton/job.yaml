@@ -1,0 +1,5 @@
+id: 2026-10-05_x6_recall_fixed_ton
+config_dir: config/jobs/2026-10-05_x6_recall_fixed_ton
+steps: recall_priority
+flags: []
+why: "TON deployed recipe (57 KB KD+clip+federated FT) + fixed calibrated QAT ranges / CLE. ~15 min."
