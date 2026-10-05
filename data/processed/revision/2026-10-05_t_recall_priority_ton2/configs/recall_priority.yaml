@@ -1,0 +1,19 @@
+# Recall-priority compression (same as job r) on the improved TON_IoT federated model selected
+# by the validation sweep (job s: text-derived features + focal alpha 0.5; 43 inputs).
+ft_samples: 10000
+val_samples: 8000
+draws: 3
+clip: 5.0
+recall_targets: [0.999, 0.9995, 0.9999]
+fixed_thresholds: [0.1, 0.2, 0.3]
+variants:
+  hard: {}
+  clipqat: {clip: true}
+  kdclip: {kd_alpha: 0.5, clip: true}
+  kdclip_fed: {kd_alpha: 0.5, clip: true, federated: true}
+  kdclip_p30: {kd_alpha: 0.5, clip: true, prune_ratio: 0.3}
+models:
+  - name: ton_near_iid_v2
+    model: data/processed/revision/2026-10-05_s_ton_sweep/ton_sweep/models/best_text_alpha05_test.h5
+    config: data/processed/revision/2026-10-05_s_ton_sweep/ton_sweep/configs/best_text_alpha05_test.yaml
+    ft_client: 0
