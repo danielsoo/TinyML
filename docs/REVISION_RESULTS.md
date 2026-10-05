@@ -425,3 +425,13 @@ Missed by type @0.3 — reference: dos 16, mitm 14, ddos 10, xss 7, ransomware 4
 password 2; new: mitm 5, scanning 4, ransomware 3, dos 3, xss 2, injection 1, ddos 1.
 Note: TON test split has 16,215 attacks (tp+fn), not 16,215 as written earlier — corrected in the paper.
 Job t queued: recall-priority compression on the new model.
+
+## Recall-priority compression on the improved TON model (`2026-10-05_t_recall_priority_ton2`, 43 inputs)
+Missed / 16,215 (max over 3 draws) / FAR: FP32 improved @0.3 19 / 3.61; FP32 val≥99.95% 9 / 4.71;
+55 KB base @0.3 168 (274) / 6.45; KD+clip val≥99.99% 3.7 (8) / 12.30 (FAR 7.2–17.3 across draws);
+KD+clip+fed val≥99.9% 30 (32) / 3.68; ≥99.95% 17.7 (20) / 5.61; **≥99.99% 12.0 (14) / 6.61**;
+100 KB p30 val≥99.99% 5.0 (8) / 9.07. Old-model 55 KB deployment: 19 / 5.94.
+New TON deployment: `ton_near_iid_v2/kdclip_fed_d0.tflite` (58,048 B), threshold 0.2070:
+12 / 16,215 missed (0.074%), FAR 6.49%. ESP32 firmware restaged; host build: INT8 parity ≤ 1/256,
+8/8 decisions, arena 2.2–4.6 KB. Paper: 3.1, new 5.14 (Tables 14–15), 5.8, abstract, 6.1, App. B,
+limitations updated.

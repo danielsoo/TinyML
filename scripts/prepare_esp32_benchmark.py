@@ -6,9 +6,9 @@ Four models are embedded in one firmware image (esp32_tflite_project/models/):
   cic_deploy  CIC-IDS2017 deployment model: prune 30% -> distillation + clipped-input fine-tuning
               -> QAT -> INT8 (paper 5.13, Table 11; threshold chosen on client data)
   cic_fp32    the CIC-IDS2017 federated FP32 model it was compressed from
-  ton_deploy  TON_IoT deployment model: prune 50% -> distillation + clipped-input fine-tuning
-              -> QAT -> INT8 (paper 5.13, Table 13)
-  ton_fp32    the TON_IoT federated FP32 model
+  ton_deploy  TON_IoT deployment model (improved federated model, 43 inputs): prune 50% ->
+              distillation + clipped-input federated fine-tuning -> QAT -> INT8 (paper 5.14)
+  ton_fp32    the improved TON_IoT federated FP32 model
 The repo ships them already staged together with esp32_tflite_project/include/test_vectors.h;
 rerun this script only to benchmark different models.
 
@@ -27,12 +27,12 @@ import numpy as np
 ROOT = Path(__file__).resolve().parent.parent
 PROJECT = ROOT / "esp32_tflite_project"
 CIC = "data/processed/revision/2026-10-05_p_recall_priority2/recall_priority/cic_near_iid"
-TON = "data/processed/revision/2026-10-05_r_recall_priority_ton/recall_priority/ton_near_iid"
+TON = "data/processed/revision/2026-10-05_t_recall_priority_ton2/recall_priority/ton_near_iid_v2"
 # name -> (default source, staged file, dataset, decision threshold used on the device)
 MODELS = {
     "cic_deploy": (f"{CIC}/kdclip_p30_d0.tflite", "cic_deploy_int8.tflite", "cic", 0.1914),
     "cic_fp32": (f"{CIC}/fp32.tflite", "cic_fp32.tflite", "cic", 0.3),
-    "ton_deploy": (f"{TON}/kdclip_d0.tflite", "ton_deploy_int8.tflite", "ton", 0.2148),
+    "ton_deploy": (f"{TON}/kdclip_fed_d0.tflite", "ton_deploy_int8.tflite", "ton", 0.2070),
     "ton_fp32": (f"{TON}/fp32.tflite", "ton_fp32.tflite", "ton", 0.3),
 }
 

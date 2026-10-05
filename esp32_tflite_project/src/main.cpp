@@ -4,8 +4,8 @@
  * Benchmarks the paper's two deployment models and the FP32 federated models they came from:
  *   cic_deploy : models/cic_deploy_int8.tflite (CIC-IDS2017, 78 inputs, INT8, 114,760 B)
  *   cic_fp32   : models/cic_fp32.tflite        (CIC-IDS2017, FP32, 821,696 B)
- *   ton_deploy : models/ton_deploy_int8.tflite (TON_IoT, 37 inputs, INT8, 56,512 B)
- *   ton_fp32   : models/ton_fp32.tflite        (TON_IoT, FP32, 737,728 B)
+ *   ton_deploy : models/ton_deploy_int8.tflite (TON_IoT, 43 inputs, INT8, 58,048 B)
+ *   ton_fp32   : models/ton_fp32.tflite        (TON_IoT, FP32, 750,016 B)
  * Models are embedded automatically by gen_model_data.py at build time; inputs, host outputs
  * and decision thresholds come from include/test_vectors.h (scripts/prepare_esp32_benchmark.py).
  *

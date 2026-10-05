@@ -9,11 +9,11 @@
 |---|---|---|---|
 | `cic_deploy` | `esp32_tflite_project/models/cic_deploy_int8.tflite` (CIC-IDS2017, 30% pruning + 증류 + 입력 자른 QAT, INT8) | 114,760 B | 0.1914 |
 | `cic_fp32` | `esp32_tflite_project/models/cic_fp32.tflite` (CIC-IDS2017 연합학습 원본, FP32) | 821,696 B | 0.3 |
-| `ton_deploy` | `esp32_tflite_project/models/ton_deploy_int8.tflite` (TON_IoT, 50% pruning + 증류 + 입력 자른 QAT, INT8) | 56,512 B | 0.2148 |
-| `ton_fp32` | `esp32_tflite_project/models/ton_fp32.tflite` (TON_IoT 연합학습 원본, FP32) | 737,728 B | 0.3 |
+| `ton_deploy` | `esp32_tflite_project/models/ton_deploy_int8.tflite` (개선된 TON_IoT 모델, 입력 43개, 50% pruning + 증류 + 입력 자른 QAT + 4개 클라이언트 미세조정, INT8) | 58,048 B | 0.2070 |
+| `ton_fp32` | `esp32_tflite_project/models/ton_fp32.tflite` (개선된 TON_IoT 연합학습 원본, FP32) | 750,016 B | 0.3 |
 
 각 모델마다: ① 고정 입력 8개로 보드 출력 vs PC(TFLite) 출력 비교(parity, 판정 일치는 각 모델의 기준값으로) → ② warm-up 5회 → ③ 100회 latency 측정.
-PC에서 같은 TFLite Micro 라이브러리로 빌드해 확인한 결과: FP32는 출력이 정확히 같고, INT8은 최대 0.012(3/256) 차이, 판정은 8/8 일치, arena 사용량 2.2–4.6 KB.
+PC에서 같은 TFLite Micro 라이브러리로 빌드해 확인한 결과: FP32는 출력이 정확히 같고, INT8은 최대 0.004(1/256) 차이, 판정은 8/8 일치, arena 사용량 2.2–4.6 KB.
 
 ## 0. 준비물 (한 번만)
 1. ESP32 보드 + **데이터 전송 가능한** USB 케이블 (충전 전용 케이블이면 포트가 안 잡힘)
@@ -55,8 +55,8 @@ python scripts/collect_esp32_benchmark.py --port COM3
    Device: ESP32-D0WD-V3 @ 240 MHz, SDK v4.4.x
    cic_deploy   114760 B  mean x.xxx ms  median ...  parity max|Δ|=0.0039 labels 8/8
    cic_fp32     821696 B  mean x.xxx ms  median ...  parity max|Δ|=0.0 labels 8/8
-   ton_deploy   56512 B   mean x.xxx ms  median ...  parity max|Δ|=0.0117 labels 8/8
-   ton_fp32     737728 B  mean x.xxx ms  median ...  parity max|Δ|=0.0 labels 8/8
+   ton_deploy   58048 B   mean x.xxx ms  median ...  parity max|Δ|=0.0 labels 8/8
+   ton_fp32     750016 B  mean x.xxx ms  median ...  parity max|Δ|=0.0 labels 8/8
 ```
 아무것도 안 나오고 타임아웃이면 보드의 **EN(RST) 버튼**을 한 번 누르고 다시 실행.
 
