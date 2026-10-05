@@ -362,3 +362,20 @@ high FAR. KD keeps scores mid-range; with clipped inputs best trade-off. Client-
 within 0.35 pt; 99.99% target not met (≈10k val attacks, SMOTE). Equal-recall cost of compression ≈ 3 FAR
 pts (FP32 22 missed @ 11.0% vs 65 KB 24 @ 14.3%). Paper 5.13 / Table 11; abstract, 5.8, contributions,
 conclusion, limitations updated.
+
+## Recall-priority follow-up (`2026-10-05_p_recall_priority2`, KD α=0.5 + clipped inputs, 3 draws)
+kdclip reproduces job o exactly. Missed (mean, max) / FAR at client-val targets:
+
+| Variant | size | ≥99.95% | ≥99.99% |
+|---|---|---|---|
+| kdclip (ref) | 65 KB | 44 (55) / 10.43 | 24 (25) / 14.33 |
+| + longer FT 6+4 | 65 KB | 54 (74) / 8.66 | 31 (45) / 10.94 |
+| + T=4 | 65 KB | 39 (42) / 13.03 | 22 (28) / 16.86 |
+| + federated FT (4 clients) | 65 KB | 51 (79) / 9.31 | 27 (33) / 11.28 |
+| prune 30% | 112 KB | 54 (73) / 7.63 | 23 (27) / 9.65 |
+| no pruning | 207 KB | 51 (52) / 6.71 | 23 (28) / 10.39 |
+| FP32 (val) | 803 KB | 67 / 6.58 | 37 / 7.56 |
+
+Residual misses at 99.99%: Bot ~6, Infiltration 4–8, PortScan 2–4, Heartbleed ≤3; FP32 misses 7
+Infiltration at every recorded threshold → ceiling is the FL model / data (rare classes, label issues
+[24]), not compression. Paper 5.13 extended; abstract/5.8/conclusion now: 65 KB misses 27 @ 11.3% FAR.
