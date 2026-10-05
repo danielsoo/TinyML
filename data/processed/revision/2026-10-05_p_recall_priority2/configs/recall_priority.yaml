@@ -1,0 +1,21 @@
+# Follow-up to job o: close the remaining compression gap of the recall-priority CIC model
+# (best so far: KD a=0.5 + clipped inputs, 65 KB, 44 missed @ 10.4% FAR) and diagnose which
+# attack types are still missed (FP32 and every variant).
+ft_samples: 10000
+val_samples: 20000
+draws: 3
+clip: 5.0
+recall_targets: [0.999, 0.9995, 0.9999]
+fixed_thresholds: [0.1, 0.2, 0.3]
+variants:
+  kdclip: {kd_alpha: 0.5, clip: true}                                  # job o best (reference)
+  kdclip_p30: {kd_alpha: 0.5, clip: true, prune_ratio: 0.3}            # ~110 KB
+  kdclip_p0: {kd_alpha: 0.5, clip: true, prune_ratio: 0.0}             # ~207 KB, QAT only
+  kdclip_T4: {kd_alpha: 0.5, clip: true, kd_temperature: 4.0}
+  kdclip_long: {kd_alpha: 0.5, clip: true, ft_epochs: 6, qat_epochs: 4}
+  kdclip_fed: {kd_alpha: 0.5, clip: true, federated: true}             # FedAvg fine-tuning on all 4 clients
+models:
+  - name: cic_near_iid
+    model: data/processed/revision/2026-10-03_b_v3_float_cic/baseline/models/b_fl.h5
+    config: data/processed/revision/2026-10-03_b_v3_float_cic/baseline/configs/b_fl.yaml
+    ft_client: 0

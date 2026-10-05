@@ -1,0 +1,5 @@
+id: 2026-10-05_p_recall_priority2
+config_dir: config/jobs/2026-10-05_p_recall_priority2
+steps: recall_priority
+flags: []
+why: "User asked for fewer missed CIC attacks than job o (44 @ 10.4% FAR): less pruning, longer FT, KD temperature, federated fine-tuning on all clients; per-attack-type miss diagnosis. ~1.5 h."
