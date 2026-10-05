@@ -1,0 +1,5 @@
+id: 2026-10-05_x3_data_free_calib
+config_dir: config/jobs/2026-10-05_x3_data_free_calib
+steps: quant_lit
+flags: []
+why: "Literature experiment C: data-free calibration (synthetic inputs / BN statistics / CLE). ~25 min."
