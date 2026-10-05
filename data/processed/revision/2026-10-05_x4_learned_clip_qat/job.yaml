@@ -1,0 +1,5 @@
+id: 2026-10-05_x4_learned_clip_qat
+config_dir: config/jobs/2026-10-05_x4_learned_clip_qat
+steps: quant_lit
+flags: []
+why: "Literature experiment D: learned-clipping QAT (PACT-style). ~30 min."

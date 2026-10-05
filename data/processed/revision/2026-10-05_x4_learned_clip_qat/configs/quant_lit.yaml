@@ -1,0 +1,16 @@
+# (D) QAT with learned (PACT-style) activation clipping on the hidden ReLU outputs; same 5 draws as B.
+part: learned
+calib_n: 2000
+ft_samples: 10000
+ft_draws: 5
+learned_inits: [max, pct9999, clip5_max]
+learned_lr_mult: 10.0
+models:
+  - name: cic_near_iid
+    model: data/processed/revision/2026-10-03_b_v3_float_cic/baseline/models/b_fl.h5
+    config: data/processed/revision/2026-10-03_b_v3_float_cic/baseline/configs/b_fl.yaml
+    ft_client: 0
+  - name: ton_near_iid_v2
+    model: data/processed/revision/2026-10-05_s_ton_sweep/ton_sweep/models/best_text_alpha05_test.h5
+    config: data/processed/revision/2026-10-05_s_ton_sweep/ton_sweep/configs/best_text_alpha05_test.yaml
+    ft_client: 0

@@ -1,0 +1,6 @@
+Output: data/processed/revision/2026-10-05_x4_learned_clip_qat
+▶ quant_lit  (2026-10-05 16:45:13)
+✅ quant_lit finished in 4 min
+
+Summary: data/processed/revision/2026-10-05_x4_learned_clip_qat/SUMMARY.md
+All steps OK.

@@ -1,0 +1,20 @@
+# Revision experiments (full)
+
+- commit: 6cdc45d0ddcb62a6a5bc16fdfa6dd9b1a5b3e1d3
+- configs: config/jobs/2026-10-05_x4_learned_clip_qat (eval_split: )
+- host: Linux 6.18.40.1-microsoft-standard-WSL2 x86_64, 16 cores
+- quant_lit: 4 min
+
+# (D) Learned-clipping QAT (mean / min / max over draws and calibration sets)
+
+| model | method | runs_ok | runs_failed | f1_mean | f1_min | f1_max | f1_sd | far_mean | missed_mean | missed_range |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| cic_near_iid | qat_default | 5 | 0 | 88.02 | 86.77 | 89.28 | 0.82 | 5.44 | 513/85173 | 355-743 |
+| cic_near_iid | qat_learned_max | 5 | 0 | 88.21 | 86.77 | 91.05 | 1.55 | 5.29 | 718/85173 | 371-1088 |
+| cic_near_iid | qat_learned_pct9999 | 5 | 0 | 87.67 | 86.22 | 89.16 | 1.03 | 5.58 | 652/85173 | 293-1136 |
+| cic_near_iid | qat_learned_clip5_max | 5 | 0 | 88.73 | 86.77 | 90.71 | 1.4 | 5.03 | 676/85173 | 374-1198 |
+| ton_near_iid_v2 | qat_default | 5 | 0 | 99.0 | 98.79 | 99.51 | 0.26 | 2.49 | 204/16215 | 71-253 |
+| ton_near_iid_v2 | qat_learned_max | 5 | 0 | 99.0 | 98.72 | 99.49 | 0.26 | 2.59 | 199/16215 | 76-276 |
+| ton_near_iid_v2 | qat_learned_pct9999 | 5 | 0 | 98.99 | 98.76 | 99.5 | 0.26 | 2.46 | 208/16215 | 72-265 |
+| ton_near_iid_v2 | qat_learned_clip5_max | 5 | 0 | 98.99 | 98.76 | 99.51 | 0.27 | 2.56 | 202/16215 | 69-257 |
+
