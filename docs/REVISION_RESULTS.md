@@ -435,3 +435,23 @@ New TON deployment: `ton_near_iid_v2/kdclip_fed_d0.tflite` (58,048 B), threshold
 12 / 16,215 missed (0.074%), FAR 6.49%. ESP32 firmware restaged; host build: INT8 parity ≤ 1/256,
 8/8 decisions, arena 2.2–4.6 KB. Paper: 3.1, new 5.14 (Tables 14–15), 5.8, abstract, 6.1, App. B,
 limitations updated.
+
+## TON_IoT v2 everywhere (jobs `2026-10-05_u_toniot_v2`, `_v_toniot_v2_downstream`, `_w_toniot_v2_sweep_robustness`)
+All TON numbers in the paper now use the validation-selected recipe (43 features, focal α 0.5); the
+near-IID FL model is job s's `best_text_alpha05_test.h5` (source of the deployment model).
+- Table 1: centralized 99.51/99.43/99.94/99.68/1.93 (10 missed); FL 99.08/98.94/99.88/99.41/3.61 (19);
+  FL second run 99.04/98.91/99.86/99.38/3.71 (23); fixed LR 98.97/98.82/99.86/99.34/4.00 (23).
+- Table 2: Dirichlet 97.81/98.60/99.99/9.52 (1 missed). 5.6: training-time QAT FL 98.14 acc / 98.79 F1 (166).
+- Table 3: FP32 732.4 KB 99.41/3.61 (19); PTQ 209.4 98.96/3.86 (153); prune no-FT 66.3 95.30/30.20 (129);
+  client FT PTQ 90.20/13.23 (2,369); base recipe 56.7 KB 98.67/2.26 (319); pooled 99.16/3.48 (105). 12.92×.
+- Table 4: TON near-IID c0 98.67/2.26 (319); Dirichlet c2 98.80/2.88 (248).
+- Fig. 1: client FT+QAT 98.65–98.74 from 30% to 90% (8.2 KB); PTQ 87.7–91.5; no FT collapses from 85%.
+- Table 5: FL 99.1/23.0/22.9; central 99.5/23.0/23.0; PTQ 98.4; client PTQ 85.7; client QAT 98.0; pooled QAT 98.7/91.1/91.1.
+- Table 6: int8 PTQ federated 97.69 (FAR 3.8), pruned 90.20 (FAR 13.2); other methods ≤0.01 loss.
+- Table 7: n=100/500/2000 median 99.36/99.37/97.68, min 96.11/54.01/32.72, within-1 14/13/5 of 15; clip ±5 99.19 (15/15), ±10 99.37–99.39, ±3 98.30–98.79.
+- QAT FT draws: 98.79–99.51 (PTQ 96.89–99.19).
+- Table 8: KD 1/8 student 99.21 at 11.6 KB PTQ; KD PTQ loss ≤0.29 vs scratch 0.55–0.70.
+- Table 9: near-IID clients 99.08–99.35 (31–51 missed) vs FL 19; Dirichlet c0 85.53% recall (2,346 missed), c3 93.39% (1,072), FL 99.99% (1).
+- Table 10: TON clipped-input QAT 99.49 (99.47–99.51), 84 missed vs base 174.
+- Table 13 = former Table 15 (+ base/clip-only rows); 5.14 now explains how the TON recipe was chosen.
+Limitation row "Two TON_IoT federated models" removed; seed-variance note added.

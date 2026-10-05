@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Paper figure: F1 vs deployed size for the pruning-ratio sweep (job 2026-10-04_g_prune_sweep)."""
+"""Paper figure: F1 vs deployed size for the pruning-ratio sweep (CIC: job 2026-10-04_g_prune_sweep;
+TON_IoT: improved model, job 2026-10-05_w_toniot_v2_sweep_robustness)."""
 import json
 import re
 import sys
@@ -10,7 +11,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 ROOT = Path(__file__).resolve().parent.parent
-SRC = ROOT / "data/processed/revision/2026-10-04_g_prune_sweep/compression_ablation/compression_ablation.json"
+SRCS = [ROOT / "data/processed/revision/2026-10-04_g_prune_sweep/compression_ablation/compression_ablation.json",
+        ROOT / "data/processed/revision/2026-10-05_w_toniot_v2_sweep_robustness/compression_ablation/compression_ablation.json"]
 OUT = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "paper/figures/prune_sweep.png"
 
 # Validated categorical slots 1-3 (dataviz reference palette); aqua needs relief -> markers + direct labels
@@ -20,9 +22,9 @@ SERIES = [
     ("prune_noft_ptq", "no fine-tuning", "#1baf7a", "^"),
 ]
 TEXT, MUTED, GRID = "#0b0b0b", "#52514e", "#e4e3df"
-PANELS = [("cic_near_iid", "CIC-IDS2017", -12), ("ton_near_iid", "TON_IoT", -12)]  # ratio-label offset
+PANELS = [("cic_near_iid", "CIC-IDS2017", -12), ("ton2_near_iid", "TON_IoT", -12)]  # ratio-label offset
 
-rows = json.loads(SRC.read_text())
+rows = [r for src in SRCS for r in json.loads(src.read_text())]
 plt.rcParams.update({"font.size": 9, "axes.edgecolor": MUTED, "axes.labelcolor": TEXT,
                      "xtick.color": MUTED, "ytick.color": MUTED})
 fig, axes = plt.subplots(1, 2, figsize=(7.0, 2.9), sharey=False)
