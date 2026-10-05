@@ -455,3 +455,60 @@ near-IID FL model is job s's `best_text_alpha05_test.h5` (source of the deployme
 - Table 10: TON clipped-input QAT 99.49 (99.47–99.51), 84 missed vs base 174.
 - Table 13 = former Table 15 (+ base/clip-only rows); 5.14 now explains how the TON recipe was chosen.
 Limitation row "Two TON_IoT federated models" removed; seed-variance note added.
+
+## Literature quantization methods A–D (jobs `2026-10-05_x1`–`x4`, `scripts/quant_lit_methods.py`, docs/QUANT_LITERATURE.md)
+Models: CIC near-IID federated (job b) and TON v2 (job s). Missed = mean over runs / all test attacks.
+`fq_` = fake-quant model with ranges set directly, per-tensor weights (identical to per-tensor TFLite PTQ);
+`tflite_` = TFLite PTQ, per-channel weights.
+
+**A. PTQ range estimators, unpruned model, 15 calibration sets (F1 mean [min–max], FAR, missed)**
+| estimator | CIC | TON |
+|---|---|---|
+| tflite max (per-channel) | 77.67 [29.16–84.99], 15.51, 349 | 77.91 [32.72–99.09], 2.99, 4,779 |
+| **tflite ±5 SD clip (ours)** | 84.38 [83.02–84.85], 7.58, 68 | 99.19 [99.19–99.19], 4.94, 27 |
+| tflite max per-tensor | 76.66 [29.20–83.69], 16.16, 336 | 81.66 [30.25–99.33], 4.44, 3,913 |
+| fq max | 76.64 [29.20–83.69], 16.14, 397 | 81.00 [36.06–99.31], 4.48, 4,156 |
+| **fq percentile 99.9** | 83.16 [82.11–84.90], 8.30, 58 | **99.39 [99.38–99.40], 3.55, 26** |
+| fq percentile 99.99 | 79.27 [31.51–84.12], 13.34, 543 | 99.31 [98.81–99.40], 3.62, 50 |
+| fq MSE (ACIQ objective) | 77.28 [29.28–84.14], 15.50, 630 | 88.68 [34.62–99.39], 4.72, 2,395 |
+| fq KL (TensorRT entropy) | 80.93 [44.16–84.13], 10.68, 565 | 98.97 [96.69–99.39], 4.20, 131 |
+| fq ±5 SD clip | 82.93 [82.09–83.54], 8.37, 239 | 99.19 [99.18–99.19], 4.94, 27 |
+Only aggressive clipping (±5 SD or 99.9th percentile) removes the collapses; MSE, KL and 99.99th percentile
+still collapse on some draws. With the same per-tensor weights, percentile 99.9 ≥ ±5 SD on both datasets.
+Per-channel weights matter little for max calibration but cut CIC misses with ±5 clipping (239 → 68).
+
+**B. QAT start/ranges, base recipe (prune 50% → FT → QAT), 5 FT draws (F1 mean [min–max], FAR, missed)**
+| | CIC | TON |
+|---|---|---|
+| PTQ tflite max | 85.81 [79.37–89.05], 6.69, 562 | 98.62 [96.89–99.19], 1.90, 351 |
+| PTQ fq ±5 SD | 87.93 [87.60–88.52], 5.24, 1,320 | 99.41 [99.39–99.44], 1.91, 99 |
+| QAT tfmot default | 88.02 [86.77–89.28], 5.44, 513 | 99.00 [98.79–99.51], 2.49, 204 |
+| QAT init from calibration (EMA continues), 5 estimators | 87.79–88.18, 5.34–5.56, 447–664 | 98.99–99.03, 2.47–2.53, 194–208 |
+| QAT fixed at max | **89.49** [87.41–91.43], 4.62, 757 | 99.46 [99.40–99.53], 2.10, 74 |
+| QAT fixed at percentile 99.99 | 88.58 [87.42–89.95], 5.18, **392** | **99.47 [99.44–99.51], 2.14, 70** |
+| QAT fixed at MSE | 88.62 [87.25–90.08], 5.03, 839 | 99.47 [99.43–99.56], 1.97, 76 |
+| QAT fixed at ±5 SD | 88.10 [87.43–89.01], 5.37, 598 | 99.34 [99.16–99.43], 2.79, 79 |
+Mechanism (draw-0 ranges): tfmot default QAT keeps hidden ranges near the ±6 start ([-5.21, ~10]) and its input
+quantizer tracks the full FT-input min/max (CIC max 61.2, TON 84.6). "init" changes the hidden ranges
+(e.g. TON d1 [0, 23]) but keeps that input range and gives the same results as default; "fixed" also keeps
+the calibrated input range (CIC 12.1, TON 26.7) and is the only variant that helps (TON misses 204 → 70,
+FAR 2.49 → 2.14). The input range, not the hidden ranges, is the lever — consistent with A and with job n
+(QAT on clipped inputs best for TON; the deployed recall recipe already clips FT inputs).
+
+**C. Data-free (server-side) calibration, unpruned model (F1, FAR, missed)**
+| | CIC | TON |
+|---|---|---|
+| real client data, tflite max (3 draws) | 77.57 [69.11–83.46], 12.10, 291 | 76.93 [32.72–99.09], 3.06, 4,435 |
+| real client data, tflite ±5 SD | 84.19, 7.69, 65 | 99.19, 4.94, 27 |
+| synthetic N(0,1), tflite (3 draws) | 82.22 [80.58–83.22], 8.87, 54 | 99.16 [99.08–99.22], 5.06, 29 |
+| BN statistics, k = 4 / 6 | 83.03, 8.37, 72 / 82.51, 8.69, 66 | 99.17, 5.06, 26 / 99.26, 4.44, 27 |
+| **CLE + BN statistics k = 6** | **84.64, 7.44, 55** | 99.25, 4.48, 30 |
+| real ±5 SD, per-tensor (fq) without / with CLE | 82.86, 8.42, 224 / 84.46, 7.54, 58 | 99.19, 4.93, 28 / 99.18, 4.93, 29 |
+BN statistics k = 3 is too tight (CIC 532, TON 282 missed). CLE float output change ≤ 1e-5.
+Server-side calibration from synthetic inputs or the federated BN statistics matches clipped real-data
+calibration; no client data leaves the clients. CLE mainly fixes per-tensor weight quantization on CIC.
+
+**D. Learned (PACT-style) clipping of hidden ReLU outputs, 5 FT draws**
+CIC: default 88.02 / 5.44 / 513; learned from max 88.21 / 5.29 / 718; from pct99.99 87.67 / 5.58 / 652;
+from ±5 SD 88.73 / 5.03 / 676. TON: all 98.99–99.00, FAR 2.46–2.59, 199–208 missed (default 204).
+No gain: the hidden activation ranges are not the bottleneck (the input range is, see B).
