@@ -1,0 +1,5 @@
+id: 2026-10-05_q_attack_counts
+config_dir: config/jobs/2026-10-05_q_attack_counts
+steps: attack_counts
+flags: []
+why: "Per-attack-type test totals for CIC-IDS2017 so residual misses can be reported as 'missed of N' (paper 5.13). ~5 min."

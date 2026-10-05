@@ -147,15 +147,15 @@ children.push(P(
 children.push(H1("5. Results"));
 
 children.push(H2("5.1 Federated vs. Centralized Training"));
-const t1w = [3000, 1150, 1150, 1150, 1150, 1100];
-const t1h = ["Model (test split, threshold 0.3)", "Accuracy", "Precision", "Attack Recall", "F1", "FAR"];
+const t1w = [2600, 950, 950, 1000, 900, 850, 1900];
+const t1h = ["Model (test split, threshold 0.3)", "Accuracy", "Precision", "Attack Recall", "F1", "FAR", "Missed attacks / all"];
 children.push(makeTable(t1h, [
-  ["CIC-IDS2017 — centralized", "95.07%", "77.60%", "99.90%", "87.35%", "5.92%"],
-  ["CIC-IDS2017 — federated (near-IID)", "94.32%", "75.01%", "99.94%", "85.70%", "6.84%"],
-  ["CIC-IDS2017 — federated, fixed LR", "95.01%", "77.40%", "99.84%", "87.20%", "5.99%"],
-  ["TON_IoT — centralized", "99.20%", "99.32%", "99.64%", "99.48%", "2.28%"],
-  ["TON_IoT — federated (near-IID)", "99.08%", "99.18%", "99.62%", "99.40%", "2.76%"],
-  ["TON_IoT — federated, fixed LR", "99.02%", "99.00%", "99.73%", "99.36%", "3.38%"],
+  ["CIC-IDS2017 — centralized", "95.07%", "77.60%", "99.90%", "87.35%", "5.92%", "88 / 85,173 (0.10%)"],
+  ["CIC-IDS2017 — federated (near-IID)", "94.32%", "75.01%", "99.94%", "85.70%", "6.84%", "52 / 85,173 (0.061%)"],
+  ["CIC-IDS2017 — federated, fixed LR", "95.01%", "77.40%", "99.84%", "87.20%", "5.99%", "136 / 85,173 (0.16%)"],
+  ["TON_IoT — centralized", "99.20%", "99.32%", "99.64%", "99.48%", "2.28%", "59 / 16,214 (0.36%)"],
+  ["TON_IoT — federated (near-IID)", "99.08%", "99.18%", "99.62%", "99.40%", "2.76%", "61 / 16,214 (0.38%)"],
+  ["TON_IoT — federated, fixed LR", "99.02%", "99.00%", "99.73%", "99.36%", "3.38%", "44 / 16,214 (0.27%)"],
 ], t1w));
 children.push(caption("Table 1. Federated vs. centralized training with the identical model, loss, and epoch budget (float models, before compression)."));
 children.push(PP([
@@ -164,45 +164,45 @@ children.push(PP([
 ]));
 
 children.push(H2("5.2 Non-IID Clients"));
-children.push(makeTable(["Model", "Client sizes (attack share)", "Accuracy", "F1", "Attack Recall", "FAR"], [
-  ["CIC-IDS2017 — near-IID", "4 × equal (≈ class ratio)", "94.32%", "85.70%", "99.94%", "6.84%"],
-  ["CIC-IDS2017 — Dirichlet(0.3)", "9.4k (0.1%), 1.98M (59.5%), 6.7k (2.6%), 728k (25.1%)", "94.27%", "85.59%", "99.83%", "6.87%"],
-  ["TON_IoT — near-IID", "4 × equal (≈ class ratio)", "99.08%", "99.40%", "99.62%", "2.76%"],
-  ["TON_IoT — Dirichlet(0.3)", "49.9k (0.4%), 62.9k (92.8%), 8.6k (65.5%), 8.4k (8.5%)", "97.63%", "98.45%", "97.99%", "3.59%"],
-], [2600, 3000, 1000, 900, 1200, 900]));
+children.push(makeTable(["Model", "Client sizes (attack share)", "Accuracy", "F1", "Attack Recall", "FAR", "Missed attacks / all"], [
+  ["CIC-IDS2017 — near-IID", "4 × equal (≈ class ratio)", "94.32%", "85.70%", "99.94%", "6.84%", "52 / 85,173 (0.061%)"],
+  ["CIC-IDS2017 — Dirichlet(0.3)", "9.4k (0.1%), 1.98M (59.5%), 6.7k (2.6%), 728k (25.1%)", "94.27%", "85.59%", "99.83%", "6.87%", "144 / 85,173 (0.17%)"],
+  ["TON_IoT — near-IID", "4 × equal (≈ class ratio)", "99.08%", "99.40%", "99.62%", "2.76%", "61 / 16,214 (0.38%)"],
+  ["TON_IoT — Dirichlet(0.3)", "49.9k (0.4%), 62.9k (92.8%), 8.6k (65.5%), 8.4k (8.5%)", "97.63%", "98.45%", "97.99%", "3.59%", "326 / 16,214 (2.01%)"],
+], [2100, 2500, 900, 800, 1000, 800, 1800]));
 children.push(caption("Table 2. Effect of a Dirichlet(α = 0.3) label partition over four clients (float federated models). Client sizes are training samples after balancing and SMOTE."));
 children.push(P(
   "The Dirichlet partition is extreme: on CIC-IDS2017 one client holds 73% of the training data and two clients see almost no attacks. Still, FedAvgM with the shared cosine schedule loses only 0.11 F1 on CIC-IDS2017 and 0.95 F1 on TON_IoT, where Attack Recall drops by 1.6 points and FAR rises from 2.76% to 3.59%. In the WIP-era runs, the non-IID partition appeared to collapse training (F1 63.5). That collapse was an artifact of the weight-exchange error described in Section 6.2."
 ));
 
 children.push(H2("5.3 Compression Without Pooled Data"));
-children.push(makeTable(["Variant (from the near-IID federated model)", "CIC size", "CIC F1 / FAR", "TON size", "TON F1 / FAR"], [
-  ["FP32 federated model (TFLite)", "802.5 KB", "85.70 / 6.84%", "720.6 KB", "99.40 / 2.76%"],
-  ["INT8 PTQ only (no pruning)", "226.9 KB", "84.75 / 7.37%", "206.4 KB", "98.38 / 2.70%"],
-  ["Prune 50%, no fine-tuning → PTQ", "75.1 KB", "42.28 / 56.04%", "64.9 KB", "96.78 / 18.15%"],
-  ["Prune 50% → client FT → PTQ", "75.1 KB", "86.90 / 6.08%", "64.9 KB", "90.50 / 14.00%"],
-  ["Prune 50% → client FT → QAT FT → INT8 (deployed)", "65.4 KB", "85.59 / 6.82%", "55.2 KB", "98.74 / 2.88%"],
-  ["Same, but fine-tuned on pooled data (upper bound)", "65.4 KB", "90.72 / 2.98%", "55.2 KB", "99.17 / 3.28%"],
-], [3700, 1000, 1500, 1000, 1500]));
+children.push(makeTable(["Variant (from the near-IID federated model)", "CIC size", "CIC F1 / FAR", "CIC missed of 85,173", "TON size", "TON F1 / FAR", "TON missed of 16,214"], [
+  ["FP32 federated model (TFLite)", "802.5 KB", "85.70 / 6.84%", "52 (0.061%)", "720.6 KB", "99.40 / 2.76%", "61 (0.38%)"],
+  ["INT8 PTQ only (no pruning)", "226.9 KB", "84.75 / 7.37%", "74 (0.087%)", "206.4 KB", "98.38 / 2.70%", "392 (2.42%)"],
+  ["Prune 50%, no fine-tuning → PTQ", "75.1 KB", "42.28 / 56.04%", "46 (0.054%)", "64.9 KB", "96.78 / 18.15%", "192 (1.18%)"],
+  ["Prune 50% → client FT → PTQ", "75.1 KB", "86.90 / 6.08%", "346 (0.41%)", "64.9 KB", "90.50 / 14.00%", "2,255 (13.91%)"],
+  ["Prune 50% → client FT → QAT FT → INT8 (deployed)", "65.4 KB", "85.59 / 6.82%", "291 (0.34%)", "55.2 KB", "98.74 / 2.88%", "268 (1.65%)"],
+  ["Same, but fine-tuned on pooled data (upper bound)", "65.4 KB", "90.72 / 2.98%", "4,216 (4.95%)", "55.2 KB", "99.17 / 3.28%", "111 (0.68%)"],
+], [3000, 900, 1300, 1200, 900, 1300, 1200]));
 children.push(caption("Table 3. Compression of the federated model. \"Client FT\" uses 10,000 samples from one participating client's own partition (client 0); \"pooled\" uses 10,000 pooled training samples and is not available in a real federated deployment. The two rows without fine-tuning calibrate INT8 on 500 pooled samples (one draw; Section 5.9 shows how much full-integer PTQ varies across calibration draws)."));
 children.push(P(
   "INT8 PTQ alone gives 3.5× at a cost of about one F1 point on both datasets for the calibration draw used here, but that cost varies widely from draw to draw (Section 5.9). Pruning half of each hidden layer gives a further 3.5×, but only if the pruned model is fine-tuned. Without fine-tuning, the pruned model breaks down (F1 42.28 on CIC-IDS2017, FAR 18% on TON_IoT). With fine-tuning and QAT fine-tuning on one client's local data, the deployed INT8 model is 65.4 KB on CIC-IDS2017 (802.5 / 65.4 = 12.27×) and 55.2 KB on TON_IoT (13.05×), and it matches the float federated model (F1 85.59 vs. 85.70 and 98.74 vs. 99.40). The deployed CIC-IDS2017 model has 94.28% accuracy, 75.00% precision, and 99.66% Attack Recall. The QAT fine-tuning step matters on TON_IoT, where client-fine-tuned PTQ reaches only F1 90.50."
 ));
 children.push(P(
-  "Pooled fine-tuning scores higher on CIC-IDS2017 (F1 90.72), mostly by shifting the operating point toward precision (FAR 2.98%). The pooled sample's 20% attack share is closer to the test distribution than client 0's 50%. We treat this as an upper bound that requires server-held data, not as a federated result."
+  "Pooled fine-tuning scores higher on CIC-IDS2017 (F1 90.72), but only by shifting the operating point toward precision (FAR 2.98%): it misses 4,216 of 85,173 attacks (4.95%), against 291 for the deployed client-fine-tuned model. The pooled sample's 20% attack share is closer to the test distribution than client 0's 50%. We treat this as an upper bound that requires server-held data, not as a federated result."
 ));
 
 children.push(H2("5.4 Which Client Fine-Tunes Matters"));
-children.push(makeTable(["Federated model", "Fine-tuning client (attack share)", "Deployed INT8 F1", "FAR"], [
-  ["CIC-IDS2017 near-IID", "client 0 (50.4%)", "85.59", "6.82%"],
-  ["CIC-IDS2017 Dirichlet(0.3)", "client 3 (24.9%)", "91.08", "2.75%"],
-  ["CIC-IDS2017 centralized model (reference)", "client 0 (50.4%)", "81.84", "8.84%"],
-  ["TON_IoT near-IID", "client 0 (50.1%)", "98.74", "2.88%"],
-  ["TON_IoT Dirichlet(0.3)", "client 2 (65.5%)", "98.72", "3.11%"],
-], [3300, 2800, 1600, 1100]));
+children.push(makeTable(["Federated model", "Fine-tuning client (attack share)", "Deployed INT8 F1", "FAR", "Missed attacks / all"], [
+  ["CIC-IDS2017 near-IID", "client 0 (50.4%)", "85.59", "6.82%", "291 / 85,173 (0.34%)"],
+  ["CIC-IDS2017 Dirichlet(0.3)", "client 3 (24.9%)", "91.08", "2.75%", "4,415 / 85,173 (5.18%)"],
+  ["CIC-IDS2017 centralized model (reference)", "client 0 (50.4%)", "81.84", "8.84%", "771 / 85,173 (0.91%)"],
+  ["TON_IoT near-IID", "client 0 (50.1%)", "98.74", "2.88%", "268 / 16,214 (1.65%)"],
+  ["TON_IoT Dirichlet(0.3)", "client 2 (65.5%)", "98.72", "3.11%", "264 / 16,214 (1.63%)"],
+], [2900, 2300, 1200, 900, 2000]));
 children.push(caption("Table 4. Deployed-model quality as a function of the client that performs fine-tuning (prune 50% → client FT → QAT FT → INT8)."));
 children.push(P(
-  "The short fine-tuning phase recalibrates the decision boundary toward the fine-tuning client's class mix. A client whose attack share is close to the deployment distribution (client 3 of the CIC-IDS2017 Dirichlet run, 24.9% attacks) yields the best model we observed (F1 91.08, FAR 2.75%). A 50%-attack client yields a recall-heavy operating point. The choice of fine-tuning client is therefore a deployment decision that should consider class mix, and it should be reported. We did not tune it on the test set: the clients in Table 4 were chosen a priori by attack share."
+  "The short fine-tuning phase recalibrates the decision boundary toward the fine-tuning client's class mix. A client whose attack share is close to the deployment distribution (client 3 of the CIC-IDS2017 Dirichlet run, 24.9% attacks) yields the highest F1 we observed (91.08, FAR 2.75%), but it misses 4,415 of 85,173 attacks (5.18%), fifteen times as many as the near-IID model fine-tuned on a 50%-attack client (291). A 50%-attack client yields a recall-heavy operating point. The choice of fine-tuning client is therefore a deployment decision that should consider class mix, and it should be reported. We did not tune it on the test set: the clients in Table 4 were chosen a priori by attack share."
 ));
 
 children.push(H2("5.5 Compression Strength"));
@@ -301,18 +301,18 @@ children.push(H2("5.11 Local-Only Training: When Does Federation Help?"));
 children.push(P(
   "Each client trains the same MLP with the same loss alone on its own partition (10 epochs, at most 200,000 of its samples) and is evaluated on the shared test split. Table 9 compares this with the federated model trained on the same partition."
 ));
-children.push(makeTable(["Partition / client", "Local data (attack share)", "Local-only F1 / Recall / FAR", "Missed attacks", "Federated F1 / Recall / FAR", "Missed attacks"], [
-  ["CIC near-IID, clients 0–3", "681k each (50%)", "88.3–90.0 / 98.85–99.78% / 4.5–5.2%", "185–982", "85.70 / 99.94% / 6.84%", "52"],
-  ["CIC Dirichlet, client 0", "9.4k (0.1%)", "62.04 / 44.97% / 0.00%", "46,872", "85.59 / 99.83% / 6.87%", "144"],
-  ["CIC Dirichlet, client 1", "1.98M (59.5%)", "90.70 / 99.75% / 4.15%", "214", "", ""],
-  ["CIC Dirichlet, client 2", "6.7k (2.6%)", "88.74 / 91.11% / 2.92%", "7,572", "", ""],
-  ["CIC Dirichlet, client 3", "728k (25.1%)", "89.80 / 99.60% / 4.56%", "339", "", ""],
-  ["TON near-IID, clients 0–3", "32k each (50%)", "99.16–99.31 / 99.65–99.79% / 3.5–4.8%", "34–57", "99.40 / 99.62% / 2.76%", "61"],
-  ["TON Dirichlet, client 0", "49.9k (0.4%)", "90.16 / 82.13% / 0.23%", "2,897", "98.45 / 97.99% / 3.59%", "326"],
-  ["TON Dirichlet, client 1", "62.9k (92.8%)", "96.90 / 99.92% / 21.20%", "13", "", ""],
-  ["TON Dirichlet, client 2", "8.6k (65.5%)", "99.02 / 99.80% / 5.97%", "33", "", ""],
-  ["TON Dirichlet, client 3", "8.4k (8.5%)", "96.34 / 93.22% / 1.00%", "1,099", "", ""],
-], [2100, 1500, 2300, 900, 1900, 900]));
+children.push(makeTable(["Partition / client", "Local data (attack share)", "Local-only F1 / Recall / FAR", "Missed attacks / all", "Federated F1 / Recall / FAR", "Missed attacks / all"], [
+  ["CIC near-IID, clients 0–3", "681k each (50%)", "88.3–90.0 / 98.85–99.78% / 4.5–5.2%", "185–982 / 85,173 (0.22–1.15%)", "85.70 / 99.94% / 6.84%", "52 / 85,173 (0.061%)"],
+  ["CIC Dirichlet, client 0", "9.4k (0.1%)", "62.04 / 44.97% / 0.00%", "46,872 / 85,173 (55.03%)", "85.59 / 99.83% / 6.87%", "144 / 85,173 (0.17%)"],
+  ["CIC Dirichlet, client 1", "1.98M (59.5%)", "90.70 / 99.75% / 4.15%", "214 / 85,173 (0.25%)", "", ""],
+  ["CIC Dirichlet, client 2", "6.7k (2.6%)", "88.74 / 91.11% / 2.92%", "7,572 / 85,173 (8.89%)", "", ""],
+  ["CIC Dirichlet, client 3", "728k (25.1%)", "89.80 / 99.60% / 4.56%", "339 / 85,173 (0.40%)", "", ""],
+  ["TON near-IID, clients 0–3", "32k each (50%)", "99.16–99.31 / 99.65–99.79% / 3.5–4.8%", "34–57 / 16,214 (0.21–0.35%)", "99.40 / 99.62% / 2.76%", "61 / 16,214 (0.38%)"],
+  ["TON Dirichlet, client 0", "49.9k (0.4%)", "90.16 / 82.13% / 0.23%", "2,897 / 16,214 (17.87%)", "98.45 / 97.99% / 3.59%", "326 / 16,214 (2.01%)"],
+  ["TON Dirichlet, client 1", "62.9k (92.8%)", "96.90 / 99.92% / 21.20%", "13 / 16,214 (0.080%)", "", ""],
+  ["TON Dirichlet, client 2", "8.6k (65.5%)", "99.02 / 99.80% / 5.97%", "33 / 16,214 (0.20%)", "", ""],
+  ["TON Dirichlet, client 3", "8.4k (8.5%)", "96.34 / 93.22% / 1.00%", "1,099 / 16,214 (6.78%)", "", ""],
+], [1900, 1400, 2200, 1500, 1700, 1500]));
 children.push(caption("Table 9. Each client trained alone vs. the federated model of the same partition (float models, test split, threshold 0.3). Test attacks: 85,173 (CIC-IDS2017), 16,214 (TON_IoT). One federated model serves all clients of a partition."));
 children.push(P(
   "Federation pays off where the reviewers' non-IID concern points: clients whose local data contains few attacks. Alone, CIC-IDS2017 Dirichlet client 0 (0.1% attacks) detects 44.97% of attacks and client 2 (2.6%) 91.11%; TON_IoT client 0 (0.4%) detects 82.13% and client 3 (8.5%) 93.22%. On the same partitions the federated model detects 99.83% (CIC-IDS2017) and 97.99% (TON_IoT). The attack-heavy TON_IoT client 1 (92.8% attacks) has the opposite problem: alone, it flags 21.2% of benign records, against 3.59% for the federated model. Clients that already hold large, representative data gain little or nothing. On near-IID CIC-IDS2017 each client alone reaches F1 88.3–90.0 against 85.70 for the federated model, at a precision-heavier operating point that misses 3.6–19 times as many attacks (185–982 vs. 52). The near-IID partition, which gives every client several hundred thousand representative flows, is therefore the setting in which federation is least needed, and the Dirichlet partition is the one in which it is needed. Three caveats apply: local and federated training budgets are not matched (10 local epochs vs. 60 rounds × 3 epochs), each configuration ran once, and at the fixed 0.3 threshold the F1 differences among data-rich clients mainly reflect operating points."
@@ -322,24 +322,24 @@ children.push(H2("5.12 Combining Pruning, PTQ, QAT, and Distillation"));
 children.push(P(
   "Sections 5.3–5.10 vary one step of the compression pipeline at a time. Table 10 compares 16 complete pipelines that combine quantization (PTQ, PTQ with clipped calibration, QAT fine-tuning, QAT fine-tuning on clipped inputs), pruning (structured 50%, unstructured magnitude pruning at 50% and 80%, and both together), distillation fine-tuning, and the order of pruning and quantization. Every pipeline starts from the near-IID federated model, uses only client 0's data, and is repeated over three random 10,000-sample fine-tuning draws. We report the mean and the range over draws. Magnitude pruning ramps sparsity up during three fine-tuning epochs; sparsity-preserving QAT (PQAT) is tfmot's prune-preserving quantization scheme."
 ));
-children.push(makeTable(["Pipeline", "Flash KB (TON / CIC)", "gzip KB (TON / CIC)", "TON F1 mean (range)", "CIC F1 mean (range)", "CIC missed attacks"], [
-  ["FP32 federated model (reference)", "720 / 803", "672 / 755", "99.40", "85.70", "52"],
-  ["INT8 PTQ", "206 / 227", "156 / 150", "98.87 (98.37–99.26)", "82.36 (81.04–83.21)", "163"],
-  ["INT8 PTQ, clipped calibration", "206 / 227", "156 / 150", "99.34 (99.34–99.34)", "83.97 (83.27–84.35)", "57"],
-  ["QAT fine-tuning", "186 / 207", "125 / 99", "99.10 (98.98–99.33)", "90.51 (89.27–91.99)", "580"],
-  ["Structured 50% → FT → PTQ", "65 / 75", "47 / 47", "98.50 (97.44–99.21)", "84.39 (79.37–87.27)", "500"],
-  ["Structured 50% → FT → PTQ, clipped calibration", "65 / 75", "47 / 47", "99.37 (99.34–99.39)", "87.67 (86.86–88.09)", "830"],
-  ["Structured 50% → FT → QAT (deployed recipe)", "55 / 65", "39 / 34", "99.08 (98.88–99.38)", "88.37 (87.64–89.28)", "498"],
-  ["Structured 50% → FT → QAT on clipped inputs", "55 / 65", "39 / 35", "99.40 (99.34–99.44)", "90.36 (88.54–92.44)", "1,163"],
-  ["Structured 50% → KD fine-tuning → QAT", "55 / 65", "39 / 34", "99.13 (98.97–99.43)", "86.04 (85.61–86.56)", "274"],
-  ["Structured 50% → KD fine-tuning → PTQ, clipped", "65 / 75", "47 / 47", "99.37 (99.36–99.38)", "84.85 (84.23–85.16)", "237"],
-  ["QAT first → structured 50% → FT → QAT", "55 / 65", "39 / 34", "99.12 (98.98–99.36)", "88.64 (86.65–90.58)", "687"],
-  ["Magnitude 50% → PTQ, clipped", "206 / 227", "124 / 128", "99.40 (99.39–99.41)", "89.72 (89.48–89.95)", "491"],
-  ["Magnitude 50% → PQAT", "186 / 207", "100 / 90", "99.12 (99.00–99.35)", "90.70 (89.95–91.71)", "487"],
-  ["Magnitude 80% → PTQ, clipped", "206 / 227", "71 / 76", "99.34 (99.31–99.37)", "87.98 (87.57–88.18)", "923"],
-  ["Magnitude 80% → PQAT", "186 / 207", "56 / 57", "98.85 (98.51–99.36)", "89.77 (88.99–91.10)", "609"],
-  ["Magnitude 80% → standard QAT", "186 / 207", "76 / 62", "99.07 (98.89–99.33)", "89.77 (89.31–90.52)", "571"],
-  ["Structured 50% → FT → magnitude 50% → PQAT", "55 / 65", "31 / 31", "98.95 (98.70–99.37)", "88.66 (88.05–89.86)", "699"],
+children.push(makeTable(["Pipeline", "Flash KB (TON / CIC)", "gzip KB (TON / CIC)", "TON F1 mean (range)", "CIC F1 mean (range)", "CIC missed of 85,173"], [
+  ["FP32 federated model (reference)", "720 / 803", "672 / 755", "99.40", "85.70", "52 (0.061%)"],
+  ["INT8 PTQ", "206 / 227", "156 / 150", "98.87 (98.37–99.26)", "82.36 (81.04–83.21)", "163 (0.19%)"],
+  ["INT8 PTQ, clipped calibration", "206 / 227", "156 / 150", "99.34 (99.34–99.34)", "83.97 (83.27–84.35)", "57 (0.067%)"],
+  ["QAT fine-tuning", "186 / 207", "125 / 99", "99.10 (98.98–99.33)", "90.51 (89.27–91.99)", "580 (0.68%)"],
+  ["Structured 50% → FT → PTQ", "65 / 75", "47 / 47", "98.50 (97.44–99.21)", "84.39 (79.37–87.27)", "500 (0.59%)"],
+  ["Structured 50% → FT → PTQ, clipped calibration", "65 / 75", "47 / 47", "99.37 (99.34–99.39)", "87.67 (86.86–88.09)", "830 (0.97%)"],
+  ["Structured 50% → FT → QAT (deployed recipe)", "55 / 65", "39 / 34", "99.08 (98.88–99.38)", "88.37 (87.64–89.28)", "498 (0.58%)"],
+  ["Structured 50% → FT → QAT on clipped inputs", "55 / 65", "39 / 35", "99.40 (99.34–99.44)", "90.36 (88.54–92.44)", "1,163 (1.37%)"],
+  ["Structured 50% → KD fine-tuning → QAT", "55 / 65", "39 / 34", "99.13 (98.97–99.43)", "86.04 (85.61–86.56)", "274 (0.32%)"],
+  ["Structured 50% → KD fine-tuning → PTQ, clipped", "65 / 75", "47 / 47", "99.37 (99.36–99.38)", "84.85 (84.23–85.16)", "237 (0.28%)"],
+  ["QAT first → structured 50% → FT → QAT", "55 / 65", "39 / 34", "99.12 (98.98–99.36)", "88.64 (86.65–90.58)", "687 (0.81%)"],
+  ["Magnitude 50% → PTQ, clipped", "206 / 227", "124 / 128", "99.40 (99.39–99.41)", "89.72 (89.48–89.95)", "491 (0.58%)"],
+  ["Magnitude 50% → PQAT", "186 / 207", "100 / 90", "99.12 (99.00–99.35)", "90.70 (89.95–91.71)", "487 (0.57%)"],
+  ["Magnitude 80% → PTQ, clipped", "206 / 227", "71 / 76", "99.34 (99.31–99.37)", "87.98 (87.57–88.18)", "923 (1.08%)"],
+  ["Magnitude 80% → PQAT", "186 / 207", "56 / 57", "98.85 (98.51–99.36)", "89.77 (88.99–91.10)", "609 (0.72%)"],
+  ["Magnitude 80% → standard QAT", "186 / 207", "76 / 62", "99.07 (98.89–99.33)", "89.77 (89.31–90.52)", "571 (0.67%)"],
+  ["Structured 50% → FT → magnitude 50% → PQAT", "55 / 65", "31 / 31", "98.95 (98.70–99.37)", "88.66 (88.05–89.86)", "699 (0.82%)"],
 ], [3300, 1250, 1250, 1500, 1500, 1000]));
 children.push(caption("Table 10. Complete compression pipelines from the near-IID federated model, using only client 0's data; mean and range over three fine-tuning draws (test split, threshold 0.3). Flash is the TFLite file that TensorFlow Lite Micro stores; gzip shows what a compressed weight format or an over-the-air update would transfer. Clipping is at ±5 standard deviations. CIC-IDS2017 missed attacks are means over draws (85,173 test attacks). Table 3's single draw of the deployed recipe (F1 85.59) lies below this table's range for the same pipeline."));
 children.push(P(
@@ -356,25 +356,25 @@ children.push(H2("5.13 Recall-Priority Deployment"));
 children.push(P(
   "For intrusion detection a missed attack usually costs more than a false alarm. The FP32 federated model misses 52 of 85,173 CIC-IDS2017 test attacks at the 0.3 threshold, whereas the 65 KB deployed model misses 463 on average over three fine-tuning draws (Table 10 setting). We therefore ask how close the 65 KB model can get to the FP32 model's missed-attack count without pooled data. Two levers are combined: fine-tuning targets that preserve the teacher's recall (distillation from the federated model with α = 0.5 or α = 0, or a 4× loss weight on attacks), and a decision threshold chosen on client 0's own held-out data (20,000 samples disjoint from every fine-tuning draw) as the largest threshold that reaches a target Attack Recall there. The test split is never used for selection."
 ));
-children.push(makeTable(["Model (CIC-IDS2017)", "Threshold selection", "Threshold", "Missed attacks: mean (max)", "Attack Recall", "FAR"], [
-  ["FP32 federated, 803 KB", "fixed", "0.30", "52", "99.94%", "6.84%"],
-  ["FP32 federated, 803 KB", "client val., recall ≥ 99.99%", "0.27", "37", "99.96%", "7.56%"],
-  ["65 KB, deployed recipe", "fixed", "0.30", "463 (483)", "99.46%", "5.97%"],
-  ["65 KB, deployed recipe", "client val., recall ≥ 99.95%", "0.005", "44 (58)", "99.95%", "23.39%"],
-  ["65 KB, attack weight 4×", "client val., recall ≥ 99.95%", "0.027", "63 (81)", "99.93%", "20.31%"],
-  ["65 KB, distillation α = 0.5", "client val., recall ≥ 99.95%", "0.164", "37 (52)", "99.96%", "19.92%"],
-  ["65 KB, distillation + clipped inputs", "fixed", "0.30", "231 (292)", "99.73%", "6.04%"],
-  ["65 KB, distillation + clipped inputs", "client val., recall ≥ 99.9%", "0.214", "77 (133)", "99.91%", "9.54%"],
-  ["65 KB, distillation + clipped inputs", "client val., recall ≥ 99.95%", "0.198", "44 (55)", "99.95%", "10.43%"],
-  ["65 KB, distillation + clipped inputs", "client val., recall ≥ 99.99%", "0.171", "24 (25)", "99.97%", "14.33%"],
-  ["65 KB, same + longer fine-tuning (6 + 4 ep)", "client val., recall ≥ 99.99%", "0.184", "31 (45)", "99.96%", "10.94%"],
-  ["65 KB, same + federated fine-tuning (4 clients)", "client val., recall ≥ 99.95%", "0.204", "51 (79)", "99.94%", "9.31%"],
-  ["65 KB, same + federated fine-tuning (4 clients)", "client val., recall ≥ 99.99%", "0.180", "27 (33)", "99.97%", "11.28%"],
-  ["112 KB (prune 30%), distillation + clipped inputs", "client val., recall ≥ 99.95%", "0.221", "54 (73)", "99.94%", "7.63%"],
-  ["112 KB (prune 30%), distillation + clipped inputs", "client val., recall ≥ 99.99%", "0.189", "23 (27)", "99.97%", "9.65%"],
-  ["207 KB (no pruning), distillation + clipped inputs", "client val., recall ≥ 99.95%", "0.229", "51 (52)", "99.94%", "6.71%"],
-  ["207 KB (no pruning), distillation + clipped inputs", "client val., recall ≥ 99.99%", "0.182", "23 (28)", "99.97%", "10.39%"],
-], [2900, 2200, 800, 1400, 1100, 900]));
+children.push(makeTable(["Model (CIC-IDS2017)", "Threshold selection", "Threshold", "Missed attacks / all (mean)", "Missed share", "Worst of 3 draws", "FAR"], [
+  ["FP32 federated, 803 KB", "fixed", "0.30", "52 / 85,173", "0.061%", "", "6.84%"],
+  ["FP32 federated, 803 KB", "client val., recall ≥ 99.99%", "0.269", "37 / 85,173", "0.043%", "", "7.56%"],
+  ["65 KB, deployed recipe", "fixed", "0.30", "463 / 85,173", "0.54%", "483", "5.97%"],
+  ["65 KB, deployed recipe", "client val., recall ≥ 99.95%", "0.005", "44 / 85,173", "0.052%", "58", "23.39%"],
+  ["65 KB, attack weight 4×", "client val., recall ≥ 99.95%", "0.027", "63 / 85,173", "0.074%", "81", "20.31%"],
+  ["65 KB, distillation α = 0.5", "client val., recall ≥ 99.95%", "0.164", "37 / 85,173", "0.044%", "52", "19.92%"],
+  ["65 KB, distillation + clipped inputs", "fixed", "0.30", "231 / 85,173", "0.27%", "292", "6.04%"],
+  ["65 KB, distillation + clipped inputs", "client val., recall ≥ 99.9%", "0.213", "77 / 85,173", "0.090%", "133", "9.54%"],
+  ["65 KB, distillation + clipped inputs", "client val., recall ≥ 99.95%", "0.198", "44 / 85,173", "0.052%", "55", "10.43%"],
+  ["65 KB, distillation + clipped inputs", "client val., recall ≥ 99.99%", "0.171", "24 / 85,173", "0.028%", "25", "14.33%"],
+  ["65 KB, same + longer fine-tuning (6 + 4 ep)", "client val., recall ≥ 99.99%", "0.184", "31 / 85,173", "0.036%", "45", "10.94%"],
+  ["65 KB, same + federated fine-tuning (4 clients)", "client val., recall ≥ 99.95%", "0.204", "51 / 85,173", "0.060%", "79", "9.31%"],
+  ["65 KB, same + federated fine-tuning (4 clients)", "client val., recall ≥ 99.99%", "0.180", "27 / 85,173", "0.032%", "33", "11.28%"],
+  ["112 KB (prune 30%), distillation + clipped inputs", "client val., recall ≥ 99.95%", "0.221", "54 / 85,173", "0.063%", "73", "7.63%"],
+  ["112 KB (prune 30%), distillation + clipped inputs", "client val., recall ≥ 99.99%", "0.189", "23 / 85,173", "0.027%", "27", "9.65%"],
+  ["207 KB (no pruning), distillation + clipped inputs", "client val., recall ≥ 99.95%", "0.229", "51 / 85,173", "0.060%", "52", "6.71%"],
+  ["207 KB (no pruning), distillation + clipped inputs", "client val., recall ≥ 99.99%", "0.182", "23 / 85,173", "0.027%", "28", "10.39%"],
+], [2700, 1900, 800, 1500, 900, 900, 800]));
 children.push(caption("Table 11. Recall-priority deployment on CIC-IDS2017 (85,173 test attacks). All models: structured pruning (50% unless stated) → fine-tuning → QAT fine-tuning → INT8, on client 0's data unless \"federated fine-tuning\" (FedAvg over all four clients' local data after every epoch); means over three fine-tuning draws. \"Client val.\": threshold chosen on 20,000 held-out samples of client 0 to reach the stated recall there."));
 children.push(P(
   "Lowering the threshold of the deployed model alone does reach the FP32 model's missed-attack count (44), but only at a 23.4% FAR. The hard-label QAT model pushes most attack and benign scores into the lowest output levels, and the selected thresholds (0.004–0.012) are one to three steps of the INT8 output's 1/256 resolution, so the threshold cannot be tuned finely. Distillation keeps the student's scores in the middle of the range, where the INT8 output has resolution (selected thresholds 0.15–0.26), and clipping the inputs during fine-tuning (Section 5.12) separates the classes further. Together they let the 65 KB model miss 44 attacks, fewer than the FP32 model at 0.3, at a 10.4% FAR, or 24 attacks at a 14.3% FAR. A 4× attack weight, pure teacher targets (α = 0; 66 missed at 18.5% FAR), and five times more fine-tuning data (50,000 samples; 40 missed at 17.9% FAR) do not do better. Measured at equal recall, compression still costs FAR: on the test sweep the FP32 model misses 22 attacks at an 11.0% FAR, against 24 at 14.3% for the best 65 KB model."
