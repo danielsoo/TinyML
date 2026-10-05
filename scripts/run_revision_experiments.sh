@@ -7,7 +7,7 @@
 #   bash scripts/run_revision_experiments.sh --with-failed --with-scaling   # + fixed-LR row, 20/50 clients
 #   bash scripts/run_revision_experiments.sh --config-dir config/tuning/<job>   # alternate configs
 #   bash scripts/run_revision_experiments.sh --steps non_iid          # subset of: baseline_ablation,non_iid,client_scaling,
-#                                                                     #   fixed_lr,robustness,compression_ablation,quant_distill,local_only,ptq_calibration,qat_stability,compression_combos,recall_priority,attack_counts,ton_sweep
+#                                                                     #   fixed_lr,qat_fl,robustness,compression_ablation,quant_distill,local_only,ptq_calibration,qat_stability,compression_combos,recall_priority,attack_counts,ton_sweep
 #   bash scripts/run_revision_experiments.sh --steps compression_ablation --config-dir <dir with compression_ablation.yaml>
 # Re-running with the same --out resumes: finished steps are skipped.
 set -uo pipefail
@@ -85,6 +85,12 @@ if wanted fixed_lr; then
     --base-config "$CONFIG_DIR/failed_config.yaml" --strategies label_balanced --client-counts 4 \
     --output-dir "$OUT/fixed_lr" $QUICK || FAILED=1
 fi
+if wanted qat_fl; then
+  # Training-time QAT inside FL (paper 5.6): fl_qat.yaml, near-IID
+  step qat_fl python scripts/run_non_iid_ablation.py \
+    --base-config "$CONFIG_DIR/fl_qat.yaml" --strategies label_balanced --client-counts 4 \
+    --output-dir "$OUT/qat_fl" $QUICK || FAILED=1
+fi
 if wanted robustness; then
   step robustness python scripts/run_robustness.py \
     --spec "$CONFIG_DIR/robustness.yaml" --output-dir "$OUT/robustness" || FAILED=1
@@ -139,7 +145,7 @@ fi
   echo "- host: $(uname -srm), $(nproc) cores"
   for f in "$OUT"/*.done; do [ -f "$f" ] && echo "- $(basename "$f" .done): $(( $(cat "$f") / 60 )) min"; done
   echo
-  for md in "$OUT"/baseline/baseline_ablation.md "$OUT"/non_iid/non_iid_ablation.md "$OUT"/client_scaling/non_iid_ablation.md "$OUT"/compression_ablation/compression_ablation.md "$OUT"/fixed_lr/non_iid_ablation.md "$OUT"/robustness/robustness.md "$OUT"/quant_distill/quant_distill.md "$OUT"/local_only/local_only.md "$OUT"/ptq_calibration/ptq_calibration.md "$OUT"/qat_stability/qat_stability.md "$OUT"/compression_combos/compression_combos.md "$OUT"/recall_priority/recall_priority.md "$OUT"/attack_counts/attack_type_counts.md "$OUT"/ton_sweep/ton_sweep.md; do
+  for md in "$OUT"/baseline/baseline_ablation.md "$OUT"/non_iid/non_iid_ablation.md "$OUT"/client_scaling/non_iid_ablation.md "$OUT"/compression_ablation/compression_ablation.md "$OUT"/fixed_lr/non_iid_ablation.md "$OUT"/qat_fl/non_iid_ablation.md "$OUT"/robustness/robustness.md "$OUT"/quant_distill/quant_distill.md "$OUT"/local_only/local_only.md "$OUT"/ptq_calibration/ptq_calibration.md "$OUT"/qat_stability/qat_stability.md "$OUT"/compression_combos/compression_combos.md "$OUT"/recall_priority/recall_priority.md "$OUT"/attack_counts/attack_type_counts.md "$OUT"/ton_sweep/ton_sweep.md; do
     [ -f "$md" ] && { cat "$md"; echo; }
   done
 } > "$OUT/SUMMARY.md"

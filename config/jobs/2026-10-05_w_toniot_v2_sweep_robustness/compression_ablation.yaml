@@ -1,0 +1,10 @@
+# Improved TON_IoT model: pruning-ratio sweep (Figure 1).
+ft_samples: 10000
+seed: 42
+prune_ratios: [0.3, 0.5, 0.7, 0.85, 0.9]
+ft_sources: [client]
+models:
+  - name: ton2_near_iid
+    model: data/processed/revision/2026-10-05_s_ton_sweep/ton_sweep/models/best_text_alpha05_test.h5
+    config: data/processed/revision/2026-10-05_s_ton_sweep/ton_sweep/configs/best_text_alpha05_test.yaml
+    ft_client: 0

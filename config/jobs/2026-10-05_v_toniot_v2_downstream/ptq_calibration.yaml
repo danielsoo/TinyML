@@ -1,0 +1,8 @@
+# Improved TON_IoT model: INT8 PTQ calibration sensitivity (Table 7).
+sizes: [100, 500, 2000]
+draws: 3
+seed: 42
+models:
+  - name: ton2_near_iid
+    model: data/processed/revision/2026-10-05_s_ton_sweep/ton_sweep/models/best_text_alpha05_test.h5
+    config: data/processed/revision/2026-10-05_s_ton_sweep/ton_sweep/configs/best_text_alpha05_test.yaml

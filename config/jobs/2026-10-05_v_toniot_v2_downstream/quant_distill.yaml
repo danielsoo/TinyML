@@ -1,0 +1,14 @@
+# Improved TON_IoT model: quantization methods + client-local distillation (Tables 6 and 8).
+ft_samples: 10000
+kd_samples: 50000
+kd_epochs: 10
+kd_temperature: 2.0
+kd_alpha: 0.5
+student_ratios: [0.5, 0.25, 0.125]
+quant_methods: [fp32, dynamic_range, float16, int8, int16x8]
+seed: 42
+models:
+  - name: ton2_near_iid
+    model: data/processed/revision/2026-10-05_s_ton_sweep/ton_sweep/models/best_text_alpha05_test.h5
+    config: data/processed/revision/2026-10-05_s_ton_sweep/ton_sweep/configs/best_text_alpha05_test.yaml
+    ft_client: 0

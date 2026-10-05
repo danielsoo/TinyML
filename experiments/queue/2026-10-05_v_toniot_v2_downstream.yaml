@@ -1,0 +1,5 @@
+id: 2026-10-05_v_toniot_v2_downstream
+config_dir: config/jobs/2026-10-05_v_toniot_v2_downstream
+steps: compression_ablation,quant_distill,local_only,ptq_calibration,qat_stability,compression_combos
+flags: []
+why: "Improved TON_IoT model through Tables 3/4, 6-10 (needs job u's centralized and Dirichlet models). ~1.5 h."

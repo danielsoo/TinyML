@@ -1,0 +1,52 @@
+# TON_IoT v2 (validation-selected, job 2026-10-05_s_ton_sweep): text_features + focal alpha 0.5.
+# TON_IoT (network) with the CIC-IDS2017 paper recipe (LCTES revision, Sec. 3.2): mirrors v12/2026-02-06_23-25-39/federated_local_sky.yaml
+# 60 rounds x 3 local epochs, lr 1e-3 cosine -> 1e-4, focal alpha 0.35, balance_ratio 4.0,
+# FedAvgM (server momentum 0.5, server lr 0.1), full TON_IoT train_test_network.csv (max_samples: null).
+# Only the fields named in the header line below differ from that recipe.
+# Table 2 row (b) narrative: fixed LR (no cosine decay). Differs from fl_baseline.yaml ONLY in lr_decay_type/lr_min.
+version: "paper_v12_toniot"
+
+data:
+  name: ton_iot
+  path: "data/raw/TON_IoT"
+  num_clients: 4
+  max_samples: null
+  binary: true
+  use_smote: true
+  text_features: true      # v2: row-local features from dns_query / http_uri (paper 5.14)
+  balance_ratio: 4.0
+  partition_strategy: label_balanced
+  dirichlet_alpha: 0.3
+
+model:
+  name: mlp
+
+evaluation:
+  prediction_threshold: 0.3
+
+federated:
+  num_rounds: 60
+  fraction_fit: 1.0
+  fraction_evaluate: 1.0
+  local_epochs: 3
+  batch_size: 128
+  learning_rate: 0.001
+  use_class_weights: true
+  use_focal_loss: true
+  focal_loss_alpha: 0.5
+  use_distillation: false
+  server_momentum: 0.5
+  server_learning_rate: 0.1
+  lr_decay_type: none
+  lr_decay_rate: 0.97
+  lr_drop_rate: 0.5
+  lr_epochs_drop: 5
+  lr_min: 0.001
+  use_qat: false
+  min_fit_clients: 4
+  min_evaluate_clients: 4
+  min_available_clients: 4
+
+compression:
+  always_build_traditional: false
+  traditional_model_path: null
