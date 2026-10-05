@@ -100,6 +100,9 @@ children.push(H2("2.3 TinyML and Model Compression"));
 children.push(P(
   "TinyML enables inference directly on microcontrollers [2], and TensorFlow Lite Micro is the runtime we target [19]. Structured pruning removes redundant parameters [4], knowledge distillation transfers knowledge to a smaller student [5], and quantization reduces numerical precision [6]. Quantization-aware training (QAT) and post-training quantization (PTQ) are the two dominant routes to integer models. Gholami et al. survey them [18], Nagel et al. give practical guidance on when 8-bit PTQ suffices [17], and they also document oscillation-driven instability in QAT [16]. Section 5.6 reports a different, data-driven failure of QAT that arises when quantizer ranges are learned on heavy-tailed inputs."
 ));
+children.push(P(
+  "Calibration need not use the extremes of each activation: percentile and entropy (KL) calibration [25] and the MSE-optimal clip of ACIQ [26] clip the ranges, and Wu et al. recommend calibrating first and then fine-tuning with QAT [25]. PACT [27] and LSQ [28] learn the clip or the step size during QAT, and DFQ quantizes without data by equalizing weight ranges across layers (cross-layer equalization, CLE) [29]. Distillation has been combined with quantization before [30], and TensorFlow Model Optimization provides sparsity-preserving QAT because standard QAT re-densifies pruned weights [33]. In federated learning, quantization has mainly been used to compress model updates [31]; Gupta et al. train federated models that stay accurate under later quantization [32]. Our input clipping (Section 5.9) is an instance of clipped calibration; Section 5.15 compares it with these estimators and with QAT-range, data-free and learned-clipping variants on our models."
+));
 
 children.push(H2("2.4 Adversarial Robustness of Compressed Models"));
 children.push(P(
@@ -274,7 +277,7 @@ children.push(P(
   "A one-line change removes the instability: clip the calibration inputs to ±5 standard deviations before conversion (inputs beyond the calibrated range then saturate at inference). Over the same 15 calibration sets of 2,000 samples, clipped calibration gives F1 99.19 for all 15 sets on TON_IoT (FP32 99.41) and 83.02–84.85 on CIC-IDS2017 (FP32 85.70), against 32.72–99.09 and 29.16–84.99 without clipping (Table 7). Clipping at ±10 works as well (TON_IoT 99.37–99.39), while ±3 is too tight for TON_IoT (F1 98.30–98.79). The remaining loss of about one F1 point on CIC-IDS2017 is the cost of 8-bit activations seen in Table 6. This is the same remedy that Section 5.6 suggests for training-time QAT, applied only at calibration time."
 ));
 children.push(P(
-  "QAT fine-tuning learns its activation ranges as moving averages during fine-tuning. It is more stable than PTQ but not independent of the fine-tuning draw. Repeating the base recipe with five different 10,000-sample fine-tuning draws from client 0 gives F1 98.79–99.51 on TON_IoT (PTQ of the same pruned models: 96.89–99.19) and 86.77–89.28 on CIC-IDS2017 (PTQ: 79.37–89.05). The Table 3 deployment (F1 85.59) lies below all five repeated draws, so it is a conservative rather than a selected result. A spread of about 2.5 F1 from the fine-tuning draw alone should be kept in mind when reading Tables 3–4 and Figure 1."
+  "QAT fine-tuning is more stable than PTQ (Section 5.15 explains why) but not independent of the fine-tuning draw. Repeating the base recipe with five different 10,000-sample fine-tuning draws from client 0 gives F1 98.79–99.51 on TON_IoT (PTQ of the same pruned models: 96.89–99.19) and 86.77–89.28 on CIC-IDS2017 (PTQ: 79.37–89.05). The Table 3 deployment (F1 85.59) lies below all five repeated draws, so it is a conservative rather than a selected result. A spread of about 2.5 F1 from the fine-tuning draw alone should be kept in mind when reading Tables 3–4 and Figure 1."
 ));
 children.push(P(
   "This determines the deployment recipe. The ESP32 build of TensorFlow Lite Micro that we use runs FP32 and full-integer INT8 kernels; dynamic-range (hybrid) and float16 models need kernels it does not provide, and int16x8 kernels exist only for some operators in newer TFLM releases, which we have not tested on the device. Dynamic-range quantization would otherwise be the best size–accuracy point in Table 6 (69 KB, F1 90.13 on CIC-IDS2017), so it is a reasonable choice for Linux-class gateways but not for the microcontroller. On the microcontroller, full-integer INT8 is required. QAT fine-tuning and PTQ with clipped calibration both reach it reliably; plain PTQ does not. A side observation: fine-tuning the pruned model on client 0 raises float F1 on CIC-IDS2017 from 85.70 to 89.39, by shifting the operating point toward precision (FAR 4.78%, Attack Recall 99.62%). INT8 quantization then gives part of that back."
@@ -444,6 +447,48 @@ children.push(P(
   "The text-derived features and the higher focal α each roughly halve the validation false-alarm rate at 99.9% recall, and together they are best (3.01% vs. 6.84%); α = 0.65 and longer training do not help. On the test split, the model trained with the initial recipe misses 61 of 16,215 attacks at the 0.3 threshold (FAR 2.76%), against 19 (FAR 3.61%) for the selected recipe, and at an equal 99.9% test recall its FAR is 7.16% against 4.52% (ROC-AUC 0.99860 vs. 0.99895). Missed DoS, MITM, and DDoS records fall from 16, 14, and 10 to 3, 5, and 1. A second, independent federated training run of the selected recipe gives F1 99.38 and 23 missed attacks (Table 1). The variants were designed after we saw that the initial TON_IoT model left room for improvement, but the choice among them used validation data only."
 ));
 
+children.push(H2("5.15 Calibration Estimators, QAT Ranges, and Data-Free Calibration"));
+children.push(P(
+  "We tested the quantization methods of Section 2.3 on our federated models. To compare range estimators with everything else fixed, we build the tfmot fake-quantization model, set its activation ranges directly, and convert it; with min/max ranges this reproduces TensorFlow Lite's per-tensor PTQ exactly (same F1, FAR and missed attacks on every calibration set). TensorFlow Lite's default PTQ uses per-channel weight scales, whereas QAT exports use per-tensor scales, so Table 15 lists both."
+));
+children.push(makeTable(["Weights", "Range estimator", "CIC F1 [min]", "CIC missed / 85,173", "CIC FAR", "TON F1 [min]", "TON missed / 16,215", "TON FAR"], [
+  ["per-channel", "min/max (TFLite default)", "77.67 [29.16]", "349", "15.51%", "77.91 [32.72]", "4,779", "2.99%"],
+  ["per-channel", "inputs clipped ±5 SD (ours)", "84.38 [83.02]", "68", "7.58%", "99.19 [99.19]", "27", "4.94%"],
+  ["per-tensor", "min/max", "76.64 [29.20]", "397", "16.14%", "81.00 [36.06]", "4,156", "4.48%"],
+  ["per-tensor", "percentile 99.9 [25]", "83.16 [82.11]", "58", "8.30%", "99.39 [99.38]", "26", "3.55%"],
+  ["per-tensor", "percentile 99.99", "79.27 [31.51]", "543", "13.34%", "99.31 [98.81]", "50", "3.62%"],
+  ["per-tensor", "MSE-optimal clip (ACIQ objective [26])", "77.28 [29.28]", "630", "15.50%", "88.68 [34.62]", "2,395", "4.72%"],
+  ["per-tensor", "KL / entropy [25]", "80.93 [44.16]", "565", "10.68%", "98.97 [96.69]", "131", "4.20%"],
+  ["per-tensor", "inputs clipped ±5 SD", "82.93 [82.09]", "239", "8.37%", "99.19 [99.18]", "27", "4.94%"],
+  ["per-tensor", "CLE + inputs clipped ±5 SD (3 sets)", "84.46 [84.04]", "58", "7.54%", "99.18 [99.18]", "29", "4.93%"],
+  ["per-channel", "data-free: synthetic N(0, I) inputs", "82.22 [80.58]", "54", "8.87%", "99.16 [99.08]", "29", "5.06%"],
+  ["per-tensor", "data-free: BN statistics, k = 4", "83.03", "72", "8.37%", "99.17", "26", "5.06%"],
+  ["per-tensor", "data-free: BN statistics, k = 6", "82.51", "66", "8.69%", "99.26", "27", "4.44%"],
+  ["per-tensor", "data-free: CLE + BN statistics, k = 6", "84.64", "55", "7.44%", "99.25", "30", "4.48%"],
+  ["—", "FP32 federated model", "85.70", "52", "6.84%", "99.41", "19", "3.61%"],
+], [1000, 2500, 1100, 900, 700, 1100, 900, 700]));
+children.push(caption("Table 15. Full-integer PTQ of the unpruned near-IID federated models with different range estimators: mean F1 [minimum], mean missed attacks, mean FAR. Real-data rows use the 15 calibration sets of Table 7 (2,000 samples). Data-free rows use no client data: synthetic inputs are 3 draws of 2,000 standard-normal vectors; BN rows set each hidden range to max over channels of (mean + k·SD) from the federated BatchNorm statistics. CLE = cross-layer equalization [29]. Source: runs 2026-10-05_x1_calib_methods and _x3_data_free_calib."));
+children.push(P(
+  "Only estimators that clip hard remove the collapses: the 99.9th percentile and our ±5 SD input clip. The 99.99th percentile, the MSE-optimal clip and KL calibration still fail on some calibration sets (minimum F1 29–44 on CIC-IDS2017, 35–97 on TON_IoT): the rare extreme records that stretch the ranges are too rare to move a per-tensor MSE or KL objective. With the same per-tensor weights, the 99.9th percentile is at least as good as our clip (TON_IoT FAR 3.55% vs. 4.94%; CIC-IDS2017 misses 58 vs. 239). Per-channel weights barely change min/max calibration, but with clipped inputs they cut CIC-IDS2017 misses from 239 to 68, and CLE recovers the same effect for per-tensor weights (58)."
+));
+children.push(P(
+  "The server can also calibrate without any client data. Because the inputs are standardized, synthetic standard-normal inputs are a usable calibration set, and the federated BatchNorm statistics, which FedAvg averages like any other weight, give each post-ReLU activation's mean and standard deviation. Both match clipped real-data calibration on both datasets, and CLE with BatchNorm-derived ranges (k = 6) gives the best CIC-IDS2017 PTQ result (F1 84.64, 55 missed). k = 3 is too tight (532 and 282 missed)."
+));
+children.push(makeTable(["Variant (base recipe, 5 fine-tuning draws)", "CIC F1 [range]", "CIC missed / 85,173", "TON F1 [range]", "TON missed / 16,215"], [
+  ["PTQ, min/max (TFLite)", "85.81 [79.37–89.05]", "562", "98.62 [96.89–99.19]", "351"],
+  ["QAT, tfmot default", "88.02 [86.77–89.28]", "513", "99.00 [98.79–99.51]", "204"],
+  ["QAT, calibrated start (5 estimators)", "87.79–88.18", "447–664", "98.99–99.03", "194–208"],
+  ["QAT, ranges fixed at min/max", "89.49 [87.41–91.43]", "757", "99.46 [99.40–99.53]", "74"],
+  ["QAT, ranges fixed at percentile 99.99", "88.58 [87.42–89.95]", "392", "99.47 [99.44–99.51]", "70"],
+  ["QAT, ranges fixed at MSE clip", "88.62 [87.25–90.08]", "839", "99.47 [99.43–99.56]", "76"],
+  ["QAT, ranges fixed at ±5 SD", "88.10 [87.43–89.01]", "598", "99.34 [99.16–99.43]", "79"],
+  ["QAT, learned clip (PACT-style, 3 starts)", "87.67–88.73", "652–718", "98.99–99.00", "199–208"],
+], [3300, 1600, 1100, 1600, 1100]));
+children.push(caption("Table 16. QAT ranges on the base recipe (prune 50% → client fine-tuning → 2 QAT epochs), five fine-tuning draws of client 0. \"Calibrated start\": ranges initialized from 2,000 calibration samples of the fine-tuning set and then updated by tfmot (range of the means over 5 estimators); \"fixed\": held at the calibrated values throughout QAT. Source: runs 2026-10-05_x2_ptq_init_qat and _x4_learned_clip_qat."));
+children.push(P(
+  "Table 16 shows why QAT behaves differently from PTQ. tfmot's default QAT does not learn its ranges in a fine-tuning run this short: activation ranges start at ±6 and follow an exponential moving average with decay 0.999, so after our roughly 140 steps about 87% of the start remains, and the hidden ranges end near [−5.2, 10] although ReLU outputs are non-negative. The input quantizer instead tracks the minimum and maximum of every fine-tuning input (up to 61 standard deviations on CIC-IDS2017 and 85 on TON_IoT, against 12 and 27 at the 99.99th percentile). Starting QAT from calibrated ranges, the PTQ-then-QAT order recommended by Wu et al. [25], changes the hidden ranges but keeps this input range and gives the default's results. Holding all ranges at the calibrated values also keeps the input range, and it is the only variant that helps: TON_IoT misses drop from 204 to 70 (FAR 2.49% → 2.14%) and CIC-IDS2017 misses from 513 to 392. Learning the hidden clips (PACT-style [27], parameterized in log space) does not help. The bottleneck is the input quantization range, not the hidden activations. This also explains why QAT on clipped inputs was the best TON_IoT pipeline in Table 10 and why training-time QAT collapses on CIC-IDS2017 (Section 5.6)."
+));
+
 // =================== 6 Discussion ===================
 children.push(H1("6. Discussion"));
 
@@ -529,6 +574,15 @@ const refs = [
   "[22] Chang Song, Elias Fallon, and Hai Li. 2021. Improving Adversarial Robustness in Weight-quantized Neural Networks. arXiv preprint arXiv:2012.14965 (2021).",
   "[23] Ferheen Ayaz, Idris Zakariyya, José Cano, Sye Loong Keoh, Jeremy Singer, Danilo Pau, and Mounia Kharbouche-Harrari. 2023. Improving Robustness Against Adversarial Attacks with Deeply Quantized Neural Networks. arXiv preprint arXiv:2304.12829 (2023).",
   "[24] Gints Engelen, Vera Rimmer, and Wouter Joosen. 2021. Troubleshooting an Intrusion Detection Dataset: the CICIDS2017 Case Study. In 2021 IEEE Security and Privacy Workshops (SPW), 7–12. doi:10.1109/SPW53761.2021.00009.",
+  "[25] Hao Wu, Patrick Judd, Xiaojie Zhang, Mikhail Isaev, and Paulius Micikevicius. 2020. Integer Quantization for Deep Learning Inference: Principles and Empirical Evaluation. arXiv preprint arXiv:2004.09602 (2020).",
+  "[26] Ron Banner, Yury Nahshan, and Daniel Soudry. 2019. Post Training 4-bit Quantization of Convolutional Networks for Rapid-Deployment. In Advances in Neural Information Processing Systems (NeurIPS).",
+  "[27] Jungwook Choi, Zhuo Wang, Swagath Venkataramani, Pierce I-Jen Chuang, Vijayalakshmi Srinivasan, and Kailash Gopalakrishnan. 2018. PACT: Parameterized Clipping Activation for Quantized Neural Networks. arXiv preprint arXiv:1805.06085 (2018).",
+  "[28] Steven K. Esser, Jeffrey L. McKinstry, Deepika Bablani, Rathinakumar Appuswamy, and Dharmendra S. Modha. 2020. Learned Step Size Quantization. In International Conference on Learning Representations (ICLR).",
+  "[29] Markus Nagel, Mart van Baalen, Tijmen Blankevoort, and Max Welling. 2019. Data-Free Quantization Through Weight Equalization and Bias Correction. In Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV), 1325–1334.",
+  "[30] Antonio Polino, Razvan Pascanu, and Dan Alistarh. 2018. Model Compression via Distillation and Quantization. In International Conference on Learning Representations (ICLR).",
+  "[31] Amirhossein Reisizadeh, Aryan Mokhtari, Hamed Hassani, Ali Jadbabaie, and Ramtin Pedarsani. 2020. FedPAQ: A Communication-Efficient Federated Learning Method with Periodic Averaging and Quantization. In Proceedings of the 23rd International Conference on Artificial Intelligence and Statistics (AISTATS), PMLR 108, 2021–2031.",
+  "[32] Kartik Gupta, Marios Fournarakis, Matthias Reisser, Christos Louizos, and Markus Nagel. 2023. Quantization Robust Federated Learning for Efficient Inference on Heterogeneous Devices. Transactions on Machine Learning Research (TMLR). arXiv:2206.10844.",
+  "[33] TensorFlow Model Optimization. 2021. Collaborative Optimization: Pruning-Preserving Quantization Aware Training. https://www.tensorflow.org/model_optimization/guide/combine/collaborative_optimization.",
 ];
 for (const r of refs) children.push(P(r, { spacingAfter: 100, size: 20 }));
 

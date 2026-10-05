@@ -73,7 +73,10 @@ study this combination on two datasets with an MLP detector and make five contri
   dependence on the fine-tuning client (\S\ref{sec:compression}).
 \item A comparison of five post-training quantization methods and 16 complete pipelines combining
   structured and unstructured pruning, PTQ, QAT and distillation, including the instability of
-  full-integer PTQ across calibration draws and a one-line fix (\S\ref{sec:quant},\S\ref{sec:combos}).
+  full-integer PTQ across calibration draws and a one-line fix (\S\ref{sec:quant},\S\ref{sec:combos}),
+  and a comparison with calibration estimators, PTQ-initialized and learned-clipping QAT, and
+  server-side data-free calibration from the literature, which locates the problem in the input
+  quantization range (\S\ref{sec:quantlit}).
 \item A recall-priority deployment recipe that uses only client-held data and lets compressed
   models miss fewer attacks than the FP32 model at its default threshold (\S\ref{sec:recall}).
 \item A negative result for training-time QAT inside FL on heavy-tailed features, and four silent
@@ -103,6 +106,19 @@ size; surveys and guidance on PTQ and QAT are given by Gholami et al.~\cite{ghol
 Nagel et al.~\cite{nagel2021white}, who also describe oscillation-driven QAT
 instability~\cite{nagel2022overcoming}. Section~\ref{sec:qatfl} reports a different, data-driven QAT
 failure.
+
+\paragraph{Calibration and quantization ranges.} Post-training calibration can clip activation ranges
+instead of using their extremes: percentile and entropy (KL) calibration~\cite{wu2020integer}, or the
+MSE-optimal clip of ACIQ~\cite{banner2019aciq}. Wu et al.\ also recommend calibrating first and then
+fine-tuning with QAT~\cite{wu2020integer}. PACT~\cite{choi2018pact} and LSQ~\cite{esser2020lsq} learn
+the clip or step size during QAT, and DFQ~\cite{nagel2019dfq} quantizes without data by equalizing
+weight ranges across layers (CLE). Distillation and quantization have been combined
+before~\cite{polino2018model}, and tfmot provides sparsity-preserving QAT because standard QAT
+re-densifies pruned weights~\cite{tfmot2021collab}. In FL, quantization has mainly been used to
+compress updates~\cite{reisizadeh2020fedpaq}; Gupta et al.\ train federated models that stay accurate
+under later quantization~\cite{gupta2023quantization}. Our input clipping is an instance of clipped
+calibration; Section~\ref{sec:quantlit} compares it with these estimators and with QAT-range,
+data-free and learned-clipping variants on our models.
 
 \paragraph{Robustness of compressed models.} FGSM~\cite{goodfellow2015fgsm} and
 PGD~\cite{madry2018towards} are the standard gradient attacks. Quantization can improve or degrade
@@ -372,10 +388,109 @@ likely to contain an extreme record of the heavy-tailed standardized features: t
 have hidden-layer maxima near 400 (\ton) and 9,609 (\cic), against roughly 50--210 for most others. A
 one-line change removes the instability: clipping calibration inputs to $\pm5$ standard deviations
 gives F1 99.19 for every \ton set and 83.0--84.9 on \cic ($\pm10$ works as well; $\pm3$ is too tight).
-QAT fine-tuning learns its ranges during fine-tuning and is more stable, though not draw-independent:
+QAT fine-tuning is more stable, though not draw-independent (\S\ref{sec:quantlit} explains why):
 over five fine-tuning draws the base recipe gives F1 98.79--99.51 on \ton (PTQ: 96.89--99.19) and
 86.77--89.28 on \cic (PTQ: 79.37--89.05). Table~\ref{tab:compression}'s \cic value (85.59) lies below
 all five draws, so it is conservative rather than selected.
+
+\subsection{Calibration Estimators, QAT Ranges and Data-Free Calibration}\label{sec:quantlit}
+We tested the methods of Section~2 on the federated models (Tables~\ref{tab:qlit-ptq}
+and~\ref{tab:qlit-qat}). To compare range estimators with everything else fixed, we build the tfmot
+fake-quantization model, set its activation ranges directly and convert it; with min/max ranges this
+reproduces TFLite's per-tensor PTQ exactly (same F1, FAR and misses on every set). TFLite's default
+PTQ uses per-channel weight scales, QAT exports use per-tensor scales.
+
+\begin{table*}[t]
+\caption{Full-integer PTQ of the unpruned federated models with different range estimators: F1 mean
+[minimum], missed attacks (mean), FAR (mean). Real-data rows: the 15 calibration sets of
+Table~\ref{tab:calib} (2,000 samples). Data-free rows use no client data (synthetic: 3 draws of 2,000
+$\mathcal{N}(0,I)$ inputs; BN: ranges $\mu+k\sigma$ from the federated BatchNorm statistics). CLE =
+cross-layer equalization~\cite{nagel2019dfq}. \src{runs X1, X3}}
+\label{tab:qlit-ptq}
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{llrrrrrr}
+\toprule
+ & & \multicolumn{3}{c}{\cic (85,173 attacks)} & \multicolumn{3}{c}{\ton (16,215 attacks)} \\
+\cmidrule(lr){3-5}\cmidrule(lr){6-8}
+Weights & Range estimator & F1 [min] & Missed & FAR & F1 [min] & Missed & FAR \\
+\midrule
+per-channel & min/max (TFLite default) & 77.67 [29.16] & 349 & 15.51 & 77.91 [32.72] & 4,779 & 2.99 \\
+per-channel & inputs clipped $\pm$5 SD (ours) & 84.38 [83.02] & 68 & 7.58 & 99.19 [99.19] & 27 & 4.94 \\
+per-tensor & min/max & 76.64 [29.20] & 397 & 16.14 & 81.00 [36.06] & 4,156 & 4.48 \\
+per-tensor & percentile 99.9~\cite{wu2020integer} & 83.16 [82.11] & 58 & 8.30 & \textbf{99.39 [99.38]} & 26 & 3.55 \\
+per-tensor & percentile 99.99 & 79.27 [31.51] & 543 & 13.34 & 99.31 [98.81] & 50 & 3.62 \\
+per-tensor & MSE-optimal clip (ACIQ objective~\cite{banner2019aciq}) & 77.28 [29.28] & 630 & 15.50 & 88.68 [34.62] & 2,395 & 4.72 \\
+per-tensor & KL / entropy~\cite{wu2020integer} & 80.93 [44.16] & 565 & 10.68 & 98.97 [96.69] & 131 & 4.20 \\
+per-tensor & inputs clipped $\pm$5 SD & 82.93 [82.09] & 239 & 8.37 & 99.19 [99.18] & 27 & 4.94 \\
+per-tensor & CLE + inputs clipped $\pm$5 SD (3 sets) & 84.46 [84.04] & 58 & 7.54 & 99.18 [99.18] & 29 & 4.93 \\
+\midrule
+per-channel & data-free: synthetic $\mathcal{N}(0,I)$ inputs & 82.22 [80.58] & 54 & 8.87 & 99.16 [99.08] & 29 & 5.06 \\
+per-tensor & data-free: BN statistics, $k=4$ & 83.03 & 72 & 8.37 & 99.17 & 26 & 5.06 \\
+per-tensor & data-free: BN statistics, $k=6$ & 82.51 & 66 & 8.69 & 99.26 & 27 & 4.44 \\
+per-tensor & data-free: CLE + BN statistics, $k=6$ & \textbf{84.64} & 55 & 7.44 & 99.25 & 30 & 4.48 \\
+\midrule
+ & FP32 federated model & 85.70 & 52 & 6.84 & 99.41 & 19 & 3.61 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table*}
+
+\paragraph{Estimators.} Only estimators that clip hard remove the collapses: the 99.9th percentile and
+our $\pm5$\,SD input clip. The 99.99th percentile, the MSE-optimal clip and KL calibration still fail
+on some calibration sets (minimum F1 29--44 on \cic, 35--97 on \ton). The rare extreme records that
+stretch the ranges are too rare to move a per-tensor MSE or KL objective. With the same per-tensor
+weights, the 99.9th percentile is at least as good as our clip (\ton FAR 3.55\% vs.\ 4.94\%, \cic
+misses 58 vs.\ 239). Per-channel weights barely change min/max calibration, but with clipped inputs
+they cut \cic misses from 239 to 68; CLE recovers the same effect for per-tensor weights (58).
+
+\paragraph{Data-free calibration.} The server can calibrate without any client data. Because inputs
+are standardized, synthetic $\mathcal{N}(0,I)$ inputs are a usable calibration set, and the federated
+BatchNorm statistics (averaged by FedAvg like any weight) give each post-ReLU activation's mean and
+standard deviation; we set the range to $\max_c(\mu_c+k\sigma_c)$. Both match clipped real-data
+calibration on both datasets, and CLE plus BN statistics ($k=6$) gives the best \cic PTQ result
+(84.64, 55 misses). $k=3$ is too tight (\cic 532, \ton 282 misses).
+
+\begin{table}[t]
+\caption{QAT ranges on the base recipe (prune 50\%, client FT, 2 QAT epochs, 5 FT draws): F1 mean
+[range], missed attacks (mean). ``Start'': ranges initialized from client calibration and then updated
+by tfmot (5 estimators, range of means); ``fixed'': held at the calibrated values. \src{runs X2, X4}}
+\label{tab:qlit-qat}
+\small
+\setlength{\tabcolsep}{2pt}
+\begin{adjustbox}{max width=\columnwidth}
+\begin{tabular}{lrrrr}
+\toprule
+ & \multicolumn{2}{c}{\cic} & \multicolumn{2}{c}{\ton} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}
+Variant & F1 & Missed & F1 & Missed \\
+\midrule
+PTQ, min/max (TFLite) & 85.81 [79.4--89.1] & 562 & 98.62 [96.9--99.2] & 351 \\
+QAT, tfmot default & 88.02 [86.8--89.3] & 513 & 99.00 [98.8--99.5] & 204 \\
+QAT, calibrated start & 87.79--88.18 & 447--664 & 98.99--99.03 & 194--208 \\
+QAT, fixed min/max & \textbf{89.49} [87.4--91.4] & 757 & 99.46 [99.4--99.5] & 74 \\
+QAT, fixed pct.\ 99.99 & 88.58 [87.4--90.0] & \textbf{392} & \textbf{99.47} [99.4--99.5] & \textbf{70} \\
+QAT, fixed MSE & 88.62 [87.3--90.1] & 839 & 99.47 [99.4--99.6] & 76 \\
+QAT, fixed $\pm$5\,SD & 88.10 [87.4--89.0] & 598 & 99.34 [99.2--99.4] & 79 \\
+QAT, learned clip (PACT-style) & 87.67--88.73 & 652--718 & 98.99--99.00 & 199--208 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\paragraph{QAT ranges and order.} tfmot's default QAT does not learn its ranges in a fine-tuning run
+this short. Activation ranges start at $\pm6$ and follow an exponential moving average (decay 0.999),
+so after our ${\approx}140$ steps about 87\% of the start remains: hidden ranges end near
+$[-5.2, 10]$ although ReLU outputs are non-negative. The input quantizer instead tracks the minimum
+and maximum of every fine-tuning input (\cic: up to 61\,SD, \ton: 85\,SD, against 12 and 27 at the
+99.99th percentile). Starting QAT from calibrated ranges, the PTQ-then-QAT order of
+Wu et al.~\cite{wu2020integer}, changes the hidden ranges but keeps this input range, and gives the
+default's results. Holding all ranges at the calibrated values also keeps the input range, and it is
+the only variant that helps: \ton misses drop from 204 to 70 (FAR 2.49\%$\rightarrow$2.14\%), \cic
+misses from 513 to 392. Learning the hidden clips (PACT-style~\cite{choi2018pact}, trained in log
+space) does not help. The bottleneck is therefore the input range, not the hidden activations. This
+also explains why QAT on clipped inputs was the best \ton pipeline in Table~\ref{tab:combos} and why
+training-time QAT collapses on \cic (\S\ref{sec:qatfl}).
 
 \subsection{Training-Time QAT Inside FL: a Negative Result}\label{sec:qatfl}
 With fake quantization from the first federated round, the \cic model collapses to 34.74\% accuracy
@@ -649,7 +764,8 @@ distillation, clipped inputs, federated fine-tuning and a client-chosen threshol
 miss fewer attacks than the FP32 model at its default threshold (27 vs.\ 52 of 85,173 on \cic; 12 of
 16,215 on \ton). The remaining misses lie in the rarest attack classes, which the FP32 model also
 misses. Training-time QAT inside FL fails on heavy-tailed features, full-integer PTQ is unstable
-across calibration draws unless its inputs are clipped, and an invariant check on the uncompressed
+across calibration draws unless its inputs are clipped (the 99.9th-percentile estimator and
+calibration from federated BatchNorm statistics, which needs no client data, work as well), and an invariant check on the uncompressed
 federated model catches the silent toolchain failures that had invalidated our earlier results.
 
 \FloatBarrier
@@ -708,6 +824,7 @@ S & 2026-10-05\_s\_ton\_sweep (\ton recipe, \ton FL model) \\
 T & 2026-10-05\_t\_recall\_priority\_ton2 \\
 U & 2026-10-05\_u\_toniot\_v2 (\ton centralized, 2nd run, fixed LR, Dirichlet, QAT) \\
 V, W & 2026-10-05\_v\_toniot\_v2\_downstream, \_w\_toniot\_v2\_sweep\_robustness \\
+X1--X4 & 2026-10-05\_x1\_calib\_methods, \_x2\_ptq\_init\_qat, \_x3\_data\_free\_calib, \_x4\_learned\_clip\_qat \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
