@@ -1,0 +1,9 @@
+# Improved TON_IoT preprocessing: each client trains alone (Table 9).
+max_samples_per_client: 200000
+epochs: 10
+seed: 42
+entries:
+  - name: ton2_near_iid
+    config: data/processed/revision/2026-10-05_s_ton_sweep/ton_sweep/configs/best_text_alpha05_test.yaml
+  - name: ton2_dirichlet
+    config: data/processed/revision/2026-10-05_u_toniot_v2/non_iid/configs/fl_dirichlet_c4.yaml

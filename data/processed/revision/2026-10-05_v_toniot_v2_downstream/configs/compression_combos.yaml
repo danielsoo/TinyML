@@ -1,0 +1,10 @@
+# Improved TON_IoT model: 16 compression pipelines (Table 10).
+ft_samples: 10000
+draws: 3
+clip: 5.0
+sparsities: [0.5, 0.8]
+models:
+  - name: ton2_near_iid
+    model: data/processed/revision/2026-10-05_s_ton_sweep/ton_sweep/models/best_text_alpha05_test.h5
+    config: data/processed/revision/2026-10-05_s_ton_sweep/ton_sweep/configs/best_text_alpha05_test.yaml
+    ft_client: 0

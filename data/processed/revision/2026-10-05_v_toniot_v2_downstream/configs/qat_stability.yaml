@@ -1,0 +1,11 @@
+# Improved TON_IoT model: QAT fine-tuning draws and clipped PTQ calibration (Section 5.9).
+ft_samples: 10000
+ft_draws: 5
+calib_n: 2000
+calib_draws: 3
+clip_values: [null, 3, 5, 10]
+models:
+  - name: ton2_near_iid
+    model: data/processed/revision/2026-10-05_s_ton_sweep/ton_sweep/models/best_text_alpha05_test.h5
+    config: data/processed/revision/2026-10-05_s_ton_sweep/ton_sweep/configs/best_text_alpha05_test.yaml
+    ft_client: 0
