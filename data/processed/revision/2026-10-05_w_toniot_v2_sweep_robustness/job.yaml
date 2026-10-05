@@ -1,0 +1,5 @@
+id: 2026-10-05_w_toniot_v2_sweep_robustness
+config_dir: config/jobs/2026-10-05_w_toniot_v2_sweep_robustness
+steps: compression_ablation,robustness
+flags: []
+why: "Improved TON_IoT model: pruning sweep (Figure 1) and FGSM/PGD (Table 5; needs job v's TFLite models). ~45 min."

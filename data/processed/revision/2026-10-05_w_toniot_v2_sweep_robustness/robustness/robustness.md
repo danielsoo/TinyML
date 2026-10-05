@@ -1,0 +1,18 @@
+# FGSM / PGD robustness (transfer from float FL model)
+
+| dataset | attack | display_name | original_accuracy | adversarial_accuracy | attack_success_rate |
+| --- | --- | --- | --- | --- | --- |
+| ton_iot_v2 | fgsm | best_text_alpha05_test | 0.99105 | 0.2295 | 0.76155 |
+| ton_iot_v2 | fgsm | a_centralized | 0.99525 | 0.2301 | 0.76515 |
+| ton_iot_v2 | fgsm | fp32 | 0.99105 | 0.2295 | 0.76155 |
+| ton_iot_v2 | fgsm | ptq_only | 0.98405 | 0.2295 | 0.75455 |
+| ton_iot_v2 | fgsm | prune_ft_client_ptq | 0.8572 | 0.2295 | 0.6277 |
+| ton_iot_v2 | fgsm | prune_ft_client_qat | 0.97985 | 0.2299 | 0.74995 |
+| ton_iot_v2 | fgsm | prune_ft_pooled_qat | 0.9871 | 0.91145 | 0.07565 |
+| ton_iot_v2 | pgd | best_text_alpha05_test | 0.99105 | 0.2293 | 0.76175 |
+| ton_iot_v2 | pgd | a_centralized | 0.99525 | 0.22965 | 0.7656 |
+| ton_iot_v2 | pgd | fp32 | 0.99105 | 0.2293 | 0.76175 |
+| ton_iot_v2 | pgd | ptq_only | 0.98405 | 0.2294 | 0.75465 |
+| ton_iot_v2 | pgd | prune_ft_client_ptq | 0.8572 | 0.2295 | 0.6277 |
+| ton_iot_v2 | pgd | prune_ft_client_qat | 0.97985 | 0.2297 | 0.75015 |
+| ton_iot_v2 | pgd | prune_ft_pooled_qat | 0.9871 | 0.9112 | 0.0759 |

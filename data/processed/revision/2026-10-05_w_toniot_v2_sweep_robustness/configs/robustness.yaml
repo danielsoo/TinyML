@@ -1,0 +1,14 @@
+# Improved TON_IoT model: FGSM + PGD (Table 5), same protocol as job f.
+attack_config: config/attack/default.yaml
+attacks: [fgsm, pgd]
+entries:
+  - name: ton_iot_v2
+    config: data/processed/revision/2026-10-05_s_ton_sweep/ton_sweep/configs/best_text_alpha05_test.yaml
+    models:
+      - data/processed/revision/2026-10-05_s_ton_sweep/ton_sweep/models/best_text_alpha05_test.h5
+      - data/processed/revision/2026-10-05_u_toniot_v2/baseline/models/a_centralized.h5
+      - data/processed/revision/2026-10-05_v_toniot_v2_downstream/compression_ablation/ton2_near_iid/fp32.tflite
+      - data/processed/revision/2026-10-05_v_toniot_v2_downstream/compression_ablation/ton2_near_iid/ptq_only.tflite
+      - data/processed/revision/2026-10-05_v_toniot_v2_downstream/compression_ablation/ton2_near_iid/prune_ft_client_ptq.tflite
+      - data/processed/revision/2026-10-05_v_toniot_v2_downstream/compression_ablation/ton2_near_iid/prune_ft_client_qat.tflite
+      - data/processed/revision/2026-10-05_v_toniot_v2_downstream/compression_ablation/ton2_near_iid/prune_ft_pooled_qat.tflite

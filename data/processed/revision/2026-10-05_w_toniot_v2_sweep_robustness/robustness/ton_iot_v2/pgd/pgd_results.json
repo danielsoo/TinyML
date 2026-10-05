@@ -1,0 +1,129 @@
+{
+  "dataset": "ton_iot",
+  "data_path": "data/raw/TON_IoT",
+  "max_samples": Infinity,
+  "threshold": 0.3,
+  "epsilon_used": 0.1,
+  "attack_model": "data/processed/revision/2026-10-05_s_ton_sweep/ton_sweep/models/best_text_alpha05_test.h5",
+  "epsilon_sweep": [
+    {
+      "epsilon": 0.01,
+      "original_accuracy": 0.99,
+      "adversarial_accuracy": 0.2314,
+      "attack_success_rate": 0.7586,
+      "avg_perturbation": 0.1788013831503937
+    },
+    {
+      "epsilon": 0.05,
+      "original_accuracy": 0.99,
+      "adversarial_accuracy": 0.2314,
+      "attack_success_rate": 0.7586,
+      "avg_perturbation": 0.18425987394069696
+    },
+    {
+      "epsilon": 0.1,
+      "original_accuracy": 0.99,
+      "adversarial_accuracy": 0.2312,
+      "attack_success_rate": 0.7588,
+      "avg_perturbation": 0.198120596945845
+    },
+    {
+      "epsilon": 0.15,
+      "original_accuracy": 0.99,
+      "adversarial_accuracy": 0.2308,
+      "attack_success_rate": 0.7592,
+      "avg_perturbation": 0.21122055204538398
+    },
+    {
+      "epsilon": 0.2,
+      "original_accuracy": 0.99,
+      "adversarial_accuracy": 0.2302,
+      "attack_success_rate": 0.7598,
+      "avg_perturbation": 0.2267885642668718
+    }
+  ],
+  "tuning": {
+    "best_epsilon": 0.01,
+    "target_success_rate": 0.5
+  },
+  "comparison": [
+    {
+      "model_path": "data/processed/revision/2026-10-05_s_ton_sweep/ton_sweep/models/best_text_alpha05_test.h5",
+      "display_name": "best_text_alpha05_test",
+      "original_accuracy": 0.99105,
+      "adversarial_accuracy": 0.2293,
+      "attack_success_rate": 0.76175,
+      "attack_success_count": 15235,
+      "total_samples": 20000,
+      "avg_perturbation": 0.20415312579191625,
+      "max_perturbation": 368.8482666015625
+    },
+    {
+      "model_path": "data/processed/revision/2026-10-05_u_toniot_v2/baseline/models/a_centralized.h5",
+      "display_name": "a_centralized",
+      "original_accuracy": 0.99525,
+      "adversarial_accuracy": 0.22965,
+      "attack_success_rate": 0.7656,
+      "attack_success_count": 15312,
+      "total_samples": 20000,
+      "avg_perturbation": 0.20415312579191625,
+      "max_perturbation": 368.8482666015625
+    },
+    {
+      "model_path": "data/processed/revision/2026-10-05_v_toniot_v2_downstream/compression_ablation/ton2_near_iid/fp32.tflite",
+      "display_name": "fp32",
+      "original_accuracy": 0.99105,
+      "adversarial_accuracy": 0.2293,
+      "attack_success_rate": 0.76175,
+      "attack_success_count": 15235,
+      "total_samples": 20000,
+      "avg_perturbation": 0.20415312579191625,
+      "max_perturbation": 368.8482666015625
+    },
+    {
+      "model_path": "data/processed/revision/2026-10-05_v_toniot_v2_downstream/compression_ablation/ton2_near_iid/ptq_only.tflite",
+      "display_name": "ptq_only",
+      "original_accuracy": 0.98405,
+      "adversarial_accuracy": 0.2294,
+      "attack_success_rate": 0.75465,
+      "attack_success_count": 15093,
+      "total_samples": 20000,
+      "avg_perturbation": 0.20415312579191625,
+      "max_perturbation": 368.8482666015625
+    },
+    {
+      "model_path": "data/processed/revision/2026-10-05_v_toniot_v2_downstream/compression_ablation/ton2_near_iid/prune_ft_client_ptq.tflite",
+      "display_name": "prune_ft_client_ptq",
+      "original_accuracy": 0.8572,
+      "adversarial_accuracy": 0.2295,
+      "attack_success_rate": 0.6277,
+      "attack_success_count": 12554,
+      "total_samples": 20000,
+      "avg_perturbation": 0.20415312579191625,
+      "max_perturbation": 368.8482666015625
+    },
+    {
+      "model_path": "data/processed/revision/2026-10-05_v_toniot_v2_downstream/compression_ablation/ton2_near_iid/prune_ft_client_qat.tflite",
+      "display_name": "prune_ft_client_qat",
+      "original_accuracy": 0.97985,
+      "adversarial_accuracy": 0.2297,
+      "attack_success_rate": 0.75015,
+      "attack_success_count": 15003,
+      "total_samples": 20000,
+      "avg_perturbation": 0.20415312579191625,
+      "max_perturbation": 368.8482666015625
+    },
+    {
+      "model_path": "data/processed/revision/2026-10-05_v_toniot_v2_downstream/compression_ablation/ton2_near_iid/prune_ft_pooled_qat.tflite",
+      "display_name": "prune_ft_pooled_qat",
+      "original_accuracy": 0.9871,
+      "adversarial_accuracy": 0.9112,
+      "attack_success_rate": 0.0759,
+      "attack_success_count": 1518,
+      "total_samples": 20000,
+      "avg_perturbation": 0.20415312579191625,
+      "max_perturbation": 368.8482666015625
+    }
+  ],
+  "generated": "2026-10-05T12:29:45.821032"
+}
