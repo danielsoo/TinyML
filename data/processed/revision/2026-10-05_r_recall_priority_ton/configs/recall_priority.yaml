@@ -1,0 +1,20 @@
+# Same recall-priority recipe as jobs o/p (CIC-IDS2017), applied to TON_IoT (16,214 test attacks),
+# to check that one pipeline works on both datasets. Client 0 holds 32,428 samples, so the
+# client validation set is 8,000 samples (disjoint from the 10,000-sample fine-tuning draws).
+ft_samples: 10000
+val_samples: 8000
+draws: 3
+clip: 5.0
+recall_targets: [0.999, 0.9995, 0.9999]
+fixed_thresholds: [0.1, 0.2, 0.3]
+variants:
+  hard: {}                                              # deployed recipe
+  clipqat: {clip: true}                                 # best TON pipeline in job n
+  kdclip: {kd_alpha: 0.5, clip: true}                   # CIC recall-priority recipe
+  kdclip_fed: {kd_alpha: 0.5, clip: true, federated: true}
+  kdclip_p30: {kd_alpha: 0.5, clip: true, prune_ratio: 0.3}
+models:
+  - name: ton_near_iid
+    model: data/processed/revision/2026-10-04_d_toniot_float/baseline/models/b_fl.h5
+    config: data/processed/revision/2026-10-04_d_toniot_float/baseline/configs/b_fl.yaml
+    ft_client: 0
