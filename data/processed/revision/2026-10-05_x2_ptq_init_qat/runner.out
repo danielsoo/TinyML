@@ -1,0 +1,6 @@
+Output: data/processed/revision/2026-10-05_x2_ptq_init_qat
+▶ quant_lit  (2026-10-05 16:11:47)
+✅ quant_lit finished in 9 min
+
+Summary: data/processed/revision/2026-10-05_x2_ptq_init_qat/SUMMARY.md
+All steps OK.
