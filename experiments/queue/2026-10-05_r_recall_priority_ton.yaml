@@ -1,0 +1,5 @@
+id: 2026-10-05_r_recall_priority_ton
+config_dir: config/jobs/2026-10-05_r_recall_priority_ton
+steps: recall_priority
+flags: []
+why: "Apply the CIC recall-priority recipe (distillation + clipped inputs + federated fine-tuning + client-validation threshold) to TON_IoT so one pipeline is shown on both datasets. ~30 min."
