@@ -1,0 +1,42 @@
+version: paper_v12_toniot
+data:
+  name: ton_iot
+  path: data/raw/TON_IoT
+  num_clients: 4
+  max_samples: null
+  binary: true
+  use_smote: false
+  balance_ratio: 4.0
+  partition_strategy: label_balanced
+  dirichlet_alpha: 0.3
+  text_features: true
+  eval_split: val
+model:
+  name: mlp
+evaluation:
+  prediction_threshold: 0.3
+federated:
+  num_rounds: 60
+  fraction_fit: 1.0
+  fraction_evaluate: 1.0
+  local_epochs: 3
+  batch_size: 128
+  learning_rate: 0.001
+  use_class_weights: true
+  use_focal_loss: true
+  focal_loss_alpha: 0.35
+  use_distillation: false
+  server_momentum: 0.5
+  server_learning_rate: 0.1
+  lr_decay_type: cosine
+  lr_decay_rate: 0.97
+  lr_drop_rate: 0.5
+  lr_epochs_drop: 5
+  lr_min: 0.0001
+  use_qat: false
+  min_fit_clients: 4
+  min_evaluate_clients: 4
+  min_available_clients: 4
+compression:
+  always_build_traditional: false
+  traditional_model_path: data/processed/revision/2026-10-04_d_toniot_float/baseline/models/b_fl_traditional.h5
