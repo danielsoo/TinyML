@@ -1,0 +1,12 @@
+Output: data/processed/revision/2026-10-05_u_toniot_v2
+▶ baseline_ablation  (2026-10-05 11:28:53)
+✅ baseline_ablation finished in 17 min
+▶ non_iid  (2026-10-05 11:46:33)
+✅ non_iid finished in 7 min
+▶ fixed_lr  (2026-10-05 11:53:39)
+✅ fixed_lr finished in 5 min
+▶ qat_fl  (2026-10-05 11:58:59)
+✅ qat_fl finished in 5 min
+
+Summary: data/processed/revision/2026-10-05_u_toniot_v2/SUMMARY.md
+All steps OK.

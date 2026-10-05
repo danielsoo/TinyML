@@ -1,0 +1,5 @@
+id: 2026-10-05_u_toniot_v2
+config_dir: config/paper_v12_toniot_v2
+steps: baseline_ablation,non_iid,fixed_lr,qat_fl
+flags: []
+why: "User asked to re-run the earlier TON_IoT tables with the improved model (text features + focal alpha 0.5): centralized + FL (second seed), Dirichlet, fixed LR, training-time QAT. ~2 h."

@@ -1,0 +1,16 @@
+[
+  {
+    "strategy": "label_balanced",
+    "num_clients": 4,
+    "client_distribution": "[{'client': 0, 'total': 32428, 'attack_pct': 50.0, 'normal_pct': 50.0}, {'client': 1, 'total': 32428, 'attack_pct': 50.0, 'normal_pct': 50.0}, {'client': 2, 'total': 32428, 'attack_pct': 50.0, 'normal_pct': 50.0}, {'client': 3, 'total': 32426, 'attack_pct': 50.0, 'normal_pct': 50.0}]",
+    "accuracy": 0.9813652785700704,
+    "precision": 0.9861136712749616,
+    "recall": 0.9897625655257478,
+    "attack_recall": 0.9897625655257478,
+    "f1": 0.9879347491535857,
+    "fn": 166,
+    "fp": 226,
+    "missed_attacks": 166,
+    "false_alarm_rate": 0.046878241028832195
+  }
+]
