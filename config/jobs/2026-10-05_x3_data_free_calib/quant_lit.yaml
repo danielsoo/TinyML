@@ -1,0 +1,16 @@
+# (C) Server-side calibration without client data: synthetic N(0,1) inputs or federated BatchNorm
+# statistics, with and without cross-layer equalization (DFQ); real-data rows as reference.
+part: datafree
+calib_n: 2000
+calib_draws: 3
+clip: 5.0
+bn_k: [3, 4, 6]
+models:
+  - name: cic_near_iid
+    model: data/processed/revision/2026-10-03_b_v3_float_cic/baseline/models/b_fl.h5
+    config: data/processed/revision/2026-10-03_b_v3_float_cic/baseline/configs/b_fl.yaml
+    ft_client: 0
+  - name: ton_near_iid_v2
+    model: data/processed/revision/2026-10-05_s_ton_sweep/ton_sweep/models/best_text_alpha05_test.h5
+    config: data/processed/revision/2026-10-05_s_ton_sweep/ton_sweep/configs/best_text_alpha05_test.yaml
+    ft_client: 0

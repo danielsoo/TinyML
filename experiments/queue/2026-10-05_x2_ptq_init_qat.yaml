@@ -1,0 +1,5 @@
+id: 2026-10-05_x2_ptq_init_qat
+config_dir: config/jobs/2026-10-05_x2_ptq_init_qat
+steps: quant_lit
+flags: []
+why: "Literature experiment B: PTQ-initialized QAT (order PTQ -> QAT). ~45 min."

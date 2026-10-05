@@ -1,0 +1,5 @@
+id: 2026-10-05_x1_calib_methods
+config_dir: config/jobs/2026-10-05_x1_calib_methods
+steps: quant_lit
+flags: []
+why: "Literature experiment A: PTQ calibration estimators (percentile / MSE / KL vs +-5 SD clip). ~40 min."

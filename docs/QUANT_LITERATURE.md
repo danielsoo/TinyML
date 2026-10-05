@@ -55,3 +55,17 @@
 - C. 데이터 없는 보정: 접힌 BN 통계로 합성 입력을 만들어 서버에서 보정 (FL 프라이버시와 연결). 비용 중간.
 - D. 학습되는 클리핑(PACT/LSQ식) QAT. 비용 중간~큼.
 - E. AdaRound식 반올림. INT8에선 이득이 작을 가능성이 커 우선순위 낮음.
+
+## 7. 실행 (2026-10-05): jobs x1–x4, `scripts/quant_lit_methods.py`
+| job | 실험 | 모델 |
+|---|---|---|
+| `2026-10-05_x1_calib_methods` | A. 보정 방법: tflite max / ±5 clip / per-tensor max, fq_{max, pct99.9, pct99.99, MSE, KL, clip5_max} × 15 calibration sets | CIC near-IID (job b), TON v2 (job s) |
+| `2026-10-05_x2_ptq_init_qat` | B. QAT 시작 범위: tfmot 기본 vs PTQ 보정값에서 시작(init) vs 보정값 고정(fixed), 5 draws | 같음 |
+| `2026-10-05_x3_data_free_calib` | C. 데이터 없는 보정: N(0,1) 합성 입력, BN 통계(k=3,4,6), CLE 유무, 실데이터 기준 | 같음 |
+| `2026-10-05_x4_learned_clip_qat` | D. 학습되는 클리핑(PACT식) QAT, 3가지 시작값, 5 draws | 같음 |
+
+로컬 확인(가짜 데이터, 실제 모델 구조)에서 드러난 사실 — 결과 해석에 필요:
+- `fq_` 경로(범위를 직접 지정한 fake-quant 모델)는 per-tensor TFLite PTQ와 결과가 정확히 같다(F1·FAR·놓친 수 동일). 즉 추정 방법만 바꿔 비교할 수 있다.
+- TFLite PTQ의 Dense 가중치는 **채널별(per-channel) scale**, tfmot QAT export는 **텐서당 하나(per-tensor)**. 그래서 예전 "PTQ vs QAT" 비교에는 가중치 양자화 방식 차이도 섞여 있다. `tflite_max_per_tensor` 행이 이것을 분리한다.
+- tfmot QAT의 활성 범위는 ±6에서 시작해 EMA(0.999)로 움직인다. 우리 QAT(약 140 step)는 끝나도 시작값의 약 87%가 남는다(예: ReLU 출력 최소값이 0이 아니라 −5.2). 실험 B가 이 점을 겨냥한다.
+- tfmot 입력 QuantizeLayer는 학습 중 본 전체 입력의 min/max를 따라간다(AllValuesQuantizer). 그래서 "init" 방식에서는 입력 클리핑 효과가 사라지고, "fixed"만 유지된다.
