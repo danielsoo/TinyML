@@ -379,3 +379,26 @@ kdclip reproduces job o exactly. Missed (mean, max) / FAR at client-val targets:
 Residual misses at 99.99%: Bot ~6, Infiltration 4–8, PortScan 2–4, Heartbleed ≤3; FP32 misses 7
 Infiltration at every recorded threshold → ceiling is the FL model / data (rare classes, label issues
 [24]), not compression. Paper 5.13 extended; abstract/5.8/conclusion now: 65 KB misses 27 @ 11.3% FAR.
+
+## CIC attack-type test counts (`2026-10-05_q_attack_counts`) and per-type misses (job p)
+Test flows: DoS Hulk 34,487 · DDoS 25,569 · PortScan 18,282 · GoldenEye 2,006 · FTP-Patator 1,236 ·
+Slowhttptest 1,071 · slowloris 1,063 · SSH-Patator 650 · Bot 368 · Web brute force 301 · XSS 120 ·
+Infiltration 11 · Heartbleed 5 · SQL injection 4 (train before SMOTE: Infiltration 25, Heartbleed 6).
+Missed (FP32 @0.3 / FP32 val99.99 / 65 KB fed val99.99 / 112 KB val99.99): Infiltration 7/7/8.3/6.3 of 11;
+Heartbleed 0/0/3.3/0 of 5 (compression-induced loss at 65 KB!); SQLi 1/1/0/0.3 of 4; Bot 20/11/6.0/6.7 of 368.
+Paper Table 12.
+
+## Recall-priority recipe on TON_IoT (`2026-10-05_r_recall_priority_ton`, val 8,000 samples)
+| Model | Selection | missed / 16,214 (max) | FAR |
+|---|---|---|---|
+| FP32 | fixed 0.3 | 61 | 2.76 |
+| FP32 | val ≥99.9% | 2 (t=0.021) | 96.76 |
+| 55 KB hard | fixed 0.3 | 182 (233) | 3.01 |
+| 55 KB hard | val ≥99.9% | 16 (29) | 36.44 |
+| 55 KB clip QAT | val ≥99.9% | 21 (25) | 7.02 (99.99% → t=0, FAR 100) |
+| 55 KB KD+clip | val ≥99.9% | 19 (20) | 5.94 |
+| 55 KB KD+clip | val ≥99.99% | 10 (10) | 11.17 |
+| 55 KB KD+clip+fed | val ≥99.99% | 7 (10) | 12.60 |
+| 98 KB p30 | val ≥99.9% | 21 (25) | 5.79 |
+FP32 test sweep t=0.2: 21 missed @ 5.85. → Same recipe works on both datasets; KD is what makes client-val
+thresholds usable (scores mid-range). Fed FT/p30 neutral on TON. Paper Table 13 + unified recommendation.
