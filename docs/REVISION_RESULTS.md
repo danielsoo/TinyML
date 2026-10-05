@@ -341,3 +341,24 @@ Readings: unstructured pruning never shrinks TFLM flash (gzip only); PQAT keeps 
 regrows (80→62% TON, 80→75% CIC). Clipping helps everything on TON (S50→QAT-clip = FP32 at 55 KB);
 on CIC it fixes PTQ collapses but after pruning shifts toward precision (more missed attacks). KD FT =
 fewest missed attacks at 65 KB. Order (quantize-first) no effect. Paper 5.12 / Table 10.
+
+## Recall-priority CIC deployment (`2026-10-05_o_recall_priority`, 65 KB, 3 FT draws, client-0 val threshold)
+| Model | Selection | t | missed mean (max) | recall | FAR |
+|---|---|---|---|---|---|
+| FP32 | fixed 0.3 | 0.30 | 52 | 99.94 | 6.84 |
+| FP32 | val ≥99.99% | 0.27 | 37 | 99.96 | 7.56 |
+| deployed (hard) | fixed 0.3 | 0.30 | 463 (483) | 99.46 | 5.97 |
+| deployed (hard) | val ≥99.95% | 0.005 | 44 (58) | 99.95 | 23.39 |
+| attack weight 4× | val ≥99.95% | 0.027 | 63 (81) | 99.93 | 20.31 |
+| KD α=0.5 | val ≥99.95% | 0.164 | 37 (52) | 99.96 | 19.92 |
+| KD α=0 | val ≥99.95% | 0.302 | 66 (80) | 99.92 | 18.53 |
+| KD + 50k FT | val ≥99.95% | 0.159 | 40 (56) | 99.95 | 17.94 |
+| **KD + clipped inputs** | val ≥99.9% | 0.214 | 77 (133) | 99.91 | 9.54 |
+| **KD + clipped inputs** | val ≥99.95% | 0.198 | **44 (55)** | 99.95 | **10.43** |
+| **KD + clipped inputs** | val ≥99.99% | 0.171 | 24 (25) | 99.97 | 14.33 |
+
+Hard-label QAT puts scores in the lowest INT8 output steps (t = 1–3 × 1/256) → coarse threshold control,
+high FAR. KD keeps scores mid-range; with clipped inputs best trade-off. Client-val FAR predicts test FAR
+within 0.35 pt; 99.99% target not met (≈10k val attacks, SMOTE). Equal-recall cost of compression ≈ 3 FAR
+pts (FP32 22 missed @ 11.0% vs 65 KB 24 @ 14.3%). Paper 5.13 / Table 11; abstract, 5.8, contributions,
+conclusion, limitations updated.
