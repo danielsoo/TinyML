@@ -1,0 +1,98 @@
+[
+  {
+    "entry": "cic_near_iid",
+    "type": "BENIGN",
+    "train": 1362760,
+    "test": 414736
+  },
+  {
+    "entry": "cic_near_iid",
+    "type": "DoS Hulk",
+    "train": 138362,
+    "test": 34487
+  },
+  {
+    "entry": "cic_near_iid",
+    "type": "DDoS",
+    "train": 102447,
+    "test": 25569
+  },
+  {
+    "entry": "cic_near_iid",
+    "type": "PortScan",
+    "train": 72537,
+    "test": 18282
+  },
+  {
+    "entry": "cic_near_iid",
+    "type": "DoS GoldenEye",
+    "train": 8276,
+    "test": 2006
+  },
+  {
+    "entry": "cic_near_iid",
+    "type": "FTP-Patator",
+    "train": 4697,
+    "test": 1236
+  },
+  {
+    "entry": "cic_near_iid",
+    "type": "DoS Slowhttptest",
+    "train": 4157,
+    "test": 1071
+  },
+  {
+    "entry": "cic_near_iid",
+    "type": "DoS slowloris",
+    "train": 4311,
+    "test": 1063
+  },
+  {
+    "entry": "cic_near_iid",
+    "type": "SSH-Patator",
+    "train": 2569,
+    "test": 650
+  },
+  {
+    "entry": "cic_near_iid",
+    "type": "Bot",
+    "train": 1585,
+    "test": 368
+  },
+  {
+    "entry": "cic_near_iid",
+    "type": "Web Attack \ufffd Brute Force",
+    "train": 1169,
+    "test": 301
+  },
+  {
+    "entry": "cic_near_iid",
+    "type": "Web Attack \ufffd XSS",
+    "train": 532,
+    "test": 120
+  },
+  {
+    "entry": "cic_near_iid",
+    "type": "Infiltration",
+    "train": 25,
+    "test": 11
+  },
+  {
+    "entry": "cic_near_iid",
+    "type": "Heartbleed",
+    "train": 6,
+    "test": 5
+  },
+  {
+    "entry": "cic_near_iid",
+    "type": "Web Attack \ufffd Sql Injection",
+    "train": 17,
+    "test": 4
+  },
+  {
+    "entry": "cic_near_iid",
+    "type": "SMOTE",
+    "train": 1022070,
+    "test": 0
+  }
+]

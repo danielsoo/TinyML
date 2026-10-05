@@ -1,0 +1,3 @@
+entries:
+  - name: cic_near_iid
+    config: data/processed/revision/2026-10-03_b_v3_float_cic/baseline/configs/b_fl.yaml
