@@ -1,0 +1,5 @@
+id: 2026-10-05_s_ton_sweep
+config_dir: config/jobs/2026-10-05_s_ton_sweep
+steps: ton_sweep
+flags: []
+why: "User is not yet satisfied with TON_IoT. Sweep FL training (focal alpha, SMOTE off, text-derived features, 100 rounds) selected on validation (FAR at 99.9% recall); retrain winner and evaluate on test with per-type misses. ~4 h."

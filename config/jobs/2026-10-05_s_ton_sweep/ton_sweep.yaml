@@ -1,0 +1,15 @@
+# TON_IoT federated-training sweep; every variant is selected on the validation split only
+# (FAR at 99.9% validation recall), the winner is retrained and evaluated once on test.
+base_config: data/processed/revision/2026-10-04_d_toniot_float/baseline/configs/b_fl.yaml
+reference_model: data/processed/revision/2026-10-04_d_toniot_float/baseline/models/b_fl.h5
+selection_recall: 0.999
+retrain_best: true
+variants:
+  base: {}
+  alpha05: {federated: {focal_loss_alpha: 0.5}}          # attacks are the majority class on TON
+  alpha065: {federated: {focal_loss_alpha: 0.65}}
+  nosmote: {data: {use_smote: false}}                     # SMOTE synthesizes benign rows on TON
+  text: {data: {text_features: true}}                     # length/digit/symbol counts of dropped text fields
+  rounds100: {federated: {num_rounds: 100}}
+  text_alpha05: {data: {text_features: true}, federated: {focal_loss_alpha: 0.5}}
+  text_nosmote: {data: {text_features: true, use_smote: false}}

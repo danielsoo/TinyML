@@ -130,7 +130,7 @@ def run_model(entry: dict, spec: dict, out_dir: Path) -> List[Dict[str, Any]]:
         kwargs["data_path"] = kwargs.pop("path")
     dname = data_cfg.get("name", "cicids2017")
     attack_test = None
-    if "cic" in dname.lower():
+    if "cic" in dname.lower() or "ton" in dname.lower():
         x_train, y_train, x_test, y_test, _, attack_test = load_dataset(dname, return_attack_labels=True, **kwargs)
         attack_test = np.asarray(attack_test).astype(str)
     else:

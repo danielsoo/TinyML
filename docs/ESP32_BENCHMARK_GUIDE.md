@@ -81,4 +81,4 @@ push하면 Claude가 JSON을 읽어서 논문 표 3 / 6.1절 / Appendix B 를 �
 ## 참고: 검증된 것 / 안 된 것
 - ✅ 이 펌웨어는 같은 TFLM 라이브러리(TensorFlowLite_ESP32 1.0.0)로 PC에서 빌드·실행 검증됨: 두 모델 모두 로드/실행, parity INT8 max|Δ|=1/256, FP32 완전 일치, arena 2–4 KB.
 - ⚠️ ESP32 툴체인 빌드는 클라우드 환경에서 PlatformIO 서버 접근이 막혀 확인 못 함 → 첫 빌드에서 에러 나면 위 표 참고.
-- 다른 모델을 재고 싶으면: `python scripts/prepare_esp32_benchmark.py --compressed <tflite> --baseline <tflite>` (TensorFlow 필요).
+- 다른 모델을 재고 싶으면: `python scripts/prepare_esp32_benchmark.py --cic-deploy <tflite> --ton-deploy <tflite> ...` (TensorFlow 또는 ai-edge-litert 필요).

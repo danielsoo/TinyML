@@ -693,6 +693,8 @@ def load_ton_iot(
     use_smote: bool = False,
     eval_split: str = "test",
     val_size: float = 0.1,
+    return_attack_labels: bool = False,
+    text_features: bool = False,
     **_,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """Load TON_IoT (ToN_IoT) network CSV and return (x_train, y_train, x_test, y_test).
@@ -716,6 +718,11 @@ def load_ton_iot(
         label_col: Column name for label (default 'label')
         binary: If True, normal=0 / attack=1. If False, use 'type' for multi-class.
         eval_split: "test" (default) or "val" (hold out val_size of train, never load test)
+        return_attack_labels: also return the attack sub-class ('type') of every train/test row
+            (synthetic SMOTE rows are labelled "SMOTE")
+        text_features: instead of only dropping high-cardinality text columns, add three
+            row-local numeric features per column (length, digit count, non-alphanumeric count;
+            0 when the field is '-'), which cannot leak information across rows
     """
     root = _ensure_dir(data_path)
     csv_files = sorted(root.rglob("*.csv"))
@@ -744,11 +751,14 @@ def load_ton_iot(
         from sklearn.preprocessing import LabelEncoder
         y = LabelEncoder().fit_transform(df["type"].astype(str))
 
+    types = (df["type"].astype(str).values if "type" in df.columns
+             else np.where(y != 0, "attack", "normal").astype(object))
     feature_df = df.drop(columns=[c for c in [label_col, "type"] if c in df.columns])
     dropped_id = [c for c in TON_IOT_ID_COLUMNS if c in feature_df.columns]
     feature_df = feature_df.drop(columns=dropped_id)
 
     encoded, dropped_text = [], []
+    extra = pd.DataFrame(index=feature_df.index)  # text_features: kept out of the dedup key
     for col in list(feature_df.columns):
         if pd.api.types.is_numeric_dtype(feature_df[col]):
             continue
@@ -760,6 +770,12 @@ def load_ton_iot(
             feature_df[col] = pd.factorize(feature_df[col].astype(str), sort=True)[0]
             encoded.append(col)
         else:
+            if text_features:
+                text = feature_df[col].astype(str)
+                missing = text.isin(["-", "", "nan"]).values
+                extra[f"{col}_len"] = np.where(missing, 0, text.str.len())
+                extra[f"{col}_digits"] = np.where(missing, 0, text.str.count(r"[0-9]"))
+                extra[f"{col}_special"] = np.where(missing, 0, text.str.count(r"[^A-Za-z0-9]"))
             feature_df = feature_df.drop(columns=[col])
             dropped_text.append(col)
     feature_df = feature_df.apply(pd.to_numeric, errors="coerce").fillna(0)
@@ -772,27 +788,30 @@ def load_ton_iot(
     n_before = len(X)
     dedup = pd.DataFrame(X)
     dedup["_y"] = y
-    dedup = dedup.drop_duplicates()
-    y = dedup.pop("_y").values.astype(np.int64)
-    X = dedup.values.astype("float32")
+    keep = ~dedup.duplicated().values  # same rows as drop_duplicates(); keeps 'type' aligned
+    X, y, types = X[keep], y[keep].astype(np.int64), np.asarray(types)[keep]
+    if extra.shape[1]:
+        # Dedup is keyed on the base features only, so every variant has the same rows and test split
+        X = np.hstack([X, extra.values.astype("float32")[keep]])
+        print(f"[load_ton_iot] text features added ({extra.shape[1]}): {list(extra.columns)}")
     print(f"[load_ton_iot] Removed {n_before - len(X):,} duplicates ({len(X):,} unique); "
           f"normal={np.sum(y == 0):,}, attack={np.sum(y == 1):,}")
 
     rng = np.random.default_rng(random_state)
     order = rng.permutation(len(X))
-    X, y = X[order], y[order]
+    X, y, types = X[order], y[order], types[order]
 
     if max_samples is not None and len(X) > max_samples:
-        X, _, y, _ = train_test_split(
-            X, y, train_size=max_samples, stratify=y, random_state=random_state,
+        X, _, y, _, types, _ = train_test_split(
+            X, y, types, train_size=max_samples, stratify=y, random_state=random_state,
         )
 
-    x_train, x_test, y_train, y_test = train_test_split(
-        X, y, test_size=test_size, stratify=y, random_state=random_state,
+    x_train, x_test, y_train, y_test, attack_train, attack_test = train_test_split(
+        X, y, types, test_size=test_size, stratify=y, random_state=random_state,
     )
     if eval_split == "val":
-        x_train, x_test, y_train, y_test = train_test_split(
-            x_train, y_train, test_size=val_size, stratify=y_train, random_state=random_state,
+        x_train, x_test, y_train, y_test, attack_train, attack_test = train_test_split(
+            x_train, y_train, attack_train, test_size=val_size, stratify=y_train, random_state=random_state,
         )
         print(f"[load_ton_iot] eval_split=val: evaluating on {len(y_test):,} held-out "
               f"training samples (val_size={val_size}); test split not used")
@@ -812,6 +831,7 @@ def load_ton_iot(
             balanced_idx = np.concatenate([np.where(y_train == minority_class)[0], keep_idx])
             rng.shuffle(balanced_idx)
             x_train, y_train = x_train[balanced_idx], y_train[balanced_idx]
+            attack_train = attack_train[balanced_idx]
             print(f"[load_ton_iot] Balanced: majority {n_majority} -> {n_majority_target} "
                   f"(ratio<={balance_ratio}), total={len(y_train):,}")
 
@@ -825,12 +845,16 @@ def load_ton_iot(
         from imblearn.over_sampling import SMOTE
         counts_before = np.bincount(y_train.astype(int))
         k = max(1, min(5, int(counts_before.min()) - 1))
+        n_before_smote = len(y_train)
         x_train, y_train = SMOTE(random_state=random_state, k_neighbors=k).fit_resample(x_train, y_train)
         x_train = x_train.astype("float32")
+        attack_train = np.concatenate([attack_train, np.array(["SMOTE"] * (len(y_train) - n_before_smote), dtype=object)])
         print(f"[load_ton_iot] SMOTE applied: train -> {len(y_train):,} "
               f"(0={np.sum(y_train == 0):,}, 1={np.sum(y_train == 1):,})")
 
     print(f"[load_ton_iot] Features: {x_train.shape[1]}, Train: {len(y_train):,}, Test: {len(y_test):,}")
+    if return_attack_labels:
+        return x_train, y_train, x_test, y_test, attack_train, attack_test
     return x_train, y_train, x_test, y_test
 
 
