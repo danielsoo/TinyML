@@ -1,0 +1,22 @@
+# Deployment recipe + the two levers found in jobs x2/x3 (docs/REVISION_RESULTS.md, "Literature
+# quantization methods A-D"): QAT activation ranges calibrated on the client's clipped fine-tuning
+# inputs and held fixed (range_fix), and cross-layer equalization before QAT (cle).
+# Same seeds / validation split / thresholds as the deployed model's job (job t).
+ft_samples: 10000
+val_samples: 8000
+draws: 3
+clip: 5.0
+calib_n: 2000
+recall_targets: [0.999, 0.9995, 0.9999]
+fixed_thresholds: [0.1, 0.2, 0.3]
+variants:
+  kdclip_fed: {kd_alpha: 0.5, clip: true, federated: true}                     # deployed recipe (reference)
+  kdclip_fed_fix: {kd_alpha: 0.5, clip: true, federated: true, range_fix: pct9999}
+  kdclip_fed_fixmax: {kd_alpha: 0.5, clip: true, federated: true, range_fix: max}
+  kdclip_fed_cle: {kd_alpha: 0.5, clip: true, federated: true, cle: true}
+  kdclip_fed_fix_cle: {kd_alpha: 0.5, clip: true, federated: true, range_fix: pct9999, cle: true}
+models:
+  - name: ton_near_iid_v2
+    model: data/processed/revision/2026-10-05_s_ton_sweep/ton_sweep/models/best_text_alpha05_test.h5
+    config: data/processed/revision/2026-10-05_s_ton_sweep/ton_sweep/configs/best_text_alpha05_test.yaml
+    ft_client: 0

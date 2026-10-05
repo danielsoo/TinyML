@@ -1,0 +1,22 @@
+# Deployment recipe + the two levers found in jobs x2/x3 (docs/REVISION_RESULTS.md, "Literature
+# quantization methods A-D"): QAT activation ranges calibrated on the client's clipped fine-tuning
+# inputs and held fixed (range_fix), and cross-layer equalization before QAT (cle).
+# Same seeds / validation split / thresholds as the deployed model's job (job p).
+ft_samples: 10000
+val_samples: 20000
+draws: 3
+clip: 5.0
+calib_n: 2000
+recall_targets: [0.999, 0.9995, 0.9999]
+fixed_thresholds: [0.1, 0.2, 0.3]
+variants:
+  kdclip_p30: {kd_alpha: 0.5, clip: true, prune_ratio: 0.3}                     # deployed recipe (reference)
+  kdclip_p30_fix: {kd_alpha: 0.5, clip: true, prune_ratio: 0.3, range_fix: pct9999}
+  kdclip_p30_fixmax: {kd_alpha: 0.5, clip: true, prune_ratio: 0.3, range_fix: max}
+  kdclip_p30_cle: {kd_alpha: 0.5, clip: true, prune_ratio: 0.3, cle: true}
+  kdclip_p30_fix_cle: {kd_alpha: 0.5, clip: true, prune_ratio: 0.3, range_fix: pct9999, cle: true}
+models:
+  - name: cic_near_iid
+    model: data/processed/revision/2026-10-03_b_v3_float_cic/baseline/models/b_fl.h5
+    config: data/processed/revision/2026-10-03_b_v3_float_cic/baseline/configs/b_fl.yaml
+    ft_client: 0

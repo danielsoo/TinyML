@@ -22,7 +22,10 @@ Spec (YAML):
   fixed_thresholds: [0.05, 0.1, 0.2, 0.3, 0.5]
   variants:            # name -> {kd_alpha: null|float, kd_temperature: float, attack_weight: float,
                        #          clip: bool, ft_samples: int, prune_ratio: float, ft_epochs: int,
-                       #          qat_epochs: int, federated: bool (fine-tune on all clients with FedAvg)}
+                       #          qat_epochs: int, federated: bool (fine-tune on all clients with FedAvg),
+                       #          range_fix: null|estimator (QAT activation ranges calibrated on the
+                       #            client's fine-tuning inputs and held fixed; quant_lit_methods.py, job x2),
+                       #          cle: bool (cross-layer equalization before QAT; job x3)}
     hard: {}
     kd05: {kd_alpha: 0.5}
   models:
@@ -62,14 +65,16 @@ from scripts.quant_distill_ablation import convert, kd_targets
 from src.data.loader import load_dataset, partition_data
 from src.modelcompression.pruning import apply_structured_pruning
 from src.tinyml.export_tflite import _strip_bn_dropout_for_qat, export_tflite_qat
+from scripts.quant_lit_methods import FreezeRanges, cross_layer_equalize, estimate_ranges, set_ranges
 
 
-def _fit_w(model, x, y, w, epochs: int) -> None:
+def _fit_w(model, x, y, w, epochs: int, callbacks=None) -> None:
     # Same settings as compression_ablation._fit, plus optional per-sample weights
-    model.fit(x, y, sample_weight=w, epochs=epochs, batch_size=128, validation_split=0.1, verbose=0)
+    model.fit(x, y, sample_weight=w, epochs=epochs, batch_size=128, validation_split=0.1, verbose=0,
+              callbacks=callbacks or [])
 
 
-def _fedavg_round(global_model, clients, epochs: int, qat: bool = False) -> None:
+def _fedavg_round(global_model, clients, epochs: int, qat: bool = False, callbacks=None) -> None:
     """One FedAvg round: every client fine-tunes a copy of global_model; weights are averaged by size."""
     states, sizes = [], []
     for x, t, w in clients:
@@ -80,7 +85,7 @@ def _fedavg_round(global_model, clients, epochs: int, qat: bool = False) -> None
             m = keras.models.clone_model(global_model)
         m.set_weights(global_model.get_weights())
         m.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
-        _fit_w(m, x, t, w, epochs)
+        _fit_w(m, x, t, w, epochs, callbacks)
         states.append(m.get_weights())
         sizes.append(len(t))
     total = float(sum(sizes))
@@ -207,6 +212,21 @@ def run_model(entry: dict, spec: dict, out_dir: Path) -> List[Dict[str, Any]]:
                 if ratio > 0:
                     pr = apply_structured_pruning(pr, pruning_ratio=ratio, skip_last_layer=True, verbose=False)
                     pr.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
+
+                def make_qat(model):
+                    """QAT model; optionally CLE first and activation ranges calibrated on the
+                    client's (clipped) fine-tuning inputs, held fixed during QAT."""
+                    model = _strip_bn_dropout_for_qat(model)
+                    if v.get("cle"):
+                        model, _ = cross_layer_equalize(model)
+                    qm = tfmot.quantization.keras.quantize_model(model)
+                    rng_fixed = None
+                    if v.get("range_fix"):
+                        rng_fixed = estimate_ranges(model, xf[:int(spec.get("calib_n", 2000))], str(v["range_fix"]))
+                        set_ranges(qm, rng_fixed)
+                    qm.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
+                    return qm, rng_fixed
+
                 if v.get("federated"):
                     # every client fine-tunes on its own data; FedAvg after each epoch (client 0 = xf)
                     clients = [(xf, tgt, w)]
@@ -222,15 +242,18 @@ def run_model(entry: dict, spec: dict, out_dir: Path) -> List[Dict[str, Any]]:
                         clients.append((xc, tc, np.where(yc == 1, float(v.get("attack_weight", 1.0)), 1.0).astype(np.float32)))
                     for _ in range(ft_ep):
                         _fedavg_round(pr, clients, 1)
-                    q = tfmot.quantization.keras.quantize_model(_strip_bn_dropout_for_qat(pr))
-                    q.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
+                    q, ranges = make_qat(pr)
+                    cb = [FreezeRanges(ranges)] if ranges else None
                     for _ in range(qat_ep):
-                        _fedavg_round(q, clients, 1, qat=True)
+                        _fedavg_round(q, clients, 1, qat=True, callbacks=cb)
+                        if ranges:
+                            set_ranges(q, ranges)  # exact after averaging
                 else:
                     _fit_w(pr, xf, tgt, w, ft_ep)
-                    q = tfmot.quantization.keras.quantize_model(_strip_bn_dropout_for_qat(pr))
-                    q.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
-                    _fit_w(q, xf, tgt, w, qat_ep)
+                    q, ranges = make_qat(pr)
+                    _fit_w(q, xf, tgt, w, qat_ep, [FreezeRanges(ranges)] if ranges else None)
+                    if ranges:
+                        set_ranges(q, ranges)
                 p = tdir / f"{vname}_d{draw}.tflite"
                 export_tflite_qat(q, str(p))
                 evaluate(vname, draw, p, round(p.stat().st_size / 1024, 2))
