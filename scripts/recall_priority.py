@@ -20,7 +20,9 @@ Spec (YAML):
   clip: 5.0
   recall_targets: [0.999, 0.9995]
   fixed_thresholds: [0.05, 0.1, 0.2, 0.3, 0.5]
-  variants:            # name -> {kd_alpha: null|float, attack_weight: float, clip: bool, ft_samples: int}
+  variants:            # name -> {kd_alpha: null|float, kd_temperature: float, attack_weight: float,
+                       #          clip: bool, ft_samples: int, prune_ratio: float, ft_epochs: int,
+                       #          qat_epochs: int, federated: bool (fine-tune on all clients with FedAvg)}
     hard: {}
     kd05: {kd_alpha: 0.5}
   models:
@@ -36,6 +38,8 @@ import os
 os.environ.setdefault("TF_USE_LEGACY_KERAS", "1")
 
 import argparse
+import collections
+import json
 import statistics
 import sys
 import traceback
@@ -48,6 +52,7 @@ if str(ROOT) not in sys.path:
 
 import numpy as np
 import tensorflow as tf
+from tensorflow import keras
 
 import tensorflow_model_optimization as tfmot
 
@@ -62,6 +67,25 @@ from src.tinyml.export_tflite import _strip_bn_dropout_for_qat, export_tflite_qa
 def _fit_w(model, x, y, w, epochs: int) -> None:
     # Same settings as compression_ablation._fit, plus optional per-sample weights
     model.fit(x, y, sample_weight=w, epochs=epochs, batch_size=128, validation_split=0.1, verbose=0)
+
+
+def _fedavg_round(global_model, clients, epochs: int, qat: bool = False) -> None:
+    """One FedAvg round: every client fine-tunes a copy of global_model; weights are averaged by size."""
+    states, sizes = [], []
+    for x, t, w in clients:
+        if qat:
+            with tfmot.quantization.keras.quantize_scope():
+                m = keras.models.clone_model(global_model)
+        else:
+            m = keras.models.clone_model(global_model)
+        m.set_weights(global_model.get_weights())
+        m.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
+        _fit_w(m, x, t, w, epochs)
+        states.append(m.get_weights())
+        sizes.append(len(t))
+    total = float(sum(sizes))
+    global_model.set_weights([sum(st[i] * (n / total) for st, n in zip(states, sizes))
+                              for i in range(len(states[0]))])
 
 
 def tflite_probs(path: Path, x: np.ndarray, batch: int = 4096) -> np.ndarray:
@@ -104,7 +128,13 @@ def run_model(entry: dict, spec: dict, out_dir: Path) -> List[Dict[str, Any]]:
     kwargs = {k: v for k, v in data_cfg.items() if k not in {"name", "num_clients"}}
     if "path" in kwargs:
         kwargs["data_path"] = kwargs.pop("path")
-    x_train, y_train, x_test, y_test = load_dataset(data_cfg.get("name", "cicids2017"), **kwargs)
+    dname = data_cfg.get("name", "cicids2017")
+    attack_test = None
+    if "cic" in dname.lower():
+        x_train, y_train, x_test, y_test, _, attack_test = load_dataset(dname, return_attack_labels=True, **kwargs)
+        attack_test = np.asarray(attack_test).astype(str)
+    else:
+        x_train, y_train, x_test, y_test = load_dataset(dname, **kwargs)
     parts = partition_data(
         x_train, y_train, int(data_cfg.get("num_clients", 4)),
         strategy=data_cfg.get("partition_strategy", "label_balanced"),
@@ -124,16 +154,26 @@ def run_model(entry: dict, spec: dict, out_dir: Path) -> List[Dict[str, Any]]:
     tdir.mkdir(parents=True, exist_ok=True)
     rows: List[Dict[str, Any]] = []
 
+    def missed_by_type(pt: np.ndarray, t: float) -> str:
+        if attack_test is None:
+            return ""
+        miss = (y_test == 1) & (pt < t)
+        return json.dumps(dict(collections.Counter(attack_test[miss]).most_common()))
+
     def evaluate(variant: str, draw: int, path: Path, size_kb: float):
         pt, pv = tflite_probs(path, x_test), tflite_probs(path, xv)
         for t in fixed:
-            rows.append({"model": name, "variant": variant, "draw": draw, "size_kb": size_kb,
-                         "selection": f"fixed {t}", **metrics_at(pt, y_test, t)})
+            r = {"model": name, "variant": variant, "draw": draw, "size_kb": size_kb,
+                 "selection": f"fixed {t}", **metrics_at(pt, y_test, t)}
+            if abs(t - 0.3) < 1e-9:
+                r["missed_by_type"] = missed_by_type(pt, t)
+            rows.append(r)
         for tr in targets:
             t = threshold_for_recall(pv, yv, tr)
             r = {"model": name, "variant": variant, "draw": draw, "size_kb": size_kb,
                  "selection": f"val recall>={tr}", **metrics_at(pt, y_test, t)}
             r["val_far"] = metrics_at(pv, yv, t)["false_alarm_rate"]
+            r["missed_by_type"] = missed_by_type(pt, t)
             rows.append(r)
         sel = [r for r in rows if r["variant"] == variant and r["draw"] == draw]
         print(f"  [{name} d{draw}] {variant:12s} " + " | ".join(
@@ -160,11 +200,37 @@ def run_model(entry: dict, spec: dict, out_dir: Path) -> List[Dict[str, Any]]:
                 else:
                     tgt = yf
                 w = np.where(yf == 1, float(v.get("attack_weight", 1.0)), 1.0).astype(np.float32)
-                pr = apply_structured_pruning(_clone(base), pruning_ratio=PRUNE_RATIO, skip_last_layer=True, verbose=False)
-                _fit_w(pr, xf, tgt, w, PRUNE_FT_EPOCHS)
-                q = tfmot.quantization.keras.quantize_model(_strip_bn_dropout_for_qat(pr))
-                q.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
-                _fit_w(q, xf, tgt, w, QAT_FT_EPOCHS)
+                ratio = float(v.get("prune_ratio", PRUNE_RATIO))
+                ft_ep = int(v.get("ft_epochs", PRUNE_FT_EPOCHS))
+                qat_ep = int(v.get("qat_epochs", QAT_FT_EPOCHS))
+                pr = _clone(base)
+                if ratio > 0:
+                    pr = apply_structured_pruning(pr, pruning_ratio=ratio, skip_last_layer=True, verbose=False)
+                    pr.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
+                if v.get("federated"):
+                    # every client fine-tunes on its own data; FedAvg after each epoch (client 0 = xf)
+                    clients = [(xf, tgt, w)]
+                    for cid in range(len(parts)):
+                        if cid == k:
+                            continue
+                        jdx = np.random.default_rng(1000 * (cid + 1) + draw).permutation(len(parts[cid]["y"]))[:n_ft]
+                        xc, yc = parts[cid]["x"][jdx], parts[cid]["y"][jdx].astype(np.float32)
+                        if v.get("clip"):
+                            xc = np.clip(xc, -clip, clip)
+                        tc = (kd_targets(base, xc, yc, float(v.get("kd_temperature", 2.0)), float(v["kd_alpha"]))
+                              if v.get("kd_alpha") is not None else yc)
+                        clients.append((xc, tc, np.where(yc == 1, float(v.get("attack_weight", 1.0)), 1.0).astype(np.float32)))
+                    for _ in range(ft_ep):
+                        _fedavg_round(pr, clients, 1)
+                    q = tfmot.quantization.keras.quantize_model(_strip_bn_dropout_for_qat(pr))
+                    q.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
+                    for _ in range(qat_ep):
+                        _fedavg_round(q, clients, 1, qat=True)
+                else:
+                    _fit_w(pr, xf, tgt, w, ft_ep)
+                    q = tfmot.quantization.keras.quantize_model(_strip_bn_dropout_for_qat(pr))
+                    q.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
+                    _fit_w(q, xf, tgt, w, qat_ep)
                 p = tdir / f"{vname}_d{draw}.tflite"
                 export_tflite_qat(q, str(p))
                 evaluate(vname, draw, p, round(p.stat().st_size / 1024, 2))
