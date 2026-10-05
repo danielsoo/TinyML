@@ -7,7 +7,7 @@
 #   bash scripts/run_revision_experiments.sh --with-failed --with-scaling   # + fixed-LR row, 20/50 clients
 #   bash scripts/run_revision_experiments.sh --config-dir config/tuning/<job>   # alternate configs
 #   bash scripts/run_revision_experiments.sh --steps non_iid          # subset of: baseline_ablation,non_iid,client_scaling,
-#                                                                     #   fixed_lr,robustness,compression_ablation,quant_distill,local_only,ptq_calibration,qat_stability,compression_combos
+#                                                                     #   fixed_lr,robustness,compression_ablation,quant_distill,local_only,ptq_calibration,qat_stability,compression_combos,recall_priority
 #   bash scripts/run_revision_experiments.sh --steps compression_ablation --config-dir <dir with compression_ablation.yaml>
 # Re-running with the same --out resumes: finished steps are skipped.
 set -uo pipefail
@@ -109,6 +109,10 @@ if wanted compression_combos; then
   step compression_combos python scripts/compression_combos.py \
     --spec "$CONFIG_DIR/compression_combos.yaml" --output-dir "$OUT/compression_combos" || FAILED=1
 fi
+if wanted recall_priority; then
+  step recall_priority python scripts/recall_priority.py \
+    --spec "$CONFIG_DIR/recall_priority.yaml" --output-dir "$OUT/recall_priority" || FAILED=1
+fi
 if wanted compression_ablation; then
   step compression_ablation python scripts/compression_ablation.py \
     --spec "$CONFIG_DIR/compression_ablation.yaml" --output-dir "$OUT/compression_ablation" || FAILED=1
@@ -127,7 +131,7 @@ fi
   echo "- host: $(uname -srm), $(nproc) cores"
   for f in "$OUT"/*.done; do [ -f "$f" ] && echo "- $(basename "$f" .done): $(( $(cat "$f") / 60 )) min"; done
   echo
-  for md in "$OUT"/baseline/baseline_ablation.md "$OUT"/non_iid/non_iid_ablation.md "$OUT"/client_scaling/non_iid_ablation.md "$OUT"/compression_ablation/compression_ablation.md "$OUT"/fixed_lr/non_iid_ablation.md "$OUT"/robustness/robustness.md "$OUT"/quant_distill/quant_distill.md "$OUT"/local_only/local_only.md "$OUT"/ptq_calibration/ptq_calibration.md "$OUT"/qat_stability/qat_stability.md "$OUT"/compression_combos/compression_combos.md; do
+  for md in "$OUT"/baseline/baseline_ablation.md "$OUT"/non_iid/non_iid_ablation.md "$OUT"/client_scaling/non_iid_ablation.md "$OUT"/compression_ablation/compression_ablation.md "$OUT"/fixed_lr/non_iid_ablation.md "$OUT"/robustness/robustness.md "$OUT"/quant_distill/quant_distill.md "$OUT"/local_only/local_only.md "$OUT"/ptq_calibration/ptq_calibration.md "$OUT"/qat_stability/qat_stability.md "$OUT"/compression_combos/compression_combos.md "$OUT"/recall_priority/recall_priority.md; do
     [ -f "$md" ] && { cat "$md"; echo; }
   done
 } > "$OUT/SUMMARY.md"

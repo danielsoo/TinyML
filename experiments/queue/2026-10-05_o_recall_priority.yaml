@@ -1,0 +1,5 @@
+id: 2026-10-05_o_recall_priority
+config_dir: config/jobs/2026-10-05_o_recall_priority
+steps: recall_priority
+flags: []
+why: "User wants CIC to miss as few attacks as possible: distillation / attack-weighted fine-tuning for the 65 KB model plus client-validation threshold selection for recall targets 99.9-99.99%. ~1 h."

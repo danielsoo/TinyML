@@ -1,0 +1,20 @@
+# CIC-IDS2017: make the 65 KB INT8 model miss as few attacks as the FP32 federated model (52 of 85,173).
+# Structured 50% -> FT -> QAT; fine-tuning targets varied; threshold chosen on client-0 held-out data.
+ft_samples: 10000
+val_samples: 20000
+draws: 3
+clip: 5.0
+recall_targets: [0.999, 0.9995, 0.9999]
+fixed_thresholds: [0.05, 0.1, 0.2, 0.3, 0.5]
+variants:
+  hard: {}                                  # deployed recipe
+  kd05: {kd_alpha: 0.5}                     # distillation, half hard label
+  kd0: {kd_alpha: 0.0}                      # pure teacher soft targets
+  cw4: {attack_weight: 4.0}                 # attack-weighted loss
+  kd05_clip: {kd_alpha: 0.5, clip: true}    # distillation + clipped inputs
+  kd05_ft50k: {kd_alpha: 0.5, ft_samples: 50000}
+models:
+  - name: cic_near_iid
+    model: data/processed/revision/2026-10-03_b_v3_float_cic/baseline/models/b_fl.h5
+    config: data/processed/revision/2026-10-03_b_v3_float_cic/baseline/configs/b_fl.yaml
+    ft_client: 0
