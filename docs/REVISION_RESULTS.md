@@ -512,3 +512,18 @@ calibration; no client data leaves the clients. CLE mainly fixes per-tensor weig
 CIC: default 88.02 / 5.44 / 513; learned from max 88.21 / 5.29 / 718; from pct99.99 87.67 / 5.58 / 652;
 from ±5 SD 88.73 / 5.03 / 676. TON: all 98.99–99.00, FAR 2.46–2.59, 199–208 missed (default 204).
 No gain: the hidden activation ranges are not the bottleneck (the input range is, see B).
+
+## Deployed recall-priority recipes + fixed QAT ranges / CLE (jobs `2026-10-05_x5_recall_fixed_cic`, `_x6_recall_fixed_ton`)
+Same seeds and client validation split as jobs p / t; reference rows reproduce them exactly.
+Missed (mean, max of 3 draws) / FAR mean at val recall ≥ 99.99%:
+| variant | CIC 112 KB (kdclip_p30) | TON 57 KB (kdclip_fed) |
+|---|---|---|
+| deployed recipe | 23.3 (27) / 9.65% | 12.0 (14) / 6.61% |
+| + ranges fixed at pct 99.99 | 28.7 (33) / 8.63% | 8.3 (10) / 7.12% |
+| + ranges fixed at max | 26.3 (34) / 9.33% | 11.0 (16) / 6.60% |
+| + CLE | 29.3 (43) / 35.27% (one draw 84%) | 12.7 (17) / 7.42% |
+| + fixed pct 99.99 + CLE | 36.3 (59) / 9.97% | 14.3 (17) / 7.30% |
+At matched FAR the curves coincide (TON fixed 0.2: 13.3 vs 14.3 missed at 6.3%; val ≥99.9%: 30 vs 30 at 3.6–3.7%),
+so fixed ranges shift the operating point, not the trade-off. No deployment change: the recipe already
+fine-tunes on clipped inputs, which bounds the input range (the lever found in job x2). Paper: LaTeX §4.8
+paragraph + provenance X5/X6; docx paragraph after Table 13.

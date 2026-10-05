@@ -620,7 +620,13 @@ trades flash for false alarms: at 112\,KB the model misses 23 attacks at 9.7\%, 
 reaches the FP32 model's miss count at a lower FAR (51 at 6.7\% vs.\ 52 at 6.8\%). On \ton, federated
 fine-tuning also makes the 57\,KB model stable across draws: 12 of 16,215 attacks missed (at most 14)
 at 6.6\% FAR (at most 6.8\%), or 30 at 3.7\%. A 4$\times$ attack weight, pure teacher targets,
-temperature 4 and five times more fine-tuning data did not improve these trade-offs.
+temperature 4 and five times more fine-tuning data did not improve these trade-offs. Neither did the
+two levers of \S\ref{sec:quantlit} (means over the same three draws, 99.99\% target): holding the QAT
+ranges at calibrated values moves the operating point along the same curve (\cic 112\,KB: 28.7 missed
+at 8.6\% FAR vs.\ 23.3 at 9.7\%; \ton 57\,KB: 8.3 at 7.1\% vs.\ 12.0 at 6.6\%; at a fixed 0.2 threshold
+13.3 vs.\ 14.3 at 6.3\%), and CLE before QAT makes \cic worse (one draw reaches 84\% FAR). The recipe
+already clips the fine-tuning inputs, which bounds the input range, the lever identified there.
+\src{runs X5, X6}
 
 The client's held-out data is a reliable guide for FAR (within 0.35 points of the test FAR per draw on \cic and 0.7 on \ton).
 Recall targets up to 99.95\% are met on \cic; very high targets need more validation attacks than one
@@ -825,6 +831,7 @@ T & 2026-10-05\_t\_recall\_priority\_ton2 \\
 U & 2026-10-05\_u\_toniot\_v2 (\ton centralized, 2nd run, fixed LR, Dirichlet, QAT) \\
 V, W & 2026-10-05\_v\_toniot\_v2\_downstream, \_w\_toniot\_v2\_sweep\_robustness \\
 X1--X4 & 2026-10-05\_x1\_calib\_methods, \_x2\_ptq\_init\_qat, \_x3\_data\_free\_calib, \_x4\_learned\_clip\_qat \\
+X5, X6 & 2026-10-05\_x5\_recall\_fixed\_cic, \_x6\_recall\_fixed\_ton \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
