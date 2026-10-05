@@ -313,3 +313,31 @@ Mechanism: worst conversions have the widest float activation maxima (TON F1 12�
 9,609; most others 52–230), not strictly monotonic. Clipped calibration = one-line fix.
 Paper 5.9 updated (Table 7 clipped row, mechanism, fix, QAT draw spread); abstract/contributions/
 6.3/conclusion mention the fix. Remaining PENDING: ESP32 only.
+
+## Compression pipeline combinations (`2026-10-05_n_compression_combos`, 3 FT draws, client 0 only)
+All 49 runs OK. Mean F1 (range), flash / gzip KB, CIC mean missed attacks:
+
+| Pipeline | Flash TON/CIC | gzip | TON F1 | CIC F1 | CIC FN |
+|---|---|---|---|---|---|
+| FP32 | 720/803 | 672/755 | 99.40 | 85.70 | 52 |
+| PTQ | 206/227 | 156/150 | 98.87 (98.37–99.26) | 82.36 (81.04–83.21) | 163 |
+| PTQ clipped | 206/227 | 156/150 | 99.34 | 83.97 (83.27–84.35) | 57 |
+| QAT FT | 186/207 | 125/99 | 99.10 | 90.51 (89.27–91.99) | 580 |
+| S50 → FT → PTQ | 65/75 | 47/47 | 98.50 (97.44–99.21) | 84.39 (79.37–87.27) | 500 |
+| S50 → FT → PTQ clipped | 65/75 | 47/47 | 99.37 | 87.67 (86.86–88.09) | 830 |
+| S50 → FT → QAT (deployed) | 55/65 | 39/34 | 99.08 (98.88–99.38) | 88.37 (87.64–89.28) | 498 |
+| S50 → FT → QAT clipped inputs | 55/65 | 39/35 | 99.40 (99.34–99.44) | 90.36 (88.54–92.44) | 1,163 |
+| S50 → KD FT → QAT | 55/65 | 39/34 | 99.13 | 86.04 | 274 |
+| S50 → KD FT → PTQ clipped | 65/75 | 47/47 | 99.37 | 84.85 | 237 |
+| QAT → S50 → FT → QAT | 55/65 | 39/34 | 99.12 | 88.64 (86.65–90.58) | 687 |
+| M50 → PTQ clipped | 206/227 | 124/128 | 99.40 | 89.72 | 491 |
+| M50 → PQAT | 186/207 | 100/90 | 99.12 | 90.70 | 487 |
+| M80 → PTQ clipped | 206/227 | 71/76 | 99.34 | 87.98 | 923 |
+| M80 → PQAT | 186/207 | 56/57 | 98.85 | 89.77 | 609 |
+| M80 → standard QAT | 186/207 | 76/62 | 99.07 | 89.77 | 571 |
+| S50 → FT → M50 → PQAT | 55/65 | 31/31 | 98.95 | 88.66 | 699 |
+
+Readings: unstructured pruning never shrinks TFLM flash (gzip only); PQAT keeps sparsity, standard QAT
+regrows (80→62% TON, 80→75% CIC). Clipping helps everything on TON (S50→QAT-clip = FP32 at 55 KB);
+on CIC it fixes PTQ collapses but after pruning shifts toward precision (more missed attacks). KD FT =
+fewest missed attacks at 65 KB. Order (quantize-first) no effect. Paper 5.12 / Table 10.
