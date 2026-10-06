@@ -53,7 +53,7 @@ const respItems = [
   ["Minor items: focal-loss motivation, duplicate table rows, BatchNorm derivation (81B)", "Section 3.2 gives the focal-loss setting. The duplicate-row table came from the superseded sweep and is removed. The BatchNorm folding derivation is in Appendix A, corrected for our post-activation BatchNorm placement."],
   ["Practical meaning of Attack Recall and false positives (81C)", "Section 5.8 reports missed-attack and false-alarm rates for every headline model."],
   ["Device heterogeneity (81C)", "Discussed in Section 6.1."],
-  ["Related work depth and citation formatting (81C)", "Section 2 is reorganized by topic (24 references)."],
+  ["Related work depth and citation formatting (81C)", "Section 2 is reorganized by topic and now covers federated and lightweight intrusion detection, TinyML compilers and on-device training, federated compression, calibration and QAT-range methods, and deployment-fault studies (49 references), including the closest prior federated TinyML IDS [34]."],
   ["Incremental novelty (meta-review)", "Section 6.3 states which results we consider non-obvious, including the negative QAT result and four silent failure modes in a common FL/TinyML toolchain."],
 ];
 for (const [k, v] of respItems) {
@@ -91,6 +91,10 @@ children.push(P(
   "IoT deployments expose billions of resource-constrained devices to denial-of-service attacks, botnet recruitment, and other network intrusions [1]. Machine-learning-based IDS detect such traffic well [13], but most are designed for centralized training with resources beyond typical IoT hardware. CIC-IDS2017 [13] remains the most widely used benchmark. Its known labelling and flow-construction issues [24] mean that absolute numbers are hard to compare across papers. TON_IoT [15] and Bot-IoT [14] target IoT-specific traffic. We use CIC-IDS2017 and the TON_IoT network dataset."
 ));
 
+children.push(P(
+  "Federated and lightweight intrusion detection. DÏoT trains per-device-type anomaly detectors across security gateways with federated learning [35]; Belarbi et al. study federated IDS on TON_IoT with one client per IP address [37]; and FLAME defends federated learning against backdoors, including on IoT IDS data [36]. Closest to our work, Li et al. combine federated learning and TinyML for intrusion detection on N-BaIoT in an IoT/edge/cloud architecture, using an outlier-resistant scaler, feature reduction and quantization [34]. We add an identically configured centralized and a local-only baseline on two datasets, a step-by-step analysis of compression without pooled data, missed-attack accounting, an analysis of quantization calibration, and the toolchain failures of Section 6.2. Outside federated learning, lightweight detectors run on gateways (Kitsune [38]) or programmable switches (HorusEye [39], NetBeacon [40]); we target the endpoint microcontroller."
+));
+
 children.push(H2("2.2 Federated Learning"));
 children.push(P(
   "FedAvg [8] trains a shared model by iteratively aggregating client updates, and Konečný et al. study how to reduce its communication cost [7]. Client data is rarely IID. FedAvgM, which we use, adds server momentum to stabilize training under non-identical label distributions [10]. Zhao et al. characterize the degradation as client data becomes skewed [20], and FedProx adds a proximal term for the same reason [11]. Following this line of work, we evaluate a Dirichlet(α = 0.3) label partition alongside a near-IID one."
@@ -104,9 +108,13 @@ children.push(P(
   "Calibration need not use the extremes of each activation: percentile and entropy (KL) calibration [25] and the MSE-optimal clip of ACIQ [26] clip the ranges, and Wu et al. recommend calibrating first and then fine-tuning with QAT [25]. PACT [27] and LSQ [28] learn the clip or the step size during QAT, and DFQ quantizes without data by equalizing weight ranges across layers (cross-layer equalization, CLE) [29]. Distillation has been combined with quantization before [30], and TensorFlow Model Optimization provides sparsity-preserving QAT because standard QAT re-densifies pruned weights [33]. In federated learning, quantization has mainly been used to compress model updates [31]; Gupta et al. train federated models that stay accurate under later quantization [32]. Our input clipping (Section 5.9) is an instance of clipped calibration; Section 5.15 compares it with these estimators and with QAT-range, data-free and learned-clipping variants on our models."
 ));
 
+children.push(P(
+  "MCUNet co-designs models and the inference engine for microcontrollers [41], Lin et al. train on 256 KB of memory [42], and SeeDot [46] and MinUn [45] compile fixed-point and mixed-precision models for microcontrollers. In federated learning, HeteroFL trains width-reduced submodels and aggregates BatchNorm statistics after training [43], and FedTiny prunes without pooled data during training [44]; we compress an already-trained federated model and use its BatchNorm statistics for INT8 calibration (Section 5.15)."
+));
+
 children.push(H2("2.4 Adversarial Robustness of Compressed Models"));
 children.push(P(
-  "FGSM [3] and PGD [9] are the standard gradient-based attacks used to evaluate adversarial robustness. Gorsline et al. study how quantization level affects robustness [21], Song et al. recover robustness lost to weight quantization [22], and Ayaz et al. study deeply quantized TinyML-scale networks [23]. We evaluate whether the federated model's robustness carries over to its compressed INT8 derivatives in a federated IDS setting."
+  "FGSM [3] and PGD [9] are the standard gradient-based attacks used to evaluate adversarial robustness. Lin et al. show that quantization can amplify adversarial noise [47]. Gorsline et al. study how quantization level affects robustness [21], Song et al. recover robustness lost to weight quantization [22], and Ayaz et al. study deeply quantized TinyML-scale networks [23]. We evaluate whether the federated model's robustness carries over to its compressed INT8 derivatives in a federated IDS setting."
 ));
 
 children.push(H2("2.5 Positioning"));
@@ -503,7 +511,7 @@ children.push(PP([
 
 children.push(H2("6.2 Four Silent Failure Modes"));
 children.push(P(
-  "Re-running the reviewers' requested experiments exposed four errors in our own pipeline. None raised an exception, and each produced plausible numbers. We describe them because the same components (Flower, TensorFlow Model Optimization, Keras BatchNorm) are widely used, and because the earlier version of this paper reported results built on the first two."
+  "Re-running the reviewers' requested experiments exposed four errors in our own pipeline. None raised an exception, and each produced plausible numbers. Empirical studies report that deployment and model-conversion faults often produce wrong models without errors [48, 49]. We describe them because the same components (Flower, TensorFlow Model Optimization, Keras BatchNorm) are widely used, and because the earlier version of this paper reported results built on the first two."
 ));
 const failureModes = [
   ["Weight exchange without scales", "Clients sent int8-rounded weights without their per-tensor scales, and the server averaged the integer codes as if they were weights. Every tensor was therefore rescaled to max |w| = 127 each round, which was visible afterwards as global weights and QAT ranges at exactly ±127. Check: assert that dequantize(quantize(w)) ≈ w on the receiving side."],
@@ -533,6 +541,8 @@ const limItems = [
   ["Single architecture", "All results use one MLP; the QAT failure mode (Section 5.6) may differ for architectures with input normalization layers."],
   ["Threshold selection data", "Recall-target thresholds (Section 5.13) are chosen on the fine-tuning client's SMOTE-augmented training data; targets above 99.95% need a larger, non-augmented validation set."],
   ["Transfer attacks only", "Robustness of TFLite models is measured with adversarial examples transferred from the float federated model, not with attacks computed through the integer model."],
+  ["Threat model", "Attacks are feature-space perturbations, not realized as traffic. Training-time poisoning and backdoors [36] are out of scope, and the supervised detector does not target unseen attack classes as unsupervised detectors do [38, 39]."],
+  ["Synthetic partitions", "Near-IID and Dirichlet splits are synthetic; per-host splits [37] are more realistic."],
   ["On-device measurement", "See Section 6.1."],
 ];
 for (const [k, v] of limItems) {
@@ -586,6 +596,22 @@ const refs = [
   "[31] Amirhossein Reisizadeh, Aryan Mokhtari, Hamed Hassani, Ali Jadbabaie, and Ramtin Pedarsani. 2020. FedPAQ: A Communication-Efficient Federated Learning Method with Periodic Averaging and Quantization. In Proceedings of the 23rd International Conference on Artificial Intelligence and Statistics (AISTATS), PMLR 108, 2021–2031.",
   "[32] Kartik Gupta, Marios Fournarakis, Matthias Reisser, Christos Louizos, and Markus Nagel. 2023. Quantization Robust Federated Learning for Efficient Inference on Heterogeneous Devices. Transactions on Machine Learning Research (TMLR). arXiv:2206.10844.",
   "[33] TensorFlow Model Optimization. 2021. Collaborative Optimization: Pruning-Preserving Quantization Aware Training. https://www.tensorflow.org/model_optimization/guide/combine/collaborative_optimization.",
+  "[34] Mingyan Li et al. 2025. Cognitive IoT and Edge Computing for Intrusion Detection with Federated TinyML. In IEEE World AI IoT Congress (AIIoT), 677–684.",
+  "[35] Thien Duc Nguyen, Samuel Marchal, Markus Miettinen, Hossein Fereidooni, N. Asokan, and Ahmad-Reza Sadeghi. 2019. DÏoT: A Federated Self-learning Anomaly Detection System for IoT. In IEEE 39th International Conference on Distributed Computing Systems (ICDCS), 756–767.",
+  "[36] Thien Duc Nguyen, Phillip Rieger, Huili Chen, Hossein Yalame, Helen Möllering, Hossein Fereidooni, Samuel Marchal, Markus Miettinen, Azalia Mirhoseini, Shaza Zeitouni, Farinaz Koushanfar, Ahmad-Reza Sadeghi, and Thomas Schneider. 2022. FLAME: Taming Backdoors in Federated Learning. In 31st USENIX Security Symposium.",
+  "[37] Othmane Belarbi, Theodoros Spyridopoulos, Eirini Anthi, Ioannis Mavromatis, Pietro Carnelli, and Aftab Khan. 2023. Federated Deep Learning for Intrusion Detection in IoT Networks. In IEEE Global Communications Conference (GLOBECOM), 237–242. doi:10.1109/GLOBECOM54140.2023.10437860.",
+  "[38] Yisroel Mirsky, Tomer Doitshman, Yuval Elovici, and Asaf Shabtai. 2018. Kitsune: An Ensemble of Autoencoders for Online Network Intrusion Detection. In Network and Distributed System Security Symposium (NDSS).",
+  "[39] Yutao Dong, Qing Li, Kaidong Wu, et al. 2023. HorusEye: A Realtime IoT Malicious Traffic Detection Framework using Programmable Switches. In 32nd USENIX Security Symposium.",
+  "[40] Guangmeng Zhou, Zhuotao Liu, Chuanpu Fu, Qi Li, and Ke Xu. 2023. An Efficient Design of Intelligent Network Data Plane. In 32nd USENIX Security Symposium.",
+  "[41] Ji Lin, Wei-Ming Chen, Yujun Lin, John Cohn, Chuang Gan, and Song Han. 2020. MCUNet: Tiny Deep Learning on IoT Devices. In Advances in Neural Information Processing Systems (NeurIPS).",
+  "[42] Ji Lin, Ligeng Zhu, Wei-Ming Chen, Wei-Chen Wang, Chuang Gan, and Song Han. 2022. On-Device Training Under 256KB Memory. In Advances in Neural Information Processing Systems (NeurIPS).",
+  "[43] Enmao Diao, Jie Ding, and Vahid Tarokh. 2021. HeteroFL: Computation and Communication Efficient Federated Learning for Heterogeneous Clients. In International Conference on Learning Representations (ICLR).",
+  "[44] Hong Huang, Lan Zhang, Chaoyue Sun, Ruogu Fang, Xiaoyong Yuan, and Dapeng Wu. 2023. Distributed Pruning Towards Tiny Neural Networks in Federated Learning. In IEEE 43rd International Conference on Distributed Computing Systems (ICDCS), 190–201.",
+  "[45] Shikhar Jaiswal, Rahul Kranti Kiran Goli, Aayan Kumar, Vivek Seshadri, and Rahul Sharma. 2023. MinUn: Accurate ML Inference on Microcontrollers. In Proceedings of the 24th ACM SIGPLAN/SIGBED International Conference on Languages, Compilers, and Tools for Embedded Systems (LCTES), 26–39.",
+  "[46] Sridhar Gopinath, Nikhil Ghanathe, Vivek Seshadri, and Rahul Sharma. 2019. Compiling KB-Sized Machine Learning Models to Tiny IoT Devices. In Proceedings of the 40th ACM SIGPLAN Conference on Programming Language Design and Implementation (PLDI).",
+  "[47] Ji Lin, Chuang Gan, and Song Han. 2019. Defensive Quantization: When Efficiency Meets Robustness. In International Conference on Learning Representations (ICLR).",
+  "[48] Zhenpeng Chen, Huihan Yao, Yiling Lou, Yanbin Cao, Yuanqiang Liu, Haoyu Wang, and Xuanzhe Liu. 2021. An Empirical Study on Deployment Faults of Deep Learning Based Mobile Applications. In IEEE/ACM 43rd International Conference on Software Engineering (ICSE).",
+  "[49] Purvish Jajal, Wenxin Jiang, Arav Tewari, Erik Kocinare, Joseph Woo, Anusha Sarraf, Yung-Hsiang Lu, George K. Thiruvathukal, and James C. Davis. 2024. Interoperability in Deep Learning: A User Survey and Failure Analysis of ONNX Model Converters. In Proceedings of the 33rd ACM SIGSOFT International Symposium on Software Testing and Analysis (ISSTA). doi:10.1145/3650212.3680374.",
 ];
 for (const r of refs) children.push(P(r, { spacingAfter: 100, size: 20 }));
 

@@ -4,6 +4,26 @@ All numbers come from our own runs on the user's PC (WSL2, RTX 5070 host, CPU si
 Each run directory under `data/processed/revision/<run>/` contains `job.yaml`, `git_commit.txt`, the configs, step logs
 (`*.log`) and result files. External facts are cited in the paper (references.bib).
 
+## Run identifiers used in the captions (all under `data/processed/revision/`)
+| ID | Run directory |
+|---|---|
+| A | 2026-10-03_v2_cic_full (training-time QAT, CIC-IDS2017) |
+| B | 2026-10-03_b_v3_float_cic (CIC-IDS2017 FL, centralized, Dirichlet) |
+| E | 2026-10-04_e_float_compression_ablation |
+| F, G | 2026-10-04_f_robustness, 2026-10-04_g_prune_sweep |
+| I | 2026-10-04_i_fixed_lr_cic |
+| J, K | 2026-10-04_j_quant_distill, 2026-10-04_k_local_only |
+| L, M | 2026-10-04_l_ptq_calibration, 2026-10-04_m_qat_stability |
+| N | 2026-10-05_n_compression_combos |
+| O, P, Q | 2026-10-05_o_recall_priority, 2026-10-05_p_recall_priority2, 2026-10-05_q_attack_counts |
+| S | 2026-10-05_s_ton_sweep (TON_IoT recipe, TON_IoT FL model) |
+| T | 2026-10-05_t_recall_priority_ton2 |
+| U | 2026-10-05_u_toniot_v2 (TON_IoT centralized, 2nd run, fixed LR, Dirichlet, QAT) |
+| V, W | 2026-10-05_v_toniot_v2_downstream, 2026-10-05_w_toniot_v2_sweep_robustness |
+| X1–X4 | 2026-10-05_x1_calib_methods, _x2_ptq_init_qat, _x3_data_free_calib, _x4_learned_clip_qat |
+| X5, X6 | 2026-10-05_x5_recall_fixed_cic, 2026-10-05_x6_recall_fixed_ton |
+
+## Paper items
 | Paper item | Run ID | Result file(s) |
 |---|---|---|
 | Table 1 (CIC rows) | B, I | `data/processed/revision/2026-10-03_b_v3_float_cic/baseline/baseline_ablation.json`, `.../non_iid/non_iid_ablation.json`, `data/processed/revision/2026-10-04_i_fixed_lr_cic/fixed_lr/non_iid_ablation.json` |

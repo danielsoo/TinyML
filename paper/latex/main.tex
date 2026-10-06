@@ -99,8 +99,27 @@ Dirichlet label partitions, the non-IID model we adopt. Zhao et al.~\cite{zhao20
 characterize the degradation under skewed client data, and FedProx~\cite{li2020fedprox} adds a
 proximal term for the same reason. We use the Flower framework~\cite{beutel2020flower}.
 
+\paragraph{Federated and lightweight intrusion detection.} D\"IoT~\cite{nguyen2019diot} trains
+per-device-type anomaly detectors across security gateways with FL; Belarbi et
+al.~\cite{belarbi2023federated} study federated IDS on \ton with one client per IP address; and
+FLAME~\cite{nguyen2022flame} defends FL against backdoors, including on IoT IDS data. Closest to us,
+Li et al.~\cite{li2025cognitive} combine FL and TinyML for intrusion detection on N-BaIoT in an
+IoT/edge/cloud architecture, using an outlier-resistant scaler, feature reduction and quantization.
+We add an identically configured centralized and a local-only baseline on two datasets, a step-by-step
+analysis of compression without pooled data, missed-attack accounting, an analysis of quantization
+calibration, and the toolchain failures of Section~\ref{sec:failures}. Outside FL, lightweight detectors
+run on gateways (Kitsune~\cite{mirsky2018kitsune}) or programmable switches
+(HorusEye~\cite{dong2023horuseye}, NetBeacon~\cite{zhou2023netbeacon}); we target the endpoint
+microcontroller.
+
 \paragraph{TinyML and compression.} TensorFlow Lite Micro (TFLM)~\cite{david2021tflm} runs integer
-and float models on microcontrollers~\cite{banbury2020benchmarking}. Pruning~\cite{han2016deep},
+and float models on microcontrollers~\cite{banbury2020benchmarking}; MCUNet~\cite{lin2020mcunet}
+co-designs models and the inference engine, Lin et al.~\cite{lin2022ondevice} train on 256\,KB of
+memory, and SeeDot~\cite{gopinath2019seedot} and MinUn~\cite{jaiswal2023minun} compile fixed-point and
+mixed-precision models for microcontrollers. In FL, HeteroFL~\cite{diao2021heterofl} trains
+width-reduced submodels and aggregates BatchNorm statistics after training, and
+FedTiny~\cite{huang2023fedtiny} prunes without pooled data during training; we compress an
+already-trained federated model and use its BatchNorm statistics for INT8 calibration. Pruning~\cite{han2016deep},
 distillation~\cite{hinton2015distilling} and quantization~\cite{jacob2018quantization} reduce model
 size; surveys and guidance on PTQ and QAT are given by Gholami et al.~\cite{gholami2021survey} and
 Nagel et al.~\cite{nagel2021white}, who also describe oscillation-driven QAT
@@ -121,7 +140,7 @@ calibration; Section~\ref{sec:quantlit} compares it with these estimators and wi
 data-free and learned-clipping variants on our models.
 
 \paragraph{Robustness of compressed models.} FGSM~\cite{goodfellow2015fgsm} and
-PGD~\cite{madry2018towards} are the standard gradient attacks. Quantization can improve or degrade
+PGD~\cite{madry2018towards} are the standard gradient attacks. Quantization can amplify adversarial noise~\cite{lin2019defensive} or improve or degrade
 robustness depending on attack strength~\cite{gorsline2021adversarial}; weight
 quantization~\cite{song2021improving} and deep quantization~\cite{ayaz2023improving} interact with
 adversarial training. We measure whether the federated model's robustness carries over to its INT8
@@ -394,11 +413,9 @@ over five fine-tuning draws the base recipe gives F1 98.79--99.51 on \ton (PTQ: 
 all five draws, so it is conservative rather than selected.
 
 \subsection{Calibration Estimators, QAT Ranges and Data-Free Calibration}\label{sec:quantlit}
-We tested the methods of Section~2 on the federated models (Tables~\ref{tab:qlit-ptq}
-and~\ref{tab:qlit-qat}). To compare range estimators with everything else fixed, we build the tfmot
-fake-quantization model, set its activation ranges directly and convert it; with min/max ranges this
-reproduces TFLite's per-tensor PTQ exactly (same F1, FAR and misses on every set). TFLite's default
-PTQ uses per-channel weight scales, QAT exports use per-tensor scales.
+To compare range estimators with everything else fixed, we set the activation ranges of the tfmot
+fake-quantization model directly and convert it; with min/max ranges this reproduces TFLite's
+per-tensor PTQ exactly. TFLite's default PTQ uses per-channel weight scales, QAT exports per-tensor.
 
 \begin{table*}[t]
 \caption{Full-integer PTQ of the unpruned federated models with different range estimators: F1 mean
@@ -620,13 +637,10 @@ trades flash for false alarms: at 112\,KB the model misses 23 attacks at 9.7\%, 
 reaches the FP32 model's miss count at a lower FAR (51 at 6.7\% vs.\ 52 at 6.8\%). On \ton, federated
 fine-tuning also makes the 57\,KB model stable across draws: 12 of 16,215 attacks missed (at most 14)
 at 6.6\% FAR (at most 6.8\%), or 30 at 3.7\%. A 4$\times$ attack weight, pure teacher targets,
-temperature 4 and five times more fine-tuning data did not improve these trade-offs. Neither did the
-two levers of \S\ref{sec:quantlit} (means over the same three draws, 99.99\% target): holding the QAT
-ranges at calibrated values moves the operating point along the same curve (\cic 112\,KB: 28.7 missed
-at 8.6\% FAR vs.\ 23.3 at 9.7\%; \ton 57\,KB: 8.3 at 7.1\% vs.\ 12.0 at 6.6\%; at a fixed 0.2 threshold
-13.3 vs.\ 14.3 at 6.3\%), and CLE before QAT makes \cic worse (one draw reaches 84\% FAR). The recipe
-already clips the fine-tuning inputs, which bounds the input range, the lever identified there.
-\src{runs X5, X6}
+temperature 4 and five times more fine-tuning data did not improve these trade-offs. Neither did the levers of
+\S\ref{sec:quantlit}: fixed QAT ranges only move the operating point (\cic 112\,KB: 28.7 missed at
+8.6\% FAR vs.\ 23.3 at 9.7\%; \ton: 8.3 at 7.1\% vs.\ 12.0 at 6.6\%), and CLE hurts \cic, because the
+recipe already clips the fine-tuning inputs and so bounds the input range. \src{runs X5, X6}
 
 The client's held-out data is a reliable guide for FAR (within 0.35 points of the test FAR per draw on \cic and 0.7 on \ton).
 Recall targets up to 99.95\% are met on \cic; very high targets need more validation attacks than one
@@ -717,7 +731,8 @@ here.]}
 An earlier version of this study reported compressed-model results that turned out to be wrong.
 Re-running the experiments exposed four errors in our pipeline. None raised an exception, and each
 produced plausible numbers (Table~\ref{tab:failures}). The same components (Flower, TensorFlow Model
-Optimization, Keras BatchNorm) are widely used.
+Optimization, Keras BatchNorm) are widely used, and empirical studies report that deployment and
+model-conversion faults often produce wrong models without errors~\cite{chen2021deployment,jajal2024onnx}.
 
 \begin{table}[t]
 \caption{Silent failures found in our TensorFlow / tfmot / Flower pipeline and the checks we now run.}
@@ -758,8 +773,12 @@ deduplication, and the dataset has known labelling issues~\cite{engelen2021troub
 \emph{Thresholds}: client validation sets are SMOTE-augmented, and recall targets above 99.95\% need
 larger, non-augmented validation sets. \emph{\ton recipe}: the variants of Appendix~\ref{app:tonrecipe}
 were designed after the initial \ton model showed room for improvement, although the choice among them
-used validation data only. \emph{Robustness}: attacks are transferred from the float model, not
-computed through the integer model. \emph{Hardware}: on-device latency is pending
+used validation data only. \emph{Threat model}: attacks are feature-space perturbations transferred from the float model, not
+computed through the integer model or realized as traffic; training-time poisoning and
+backdoors~\cite{nguyen2022flame} are out of scope, and the supervised detector does not target unseen
+attack classes as unsupervised detectors do~\cite{mirsky2018kitsune,dong2023horuseye}.
+\emph{Partitions}: near-IID and Dirichlet splits are synthetic; per-host splits~\cite{belarbi2023federated}
+are more realistic. \emph{Hardware}: on-device latency is pending
 (\S\ref{sec:device}).
 
 \section{Conclusion}
@@ -807,36 +826,9 @@ Targets: ESP32 (Xtensa LX6), ESP32-S3 (LX7) and ESP32-C3 (RISC-V).
 
 \section{Provenance of Reported Numbers}\label{app:provenance}
 Every number in this paper comes from our own runs. Each run directory in the artifact holds the
-configuration, log, Git commit and result files (JSON/CSV/Markdown). Run identifiers used in the
-captions:
-\begin{center}
-\small
-\setlength{\tabcolsep}{3pt}
-\begin{adjustbox}{max width=\columnwidth}
-\begin{tabular}{cl}
-\toprule
-ID & Run (artifact: data/processed/revision/) \\
-\midrule
-A & 2026-10-03\_v2\_cic\_full (training-time QAT, \cic) \\
-B & 2026-10-03\_b\_v3\_float\_cic (\cic FL, centralized, Dirichlet) \\
-E & 2026-10-04\_e\_float\_compression\_ablation \\
-F, G & 2026-10-04\_f\_robustness, \_g\_prune\_sweep \\
-I & 2026-10-04\_i\_fixed\_lr\_cic \\
-J, K & 2026-10-04\_j\_quant\_distill, \_k\_local\_only \\
-L, M & 2026-10-04\_l\_ptq\_calibration, \_m\_qat\_stability \\
-N & 2026-10-05\_n\_compression\_combos \\
-O, P, Q & 2026-10-05\_o/\_p\_recall\_priority, \_q\_attack\_counts \\
-S & 2026-10-05\_s\_ton\_sweep (\ton recipe, \ton FL model) \\
-T & 2026-10-05\_t\_recall\_priority\_ton2 \\
-U & 2026-10-05\_u\_toniot\_v2 (\ton centralized, 2nd run, fixed LR, Dirichlet, QAT) \\
-V, W & 2026-10-05\_v\_toniot\_v2\_downstream, \_w\_toniot\_v2\_sweep\_robustness \\
-X1--X4 & 2026-10-05\_x1\_calib\_methods, \_x2\_ptq\_init\_qat, \_x3\_data\_free\_calib, \_x4\_learned\_clip\_qat \\
-X5, X6 & 2026-10-05\_x5\_recall\_fixed\_cic, \_x6\_recall\_fixed\_ton \\
-\bottomrule
-\end{tabular}
-\end{adjustbox}
-\end{center}
-Dataset statistics (\S\ref{sec:data}) are computed by our loaders on the published CSV
+configuration, log, Git commit and result files (JSON/CSV/Markdown), and the artifact's
+PROVENANCE.md maps every table and run identifier used in the captions (A--X6) to its directory and
+result file. Dataset statistics (\S\ref{sec:data}) are computed by our loaders on the published CSV
 files~\cite{sharafaldin2018toward,moustafa2021toniot}.
 
 \end{document}
