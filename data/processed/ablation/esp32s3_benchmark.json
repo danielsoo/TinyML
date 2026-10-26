@@ -1,0 +1,2504 @@
+{
+  "device": {
+    "chip": "ESP32-S3",
+    "cores": 2,
+    "cpu_mhz": 240,
+    "flash_bytes": 16777216,
+    "sdk": "v4.4.7-dirty"
+  },
+  "models": {
+    "cic_deploy": {
+      "samples": [
+        {
+          "latency_us": 11281.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 1
+        },
+        {
+          "latency_us": 11312.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 2
+        },
+        {
+          "latency_us": 11312.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 3
+        },
+        {
+          "latency_us": 11306.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 4
+        },
+        {
+          "latency_us": 11311.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 5
+        },
+        {
+          "latency_us": 11304.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 6
+        },
+        {
+          "latency_us": 11311.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 7
+        },
+        {
+          "latency_us": 11306.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 8
+        },
+        {
+          "latency_us": 11310.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 9
+        },
+        {
+          "latency_us": 11304.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 10
+        },
+        {
+          "latency_us": 11311.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 11
+        },
+        {
+          "latency_us": 11306.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 12
+        },
+        {
+          "latency_us": 11311.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 13
+        },
+        {
+          "latency_us": 11304.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 14
+        },
+        {
+          "latency_us": 11311.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 15
+        },
+        {
+          "latency_us": 11306.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 16
+        },
+        {
+          "latency_us": 11310.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 17
+        },
+        {
+          "latency_us": 11304.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 18
+        },
+        {
+          "latency_us": 11311.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 19
+        },
+        {
+          "latency_us": 11306.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 20
+        },
+        {
+          "latency_us": 11311.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 21
+        },
+        {
+          "latency_us": 11304.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 22
+        },
+        {
+          "latency_us": 11311.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 23
+        },
+        {
+          "latency_us": 11306.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 24
+        },
+        {
+          "latency_us": 11310.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 25
+        },
+        {
+          "latency_us": 11304.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 26
+        },
+        {
+          "latency_us": 11311.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 27
+        },
+        {
+          "latency_us": 11306.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 28
+        },
+        {
+          "latency_us": 11311.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 29
+        },
+        {
+          "latency_us": 11304.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 30
+        },
+        {
+          "latency_us": 11311.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 31
+        },
+        {
+          "latency_us": 11306.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 32
+        },
+        {
+          "latency_us": 11310.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 33
+        },
+        {
+          "latency_us": 11304.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 34
+        },
+        {
+          "latency_us": 11311.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 35
+        },
+        {
+          "latency_us": 11306.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 36
+        },
+        {
+          "latency_us": 11311.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 37
+        },
+        {
+          "latency_us": 11304.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 38
+        },
+        {
+          "latency_us": 11311.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 39
+        },
+        {
+          "latency_us": 11306.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 40
+        },
+        {
+          "latency_us": 11310.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 41
+        },
+        {
+          "latency_us": 11304.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 42
+        },
+        {
+          "latency_us": 11311.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 43
+        },
+        {
+          "latency_us": 11306.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 44
+        },
+        {
+          "latency_us": 11311.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 45
+        },
+        {
+          "latency_us": 11304.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 46
+        },
+        {
+          "latency_us": 11311.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 47
+        },
+        {
+          "latency_us": 11306.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 48
+        },
+        {
+          "latency_us": 11310.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 49
+        },
+        {
+          "latency_us": 11304.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 50
+        },
+        {
+          "latency_us": 11311.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 51
+        },
+        {
+          "latency_us": 11306.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 52
+        },
+        {
+          "latency_us": 11311.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 53
+        },
+        {
+          "latency_us": 11304.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 54
+        },
+        {
+          "latency_us": 11311.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 55
+        },
+        {
+          "latency_us": 11306.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 56
+        },
+        {
+          "latency_us": 11310.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 57
+        },
+        {
+          "latency_us": 11304.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 58
+        },
+        {
+          "latency_us": 11311.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 59
+        },
+        {
+          "latency_us": 11306.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 60
+        },
+        {
+          "latency_us": 11311.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 61
+        },
+        {
+          "latency_us": 11304.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 62
+        },
+        {
+          "latency_us": 11311.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 63
+        },
+        {
+          "latency_us": 11306.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 64
+        },
+        {
+          "latency_us": 11310.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 65
+        },
+        {
+          "latency_us": 11304.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 66
+        },
+        {
+          "latency_us": 11311.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 67
+        },
+        {
+          "latency_us": 11306.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 68
+        },
+        {
+          "latency_us": 11311.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 69
+        },
+        {
+          "latency_us": 11304.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 70
+        },
+        {
+          "latency_us": 11311.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 71
+        },
+        {
+          "latency_us": 11306.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 72
+        },
+        {
+          "latency_us": 11310.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 73
+        },
+        {
+          "latency_us": 11304.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 74
+        },
+        {
+          "latency_us": 11311.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 75
+        },
+        {
+          "latency_us": 11306.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 76
+        },
+        {
+          "latency_us": 11311.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 77
+        },
+        {
+          "latency_us": 11304.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 78
+        },
+        {
+          "latency_us": 11311.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 79
+        },
+        {
+          "latency_us": 11306.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 80
+        },
+        {
+          "latency_us": 11310.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 81
+        },
+        {
+          "latency_us": 11304.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 82
+        },
+        {
+          "latency_us": 11311.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 83
+        },
+        {
+          "latency_us": 11306.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 84
+        },
+        {
+          "latency_us": 11311.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 85
+        },
+        {
+          "latency_us": 11304.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 86
+        },
+        {
+          "latency_us": 11311.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 87
+        },
+        {
+          "latency_us": 11306.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 88
+        },
+        {
+          "latency_us": 11310.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 89
+        },
+        {
+          "latency_us": 11304.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 90
+        },
+        {
+          "latency_us": 11311.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 91
+        },
+        {
+          "latency_us": 11306.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 92
+        },
+        {
+          "latency_us": 11311.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 93
+        },
+        {
+          "latency_us": 11304.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 94
+        },
+        {
+          "latency_us": 11311.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 95
+        },
+        {
+          "latency_us": 11306.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 96
+        },
+        {
+          "latency_us": 11310.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 97
+        },
+        {
+          "latency_us": 11304.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 98
+        },
+        {
+          "latency_us": 11311.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 99
+        },
+        {
+          "latency_us": 11306.0,
+          "arena_used": 1616,
+          "input_dim": 78,
+          "run": 100
+        }
+      ],
+      "bytes": 114760,
+      "input_type": "float32",
+      "output_type": "float32",
+      "parity": {
+        "max_abs_diff": 0.003906,
+        "label_agree": "8/8"
+      },
+      "summary": {
+        "count": 100,
+        "latency_us_mean": 11307.67,
+        "latency_us_median": 11308.0,
+        "latency_us_std": 4.0076302224631455,
+        "latency_us_p95": 11311.0,
+        "latency_us_min": 11281.0,
+        "latency_us_max": 11312.0,
+        "latency_ms_mean": 11.30767,
+        "arena_used": 1616,
+        "input_dim": 78
+      }
+    },
+    "cic_fp32": {
+      "samples": [
+        {
+          "latency_us": 32994.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 1
+        },
+        {
+          "latency_us": 33010.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 2
+        },
+        {
+          "latency_us": 32994.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 3
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 4
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 5
+        },
+        {
+          "latency_us": 32990.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 6
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 7
+        },
+        {
+          "latency_us": 32987.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 8
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 9
+        },
+        {
+          "latency_us": 32990.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 10
+        },
+        {
+          "latency_us": 32991.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 11
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 12
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 13
+        },
+        {
+          "latency_us": 32990.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 14
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 15
+        },
+        {
+          "latency_us": 32987.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 16
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 17
+        },
+        {
+          "latency_us": 32990.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 18
+        },
+        {
+          "latency_us": 32991.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 19
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 20
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 21
+        },
+        {
+          "latency_us": 32990.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 22
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 23
+        },
+        {
+          "latency_us": 32987.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 24
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 25
+        },
+        {
+          "latency_us": 32990.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 26
+        },
+        {
+          "latency_us": 32991.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 27
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 28
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 29
+        },
+        {
+          "latency_us": 32990.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 30
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 31
+        },
+        {
+          "latency_us": 32987.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 32
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 33
+        },
+        {
+          "latency_us": 32990.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 34
+        },
+        {
+          "latency_us": 32991.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 35
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 36
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 37
+        },
+        {
+          "latency_us": 32990.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 38
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 39
+        },
+        {
+          "latency_us": 32987.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 40
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 41
+        },
+        {
+          "latency_us": 32990.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 42
+        },
+        {
+          "latency_us": 32991.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 43
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 44
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 45
+        },
+        {
+          "latency_us": 32990.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 46
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 47
+        },
+        {
+          "latency_us": 32987.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 48
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 49
+        },
+        {
+          "latency_us": 32990.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 50
+        },
+        {
+          "latency_us": 32991.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 51
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 52
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 53
+        },
+        {
+          "latency_us": 32990.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 54
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 55
+        },
+        {
+          "latency_us": 32987.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 56
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 57
+        },
+        {
+          "latency_us": 32990.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 58
+        },
+        {
+          "latency_us": 32991.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 59
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 60
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 61
+        },
+        {
+          "latency_us": 32990.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 62
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 63
+        },
+        {
+          "latency_us": 32987.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 64
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 65
+        },
+        {
+          "latency_us": 32990.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 66
+        },
+        {
+          "latency_us": 32991.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 67
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 68
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 69
+        },
+        {
+          "latency_us": 32990.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 70
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 71
+        },
+        {
+          "latency_us": 32987.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 72
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 73
+        },
+        {
+          "latency_us": 32990.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 74
+        },
+        {
+          "latency_us": 32991.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 75
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 76
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 77
+        },
+        {
+          "latency_us": 32990.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 78
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 79
+        },
+        {
+          "latency_us": 32987.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 80
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 81
+        },
+        {
+          "latency_us": 32990.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 82
+        },
+        {
+          "latency_us": 32991.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 83
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 84
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 85
+        },
+        {
+          "latency_us": 32990.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 86
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 87
+        },
+        {
+          "latency_us": 32987.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 88
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 89
+        },
+        {
+          "latency_us": 32990.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 90
+        },
+        {
+          "latency_us": 32991.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 91
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 92
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 93
+        },
+        {
+          "latency_us": 32990.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 94
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 95
+        },
+        {
+          "latency_us": 32987.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 96
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 97
+        },
+        {
+          "latency_us": 32990.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 98
+        },
+        {
+          "latency_us": 32991.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 99
+        },
+        {
+          "latency_us": 32989.0,
+          "arena_used": 3952,
+          "input_dim": 78,
+          "run": 100
+        }
+      ],
+      "bytes": 821696,
+      "input_type": "float32",
+      "output_type": "float32",
+      "parity": {
+        "max_abs_diff": 0.0,
+        "label_agree": "8/8"
+      },
+      "summary": {
+        "count": 100,
+        "latency_us_mean": 32989.55,
+        "latency_us_median": 32989.0,
+        "latency_us_std": 2.4098755154571783,
+        "latency_us_p95": 32991.0,
+        "latency_us_min": 32987.0,
+        "latency_us_max": 33010.0,
+        "latency_ms_mean": 32.98955,
+        "arena_used": 3952,
+        "input_dim": 78
+      }
+    },
+    "ton_deploy": {
+      "samples": [
+        {
+          "latency_us": 5537.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 1
+        },
+        {
+          "latency_us": 5574.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 2
+        },
+        {
+          "latency_us": 5568.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 3
+        },
+        {
+          "latency_us": 5563.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 4
+        },
+        {
+          "latency_us": 5569.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 5
+        },
+        {
+          "latency_us": 5563.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 6
+        },
+        {
+          "latency_us": 5567.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 7
+        },
+        {
+          "latency_us": 5563.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 8
+        },
+        {
+          "latency_us": 5568.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 9
+        },
+        {
+          "latency_us": 5564.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 10
+        },
+        {
+          "latency_us": 5567.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 11
+        },
+        {
+          "latency_us": 5563.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 12
+        },
+        {
+          "latency_us": 5569.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 13
+        },
+        {
+          "latency_us": 5563.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 14
+        },
+        {
+          "latency_us": 5567.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 15
+        },
+        {
+          "latency_us": 5563.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 16
+        },
+        {
+          "latency_us": 5568.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 17
+        },
+        {
+          "latency_us": 5564.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 18
+        },
+        {
+          "latency_us": 5567.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 19
+        },
+        {
+          "latency_us": 5563.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 20
+        },
+        {
+          "latency_us": 5569.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 21
+        },
+        {
+          "latency_us": 5563.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 22
+        },
+        {
+          "latency_us": 5567.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 23
+        },
+        {
+          "latency_us": 5563.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 24
+        },
+        {
+          "latency_us": 5568.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 25
+        },
+        {
+          "latency_us": 5564.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 26
+        },
+        {
+          "latency_us": 5567.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 27
+        },
+        {
+          "latency_us": 5563.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 28
+        },
+        {
+          "latency_us": 5569.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 29
+        },
+        {
+          "latency_us": 5563.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 30
+        },
+        {
+          "latency_us": 5567.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 31
+        },
+        {
+          "latency_us": 5563.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 32
+        },
+        {
+          "latency_us": 5568.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 33
+        },
+        {
+          "latency_us": 5564.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 34
+        },
+        {
+          "latency_us": 5567.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 35
+        },
+        {
+          "latency_us": 5563.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 36
+        },
+        {
+          "latency_us": 5569.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 37
+        },
+        {
+          "latency_us": 5563.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 38
+        },
+        {
+          "latency_us": 5567.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 39
+        },
+        {
+          "latency_us": 5563.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 40
+        },
+        {
+          "latency_us": 5568.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 41
+        },
+        {
+          "latency_us": 5564.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 42
+        },
+        {
+          "latency_us": 5567.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 43
+        },
+        {
+          "latency_us": 5563.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 44
+        },
+        {
+          "latency_us": 5569.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 45
+        },
+        {
+          "latency_us": 5563.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 46
+        },
+        {
+          "latency_us": 5567.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 47
+        },
+        {
+          "latency_us": 5563.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 48
+        },
+        {
+          "latency_us": 5568.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 49
+        },
+        {
+          "latency_us": 5564.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 50
+        },
+        {
+          "latency_us": 5567.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 51
+        },
+        {
+          "latency_us": 5563.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 52
+        },
+        {
+          "latency_us": 5569.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 53
+        },
+        {
+          "latency_us": 5563.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 54
+        },
+        {
+          "latency_us": 5567.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 55
+        },
+        {
+          "latency_us": 5563.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 56
+        },
+        {
+          "latency_us": 5568.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 57
+        },
+        {
+          "latency_us": 5564.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 58
+        },
+        {
+          "latency_us": 5567.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 59
+        },
+        {
+          "latency_us": 5563.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 60
+        },
+        {
+          "latency_us": 5569.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 61
+        },
+        {
+          "latency_us": 5563.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 62
+        },
+        {
+          "latency_us": 5567.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 63
+        },
+        {
+          "latency_us": 5563.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 64
+        },
+        {
+          "latency_us": 5568.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 65
+        },
+        {
+          "latency_us": 5564.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 66
+        },
+        {
+          "latency_us": 5567.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 67
+        },
+        {
+          "latency_us": 5563.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 68
+        },
+        {
+          "latency_us": 5569.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 69
+        },
+        {
+          "latency_us": 5563.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 70
+        },
+        {
+          "latency_us": 5567.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 71
+        },
+        {
+          "latency_us": 5563.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 72
+        },
+        {
+          "latency_us": 5568.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 73
+        },
+        {
+          "latency_us": 5564.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 74
+        },
+        {
+          "latency_us": 5567.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 75
+        },
+        {
+          "latency_us": 5563.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 76
+        },
+        {
+          "latency_us": 5569.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 77
+        },
+        {
+          "latency_us": 5563.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 78
+        },
+        {
+          "latency_us": 5567.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 79
+        },
+        {
+          "latency_us": 5563.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 80
+        },
+        {
+          "latency_us": 5568.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 81
+        },
+        {
+          "latency_us": 5564.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 82
+        },
+        {
+          "latency_us": 5567.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 83
+        },
+        {
+          "latency_us": 5563.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 84
+        },
+        {
+          "latency_us": 5569.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 85
+        },
+        {
+          "latency_us": 5563.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 86
+        },
+        {
+          "latency_us": 5567.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 87
+        },
+        {
+          "latency_us": 5563.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 88
+        },
+        {
+          "latency_us": 5568.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 89
+        },
+        {
+          "latency_us": 5564.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 90
+        },
+        {
+          "latency_us": 5567.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 91
+        },
+        {
+          "latency_us": 5563.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 92
+        },
+        {
+          "latency_us": 5569.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 93
+        },
+        {
+          "latency_us": 5563.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 94
+        },
+        {
+          "latency_us": 5567.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 95
+        },
+        {
+          "latency_us": 5563.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 96
+        },
+        {
+          "latency_us": 5568.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 97
+        },
+        {
+          "latency_us": 5564.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 98
+        },
+        {
+          "latency_us": 5567.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 99
+        },
+        {
+          "latency_us": 5563.0,
+          "arena_used": 1440,
+          "input_dim": 43,
+          "run": 100
+        }
+      ],
+      "bytes": 58048,
+      "input_type": "float32",
+      "output_type": "float32",
+      "parity": {
+        "max_abs_diff": 0.0,
+        "label_agree": "8/8"
+      },
+      "summary": {
+        "count": 100,
+        "latency_us_mean": 5565.3,
+        "latency_us_median": 5565.5,
+        "latency_us_std": 3.7696153649941526,
+        "latency_us_p95": 5569.0,
+        "latency_us_min": 5537.0,
+        "latency_us_max": 5574.0,
+        "latency_ms_mean": 5.565300000000001,
+        "arena_used": 1440,
+        "input_dim": 43
+      }
+    },
+    "ton_fp32": {
+      "samples": [
+        {
+          "latency_us": 30115.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 1
+        },
+        {
+          "latency_us": 30131.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 2
+        },
+        {
+          "latency_us": 30114.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 3
+        },
+        {
+          "latency_us": 30111.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 4
+        },
+        {
+          "latency_us": 30111.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 5
+        },
+        {
+          "latency_us": 30114.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 6
+        },
+        {
+          "latency_us": 30112.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 7
+        },
+        {
+          "latency_us": 30113.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 8
+        },
+        {
+          "latency_us": 30110.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 9
+        },
+        {
+          "latency_us": 30111.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 10
+        },
+        {
+          "latency_us": 30112.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 11
+        },
+        {
+          "latency_us": 30111.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 12
+        },
+        {
+          "latency_us": 30111.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 13
+        },
+        {
+          "latency_us": 30114.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 14
+        },
+        {
+          "latency_us": 30112.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 15
+        },
+        {
+          "latency_us": 30113.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 16
+        },
+        {
+          "latency_us": 30110.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 17
+        },
+        {
+          "latency_us": 30111.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 18
+        },
+        {
+          "latency_us": 30112.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 19
+        },
+        {
+          "latency_us": 30111.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 20
+        },
+        {
+          "latency_us": 30111.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 21
+        },
+        {
+          "latency_us": 30114.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 22
+        },
+        {
+          "latency_us": 30112.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 23
+        },
+        {
+          "latency_us": 30113.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 24
+        },
+        {
+          "latency_us": 30110.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 25
+        },
+        {
+          "latency_us": 30111.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 26
+        },
+        {
+          "latency_us": 30112.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 27
+        },
+        {
+          "latency_us": 30111.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 28
+        },
+        {
+          "latency_us": 30111.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 29
+        },
+        {
+          "latency_us": 30114.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 30
+        },
+        {
+          "latency_us": 30112.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 31
+        },
+        {
+          "latency_us": 30113.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 32
+        },
+        {
+          "latency_us": 30110.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 33
+        },
+        {
+          "latency_us": 30111.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 34
+        },
+        {
+          "latency_us": 30112.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 35
+        },
+        {
+          "latency_us": 30111.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 36
+        },
+        {
+          "latency_us": 30111.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 37
+        },
+        {
+          "latency_us": 30114.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 38
+        },
+        {
+          "latency_us": 30112.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 39
+        },
+        {
+          "latency_us": 30113.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 40
+        },
+        {
+          "latency_us": 30110.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 41
+        },
+        {
+          "latency_us": 30111.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 42
+        },
+        {
+          "latency_us": 30112.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 43
+        },
+        {
+          "latency_us": 30111.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 44
+        },
+        {
+          "latency_us": 30111.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 45
+        },
+        {
+          "latency_us": 30114.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 46
+        },
+        {
+          "latency_us": 30112.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 47
+        },
+        {
+          "latency_us": 30113.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 48
+        },
+        {
+          "latency_us": 30110.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 49
+        },
+        {
+          "latency_us": 30111.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 50
+        },
+        {
+          "latency_us": 30112.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 51
+        },
+        {
+          "latency_us": 30111.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 52
+        },
+        {
+          "latency_us": 30111.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 53
+        },
+        {
+          "latency_us": 30114.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 54
+        },
+        {
+          "latency_us": 30112.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 55
+        },
+        {
+          "latency_us": 30113.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 56
+        },
+        {
+          "latency_us": 30110.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 57
+        },
+        {
+          "latency_us": 30111.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 58
+        },
+        {
+          "latency_us": 30112.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 59
+        },
+        {
+          "latency_us": 30111.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 60
+        },
+        {
+          "latency_us": 30111.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 61
+        },
+        {
+          "latency_us": 30114.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 62
+        },
+        {
+          "latency_us": 30112.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 63
+        },
+        {
+          "latency_us": 30113.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 64
+        },
+        {
+          "latency_us": 30110.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 65
+        },
+        {
+          "latency_us": 30111.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 66
+        },
+        {
+          "latency_us": 30112.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 67
+        },
+        {
+          "latency_us": 30111.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 68
+        },
+        {
+          "latency_us": 30111.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 69
+        },
+        {
+          "latency_us": 30114.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 70
+        },
+        {
+          "latency_us": 30112.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 71
+        },
+        {
+          "latency_us": 30113.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 72
+        },
+        {
+          "latency_us": 30110.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 73
+        },
+        {
+          "latency_us": 30111.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 74
+        },
+        {
+          "latency_us": 30112.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 75
+        },
+        {
+          "latency_us": 30111.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 76
+        },
+        {
+          "latency_us": 30111.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 77
+        },
+        {
+          "latency_us": 30114.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 78
+        },
+        {
+          "latency_us": 30112.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 79
+        },
+        {
+          "latency_us": 30113.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 80
+        },
+        {
+          "latency_us": 30110.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 81
+        },
+        {
+          "latency_us": 30111.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 82
+        },
+        {
+          "latency_us": 30112.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 83
+        },
+        {
+          "latency_us": 30111.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 84
+        },
+        {
+          "latency_us": 30111.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 85
+        },
+        {
+          "latency_us": 30114.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 86
+        },
+        {
+          "latency_us": 30112.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 87
+        },
+        {
+          "latency_us": 30113.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 88
+        },
+        {
+          "latency_us": 30110.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 89
+        },
+        {
+          "latency_us": 30111.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 90
+        },
+        {
+          "latency_us": 30112.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 91
+        },
+        {
+          "latency_us": 30111.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 92
+        },
+        {
+          "latency_us": 30111.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 93
+        },
+        {
+          "latency_us": 30114.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 94
+        },
+        {
+          "latency_us": 30112.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 95
+        },
+        {
+          "latency_us": 30113.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 96
+        },
+        {
+          "latency_us": 30110.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 97
+        },
+        {
+          "latency_us": 30111.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 98
+        },
+        {
+          "latency_us": 30112.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 99
+        },
+        {
+          "latency_us": 30111.0,
+          "arena_used": 3952,
+          "input_dim": 43,
+          "run": 100
+        }
+      ],
+      "bytes": 750016,
+      "input_type": "float32",
+      "output_type": "float32",
+      "parity": {
+        "max_abs_diff": 0.0,
+        "label_agree": "8/8"
+      },
+      "summary": {
+        "count": 100,
+        "latency_us_mean": 30111.99,
+        "latency_us_median": 30112.0,
+        "latency_us_std": 2.278135202309117,
+        "latency_us_p95": 30114.0,
+        "latency_us_min": 30110.0,
+        "latency_us_max": 30131.0,
+        "latency_ms_mean": 30.111990000000002,
+        "arena_used": 3952,
+        "input_dim": 43
+      }
+    }
+  },
+  "errors": []
+}
