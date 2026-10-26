@@ -38,6 +38,8 @@ followed by fine-tuning and QAT fine-tuning on one client's data yields a 65\,KB
 from the federated model, fine-tuning on clipped inputs across clients, and a threshold chosen on
 client-held data let a 65\,KB model miss 27 of 85,173 \cic test attacks (FP32 model at its default
 threshold: 52) at an 11.3\% false-alarm rate, and a 57\,KB \ton model miss 12 of 16,215 at 6.6\%.
+On an ESP32 the deployed INT8 models classify a flow in 26\,ms (\cic, 112\,KB) and 13\,ms (\ton),
+4.4--7.9$\times$ faster than their FP32 versions, with all on-device decisions matching the host.
 We also find that training-time QAT inside FL collapses on heavy-tailed \cic features, that
 full-integer post-training quantization is unstable across calibration draws until the calibration
 inputs are clipped, and that four silent failures in a common TensorFlow/tfmot/Flower toolchain
@@ -718,13 +720,13 @@ semantics, so they overstate what a network attacker can realize.
 
 %% ---------------------------------------------------------------------
 \subsection{On-Device Measurement}\label{sec:device}
-Our ESP32 firmware embeds both deployment models (\cic 112\,KB INT8, \ton 57\,KB INT8) and their FP32
-federated models (1.7\,MB in total). It compares on-device outputs with the host TFLite interpreter on
-fixed inputs, including decision agreement at each model's threshold, and times 100 inferences per
-model (Appendix~\ref{app:esp32}). A host build against the same TFLM library reproduces the interpreter
-outputs exactly (FP32) and within one INT8 output step, with all decisions in agreement; tensor-arena
-use is 2.2--4.6\,KB. \textbf{[On-device latency on ESP32 hardware is pending and will be reported
-here.]}
+We ran both deployment models and their FP32 federated models on an ESP32 (ESP32-D0WD-V3, Xtensa LX6
+at 240\,MHz, ESP-IDF v4.4.7; protocol in Appendix~\ref{app:esp32}). On fixed inputs every model
+reproduces the host interpreter (FP32 exactly, INT8 within one output step), and all decisions agree
+at each model's threshold. Over 100 inferences the \cic 112\,KB INT8 model takes 26.3\,ms (FP32:
+114.6\,ms, 4.4$\times$) and the \ton 57\,KB INT8 model 13.3\,ms (FP32: 104.7\,ms, 7.9$\times$); the
+95th percentile is within 0.05\,ms of the mean, and tensor arenas need 1.4--3.9\,KB. One core thus
+classifies about 38 (\cic) or 75 (\ton) flows per second. \src{ESP32 run, data/processed/ablation/esp32\_benchmark.json}
 
 %% =====================================================================
 \section{Four Silent Failure Modes}\label{sec:failures}
@@ -778,8 +780,8 @@ computed through the integer model or realized as traffic; training-time poisoni
 backdoors~\cite{nguyen2022flame} are out of scope, and the supervised detector does not target unseen
 attack classes as unsupervised detectors do~\cite{mirsky2018kitsune,dong2023horuseye}.
 \emph{Partitions}: near-IID and Dirichlet splits are synthetic; per-host splits~\cite{belarbi2023federated}
-are more realistic. \emph{Hardware}: on-device latency is pending
-(\S\ref{sec:device}).
+are more realistic. \emph{Hardware}: latency is measured on one ESP32 board with the kernels of the TensorFlowLite\_\-ESP32
+1.0.0 library; optimized kernels and other microcontrollers would change the absolute numbers.
 
 \section{Conclusion}
 A federated MLP intrusion detector comes close to centralized training on \cic and \ton and loses less
@@ -822,7 +824,7 @@ The firmware (PlatformIO, the TensorFlowLite\_\-ESP32 1.0.0 library, the huge\_\
 16-byte-aligned arrays. For 8 fixed standardized inputs per dataset it reports the maximum output
 difference to the host TFLite interpreter and decision agreement at each model's threshold; after 5
 warm-up runs it times 100 Invoke() calls with micros() and reports chip, clock, SDK and arena use.
-Targets: ESP32 (Xtensa LX6), ESP32-S3 (LX7) and ESP32-C3 (RISC-V).
+Builds exist for ESP32, ESP32-S3 and ESP32-C3; \S\ref{sec:device} uses an ESP-WROOM-32 board.
 
 \section{Provenance of Reported Numbers}\label{app:provenance}
 Every number in this paper comes from our own runs. Each run directory in the artifact holds the

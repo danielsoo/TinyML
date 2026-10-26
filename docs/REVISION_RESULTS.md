@@ -527,3 +527,15 @@ At matched FAR the curves coincide (TON fixed 0.2: 13.3 vs 14.3 missed at 6.3%; 
 so fixed ranges shift the operating point, not the trade-off. No deployment change: the recipe already
 fine-tunes on clipped inputs, which bounds the input range (the lever found in job x2). Paper: LaTeX §4.8
 paragraph + provenance X5/X6; docx paragraph after Table 13.
+
+## On-device measurement, ESP32 (2026-10-26, `data/processed/ablation/esp32_benchmark.json`)
+Board: ELEGOO ESP-WROOM-32 (ESP32-D0WD-V3, 2 cores, 240 MHz, 4 MB flash, ESP-IDF v4.4.7), firmware
+`esp32_tflite_project` (env esp32dev, TensorFlowLite_ESP32 1.0.0), 100 timed Invoke() after 5 warm-ups.
+| model | bytes | mean ms | median ms | p95 ms | arena B | parity max abs diff | decisions |
+|---|---|---|---|---|---|---|---|
+| cic_deploy (INT8, 112 KB) | 114,760 | 26.346 | 26.350 | 26.376 | 1,616 | 0.003906 | 8/8 |
+| cic_fp32 | 821,696 | 114.617 | 114.630 | 114.643 | 3,952 | 0 | 8/8 |
+| ton_deploy (INT8, 57 KB) | 58,048 | 13.332 | 13.335 | 13.347 | 1,440 | 0 | 8/8 |
+| ton_fp32 | 750,016 | 104.725 | 104.741 | 104.783 | 3,952 | 0 | 8/8 |
+INT8 vs FP32 speed-up: CIC 4.35x, TON 7.86x. Paper: LaTeX abstract, §4.10, limitations, App. C; docx 6.1
+(Table 17), contribution (5), reviewer table, App. B. All [PENDING] markers removed.
