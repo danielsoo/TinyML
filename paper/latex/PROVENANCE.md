@@ -43,7 +43,7 @@ Each run directory under `data/processed/revision/<run>/` contains `job.yaml`, `
 | Table 11 (per attack type) | P, Q | `missed_by_type` fields in run P's json; test counts `data/processed/revision/2026-10-05_q_attack_counts/attack_counts/attack_type_counts.json` |
 | Table 12 (robustness) | F, W | `data/processed/revision/2026-10-04_f_robustness/robustness/robustness.md`, `data/processed/revision/2026-10-05_w_toniot_v2_sweep_robustness/robustness/robustness.md` |
 | Table 13 (failure modes) | — | `docs/REVISION_RESULTS.md` ("Bugs found"), fixes in `src/federated/client.py`, `compression.py`, `src/tinyml/export_tflite.py` |
-| Section 4.10 / Appendix C (ESP32), abstract latency | ESP32 run | `data/processed/ablation/esp32_benchmark.json` (+ raw serial log `esp32_benchmark.log`), collected by `scripts/collect_esp32_benchmark.py` from `esp32_tflite_project/` (TensorFlowLite_ESP32 1.0.0) on an ELEGOO ESP-WROOM-32 board (ESP32-D0WD-V3, 240 MHz, ESP-IDF v4.4.7) |
+| Section 4.10 / Table 13 / Appendix C (ESP32 + ESP32-S3), abstract and conclusion latency | ESP32 and ESP32-S3 runs | `data/processed/ablation/esp32s3_benchmark.json` (+ `.log`; hiBCTR ESP32-S3 N16R8 board, FT232R bridge, env esp32-s3-devkitc-1) and `data/processed/ablation/esp32_benchmark.json` (+ raw serial log `esp32_benchmark.log`), collected by `scripts/collect_esp32_benchmark.py` from `esp32_tflite_project/` (TensorFlowLite_ESP32 1.0.0) on an ELEGOO ESP-WROOM-32 board (ESP32-D0WD-V3, 240 MHz, ESP-IDF v4.4.7) |
 | Appendix B (TON recipe) | S | `data/processed/revision/2026-10-05_s_ton_sweep/ton_sweep/ton_sweep.json` |
 | Dataset statistics (Section 3.1) | B, U | loader logs (`baseline_ablation.log`) of runs B and U |
 

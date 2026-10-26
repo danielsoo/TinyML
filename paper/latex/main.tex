@@ -39,7 +39,7 @@ from the federated model, fine-tuning on clipped inputs across clients, and a th
 client-held data let a 65\,KB model miss 27 of 85,173 \cic test attacks (FP32 model at its default
 threshold: 52) at an 11.3\% false-alarm rate, and a 57\,KB \ton model miss 12 of 16,215 at 6.6\%.
 On an ESP32 the deployed INT8 models classify a flow in 26\,ms (\cic, 112\,KB) and 13\,ms (\ton),
-4.4--7.9$\times$ faster than their FP32 versions, with all on-device decisions matching the host.
+and on an ESP32-S3 in 11\,ms and 6\,ms, with all on-device decisions matching the host.
 We also find that training-time QAT inside FL collapses on heavy-tailed \cic features, that
 full-integer post-training quantization is unstable across calibration draws until the calibration
 inputs are clipped, and that four silent failures in a common TensorFlow/tfmot/Flower toolchain
@@ -85,7 +85,7 @@ study this combination on two datasets with an MLP detector and make five contri
   toolchain failure modes with the invariant check that exposes them (\S\ref{sec:qatfl},\S\ref{sec:failures}).
 \end{itemize}
 The paper is an evidence-backed characterization rather than a new algorithm. All numbers come from
-our own runs; the table captions name the run that produced them (Appendix~\ref{app:provenance}).
+our own runs; the table captions name the run that produced them.
 
 %% =====================================================================
 \section{Background and Related Work}
@@ -210,8 +210,8 @@ mean and range.
 
 \paragraph{Setup.} All runs used one desktop (16-core CPU under WSL2; Flower simulates the clients
 on CPU). A \cic federated run takes about 5.4\,h, a \ton run about 25\,min. Code, configurations,
-logs and per-run result files are in the artifact repository; Appendix~\ref{app:provenance} maps every
-table to its run.
+logs and per-run result files are in the artifact repository, whose PROVENANCE.md maps every
+table and caption run identifier to its result files.
 
 %% =====================================================================
 \section{Results}
@@ -720,13 +720,30 @@ semantics, so they overstate what a network attacker can realize.
 
 %% ---------------------------------------------------------------------
 \subsection{On-Device Measurement}\label{sec:device}
-We ran both deployment models and their FP32 federated models on an ESP32 (ESP32-D0WD-V3, Xtensa LX6
-at 240\,MHz, ESP-IDF v4.4.7; protocol in Appendix~\ref{app:esp32}). On fixed inputs every model
-reproduces the host interpreter (FP32 exactly, INT8 within one output step), and all decisions agree
-at each model's threshold. Over 100 inferences the \cic 112\,KB INT8 model takes 26.3\,ms (FP32:
-114.6\,ms, 4.4$\times$) and the \ton 57\,KB INT8 model 13.3\,ms (FP32: 104.7\,ms, 7.9$\times$); the
-95th percentile is within 0.05\,ms of the mean, and tensor arenas need 1.4--3.9\,KB. One core thus
-classifies about 38 (\cic) or 75 (\ton) flows per second. \src{ESP32 run, data/processed/ablation/esp32\_benchmark.json}
+We ran both deployment models and their FP32 federated models on two microcontrollers with different
+cores, an ESP32 (ESP32-D0WD-V3, Xtensa LX6) and an ESP32-S3 (Xtensa LX7), both at 240\,MHz with
+ESP-IDF v4.4.7 (protocol in Appendix~\ref{app:esp32}). On both, every model reproduces the host
+interpreter on fixed inputs (INT8 within one output step) with all decisions in agreement; latency
+varies by under 0.05\,ms and arenas need 1.4--3.9\,KB (Table~\ref{tab:device}). The INT8 deployment models are
+2.9--7.9$\times$ faster than FP32, and the ESP32-S3 is 2.3--3.5$\times$ faster than the ESP32.
+
+\begin{table}[t]
+\caption{Mean on-device latency over 100 inferences (ms). \src{ESP32 / ESP32-S3 runs,
+data/processed/ablation/esp32\_benchmark.json, esp32s3\_benchmark.json}}
+\label{tab:device}
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lrrr}
+\toprule
+Model & Flash & ESP32 & ESP32-S3 \\
+\midrule
+\cic deployment (INT8) & 112\,KB & 26.35 & 11.31 \\
+\cic FP32 federated & 802\,KB & 114.62 & 32.99 \\
+\ton deployment (INT8) & 57\,KB & 13.33 & 5.57 \\
+\ton FP32 federated & 732\,KB & 104.73 & 30.11 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 %% =====================================================================
 \section{Four Silent Failure Modes}\label{sec:failures}
@@ -769,9 +786,8 @@ FL-plus-compression study.
 \section{Limitations}\label{sec:limits}
 \emph{Seeds}: federated training ran once per configuration except for a second \ton run (0.03 F1
 apart); compression results are repeated over three to five draws. \emph{Scale}: all experiments use
-four clients and one MLP architecture. \emph{Comparisons}: we compare only against our own centralized
-baseline, because published \cic results mostly use multi-class metrics, different splits and no
-deduplication, and the dataset has known labelling issues~\cite{engelen2021troubleshooting}.
+four clients and one MLP architecture. \emph{Comparisons}: we compare only against our own centralized baseline; published \cic results
+mostly use other metrics and splits, and the dataset has labelling issues~\cite{engelen2021troubleshooting}.
 \emph{Thresholds}: client validation sets are SMOTE-augmented, and recall targets above 99.95\% need
 larger, non-augmented validation sets. \emph{\ton recipe}: the variants of Appendix~\ref{app:tonrecipe}
 were designed after the initial \ton model showed room for improvement, although the choice among them
@@ -780,8 +796,7 @@ computed through the integer model or realized as traffic; training-time poisoni
 backdoors~\cite{nguyen2022flame} are out of scope, and the supervised detector does not target unseen
 attack classes as unsupervised detectors do~\cite{mirsky2018kitsune,dong2023horuseye}.
 \emph{Partitions}: near-IID and Dirichlet splits are synthetic; per-host splits~\cite{belarbi2023federated}
-are more realistic. \emph{Hardware}: latency is measured on one ESP32 board with the kernels of the TensorFlowLite\_\-ESP32
-1.0.0 library; optimized kernels and other microcontrollers would change the absolute numbers.
+are more realistic. \emph{Hardware}: one board each of ESP32 and ESP32-S3; optimized kernels would change latency.
 
 \section{Conclusion}
 A federated MLP intrusion detector comes close to centralized training on \cic and \ton and loses less
@@ -789,10 +804,8 @@ than one F1 point under a strongly non-IID partition, and federation matters mos
 local attacks. It can be compressed to a 65\,KB INT8 TFLM model without pooled data, and with
 distillation, clipped inputs, federated fine-tuning and a client-chosen threshold the compressed models
 miss fewer attacks than the FP32 model at its default threshold (27 vs.\ 52 of 85,173 on \cic; 12 of
-16,215 on \ton). The remaining misses lie in the rarest attack classes, which the FP32 model also
-misses. Training-time QAT inside FL fails on heavy-tailed features, full-integer PTQ is unstable
-across calibration draws unless its inputs are clipped (the 99.9th-percentile estimator and
-calibration from federated BatchNorm statistics, which needs no client data, work as well), and an invariant check on the uncompressed
+16,215 on \ton) and run in 6--26\,ms on ESP32-class microcontrollers. Training-time QAT inside FL fails on heavy-tailed features, full-integer PTQ is unstable
+across calibration draws unless its inputs are clipped, and an invariant check on the uncompressed
 federated model catches the silent toolchain failures that had invalidated our earlier results.
 
 \FloatBarrier
@@ -824,13 +837,6 @@ The firmware (PlatformIO, the TensorFlowLite\_\-ESP32 1.0.0 library, the huge\_\
 16-byte-aligned arrays. For 8 fixed standardized inputs per dataset it reports the maximum output
 difference to the host TFLite interpreter and decision agreement at each model's threshold; after 5
 warm-up runs it times 100 Invoke() calls with micros() and reports chip, clock, SDK and arena use.
-Builds exist for ESP32, ESP32-S3 and ESP32-C3; \S\ref{sec:device} uses an ESP-WROOM-32 board.
-
-\section{Provenance of Reported Numbers}\label{app:provenance}
-Every number in this paper comes from our own runs. Each run directory in the artifact holds the
-configuration, log, Git commit and result files (JSON/CSV/Markdown), and the artifact's
-PROVENANCE.md maps every table and run identifier used in the captions (A--X6) to its directory and
-result file. Dataset statistics (\S\ref{sec:data}) are computed by our loaders on the published CSV
-files~\cite{sharafaldin2018toward,moustafa2021toniot}.
+Builds exist for ESP32, ESP32-S3 and ESP32-C3; \S\ref{sec:device} uses ESP-WROOM-32 and ESP32-S3 N16R8 boards.
 
 \end{document}
