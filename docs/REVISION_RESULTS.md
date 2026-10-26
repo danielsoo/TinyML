@@ -539,3 +539,16 @@ Board: ELEGOO ESP-WROOM-32 (ESP32-D0WD-V3, 2 cores, 240 MHz, 4 MB flash, ESP-IDF
 | ton_fp32 | 750,016 | 104.725 | 104.741 | 104.783 | 3,952 | 0 | 8/8 |
 INT8 vs FP32 speed-up: CIC 4.35x, TON 7.86x. Paper: LaTeX abstract, §4.10, limitations, App. C; docx 6.1
 (Table 17), contribution (5), reviewer table, App. B. All [PENDING] markers removed.
+
+## On-device measurement, ESP32-S3 (2026-10-26, `data/processed/ablation/esp32s3_benchmark.json`)
+Board: hiBCTR ESP32-S3 DevKit N16R8 (Xtensa LX7, 240 MHz, ESP-IDF v4.4.7), COM port (FT232R bridge),
+env esp32-s3-devkitc-1. Parity and arena identical to the ESP32 run (INT8 CIC max|Δ| 0.003906, all 8/8).
+| model | ESP32 mean ms | ESP32-S3 mean ms (p95) | S3 speed-up |
+|---|---|---|---|
+| cic_deploy (INT8, 112 KB) | 26.346 | 11.308 (11.311) | 2.33x |
+| cic_fp32 | 114.617 | 32.990 (32.991) | 3.47x |
+| ton_deploy (INT8, 57 KB) | 13.332 | 5.565 (5.569) | 2.40x |
+| ton_fp32 | 104.725 | 30.112 (30.114) | 3.48x |
+INT8 vs FP32 on the S3: CIC 2.92x, TON 5.41x. Paper: LaTeX §4.10 now has Table 13 (both boards),
+abstract/conclusion/limitations/App. C updated, Appendix D (run table) moved to PROVENANCE.md to stay
+within 10+2 pages; docx Table 17 has both boards.
