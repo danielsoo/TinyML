@@ -1,0 +1,15 @@
+# Spec for scripts/compare_arms.py (step compare_arms)
+dataset_config: config/v13/ton_fl.yaml
+train_dir: data/processed/revision/2026-10-28_y2_train_ton/train_fl
+seeds: [1, 2, 3]
+budgets:
+  80: {prune_ratio: 0.5, scratch: S80}
+  128: {prune_ratio: 0.3, scratch: S128}
+far_budgets: [0.01, 0.05]
+arms: [F8, P, Q, R, S, SQ]
+calib:
+  n: 2000
+  client: 0
+  estimators: [tfl_max, tfl_clip5, pct999, pct9999, mse, kl, clip5_pct9999]
+fine_tune: {mode: federated, samples_per_client: 10000, epochs: 3, qat_epochs: 2,
+  kd_alpha: 0.5, kd_temperature: 2.0, clip: 5.0}

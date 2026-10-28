@@ -1,0 +1,6 @@
+id: 2026-10-28_y2b_compare_ton_fed
+config_dir: config/jobs/2026-10-28_y2b_compare_ton_fed
+steps: compare_arms
+flags: []
+why: 'E1/E2 on TON_IoT: F/P/Q/R/S at 80 and 128 KB, FAR budgets 1% and 5% chosen on
+  client validation, fine-tuning federated (10k records per client). ~1 h.'
