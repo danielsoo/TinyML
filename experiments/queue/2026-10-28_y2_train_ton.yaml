@@ -1,0 +1,7 @@
+id: 2026-10-28_y2_train_ton
+config_dir: config/jobs/2026-10-28_y2_train_ton
+steps: train_fl
+flags: []
+why: 'v13 TON_IoT: teacher F (512-256-128) and compact models trained federatively
+  from scratch at the 80 KB (256-128-64) and 128 KB (358-179-89) budgets, seeds 1-3
+  each, same split. ~5-6 h.'
