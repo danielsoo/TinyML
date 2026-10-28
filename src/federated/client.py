@@ -155,6 +155,7 @@ def _build_model(
     use_focal_loss: bool = False,
     focal_loss_alpha: float = 0.75,
     use_qat: bool = False,
+    hidden_units=None,
 ):
     """Build model based on model name.
     
@@ -166,6 +167,7 @@ def _build_model(
             model_name, input_shape, num_classes, learning_rate,
             use_focal_loss=use_focal_loss, focal_loss_alpha=focal_loss_alpha,
             use_bn=not use_qat,  # Disable BN when using QAT
+            hidden_units=hidden_units,
         )
 
     name = (model_name or "mlp").lower()
@@ -517,8 +519,23 @@ def simulate_clients(config: dict = None):
     dirichlet_alpha = float(data_cfg.get("dirichlet_alpha", 0.3))
     return_attack_labels = partition_strategy in {"attack_class", "attack_shift"}
 
+    fed_data = None
+    if data_cfg.get("pipeline") == "v13":
+        # Corrected pipeline (docs/AUDIT.md): clients own their records before any fitted
+        # preprocessing; client-side evaluation uses each client's real validation slice.
+        from src.data.fed_pipeline import build_federated
+        v13_kw = {k: v for k, v in data_cfg.items()
+                  if k not in {"name", "path", "data_path", "num_clients", "pipeline"}}
+        fed_data = build_federated(dataset_name, data_cfg.get("path") or data_cfg.get("data_path"),
+                                   num_clients=num_clients, **v13_kw)
+        x_train = np.concatenate([c.train.x for c in fed_data.clients])
+        y_train = np.concatenate([c.train.y for c in fed_data.clients])
+        x_test, y_test = fed_data.pooled_val().x, fed_data.pooled_val().y
+        attack_train = attack_test = None
     try:
-        if return_attack_labels and dataset_name.lower() in {
+        if fed_data is not None:
+            pass
+        elif return_attack_labels and dataset_name.lower() in {
             "cicids2017", "cic-ids-2017", "cic_ids_2017"
         }:
             dataset_kwargs["return_attack_labels"] = True
@@ -551,22 +568,18 @@ def simulate_clients(config: dict = None):
         input_shape = x_train.shape[1:]
 
     # Partition data
-    train_parts = partition_data(
-        x_train,
-        y_train,
-        num_clients,
-        strategy=partition_strategy,
-        dirichlet_alpha=dirichlet_alpha,
-        attack_labels=attack_train,
-    )
-    test_parts = partition_data(
-        x_test,
-        y_test,
-        num_clients,
-        strategy=partition_strategy,
-        dirichlet_alpha=dirichlet_alpha,
-        attack_labels=attack_test,
-    )
+    if fed_data is not None:
+        train_parts = [{"x": c.train.x, "y": c.train.y} for c in fed_data.clients]
+        test_parts = [{"x": c.val.x, "y": c.val.y} for c in fed_data.clients]
+    else:
+        train_parts = partition_data(
+            x_train, y_train, num_clients, strategy=partition_strategy,
+            dirichlet_alpha=dirichlet_alpha, attack_labels=attack_train,
+        )
+        test_parts = partition_data(
+            x_test, y_test, num_clients, strategy=partition_strategy,
+            dirichlet_alpha=dirichlet_alpha, attack_labels=attack_test,
+        )
 
     # Print client data distribution for debugging class imbalance
     print("\n" + "="*60)
@@ -609,6 +622,8 @@ def simulate_clients(config: dict = None):
         "learning_rate": learning_rate,
         "use_qat": use_qat,
         "use_adversarial_training": use_adversarial_training,
+        "hidden_units": model_cfg.get("hidden_units"),
+        "fed_data": fed_data,
     }
 
     def client_fn(context: fl.common.Context) -> fl.client.Client:
@@ -646,6 +661,7 @@ def simulate_clients(config: dict = None):
             state.get("use_focal_loss", False),
             state.get("focal_loss_alpha", 0.75),
             state.get("use_qat", False),
+            hidden_units=state.get("hidden_units"),
         )
 
         client = KerasClient(
@@ -968,6 +984,9 @@ def main(save_path: str = "src/models/global_model.h5", config_path: str = None)
     if hasattr(fl.server.strategy, "FedAvgM"):
         strategy_kw["server_momentum"] = fed_cfg.get("server_momentum", 0.9)
         strategy_kw["server_learning_rate"] = fed_cfg.get("server_learning_rate", 1.0)
+        if fed_cfg.get("seed") is not None:
+            tf.keras.utils.set_random_seed(int(fed_cfg["seed"]))
+            print(f"[Strategy] seed={fed_cfg['seed']} (initial weights)")
         init_model = _build_model(
             state["model_name"],
             state["input_shape"],
@@ -976,6 +995,7 @@ def main(save_path: str = "src/models/global_model.h5", config_path: str = None)
             state.get("use_focal_loss", False),
             state.get("focal_loss_alpha", 0.75),
             state.get("use_qat", False),
+            hidden_units=state.get("hidden_units"),
         )
         
         # Apply QAT to initial model if enabled
@@ -1115,6 +1135,7 @@ def main(save_path: str = "src/models/global_model.h5", config_path: str = None)
         state.get("use_focal_loss", False),
         state.get("focal_loss_alpha", 0.75),
         state.get("use_qat", False),
+        hidden_units=state.get("hidden_units"),
     )
     
     if getattr(strategy, "latest_parameters", None) is not None:
@@ -1138,6 +1159,12 @@ def main(save_path: str = "src/models/global_model.h5", config_path: str = None)
         global_model.set_weights(weights)
         Path(save_path).parent.mkdir(parents=True, exist_ok=True)
         global_model.save(save_path)
+        if state.get("fed_data") is not None:
+            man = Path(str(save_path).rsplit(".", 1)[0] + "_manifest")
+            state["fed_data"].manifest["federated"] = dict(fed_cfg)
+            state["fed_data"].manifest["model"] = dict(CFG.get("model", {}))
+            state["fed_data"].save_manifest(man)
+            print(f"[SUCCESS] Saved data manifest to {man}.json/.npz")
         print(f"[SUCCESS] Saved global model to {save_path}")
         
         # Generate pipeline summary for easy reference

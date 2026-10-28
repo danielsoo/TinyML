@@ -65,8 +65,9 @@ def make_mlp(
     use_focal_loss: bool = False,
     focal_loss_alpha: float = 0.75,
     use_bn: bool = True,
+    hidden_units=None,
 ) -> Model:
-    """MLP: 512->256->128, BatchNorm (optional), Dropout. For training stability and accuracy.
+    """MLP: 512->256->128 (or hidden_units), BatchNorm (optional), Dropout.
     
     Args:
         use_bn: If False, skip BatchNormalization (required for QAT with tfmot).
@@ -74,25 +75,12 @@ def make_mlp(
     from tensorflow.keras import Input
     
     layer_list = [Input(shape=input_shape)]
-    
-    # Layer 1: Dense 512
-    layer_list.append(layers.Dense(512, activation="relu"))
-    if use_bn:
-        layer_list.append(layers.BatchNormalization())
-    layer_list.append(layers.Dropout(dropout_rate))
-    
-    # Layer 2: Dense 256
-    layer_list.append(layers.Dense(256, activation="relu"))
-    if use_bn:
-        layer_list.append(layers.BatchNormalization())
-    layer_list.append(layers.Dropout(dropout_rate))
-    
-    # Layer 3: Dense 128
-    layer_list.append(layers.Dense(128, activation="relu"))
-    if use_bn:
-        layer_list.append(layers.BatchNormalization())
-    layer_list.append(layers.Dropout(dropout_rate))
-    
+    for units in (hidden_units or (512, 256, 128)):
+        layer_list.append(layers.Dense(int(units), activation="relu"))
+        if use_bn:
+            layer_list.append(layers.BatchNormalization())
+        layer_list.append(layers.Dropout(dropout_rate))
+
     model = Sequential(layer_list)
     return _compile_for_classes(model, num_classes, learning_rate, use_focal_loss, focal_loss_alpha)
 
@@ -123,6 +111,7 @@ def get_model(
     use_focal_loss: bool = False,
     focal_loss_alpha: float = 0.75,
     use_bn: bool = True,
+    hidden_units=None,
 ) -> Model:
     """Build model with optional BatchNormalization.
     
@@ -136,5 +125,6 @@ def get_model(
         input_shape, num_classes, learning_rate,
         use_focal_loss=use_focal_loss,
         focal_loss_alpha=focal_loss_alpha,
-        use_bn=use_bn
+        use_bn=use_bn,
+        hidden_units=hidden_units
     )
