@@ -1,0 +1,5 @@
+id: 2026-10-28_y1_audit
+config_dir: config/jobs/2026-10-28_y1_audit
+steps: audit
+flags: []
+why: "Audit of data separation, SMOTE validity, threshold-validation leakage, extreme records and the corrected v13 split. ~15 min."

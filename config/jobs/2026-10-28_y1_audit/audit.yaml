@@ -1,0 +1,5 @@
+# Data / implementation audit (Dr. Saha's guide, section 2; docs/AUDIT.md).
+datasets:
+  - {name: cicids2017, data_path: data/raw/CIC-IDS2017, val_samples: 20000}
+  - {name: ton_iot, data_path: data/raw/TON_IoT, val_samples: 8000, text_features: true}
+v13: {split_seed: 2027, partition_seed: 42, val_frac: 0.1, balance_ratio: 4.0, conflict_policy: drop}
