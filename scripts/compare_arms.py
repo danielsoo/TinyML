@@ -75,11 +75,14 @@ BENIGN = {"benign", "normal"}
 # --------------------------------------------------------------------------- thresholds / metrics
 def threshold_at_far(pv: np.ndarray, yv: np.ndarray, far: float) -> float:
     """Smallest threshold t with mean(pv[benign] >= t) <= far (ties in INT8 outputs respected)."""
-    ben = np.sort(pv[yv == 0])
+    ben = np.sort(pv[yv == 0].astype(np.float32))
     k = int(np.floor(far * len(ben)))  # false alarms allowed
     if k >= len(ben):
         return 0.0
-    return float(np.nextafter(ben[len(ben) - k - 1], np.inf))
+    # next float32 above the (k+1)-th largest benign score. Kept in float32: with NumPy 1.x a
+    # float64 nextafter is cast back to float32 in `p >= t`, which re-admits the whole tie group
+    # (a large one for discretized INT8 outputs).
+    return float(np.nextafter(ben[len(ben) - k - 1], np.float32(np.inf), dtype=np.float32))
 
 
 def metrics(p: np.ndarray, y: np.ndarray, t: float) -> Dict[str, Any]:
@@ -203,10 +206,12 @@ def run_seed(ctx: Ctx, seed: int, rows: list, trans: list, sel: dict) -> None:
     clip = float(ctx.ft["clip"])
     arms = spec.get("arms", ["F8", "P", "Q", "R", "S", "SQ"])
     scores: Dict[str, np.ndarray] = {}
+    val_scores: Dict[str, np.ndarray] = {}  # saved too, so thresholds can be re-derived offline
 
     def record(arm: str, budget: str, stage: str, pv: np.ndarray, pt: np.ndarray, size_kb: Optional[float]):
         key = f"{arm}|{budget}|{stage}"
-        scores[key] = pt.astype(np.float32)  # saved as float16 (enough for INT8 outputs, 1/256 steps)
+        scores[key] = pt.astype(np.float32)
+        val_scores[key] = pv.astype(np.float32)  # saved as float16 (enough for INT8 outputs, 1/256 steps)
         thr = {}
         try:
             auc, ap = roc_auc_score(ctx.yt, pt), average_precision_score(ctx.yt, pt)
@@ -216,6 +221,7 @@ def run_seed(ctx: Ctx, seed: int, rows: list, trans: list, sel: dict) -> None:
             t = threshold_at_far(pv, ctx.yv, b)
             thr[b] = t
             vm, tm = metrics(pv, ctx.yv, t), metrics(pt, ctx.yt, t)
+            assert vm["far"] <= b + 1e-12, f"{arm} {stage}: validation FAR {vm['far']:.4f} above budget {b}"
             rows.append({"seed": seed, "arm": arm, "budget_kb": budget, "stage": stage, "far_budget": b,
                          "size_kb": size_kb, "threshold": t, "val_far": vm["far"], "val_recall": vm["recall"],
                          **{f"test_{k}": v for k, v in tm.items()}, "test_roc_auc": auc, "test_pr_auc": ap,
@@ -311,6 +317,7 @@ def run_seed(ctx: Ctx, seed: int, rows: list, trans: list, sel: dict) -> None:
             traceback.print_exc()
             rows.append({"seed": seed, "budget_kb": budget, "error": str(err)[:200]})
     np.savez_compressed(sdir / "test_scores.npz", **{k.replace("|", "__"): v.astype(np.float16) for k, v in scores.items()})
+    np.savez_compressed(sdir / "val_scores.npz", **{k.replace("|", "__"): v.astype(np.float16) for k, v in val_scores.items()})
 
 
 def summarize(rows: list) -> list:
