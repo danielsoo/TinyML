@@ -640,7 +640,46 @@ extremes" A, so excluding extreme records from the calibration draw is the gentl
   a model that outputs that logit directly gives identical decisions. Rows for 16-bit
   activations with INT8 weights and for FP32 with clipped inputs are queued (z1h, z2f).
 
+### QAT on clipped inputs (jobs z1g, z2e)
+QC = the P/Q compact FP32 model, QAT on inputs clipped to ±5 SD (hard labels); SQC = the same from S.
+Recall at FAR 1%, 80 KB: TON QC 97.86 ± 0.44, SQC 97.71 ± 1.09 (Q 55.4, SQ 59.0); CIC QC 99.57 ±
+0.10, SQC 99.59 ± 0.07 (Q 81.9, SQ 84.8). 128 KB: TON 98.24 / 98.11, CIC 99.56 / 99.62. Bounding
+the input range that QAT learns removes the QAT failure entirely; distillation (R) adds 0.6 points
+on TON and nothing on CIC.
+
+### E4 re-run: what makes INT8 differ from FP32 (jobs z1h, z2f; FAR 1%, 3 seeds)
+| model | FP32 | FP32, inputs ±5 SD | FP32, output on INT8 grid | INT8 (cell D) | 16-bit act., INT8 weights |
+|---|---|---|---|---|---|
+| TON F | 96.68 | 98.40 | 96.65 | 98.28 | 98.40 |
+| TON PQ_80 | 96.24 | 97.35 | 96.01 | 96.59 | 97.34 |
+| TON S80 | 96.98 | 97.52 | 96.90 | 97.36 | 97.52 |
+| CIC F | 96.89 | 96.76 | 96.76 | 99.40 | 96.21 |
+| CIC PQ_80 | 99.39 | 99.18 | 99.28 | 98.99 | 99.29 |
+| CIC S80 | 97.31 | 97.18 | 97.26 | 99.45 | 96.73 |
+
+- TON: the INT8 "gain" over FP32 is the input saturation: FP32 with inputs clipped to ±5 SD and
+  16-bit activations reach the same recall as INT8.
+- CIC: clipping FP32 inputs gives nothing; the INT8 gain for F and S80 (+2.5 points, ~2,000-2,400
+  PortScan flows) disappears with 16-bit activations. The FP32 teacher's 1%-FAR threshold sits on a
+  cliff of PortScan scores, and INT8 rounding moves them across. It is an operating-point
+  sensitivity, not a robust benefit, and we report it as such.
+- Where INT8 loses (CIC PQ_80, TON PQ_80) 16-bit activations recover most of the loss (CIC lost
+  attacks 462 -> 131, benign records tied at the threshold 722 -> 10): the loss comes from the
+  coarse INT8 activations / logit, and 16-bit activations (weights unchanged) are the remedy.
+
+### E6: TON_IoT grouped split, unseen source hosts (jobs z3, z3b)
+Test = all records of 15 of 51 source hosts (22,866 records; their 5,697 old-test records dropped);
+training on the other 36 hosts. Family test shares are uneven (injection 61%, password 52%, mitm
+49%, backdoor 2%). Recall at validation FAR 1%, 80 KB, 3 seeds:
+F 98.20 ± 0.11, F8 98.08; R 96.57 ± 0.62; S 96.43 ± 0.92; QC 96.30 ± 0.87; SQC 95.96 ± 1.60;
+P 94.79 ± 1.42; Q 52.9 ± 45.8; SQ 56.9 ± 49.2.
+- On unseen hosts compression costs 1.6 (R, S, QC) to 3.4 points (P); the random-split ordering
+  holds (R ≈ S ≈ QC > P >> Q).
+- The QAT collapse and its repair by input clipping reproduce.
+- The validation-chosen FAR does not transfer to unseen hosts for FP32 models (test FAR 3.2 ± 2.8%
+  at a 1% budget; S FP32 4.8%) while the INT8 models stay below it (0.00% at 1%); the test split
+  has only 2,537 benign records from few hosts, so FAR on it is noisy.
+
 ### Status
-- E5 (independent runs): all tables above are over 3 teacher seeds.
-- E6 (TON grouped split by source host): queued (z3, z3b).
+- E5 (independent runs): all tables are over 3 teacher seeds.
 - E7 (device agreement on thousands of inputs, memory / latency breakdown): needs the boards.
