@@ -1,0 +1,6 @@
+id: 2026-10-29_z2f_range_cic2
+config_dir: config/jobs/2026-10-29_z2f_range_cic2
+steps: range_mechanism
+flags: []
+why: 'E3/E4 re-run on CIC with two added E4 rows: FP32 with inputs clipped (+-5, +-10
+  SD) and 16-bit activations with INT8 weights. ~25 min.'

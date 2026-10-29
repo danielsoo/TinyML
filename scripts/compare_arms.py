@@ -9,6 +9,7 @@ For every teacher seed and memory budget:
   R   prune -> fine-tune distilled from F on clipped inputs -> QAT on clipped inputs -> INT8
   S   compact model trained federatively from scratch (train_fl step) -> strong calibrated PTQ
   SQ  S -> QAT on client data -> INT8
+  QC / SQC  as Q / SQ, but QAT on inputs clipped to +-clip SD (the learned input range is then bounded)
 "Strong calibrated PTQ" picks, per model, the calibration (TFLite min/max per channel, with or
 without +-c SD input clipping, or per-tensor ranges from the 99.9 / 99.99th percentile, MSE or KL
 estimators) with the best mean validation attack recall at the FAR budgets.
@@ -261,7 +262,7 @@ def run_seed(ctx: Ctx, seed: int, rows: list, trans: list, sel: dict) -> None:
         ratio = float(bcfg["prune_ratio"])
         try:
             tf.keras.utils.set_random_seed(100 * seed + 1)
-            if {"P", "Q"} & set(arms):
+            if {"P", "Q", "QC"} & set(arms):
                 pr = apply_structured_pruning(_clone(teacher), pruning_ratio=ratio, skip_last_layer=True, verbose=False)
                 pr.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
                 sets = ctx.client_sets(seed)
@@ -282,6 +283,14 @@ def run_seed(ctx: Ctx, seed: int, rows: list, trans: list, sel: dict) -> None:
                     t8 = record("Q", budget, "int8", tflite_probs(p, ctx.xv), tflite_probs(p, ctx.xt), round(p.stat().st_size / 1024, 2))
                     transitions("Q", budget, [teacher_link, c_link, ("qat_float", scores[f"Q|{budget}|qat"], qf),
                                               ("int8", scores[f"Q|{budget}|int8"], t8)])
+                if "QC" in arms:
+                    # QAT on inputs clipped to +-clip SD (hard labels): isolates the learned input range
+                    tf.keras.utils.set_random_seed(100 * seed + 4)
+                    q = ctx.qat(pr, ctx.client_sets(seed, clip=clip))
+                    p = sdir / f"QC_{budget}.tflite"
+                    export_tflite_qat(q, str(p))
+                    t8 = record("QC", budget, "int8", tflite_probs(p, ctx.xv), tflite_probs(p, ctx.xt), round(p.stat().st_size / 1024, 2))
+                    transitions("QC", budget, [teacher_link, c_link, ("int8", scores[f"QC|{budget}|int8"], t8)])
             if "R" in arms:
                 tf.keras.utils.set_random_seed(100 * seed + 2)
                 pr = apply_structured_pruning(_clone(teacher), pruning_ratio=ratio, skip_last_layer=True, verbose=False)
@@ -297,7 +306,7 @@ def run_seed(ctx: Ctx, seed: int, rows: list, trans: list, sel: dict) -> None:
                 t8 = record("R", budget, "int8", tflite_probs(p, ctx.xv), tflite_probs(p, ctx.xt), round(p.stat().st_size / 1024, 2))
                 transitions("R", budget, [teacher_link, ("compact_fp32", scores[f"R|{budget}|fp32"], c_thr),
                                           ("int8", scores[f"R|{budget}|int8"], t8)])
-            if {"S", "SQ"} & set(arms) and bcfg.get("scratch"):
+            if {"S", "SQ", "SQC"} & set(arms) and bcfg.get("scratch"):
                 sname = f"{bcfg['scratch']}_s{seed}"
                 check_manifest(fd, tdir / "models" / f"{sname}_manifest.json")
                 sm = _load_fl_model(str(tdir / "models" / f"{sname}.h5"))
@@ -315,6 +324,13 @@ def run_seed(ctx: Ctx, seed: int, rows: list, trans: list, sel: dict) -> None:
                     export_tflite_qat(q, str(p))
                     t8 = record("SQ", budget, "int8", tflite_probs(p, ctx.xv), tflite_probs(p, ctx.xt), round(p.stat().st_size / 1024, 2))
                     transitions("SQ", budget, [teacher_link, s_link, ("int8", scores[f"SQ|{budget}|int8"], t8)])
+                if "SQC" in arms:
+                    tf.keras.utils.set_random_seed(100 * seed + 5)
+                    q = ctx.qat(sm, ctx.client_sets(seed, clip=clip))
+                    p = sdir / f"SQC_{budget}.tflite"
+                    export_tflite_qat(q, str(p))
+                    t8 = record("SQC", budget, "int8", tflite_probs(p, ctx.xv), tflite_probs(p, ctx.xt), round(p.stat().st_size / 1024, 2))
+                    transitions("SQC", budget, [teacher_link, s_link, ("int8", scores[f"SQC|{budget}|int8"], t8)])
         except Exception as err:
             traceback.print_exc()
             rows.append({"seed": seed, "budget_kb": budget, "error": str(err)[:200]})

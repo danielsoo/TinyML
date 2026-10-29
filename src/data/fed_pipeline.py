@@ -219,11 +219,38 @@ def split_test(raw: RawData, mode: str, test_size: float, seed: int,
             rng.shuffle(idx)
             test[idx[:k]] = True
         return test
+    if mode == "group":
+        raise ValueError("group splits are built by group_test_split()")
     if mode == "temporal":
         ts = pd.to_numeric(raw.meta["ts"], errors="coerce").values
         cut = np.nanquantile(ts, 1.0 - test_size)
         return ts > cut
     raise ValueError(mode)
+
+
+def group_test_split(groups: np.ndarray, attack: np.ndarray, test_size: float, seed: int,
+                     tries: int = 2000) -> np.ndarray:
+    """Test mask holding whole groups (hosts): random group subsets of about test_size of the
+    records, keeping the one whose per-family test share is closest to test_size (families that
+    cannot be split because one host holds them are reported in the manifest)."""
+    uniq, inv, counts = np.unique(groups, return_inverse=True, return_counts=True)
+    fams, fam_idx = np.unique(attack, return_inverse=True)
+    per = np.zeros((len(uniq), len(fams)))
+    np.add.at(per, (inv, fam_idx), 1)
+    fam_tot = per.sum(axis=0)
+    rng = np.random.default_rng(seed)
+    best, best_cost = None, np.inf
+    for _ in range(tries):
+        order = rng.permutation(len(uniq))
+        k = int(np.searchsorted(np.cumsum(counts[order]), test_size * len(groups))) + 1
+        sel = order[:k]
+        share = per[sel].sum(axis=0) / fam_tot
+        cost = np.abs(share - test_size).sum() + 10 * np.sum((share == 0) | (share == 1))
+        if cost < best_cost:
+            best, best_cost = sel, cost
+    chosen = np.zeros(len(uniq), bool)
+    chosen[best] = True
+    return chosen[inv]
 
 
 def assign_clients(y: np.ndarray, num_clients: int, strategy: str, alpha: float, seed: int,
@@ -311,7 +338,7 @@ def build_federated(name: str, data_path: str, num_clients: int = 4,
                     partition_seed: int = 42, val_frac: float = 0.1, balance_ratio: Optional[float] = 4.0,
                     conflict_policy: str = "drop", text_features: bool = True,
                     group_column: Optional[str] = None, drop_negative: bool = False,
-                    exclude_old_test: bool = False, **_) -> FederatedData:
+                    exclude_old_test: bool = False, group_test_column: str = "src_ip", **_) -> FederatedData:
     raw = load_raw(name, data_path, text_features=text_features)
     old_test = old_test_ids(name, raw) if exclude_old_test else None
     invalid = drop_invalid(raw) if drop_negative else None
@@ -319,8 +346,22 @@ def build_federated(name: str, data_path: str, num_clients: int = 4,
     dedup = deduplicate(raw, key_cols=key_cols, conflict_policy=conflict_policy)
 
     exclude = np.isin(raw.ids.astype(str), old_test) if old_test is not None else None
-    test_mask = split_test(raw, split_mode, test_size, split_seed, exclude)
-    pool = np.where(~test_mask)[0]
+    group_info = None
+    if split_mode == "group":
+        # whole hosts in the test split; their old-test records are dropped (not moved to training),
+        # so training and test never share a host
+        g = raw.meta[group_test_column].astype(str).values
+        host_test = group_test_split(g, raw.attack, test_size, split_seed)
+        test_mask = host_test & (~exclude if exclude is not None else True)
+        pool = np.where(~host_test)[0]
+        fam = pd.Series(raw.attack)
+        group_info = {"column": group_test_column, "test_hosts": int(len(np.unique(g[host_test]))),
+                      "train_hosts": int(len(np.unique(g[~host_test]))),
+                      "dropped_old_test_records_of_test_hosts": int((host_test & ~test_mask).sum()),
+                      "test_share_by_family": (fam[host_test].value_counts() / fam.value_counts()).round(3).fillna(0).to_dict()}
+    else:
+        test_mask = split_test(raw, split_mode, test_size, split_seed, exclude)
+        pool = np.where(~test_mask)[0]
     test_idx = np.where(test_mask)[0]
 
     groups = raw.meta[group_column].astype(str).values[pool] if group_column else None
@@ -376,6 +417,7 @@ def build_federated(name: str, data_path: str, num_clients: int = 4,
                    "scaler": "mean/std of the union of client training slices (federated aggregate)"},
         "raw_info": raw.info, "invalid_records": invalid, "dedup": dedup,
         "old_test_records_excluded_from_test": None if exclude is None else int(exclude.sum()),
+        "group_split": group_info,
         "n_features": int(raw.X.shape[1]), "feature_names": raw.feature_names,
         "categorical_label_encoded": raw.categorical,
         "test": {**counts(test_idx), "hash": _hash_ids(raw.ids[test_idx]),

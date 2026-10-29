@@ -1,0 +1,6 @@
+id: 2026-10-29_z3b_compare_ton_group
+config_dir: config/jobs/2026-10-29_z3b_compare_ton_group
+steps: compare_arms
+flags: []
+why: 'E6: F/P/Q/QC/R/S/SQ/SQC on the TON_IoT grouped (unseen-host) split, federated
+  fine-tuning. ~10 min.'

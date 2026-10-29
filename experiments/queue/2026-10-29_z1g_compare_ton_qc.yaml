@@ -1,0 +1,6 @@
+id: 2026-10-29_z1g_compare_ton_qc
+config_dir: config/jobs/2026-10-29_z1g_compare_ton_qc
+steps: compare_arms
+flags: []
+why: 'TON: QAT with inputs clipped to +-5 SD (QC from the pruned + fine-tuned model,
+  SQC from S): does bounding the learned input range repair QAT? ~5 min.'

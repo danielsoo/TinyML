@@ -15,7 +15,8 @@ E3  input / hidden range, 2 x 2, with every other factor fixed (same FP32 model,
 
 E4  output discretization: the TFLite sigmoid output has 256 levels (step 1/256), so at a low FAR
     the threshold falls inside a tie group. Rows: FP32; FP32 with only its output rounded to the
-    INT8 grid; INT8 (cell D); INT8 with a linear (logit) output, thresholded on the logit. Tie
+    INT8 grid; FP32 with inputs clipped to +-5 / +-10 SD; INT8 (cell D); INT8 with a linear (logit)
+    output, thresholded on the logit; 16-bit activations with INT8 weights (TFLite int16x8). Tie
     statistics: distinct output values on validation, and benign validation records sharing the
     threshold's output value.
 
@@ -59,6 +60,7 @@ from tensorflow import keras
 from scripts.ablation_utils import load_yaml, rows_to_csv, rows_to_markdown
 from scripts.compare_arms import check_manifest, keras_probs, load_data, metrics, threshold_at_far
 from scripts.compression_ablation import _load_fl_model
+from scripts.quant_distill_ablation import convert
 from scripts.quant_lit_methods import Ranges, dense_layers, estimate, fq_export, tensors
 from scripts.recall_priority import tflite_probs
 
@@ -172,6 +174,10 @@ def main():
                 g = lambda p: np.clip(np.round(p * 256.0), 0, 255) / 256.0  # TFLite logistic output grid
                 for r in evaluate(g(fv), g(ft), ref):
                     e4.append({**base, "variant": "fp32, output on INT8 grid", **r})
+                for c in (5.0, 10.0):  # does input saturation alone explain INT8 beating FP32?
+                    pv_c, pt_c = keras_probs(model, np.clip(xv, -c, c)), keras_probs(model, np.clip(xt, -c, c))
+                    for r in evaluate(pv_c, pt_c, ref):
+                        e4.append({**base, "variant": f"fp32, inputs clipped +-{c:g} SD", **r})
                 # E3: 2 x 2 x calibration draws
                 for dname, idx in cal_sets:
                     xcal = xc_all[idx]
@@ -196,6 +202,10 @@ def main():
                             fq_export(lm, rl, pl)
                             for row in evaluate(tflite_probs(pl, xv), tflite_probs(pl, xt), ref):
                                 e4.append({**base, "variant": "INT8 (cell D), logit output", **row})
+                            p16 = sdir / f"{mname}_int16x8.tflite"
+                            convert(model, "int16x8", np.clip(xcal, -float(cal["clip"]), float(cal["clip"])), p16)
+                            for row in evaluate(tflite_probs(p16, xv), tflite_probs(p16, xt), ref):
+                                e4.append({**base, "variant": "16-bit activations, INT8 weights (clipped calib.)", **row})
                         if dname != "random0":
                             p.unlink(missing_ok=True)
                     print(f"  s{seed} {mname} {dname}: " + " ".join(

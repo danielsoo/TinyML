@@ -1,0 +1,6 @@
+id: 2026-10-29_z3_train_ton_group
+config_dir: config/jobs/2026-10-29_z3_train_ton_group
+steps: train_fl
+flags: []
+why: 'E6: TON_IoT grouped split (test = whole unseen source hosts): F, S80, S128,
+  seeds 1-3. ~30 min.'
