@@ -1,0 +1,7 @@
+id: 2026-10-29_z2d_range_cic
+config_dir: config/jobs/2026-10-29_z2d_range_cic
+steps: range_mechanism
+flags: []
+why: 'E3/E4 on CIC (v13.1): input/hidden range 2x2 crossed with calibration draws
+  with/without extreme records, and output discretization (INT8 output grid, logit
+  output). ~1-2 h.'

@@ -7,7 +7,7 @@
 #   bash scripts/run_revision_experiments.sh --with-failed --with-scaling   # + fixed-LR row, 20/50 clients
 #   bash scripts/run_revision_experiments.sh --config-dir config/tuning/<job>   # alternate configs
 #   bash scripts/run_revision_experiments.sh --steps non_iid          # subset of: baseline_ablation,non_iid,client_scaling,
-#                                                                     #   fixed_lr,qat_fl,robustness,compression_ablation,quant_distill,local_only,ptq_calibration,qat_stability,compression_combos,recall_priority,attack_counts,ton_sweep,quant_lit,audit,train_fl,compare_arms
+#                                                                     #   fixed_lr,qat_fl,robustness,compression_ablation,quant_distill,local_only,ptq_calibration,qat_stability,compression_combos,recall_priority,attack_counts,ton_sweep,quant_lit,audit,train_fl,compare_arms,range_mechanism
 #   bash scripts/run_revision_experiments.sh --steps compression_ablation --config-dir <dir with compression_ablation.yaml>
 # Re-running with the same --out resumes: finished steps are skipped.
 set -uo pipefail
@@ -137,6 +137,11 @@ if wanted compare_arms; then
   step compare_arms python scripts/compare_arms.py \
     --spec "$CONFIG_DIR/compare_arms.yaml" --output-dir "$OUT/compare_arms" || FAILED=1
 fi
+if wanted range_mechanism; then
+  # Input / hidden range 2x2 and output discretization (guide E3, E4)
+  step range_mechanism python scripts/range_mechanism.py \
+    --spec "$CONFIG_DIR/range_mechanism.yaml" --output-dir "$OUT/range_mechanism" || FAILED=1
+fi
 if wanted audit; then
   # Data / implementation audit (docs/AUDIT.md)
   step audit python scripts/audit_pipeline.py \
@@ -165,7 +170,7 @@ fi
   echo "- host: $(uname -srm), $(nproc) cores"
   for f in "$OUT"/*.done; do [ -f "$f" ] && echo "- $(basename "$f" .done): $(( $(cat "$f") / 60 )) min"; done
   echo
-  for md in "$OUT"/baseline/baseline_ablation.md "$OUT"/non_iid/non_iid_ablation.md "$OUT"/client_scaling/non_iid_ablation.md "$OUT"/compression_ablation/compression_ablation.md "$OUT"/fixed_lr/non_iid_ablation.md "$OUT"/qat_fl/non_iid_ablation.md "$OUT"/robustness/robustness.md "$OUT"/quant_distill/quant_distill.md "$OUT"/local_only/local_only.md "$OUT"/ptq_calibration/ptq_calibration.md "$OUT"/qat_stability/qat_stability.md "$OUT"/compression_combos/compression_combos.md "$OUT"/recall_priority/recall_priority.md "$OUT"/attack_counts/attack_type_counts.md "$OUT"/ton_sweep/ton_sweep.md "$OUT"/quant_lit/quant_lit.md "$OUT"/audit/audit.md "$OUT"/train_fl/train_fl.md "$OUT"/compare_arms/compare_arms.md; do
+  for md in "$OUT"/baseline/baseline_ablation.md "$OUT"/non_iid/non_iid_ablation.md "$OUT"/client_scaling/non_iid_ablation.md "$OUT"/compression_ablation/compression_ablation.md "$OUT"/fixed_lr/non_iid_ablation.md "$OUT"/qat_fl/non_iid_ablation.md "$OUT"/robustness/robustness.md "$OUT"/quant_distill/quant_distill.md "$OUT"/local_only/local_only.md "$OUT"/ptq_calibration/ptq_calibration.md "$OUT"/qat_stability/qat_stability.md "$OUT"/compression_combos/compression_combos.md "$OUT"/recall_priority/recall_priority.md "$OUT"/attack_counts/attack_type_counts.md "$OUT"/ton_sweep/ton_sweep.md "$OUT"/quant_lit/quant_lit.md "$OUT"/audit/audit.md "$OUT"/train_fl/train_fl.md "$OUT"/compare_arms/compare_arms.md "$OUT"/range_mechanism/range_mechanism.md; do
     [ -f "$md" ] && { cat "$md"; echo; }
   done
 } > "$OUT/SUMMARY.md"

@@ -266,6 +266,7 @@ def run_seed(ctx: Ctx, seed: int, rows: list, trans: list, sel: dict) -> None:
                 pr.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
                 sets = ctx.client_sets(seed)
                 ctx.train(pr, sets, int(ctx.ft["epochs"]))
+                pr.save(sdir / f"PQ_{budget}.h5")  # compact FP32 model, reused by range_mechanism.py (E3/E4)
                 c_thr = record("PQ", budget, "fp32", keras_probs(pr, ctx.xv), keras_probs(pr, ctx.xt), None)
                 c_link = ("compact_fp32", scores[f"PQ|{budget}|fp32"], c_thr)
                 if "P" in arms:
@@ -288,6 +289,7 @@ def run_seed(ctx: Ctx, seed: int, rows: list, trans: list, sel: dict) -> None:
                 sets = ctx.client_sets(seed, clip=clip, teacher=teacher)
                 ctx.train(pr, sets, int(ctx.ft["epochs"]))
                 xv_c, xt_c = np.clip(ctx.xv, -clip, clip), np.clip(ctx.xt, -clip, clip)
+                pr.save(sdir / f"R_{budget}.h5")
                 c_thr = record("R", budget, "fp32", keras_probs(pr, xv_c), keras_probs(pr, xt_c), None)
                 q = ctx.qat(pr, sets)
                 p = sdir / f"R_{budget}.tflite"
