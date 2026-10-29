@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # PC-side worker for experiments/queue (see experiments/README.md).
-# Start in WSL from the repo folder:  nohup bash scripts/pc_worker.sh > worker.out 2>&1 &
+# Start in WSL from the repo folder and leave that window open:  bash scripts/pc_worker.sh 2>&1 | tee -a worker.out
 # Stop:                               pkill -f pc_worker.sh
 # git runs through Windows git (git.exe) so it uses the Windows login for push.
 set -uo pipefail
@@ -21,7 +21,7 @@ elif [ -x "/mnt/c/Program Files/Git/cmd/git.exe" ]; then
 else
   echo "❌ Windows git.exe not found"; exit 1
 fi
-git_() { "${GIT[@]}" "$@"; }
+git_() { "${GIT[@]}" "$@" < /dev/null; }  # Windows exes fail ("read failed 9") without a valid stdin
 BRANCH="$(git_ rev-parse --abbrev-ref HEAD | tr -d '\r')"
 log() { echo "[$(date '+%F %T')] $*"; }
 
