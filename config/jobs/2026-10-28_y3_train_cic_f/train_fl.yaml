@@ -1,6 +1,0 @@
-# Spec for scripts/train_fl_runs.py (step train_fl)
-base_config: config/v13/cic_fl.yaml
-runs:
-- {name: F_s1, seed: 1}
-- {name: F_s2, seed: 2}
-- {name: F_s3, seed: 3}

@@ -3,7 +3,10 @@
 # on the corrected pipeline (src/data/fed_pipeline.py, docs/AUDIT.md): dedup + conflicting labels dropped,
 # fresh test split (seed 2027) drawn first, clients assigned before any fitted step, per-client real
 # validation slice (10%), per-client undersampling 4:1, no SMOTE. federated.seed is set per run.
-version: v13
+# v13.1 (after audit job y1): records with impossible negative values are dropped (CIC-IDS2017
+# overflowed header lengths / durations; Init_Win_bytes -1 sentinels kept), and no record of the
+# old test split can enter the new test split (docs/AUDIT.md D6, N1).
+version: v13.1
 data:
   name: cicids2017
   path: data/raw/CIC-IDS2017
@@ -19,6 +22,8 @@ data:
   partition_seed: 42
   val_frac: 0.1
   conflict_policy: drop
+  drop_negative: true
+  exclude_old_test: true
 model:
   name: mlp
   hidden_units:

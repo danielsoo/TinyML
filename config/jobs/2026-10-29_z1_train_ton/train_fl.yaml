@@ -1,0 +1,36 @@
+# Spec for step train_fl
+base_config: config/v13/ton_fl.yaml
+runs:
+- {name: F_s1, seed: 1}
+- {name: F_s2, seed: 2}
+- {name: F_s3, seed: 3}
+- name: S80_s1
+  seed: 1
+  overrides:
+    model:
+      hidden_units: [256, 128, 64]
+- name: S80_s2
+  seed: 2
+  overrides:
+    model:
+      hidden_units: [256, 128, 64]
+- name: S80_s3
+  seed: 3
+  overrides:
+    model:
+      hidden_units: [256, 128, 64]
+- name: S128_s1
+  seed: 1
+  overrides:
+    model:
+      hidden_units: [358, 179, 89]
+- name: S128_s2
+  seed: 2
+  overrides:
+    model:
+      hidden_units: [358, 179, 89]
+- name: S128_s3
+  seed: 3
+  overrides:
+    model:
+      hidden_units: [358, 179, 89]

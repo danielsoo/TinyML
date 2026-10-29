@@ -35,6 +35,10 @@ import pandas as pd
 
 TON_META_COLUMNS = ["ts", "src_ip", "dst_ip", "src_port"]
 TON_MAX_CATEGORIES = 50
+# Columns where a negative value is a defined sentinel, not a data error (CIC-IDS2017: -1 = no
+# TCP window observed). Every other negative value in these flow statistics is impossible
+# (durations, rates, inter-arrival times, header lengths) and is treated as a data error.
+NEGATIVE_SENTINEL_COLUMNS = {"Init_Win_bytes_forward", "Init_Win_bytes_backward"}
 
 
 # --------------------------------------------------------------------------- raw loading
@@ -164,17 +168,56 @@ def deduplicate(raw: RawData, key_cols: Optional[int] = None, conflict_policy: s
     return stats
 
 
+def drop_invalid(raw: RawData) -> Dict[str, Any]:
+    """Remove records with a negative value outside NEGATIVE_SENTINEL_COLUMNS (data errors such as
+    the overflowed header lengths of CIC-IDS2017, e.g. Fwd Header Length = -3.2e10)."""
+    cols = [j for j, n in enumerate(raw.feature_names) if n not in NEGATIVE_SENTINEL_COLUMNS]
+    bad_by_col = {raw.feature_names[j]: int((raw.X[:, j] < 0).sum()) for j in cols if (raw.X[:, j] < 0).any()}
+    bad = (raw.X[:, cols] < 0).any(axis=1) if cols else np.zeros(len(raw.y), bool)
+    stats = {"records_removed": int(bad.sum()), "negative_by_column": bad_by_col,
+             "removed_by_family": pd.Series(raw.attack[bad]).value_counts().to_dict(),
+             "sentinel_columns_kept": sorted(NEGATIVE_SENTINEL_COLUMNS & set(raw.feature_names))}
+    keep = ~bad
+    for a in ("X", "y", "attack", "ids"):
+        setattr(raw, a, getattr(raw, a)[keep])
+    raw.meta = raw.meta.iloc[np.where(keep)[0]].reset_index(drop=True)
+    return stats
+
+
+def old_test_ids(name: str, raw: RawData) -> np.ndarray:
+    """Record ids of the test split of the old pipeline (src/data/loader.py), re-derived from the
+    raw records (before any v13 cleaning). Used to keep every old test record out of the new one."""
+    from sklearn.model_selection import train_test_split
+    if name.lower().startswith("cic"):
+        df = pd.DataFrame(raw.X)
+        df["_a"] = raw.attack
+        keep = ~df.duplicated().values
+        ids, y = raw.ids[keep], (raw.attack[keep] != "BENIGN").astype(int)
+    else:
+        df = pd.DataFrame(raw.X[:, :raw.info["n_base_features"]])
+        df["_y"] = raw.y
+        keep = ~df.duplicated().values
+        ids, y = raw.ids[keep], raw.y[keep]
+    perm = np.random.default_rng(42).permutation(len(ids))
+    _, test_ids = train_test_split(ids[perm], test_size=0.2, stratify=y[perm], random_state=42)
+    return np.asarray(test_ids).astype(str)
+
+
 # --------------------------------------------------------------------------- splitting
-def split_test(raw: RawData, mode: str, test_size: float, seed: int) -> np.ndarray:
-    """Boolean mask of the final test records."""
+def split_test(raw: RawData, mode: str, test_size: float, seed: int,
+               exclude: Optional[np.ndarray] = None) -> np.ndarray:
+    """Boolean mask of the final test records. exclude: records that may not be test records
+    (e.g. the old test split); the test size is still test_size of all records per class."""
     n = len(raw.y)
     if mode == "random":
         rng = np.random.default_rng(seed)
         test = np.zeros(n, bool)
+        allowed = np.ones(n, bool) if exclude is None else ~exclude
         for c in (0, 1):
-            idx = np.where(raw.y == c)[0]
+            k = int(round(test_size * int((raw.y == c).sum())))
+            idx = np.where((raw.y == c) & allowed)[0]
             rng.shuffle(idx)
-            test[idx[: int(round(test_size * len(idx)))]] = True
+            test[idx[:k]] = True
         return test
     if mode == "temporal":
         ts = pd.to_numeric(raw.meta["ts"], errors="coerce").values
@@ -267,12 +310,16 @@ def build_federated(name: str, data_path: str, num_clients: int = 4,
                     split_mode: str = "random", test_size: float = 0.2, split_seed: int = 2027,
                     partition_seed: int = 42, val_frac: float = 0.1, balance_ratio: Optional[float] = 4.0,
                     conflict_policy: str = "drop", text_features: bool = True,
-                    group_column: Optional[str] = None, **_) -> FederatedData:
+                    group_column: Optional[str] = None, drop_negative: bool = False,
+                    exclude_old_test: bool = False, **_) -> FederatedData:
     raw = load_raw(name, data_path, text_features=text_features)
+    old_test = old_test_ids(name, raw) if exclude_old_test else None
+    invalid = drop_invalid(raw) if drop_negative else None
     key_cols = raw.info.get("n_base_features")
     dedup = deduplicate(raw, key_cols=key_cols, conflict_policy=conflict_policy)
 
-    test_mask = split_test(raw, split_mode, test_size, split_seed)
+    exclude = np.isin(raw.ids.astype(str), old_test) if old_test is not None else None
+    test_mask = split_test(raw, split_mode, test_size, split_seed, exclude)
     pool = np.where(~test_mask)[0]
     test_idx = np.where(test_mask)[0]
 
@@ -325,8 +372,10 @@ def build_federated(name: str, data_path: str, num_clients: int = 4,
                    "split_seed": split_seed, "partition_seed": partition_seed, "val_frac": val_frac,
                    "balance_ratio": balance_ratio, "conflict_policy": conflict_policy,
                    "text_features": text_features, "group_column": group_column, "smote": False,
+                   "drop_negative": drop_negative, "exclude_old_test": exclude_old_test,
                    "scaler": "mean/std of the union of client training slices (federated aggregate)"},
-        "raw_info": raw.info, "dedup": dedup,
+        "raw_info": raw.info, "invalid_records": invalid, "dedup": dedup,
+        "old_test_records_excluded_from_test": None if exclude is None else int(exclude.sum()),
         "n_features": int(raw.X.shape[1]), "feature_names": raw.feature_names,
         "categorical_label_encoded": raw.categorical,
         "test": {**counts(test_idx), "hash": _hash_ids(raw.ids[test_idx]),

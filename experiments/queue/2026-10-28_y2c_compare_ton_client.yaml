@@ -1,6 +1,0 @@
-id: 2026-10-28_y2c_compare_ton_client
-config_dir: config/jobs/2026-10-28_y2c_compare_ton_client
-steps: compare_arms
-flags: []
-why: Same as y2b, but compression fine-tuning uses one client's 10k records only (client-data
-  constraint). ~40 min.

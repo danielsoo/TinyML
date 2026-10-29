@@ -1,0 +1,7 @@
+id: 2026-10-29_z1c_compare_ton_client
+config_dir: config/jobs/2026-10-29_z1c_compare_ton_client
+steps: compare_arms
+flags: []
+why: 'E1/E2 on TON (v13.1): F/P/Q/R/S at 80 and 128 KB, FAR budgets 1% and 5% chosen
+  on client validation; fine-tuning on one client''s 10k records only (client-data
+  constraint). ~1 h.'
