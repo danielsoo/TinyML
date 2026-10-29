@@ -552,3 +552,95 @@ env esp32-s3-devkitc-1. Parity and arena identical to the ESP32 run (INT8 CIC ma
 INT8 vs FP32 on the S3: CIC 2.92x, TON 5.41x. Paper: LaTeX §4.10 now has Table 13 (both boards),
 abstract/conclusion/limitations/App. C updated, Appendix D (run table) moved to PROVENANCE.md to stay
 within 10+2 pages; docx Table 17 has both boards.
+
+---
+
+## v13.1 re-run (audited pipeline; Dr. Saha's experimental guide)
+
+Pipeline: `src/data/fed_pipeline.py` with `config/v13/*.yaml` (docs/AUDIT.md): duplicates and
+conflicting labels removed, impossible negative values dropped, new test split drawn only from
+records never in the old test split, clients own their records before any fitted step, per-client
+real validation slices, no SMOTE. Teachers F (512-256-128) and from-scratch compact models S80
+(256-128-64) / S128 (358-179-89) trained federatively, seeds 1-3 (jobs `2026-10-29_z1_train_ton`,
+`2026-10-29_z2_train_cic`; 3-4 min per TON run, 26-41 min per CIC run on the PC).
+Thresholds: smallest threshold with pooled client-validation FAR <= budget, frozen, applied once
+to test. Mean ± SD over the three teacher seeds.
+
+### E1: attack recall (%) at validation FAR 1% (test FAR in brackets)
+Jobs z1d / z1e (TON) and z2b / z2c (CIC); "fed" = compression fine-tuning FedAvg over the 4
+clients (10k records each), "1 client" = one client's 10k records. F, F8, S do not fine-tune.
+
+| arm | size | TON fed | TON 1 client | CIC fed | CIC 1 client |
+|---|---|---|---|---|---|
+| F teacher FP32 | – | 96.68 ± 1.38 [0.84] | = | 96.89 ± 2.05 [0.98] | = |
+| F8 teacher, strong PTQ | 189 / 207 KB | 98.37 ± 0.08 [1.18] | = | 99.46 ± 0.14 [0.94] | = |
+| P prune 50% + FT + strong PTQ | 66 KB | 96.40 ± 0.92 [0.95] | 96.92 ± 1.56 | 99.09 ± 0.25 [0.94] | 99.06 ± 0.26 |
+| Q prune 50% + FT + QAT | 57 / 65 KB | 55.4 ± 48.8 [0.61] | 59.6 ± 51.7 | 81.9 ± 9.2 [0.80] | 88.5 ± 3.1 |
+| R distill + clip ±5 + QAT | 57 / 65 KB | **98.51 ± 0.11** [1.16] | 97.80 ± 0.79 | **99.60 ± 0.15** [0.92] | 99.52 ± 0.23 |
+| S80 from scratch + strong PTQ | 57 / 65 KB | 97.73 ± 0.64 [0.98] | = | 99.54 ± 0.22 [0.92] | = |
+| SQ S80 + QAT | 57 / 65 KB | 59.0 ± 51.1 [0.55] | 88.2 ± 3.7 | 84.8 ± 5.4 [0.82] | 90.9 ± 1.9 |
+| P 30% (128 KB budget) | 100 / 112 KB | 97.78 ± 0.17 | 97.66 ± 0.41 | 99.19 ± 0.24 | 99.28 ± 0.02 |
+| R 30% | 100 / 112 KB | 98.72 ± 0.19 | 98.74 ± 0.22 | 99.64 ± 0.12 | 99.62 ± 0.14 |
+| S128 + strong PTQ | 114 / 126 KB | 98.58 ± 0.16 | = | 99.37 ± 0.16 | = |
+
+At FAR 5% every arm except the QAT arms is within 0.2 points (TON 99.7-99.9%, CIC 99.8-99.98%).
+
+Findings:
+1. Within 80 KB, INT8 models match or exceed the float teacher at a validation-chosen 1% FAR:
+   R and S lose nothing; P loses 0.3-0.4 points on TON.
+2. A compact model trained federatively from scratch (S) is as good as compressing the teacher
+   (P, R) on CIC and close to R on TON. Distillation + clipping (R) is the best or tied-best arm
+   in every column.
+3. Fine-tuning with one client's 10k records instead of all clients changes recall by < 0.8 points
+   (client-data constraint is not binding at this size).
+4. QAT fails (Q, SQ). E2 locates the loss in the QAT fine-tuning, before conversion: CIC Q-80
+   loses 45,603 attacks (3 seeds) between the compact FP32 and the QAT float model and only 15
+   in the INT8 conversion; TON one seed in three collapses (recall near 0 at FAR 1%). R also uses
+   QAT, but on clipped inputs, so the learned input range is the suspect (confirmed by E3; QC /
+   SQC = QAT on clipped inputs, queued as z1g / z2e).
+
+### E2: where decisions change (FAR 1%, summed over seeds)
+`compare_arms_transitions.csv`: attacks lost / recovered per stage, by family.
+- The teacher's 1% threshold leaves ~2,265 PortScan flows per seed just below it on CIC; every
+  INT8 / compact model recovers them (F -> F8: 7,125 recovered, 573 lost). The FP32 teacher's
+  low-FAR operating point is the least stable (SD 2.05 points).
+- CIC P-80: pruning + FT loses 759 (DoS Hulk, Web brute force, Bot) and recovers 7,124; INT8
+  conversion then loses 1,040 (Web brute force 360, DoS Hulk 250, XSS 168) and recovers 268.
+  R-80 INT8 conversion loses only 127.
+- TON P-80: pruning + FT loses 859 (dos 321, xss 197, mitm 103); INT8 loses 336 (dos 225).
+
+### E3: input vs hidden range (job z1f, z2d)
+Same FP32 model and calibration draw, per-tensor fake-quant export; A input min/max + hidden
+min/max, B input clipped ±5 SD + hidden min/max, C input min/max + hidden 99.99th pct, D both.
+Recall at FAR 1%, mean over 3 seeds x 3 draws (PQ_80 = pruned + fine-tuned compact model):
+
+| model | calibration draw | A | B | C | D | input step (A) |
+|---|---|---|---|---|---|---|
+| CIC PQ_80 | random 2,000 | 70.9 | 98.9 | 73.9 | 99.1 | 0.15 SD |
+| CIC PQ_80 | + 10 most extreme records | **0.0** | 98.9 | 12.7 | 99.0 | 4.68 SD |
+| CIC PQ_80 | no record beyond 10 SD | 98.0 | 99.0 | 98.5 | 99.0 | 0.05 SD |
+| TON PQ_80 | random | 63.5 | 96.3 | 63.6 | 96.3 | 0.53 SD |
+| TON PQ_80 | + extremes | 23.3 | 96.1 | 23.3 | 96.2 | 0.74 SD |
+| TON PQ_80 | no extremes | 96.4 | 96.6 | 96.4 | 96.6 | 0.05 SD |
+
+The input range decides the outcome; the hidden range barely matters (A ≈ C, B ≈ D) and hidden
+saturation stays below 0.05%. Ten extreme records in a 2,000-record draw widen the input step to
+4.7 SD on CIC and every attack is missed. Clipping the input range (B, D) makes the result
+independent of the draw. Same pattern for F, S80, S128. Cost: ±5 SD saturates 28% of CIC test
+rows in at least one feature (7.6% on TON); for the CIC teacher B/D are 1.5 points below "no
+extremes" A, so excluding extreme records from the calibration draw is the gentler remedy.
+
+### E4: output discretization
+- FP32 with only its output rounded to the TFLite sigmoid grid (1/256) loses 4-115 attacks
+  (TON / CIC, FAR 1%): the output grid is not the main INT8 effect.
+- The INT8 models produce few distinct outputs on validation (CIC PQ_128: 23 vs 241 for the
+  rounded FP32), so up to ~1,000 benign validation records share the output value just below
+  the threshold: the FAR budget can only be met by jumping over the tie group (val FAR 0.74%
+  instead of 1%), which costs recall. The coarse INT8 logit (last Dense output) is the bottleneck:
+  a model that outputs that logit directly gives identical decisions. Rows for 16-bit
+  activations with INT8 weights and for FP32 with clipped inputs are queued (z1h, z2f).
+
+### Status
+- E5 (independent runs): all tables above are over 3 teacher seeds.
+- E6 (TON grouped split by source host): queued (z3, z3b).
+- E7 (device agreement on thousands of inputs, memory / latency breakdown): needs the boards.
