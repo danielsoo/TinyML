@@ -1,0 +1,7 @@
+id: 2026-10-29_z2b_compare_cic_fed
+config_dir: config/jobs/2026-10-29_z2b_compare_cic_fed
+steps: compare_arms
+flags: []
+why: 'E1/E2 on CIC (v13.1): F/P/Q/R/S at 80 and 128 KB, FAR budgets 1% and 5% chosen
+  on client validation; fine-tuning federated over all clients (10k records each).
+  ~2-3 h.'
