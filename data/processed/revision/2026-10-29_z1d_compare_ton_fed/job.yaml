@@ -1,0 +1,7 @@
+id: 2026-10-29_z1d_compare_ton_fed
+config_dir: config/jobs/2026-10-29_z1d_compare_ton_fed
+steps: compare_arms
+flags: []
+why: Re-run of z1b_compare_ton_fed after the float32 threshold fix (NumPy 1.x re-admitted
+  INT8 tie groups, so validation FAR could exceed the budget); E1/E2 on TON (v13.1),
+  fine-tuning federated over all clients (10k records each). ~5 min.
