@@ -1,0 +1,6 @@
+id: 2026-10-29_z2e_compare_cic_qc
+config_dir: config/jobs/2026-10-29_z2e_compare_cic_qc
+steps: compare_arms
+flags: []
+why: 'CIC: QAT with inputs clipped to +-5 SD (QC from the pruned + fine-tuned model,
+  SQC from S): does bounding the learned input range repair QAT? ~20 min.'
