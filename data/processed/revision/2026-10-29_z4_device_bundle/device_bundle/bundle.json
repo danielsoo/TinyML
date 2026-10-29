@@ -1,0 +1,184 @@
+{
+  "models": [
+    {
+      "name": "ton_R80",
+      "file": "models/ton_R80.tflite",
+      "dataset": "ton",
+      "dim": 43,
+      "bytes": 58056,
+      "thresholds": {
+        "0.01": 0.7460938096046448,
+        "0.05": 0.3164062798023224
+      }
+    },
+    {
+      "name": "ton_S80",
+      "file": "models/ton_S80.tflite",
+      "dataset": "ton",
+      "dim": 43,
+      "bytes": 67936,
+      "thresholds": {
+        "0.01": 0.6914063096046448,
+        "0.05": 0.3671875298023224
+      }
+    },
+    {
+      "name": "ton_P80",
+      "file": "models/ton_P80.tflite",
+      "dataset": "ton",
+      "dim": 43,
+      "bytes": 67936,
+      "thresholds": {
+        "0.01": 0.9531250596046448,
+        "0.05": 0.1367187649011612
+      }
+    },
+    {
+      "name": "ton_QC80",
+      "file": "models/ton_QC80.tflite",
+      "dataset": "ton",
+      "dim": 43,
+      "bytes": 58040,
+      "thresholds": {
+        "0.01": 0.9375000596046448,
+        "0.05": 0.1093750074505806
+      }
+    },
+    {
+      "name": "ton_PQ80_minmax",
+      "file": "models/ton_PQ80_minmax.tflite",
+      "dataset": "ton",
+      "dim": 43,
+      "bytes": 58056,
+      "thresholds": {
+        "0.01": 0.9218750596046448,
+        "0.05": 0.8398438096046448
+      }
+    },
+    {
+      "name": "ton_PQ80_int16",
+      "file": "models/ton_PQ80_int16.tflite",
+      "dataset": "ton",
+      "dim": 43,
+      "bytes": 73456,
+      "thresholds": {
+        "0.01": 0.9454041123390198,
+        "0.05": 0.0953979566693306
+      }
+    },
+    {
+      "name": "cic_R80",
+      "file": "models/cic_R80.tflite",
+      "dataset": "cic",
+      "dim": 78,
+      "bytes": 67016,
+      "thresholds": {
+        "0.01": 0.2500000298023224,
+        "0.05": 0.1562500149011612
+      }
+    },
+    {
+      "name": "cic_S80",
+      "file": "models/cic_S80.tflite",
+      "dataset": "cic",
+      "dim": 78,
+      "bytes": 67016,
+      "thresholds": {
+        "0.01": 0.3007812798023224,
+        "0.05": 0.1484375149011612
+      }
+    },
+    {
+      "name": "cic_P80",
+      "file": "models/cic_P80.tflite",
+      "dataset": "cic",
+      "dim": 78,
+      "bytes": 67008,
+      "thresholds": {
+        "0.01": 0.3789062798023224,
+        "0.05": 0.02343750186264515
+      }
+    },
+    {
+      "name": "cic_QC80",
+      "file": "models/cic_QC80.tflite",
+      "dataset": "cic",
+      "dim": 78,
+      "bytes": 67000,
+      "thresholds": {
+        "0.01": 0.0742187574505806,
+        "0.05": 1.401298464324817e-45
+      }
+    },
+    {
+      "name": "cic_PQ80_minmax",
+      "file": "models/cic_PQ80_minmax.tflite",
+      "dataset": "cic",
+      "dim": 78,
+      "bytes": 67016,
+      "thresholds": {
+        "0.01": 0.5000000596046448,
+        "0.05": 0.003906250465661287
+      }
+    },
+    {
+      "name": "cic_PQ80_int16",
+      "file": "models/cic_PQ80_int16.tflite",
+      "dataset": "cic",
+      "dim": 78,
+      "bytes": 82416,
+      "thresholds": {
+        "0.01": 0.1442260891199112,
+        "0.05": 0.006622314918786287
+      }
+    }
+  ],
+  "datasets": {
+    "ton": {
+      "n_inputs": 4058,
+      "categories": {
+        "near_threshold:ton_P80:0.01": 300,
+        "near_threshold:ton_P80:0.05": 31,
+        "near_threshold:ton_PQ80_int16:0.01": 168,
+        "near_threshold:ton_PQ80_int16:0.05": 36,
+        "near_threshold:ton_PQ80_minmax:0.01": 93,
+        "near_threshold:ton_PQ80_minmax:0.05": 300,
+        "near_threshold:ton_QC80:0.01": 190,
+        "near_threshold:ton_QC80:0.05": 5,
+        "near_threshold:ton_R80:0.01": 80,
+        "near_threshold:ton_R80:0.05": 19,
+        "near_threshold:ton_S80:0.01": 122,
+        "near_threshold:ton_S80:0.05": 4,
+        "out_of_range": 800,
+        "random": 1500,
+        "synthetic_extreme": 400,
+        "zeros": 10
+      }
+    },
+    "cic": {
+      "n_inputs": 5902,
+      "categories": {
+        "near_threshold:cic_P80:0.01": 300,
+        "near_threshold:cic_P80:0.05": 300,
+        "near_threshold:cic_PQ80_int16:0.01": 100,
+        "near_threshold:cic_PQ80_int16:0.05": 300,
+        "near_threshold:cic_PQ80_minmax:0.01": 300,
+        "near_threshold:cic_PQ80_minmax:0.05": 300,
+        "near_threshold:cic_QC80:0.01": 300,
+        "near_threshold:cic_QC80:0.05": 300,
+        "near_threshold:cic_R80:0.01": 300,
+        "near_threshold:cic_R80:0.05": 300,
+        "near_threshold:cic_S80:0.01": 92,
+        "near_threshold:cic_S80:0.05": 300,
+        "out_of_range": 800,
+        "random": 1500,
+        "synthetic_extreme": 400,
+        "zeros": 10
+      }
+    }
+  },
+  "far_budgets": [
+    0.01,
+    0.05
+  ]
+}

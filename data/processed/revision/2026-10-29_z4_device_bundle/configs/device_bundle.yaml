@@ -1,0 +1,32 @@
+# Spec for scripts/device_agreement.py prepare (step device_bundle)
+far_budgets: [0.01, 0.05]
+clip: 5.0
+datasets:
+- name: ton
+  dataset_config: config/v13/ton_fl.yaml
+  seed: 1
+  n_random: 1500
+  n_near: 300
+  n_out_of_range: 800
+  n_synthetic: 400
+  models:
+  - {name: ton_R80, path: data/processed/revision/2026-10-29_z1d_compare_ton_fed/compare_arms/s1/R_80.tflite}
+  - {name: ton_S80, path: data/processed/revision/2026-10-29_z1d_compare_ton_fed/compare_arms/s1/S_80.tflite}
+  - {name: ton_P80, path: data/processed/revision/2026-10-29_z1d_compare_ton_fed/compare_arms/s1/P_80.tflite}
+  - {name: ton_QC80, path: data/processed/revision/2026-10-29_z1g_compare_ton_qc/compare_arms/s1/QC_80.tflite}
+  - {name: ton_PQ80_minmax, path: data/processed/revision/2026-10-29_z1h_range_ton2/range_mechanism/s1/PQ_80_A_random0.tflite}
+  - {name: ton_PQ80_int16, path: data/processed/revision/2026-10-29_z1h_range_ton2/range_mechanism/s1/PQ_80_int16x8.tflite}
+- name: cic
+  dataset_config: config/v13/cic_fl.yaml
+  seed: 1
+  n_random: 1500
+  n_near: 300
+  n_out_of_range: 800
+  n_synthetic: 400
+  models:
+  - {name: cic_R80, path: data/processed/revision/2026-10-29_z2b_compare_cic_fed/compare_arms/s1/R_80.tflite}
+  - {name: cic_S80, path: data/processed/revision/2026-10-29_z2b_compare_cic_fed/compare_arms/s1/S_80.tflite}
+  - {name: cic_P80, path: data/processed/revision/2026-10-29_z2b_compare_cic_fed/compare_arms/s1/P_80.tflite}
+  - {name: cic_QC80, path: data/processed/revision/2026-10-29_z2e_compare_cic_qc/compare_arms/s1/QC_80.tflite}
+  - {name: cic_PQ80_minmax, path: data/processed/revision/2026-10-29_z2f_range_cic2/range_mechanism/s1/PQ_80_A_random0.tflite}
+  - {name: cic_PQ80_int16, path: data/processed/revision/2026-10-29_z2f_range_cic2/range_mechanism/s1/PQ_80_int16x8.tflite}
