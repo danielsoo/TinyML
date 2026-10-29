@@ -1,0 +1,7 @@
+id: 2026-10-29_z2_train_cic
+config_dir: config/jobs/2026-10-29_z2_train_cic
+steps: train_fl
+flags: []
+why: 'v13.1 CIC: teacher F and from-scratch compact models S80 (256-128-64) / S128
+  (358-179-89), seeds 1-3, on the audited split (data errors dropped, no old-test
+  record in test). ~12-18 h.'

@@ -1,0 +1,313 @@
+{
+  "pipeline": "v13",
+  "dataset": "cicids2017",
+  "data_path": "data/raw/CIC-IDS2017",
+  "config": {
+    "num_clients": 4,
+    "partition_strategy": "label_balanced",
+    "dirichlet_alpha": 0.3,
+    "split_mode": "random",
+    "test_size": 0.2,
+    "split_seed": 2027,
+    "partition_seed": 42,
+    "val_frac": 0.1,
+    "balance_ratio": 4.0,
+    "conflict_policy": "drop",
+    "text_features": true,
+    "group_column": null,
+    "smote": false,
+    "drop_negative": true,
+    "exclude_old_test": true,
+    "scaler": "mean/std of the union of client training slices (federated aggregate)"
+  },
+  "raw_info": {
+    "inf_values_replaced_by_0": 4376,
+    "nan_values_replaced_by_0": 5734,
+    "dropped_all_nan_columns": [],
+    "files": [
+      "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv",
+      "Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv",
+      "Friday-WorkingHours-Morning.pcap_ISCX.csv",
+      "Monday-WorkingHours.pcap_ISCX.csv",
+      "Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv",
+      "Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv",
+      "Tuesday-WorkingHours.pcap_ISCX.csv",
+      "Wednesday-workingHours.pcap_ISCX.csv"
+    ]
+  },
+  "invalid_records": {
+    "records_removed": 2926,
+    "negative_by_column": {
+      "Flow Duration": 115,
+      "Flow Bytes/s": 85,
+      "Flow Packets/s": 115,
+      "Flow IAT Mean": 115,
+      "Flow IAT Max": 115,
+      "Flow IAT Min": 2891,
+      "Fwd IAT Min": 17,
+      "Fwd Header Length": 35,
+      "Bwd Header Length": 22,
+      "Fwd Header Length.1": 35,
+      "min_seg_size_forward": 35
+    },
+    "removed_by_family": {
+      "BENIGN": 2732,
+      "DoS Hulk": 159,
+      "DDoS": 19,
+      "DoS GoldenEye": 5,
+      "FTP-Patator": 4,
+      "Heartbleed": 4,
+      "SSH-Patator": 2,
+      "Infiltration": 1
+    },
+    "sentinel_columns_kept": [
+      "Init_Win_bytes_backward",
+      "Init_Win_bytes_forward"
+    ]
+  },
+  "dedup": {
+    "records": 2827817,
+    "unique_vectors": 2495908,
+    "duplicate_records_removed": 331190,
+    "conflicting_label_vectors": 719,
+    "conflicting_label_records": 7144,
+    "conflict_policy": "drop",
+    "kept": 2495189
+  },
+  "old_test_records_excluded_from_test": 498999,
+  "n_features": 78,
+  "feature_names": [
+    "Destination Port",
+    "Flow Duration",
+    "Total Fwd Packets",
+    "Total Backward Packets",
+    "Total Length of Fwd Packets",
+    "Total Length of Bwd Packets",
+    "Fwd Packet Length Max",
+    "Fwd Packet Length Min",
+    "Fwd Packet Length Mean",
+    "Fwd Packet Length Std",
+    "Bwd Packet Length Max",
+    "Bwd Packet Length Min",
+    "Bwd Packet Length Mean",
+    "Bwd Packet Length Std",
+    "Flow Bytes/s",
+    "Flow Packets/s",
+    "Flow IAT Mean",
+    "Flow IAT Std",
+    "Flow IAT Max",
+    "Flow IAT Min",
+    "Fwd IAT Total",
+    "Fwd IAT Mean",
+    "Fwd IAT Std",
+    "Fwd IAT Max",
+    "Fwd IAT Min",
+    "Bwd IAT Total",
+    "Bwd IAT Mean",
+    "Bwd IAT Std",
+    "Bwd IAT Max",
+    "Bwd IAT Min",
+    "Fwd PSH Flags",
+    "Bwd PSH Flags",
+    "Fwd URG Flags",
+    "Bwd URG Flags",
+    "Fwd Header Length",
+    "Bwd Header Length",
+    "Fwd Packets/s",
+    "Bwd Packets/s",
+    "Min Packet Length",
+    "Max Packet Length",
+    "Packet Length Mean",
+    "Packet Length Std",
+    "Packet Length Variance",
+    "FIN Flag Count",
+    "SYN Flag Count",
+    "RST Flag Count",
+    "PSH Flag Count",
+    "ACK Flag Count",
+    "URG Flag Count",
+    "CWE Flag Count",
+    "ECE Flag Count",
+    "Down/Up Ratio",
+    "Average Packet Size",
+    "Avg Fwd Segment Size",
+    "Avg Bwd Segment Size",
+    "Fwd Header Length.1",
+    "Fwd Avg Bytes/Bulk",
+    "Fwd Avg Packets/Bulk",
+    "Fwd Avg Bulk Rate",
+    "Bwd Avg Bytes/Bulk",
+    "Bwd Avg Packets/Bulk",
+    "Bwd Avg Bulk Rate",
+    "Subflow Fwd Packets",
+    "Subflow Fwd Bytes",
+    "Subflow Bwd Packets",
+    "Subflow Bwd Bytes",
+    "Init_Win_bytes_forward",
+    "Init_Win_bytes_backward",
+    "act_data_pkt_fwd",
+    "min_seg_size_forward",
+    "Active Mean",
+    "Active Std",
+    "Active Max",
+    "Active Min",
+    "Idle Mean",
+    "Idle Std",
+    "Idle Max",
+    "Idle Min"
+  ],
+  "categorical_label_encoded": [],
+  "test": {
+    "n": 499038,
+    "attack": 84990,
+    "benign": 414048,
+    "hash": "3094008a801be204",
+    "attack_families": {
+      "BENIGN": 414048,
+      "DoS Hulk": 34458,
+      "DDoS": 25705,
+      "PortScan": 17951,
+      "DoS GoldenEye": 2121,
+      "FTP-Patator": 1173,
+      "DoS slowloris": 1083,
+      "DoS Slowhttptest": 1019,
+      "SSH-Patator": 660,
+      "Bot": 405,
+      "Web Attack \ufffd Brute Force": 286,
+      "Web Attack \ufffd XSS": 117,
+      "Web Attack \ufffd Sql Injection": 5,
+      "Infiltration": 4,
+      "Heartbleed": 3
+    }
+  },
+  "clients": [
+    {
+      "train": {
+        "n": 382460,
+        "attack": 76492,
+        "benign": 305968,
+        "hash": "8c338b66c73809ba"
+      },
+      "val": {
+        "n": 49904,
+        "attack": 8499,
+        "benign": 41405,
+        "hash": "337682280487b715"
+      },
+      "balance": {
+        "before": [
+          372643,
+          76492
+        ],
+        "after": [
+          305968,
+          76492
+        ]
+      }
+    },
+    {
+      "train": {
+        "n": 382455,
+        "attack": 76491,
+        "benign": 305964,
+        "hash": "212142e95eea3994"
+      },
+      "val": {
+        "n": 49904,
+        "attack": 8499,
+        "benign": 41405,
+        "hash": "4415fe193b61cf96"
+      },
+      "balance": {
+        "before": [
+          372643,
+          76491
+        ],
+        "after": [
+          305964,
+          76491
+        ]
+      }
+    },
+    {
+      "train": {
+        "n": 382455,
+        "attack": 76491,
+        "benign": 305964,
+        "hash": "400cf2f5597eca38"
+      },
+      "val": {
+        "n": 49904,
+        "attack": 8499,
+        "benign": 41405,
+        "hash": "8f87d3109654b270"
+      },
+      "balance": {
+        "before": [
+          372642,
+          76491
+        ],
+        "after": [
+          305964,
+          76491
+        ]
+      }
+    },
+    {
+      "train": {
+        "n": 382455,
+        "attack": 76491,
+        "benign": 305964,
+        "hash": "91858b86e0abc380"
+      },
+      "val": {
+        "n": 49904,
+        "attack": 8499,
+        "benign": 41405,
+        "hash": "26dade2fc43636ef"
+      },
+      "balance": {
+        "before": [
+          372642,
+          76491
+        ],
+        "after": [
+          305964,
+          76491
+        ]
+      }
+    }
+  ],
+  "federated": {
+    "num_rounds": 60,
+    "fraction_fit": 1.0,
+    "fraction_evaluate": 1.0,
+    "local_epochs": 3,
+    "batch_size": 128,
+    "learning_rate": 0.001,
+    "use_class_weights": true,
+    "use_focal_loss": true,
+    "focal_loss_alpha": 0.35,
+    "use_distillation": false,
+    "server_momentum": 0.5,
+    "server_learning_rate": 0.1,
+    "lr_decay_type": "cosine",
+    "lr_decay_rate": 0.97,
+    "lr_drop_rate": 0.5,
+    "lr_epochs_drop": 5,
+    "lr_min": 0.0001,
+    "use_qat": false,
+    "min_fit_clients": 4,
+    "min_evaluate_clients": 4,
+    "min_available_clients": 4,
+    "seed": 3
+  },
+  "model": {
+    "name": "mlp",
+    "hidden_units": [
+      358,
+      179,
+      89
+    ]
+  }
+}
