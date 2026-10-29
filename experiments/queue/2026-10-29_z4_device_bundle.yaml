@@ -1,0 +1,7 @@
+id: 2026-10-29_z4_device_bundle
+config_dir: config/jobs/2026-10-29_z4_device_bundle
+steps: device_bundle
+flags: []
+why: 'E7: input bundle for the on-device agreement test (seed-1 R80, S80, P80, QC80,
+  min/max PTQ and 16-bit-activation models for TON and CIC; random, near-threshold,
+  out-of-range and synthetic extreme inputs, host outputs). ~5 min.'

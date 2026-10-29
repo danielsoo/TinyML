@@ -35,3 +35,6 @@ esp32_tflite_project/include/model_data.h
 esp32_tflite_project/.pio/
 revision.out
 worker.out
+esp32_agreement/.pio/
+esp32_agreement/src/model_data.cc
+esp32_agreement/include/model_data.h
