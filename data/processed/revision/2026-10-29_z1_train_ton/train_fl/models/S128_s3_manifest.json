@@ -1,0 +1,264 @@
+{
+  "pipeline": "v13",
+  "dataset": "ton_iot",
+  "data_path": "data/raw/TON_IoT",
+  "config": {
+    "num_clients": 4,
+    "partition_strategy": "label_balanced",
+    "dirichlet_alpha": 0.3,
+    "split_mode": "random",
+    "test_size": 0.2,
+    "split_seed": 2027,
+    "partition_seed": 42,
+    "val_frac": 0.1,
+    "balance_ratio": 4.0,
+    "conflict_policy": "drop",
+    "text_features": true,
+    "group_column": null,
+    "smote": false,
+    "drop_negative": true,
+    "exclude_old_test": true,
+    "scaler": "mean/std of the union of client training slices (federated aggregate)"
+  },
+  "raw_info": {
+    "files": [
+      "train_test_network.csv"
+    ],
+    "dropped_text": [
+      "dns_query",
+      "http_uri"
+    ],
+    "n_base_features": 37
+  },
+  "invalid_records": {
+    "records_removed": 0,
+    "negative_by_column": {},
+    "removed_by_family": {},
+    "sentinel_columns_kept": []
+  },
+  "dedup": {
+    "records": 211043,
+    "unique_vectors": 105168,
+    "duplicate_records_removed": 105867,
+    "conflicting_label_vectors": 8,
+    "conflicting_label_records": 314,
+    "conflict_policy": "drop",
+    "kept": 105160
+  },
+  "old_test_records_excluded_from_test": 21032,
+  "n_features": 43,
+  "feature_names": [
+    "dst_port",
+    "proto",
+    "service",
+    "duration",
+    "src_bytes",
+    "dst_bytes",
+    "conn_state",
+    "missed_bytes",
+    "src_pkts",
+    "src_ip_bytes",
+    "dst_pkts",
+    "dst_ip_bytes",
+    "dns_qclass",
+    "dns_qtype",
+    "dns_rcode",
+    "dns_AA",
+    "dns_RD",
+    "dns_RA",
+    "dns_rejected",
+    "ssl_version",
+    "ssl_cipher",
+    "ssl_resumed",
+    "ssl_established",
+    "ssl_subject",
+    "ssl_issuer",
+    "http_trans_depth",
+    "http_method",
+    "http_version",
+    "http_request_body_len",
+    "http_response_body_len",
+    "http_status_code",
+    "http_user_agent",
+    "http_orig_mime_types",
+    "http_resp_mime_types",
+    "weird_name",
+    "weird_addl",
+    "weird_notice",
+    "dns_query_len",
+    "dns_query_digits",
+    "dns_query_special",
+    "http_uri_len",
+    "http_uri_digits",
+    "http_uri_special"
+  ],
+  "categorical_label_encoded": [
+    "proto",
+    "service",
+    "conn_state",
+    "dns_AA",
+    "dns_RD",
+    "dns_RA",
+    "dns_rejected",
+    "ssl_version",
+    "ssl_cipher",
+    "ssl_resumed",
+    "ssl_established",
+    "ssl_subject",
+    "ssl_issuer",
+    "http_method",
+    "http_user_agent",
+    "http_orig_mime_types",
+    "http_resp_mime_types",
+    "weird_name",
+    "weird_notice"
+  ],
+  "test": {
+    "n": 21032,
+    "attack": 16212,
+    "benign": 4820,
+    "hash": "0bb6c30e9f3f20bf",
+    "attack_families": {
+      "normal": 4820,
+      "injection": 3884,
+      "password": 3124,
+      "dos": 2946,
+      "ddos": 2474,
+      "xss": 1788,
+      "scanning": 1050,
+      "backdoor": 473,
+      "ransomware": 260,
+      "mitm": 213
+    }
+  },
+  "clients": [
+    {
+      "train": {
+        "n": 18930,
+        "attack": 14592,
+        "benign": 4338,
+        "hash": "05d9938b7b00fef9"
+      },
+      "val": {
+        "n": 2103,
+        "attack": 1621,
+        "benign": 482,
+        "hash": "662e690fcd8d6b78"
+      },
+      "balance": {
+        "before": [
+          4338,
+          14592
+        ],
+        "after": [
+          4338,
+          14592
+        ]
+      }
+    },
+    {
+      "train": {
+        "n": 18930,
+        "attack": 14592,
+        "benign": 4338,
+        "hash": "214d515ff8009d97"
+      },
+      "val": {
+        "n": 2103,
+        "attack": 1621,
+        "benign": 482,
+        "hash": "2f02c9801a34372e"
+      },
+      "balance": {
+        "before": [
+          4338,
+          14592
+        ],
+        "after": [
+          4338,
+          14592
+        ]
+      }
+    },
+    {
+      "train": {
+        "n": 18928,
+        "attack": 14591,
+        "benign": 4337,
+        "hash": "95dffc01f2a8efd6"
+      },
+      "val": {
+        "n": 2103,
+        "attack": 1621,
+        "benign": 482,
+        "hash": "e3409a91ada24b98"
+      },
+      "balance": {
+        "before": [
+          4337,
+          14591
+        ],
+        "after": [
+          4337,
+          14591
+        ]
+      }
+    },
+    {
+      "train": {
+        "n": 18928,
+        "attack": 14591,
+        "benign": 4337,
+        "hash": "75d5e15b77205855"
+      },
+      "val": {
+        "n": 2103,
+        "attack": 1621,
+        "benign": 482,
+        "hash": "6ff3cf7dcc6c886c"
+      },
+      "balance": {
+        "before": [
+          4337,
+          14591
+        ],
+        "after": [
+          4337,
+          14591
+        ]
+      }
+    }
+  ],
+  "federated": {
+    "num_rounds": 60,
+    "fraction_fit": 1.0,
+    "fraction_evaluate": 1.0,
+    "local_epochs": 3,
+    "batch_size": 128,
+    "learning_rate": 0.001,
+    "use_class_weights": true,
+    "use_focal_loss": true,
+    "focal_loss_alpha": 0.5,
+    "use_distillation": false,
+    "server_momentum": 0.5,
+    "server_learning_rate": 0.1,
+    "lr_decay_type": "cosine",
+    "lr_decay_rate": 0.97,
+    "lr_drop_rate": 0.5,
+    "lr_epochs_drop": 5,
+    "lr_min": 0.0001,
+    "use_qat": false,
+    "min_fit_clients": 4,
+    "min_evaluate_clients": 4,
+    "min_available_clients": 4,
+    "seed": 3
+  },
+  "model": {
+    "name": "mlp",
+    "hidden_units": [
+      358,
+      179,
+      89
+    ]
+  }
+}
