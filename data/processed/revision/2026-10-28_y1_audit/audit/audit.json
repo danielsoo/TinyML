@@ -1,0 +1,1141 @@
+{
+  "cicids2017": {
+    "raw": {
+      "records": 2830743,
+      "attack": 557646,
+      "benign": 2273097,
+      "attack_families": {
+        "BENIGN": 2273097,
+        "DoS Hulk": 231073,
+        "PortScan": 158930,
+        "DDoS": 128027,
+        "DoS GoldenEye": 10293,
+        "FTP-Patator": 7938,
+        "SSH-Patator": 5897,
+        "DoS slowloris": 5796,
+        "DoS Slowhttptest": 5499,
+        "Bot": 1966,
+        "Web Attack \ufffd Brute Force": 1507,
+        "Web Attack \ufffd XSS": 652,
+        "Infiltration": 36,
+        "Web Attack \ufffd Sql Injection": 21,
+        "Heartbleed": 11
+      },
+      "negative_values_per_column": {
+        "Flow Duration": 115,
+        "Flow Bytes/s": 85,
+        "Flow Packets/s": 115,
+        "Flow IAT Mean": 115,
+        "Flow IAT Max": 115,
+        "Flow IAT Min": 2891,
+        "Fwd IAT Min": 17,
+        "Fwd Header Length": 35,
+        "Bwd Header Length": 22,
+        "Fwd Header Length.1": 35,
+        "Init_Win_bytes_forward": 1001189,
+        "Init_Win_bytes_backward": 1441552,
+        "min_seg_size_forward": 35
+      },
+      "constant_columns": [
+        "Bwd PSH Flags",
+        "Bwd URG Flags",
+        "Fwd Avg Bytes/Bulk",
+        "Fwd Avg Packets/Bulk",
+        "Fwd Avg Bulk Rate",
+        "Bwd Avg Bytes/Bulk",
+        "Bwd Avg Packets/Bulk",
+        "Bwd Avg Bulk Rate"
+      ],
+      "categorical_label_encoded": [],
+      "inf_values_replaced_by_0": 4376,
+      "nan_values_replaced_by_0": 5734,
+      "dropped_all_nan_columns": [],
+      "files": [
+        "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv",
+        "Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv",
+        "Friday-WorkingHours-Morning.pcap_ISCX.csv",
+        "Monday-WorkingHours.pcap_ISCX.csv",
+        "Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv",
+        "Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv",
+        "Tuesday-WorkingHours.pcap_ISCX.csv",
+        "Wednesday-workingHours.pcap_ISCX.csv"
+      ]
+    },
+    "old_pipeline": {
+      "train_rows": 2725520,
+      "synthetic_rows": 1022070,
+      "synthetic_share": 0.375,
+      "smote_invalid_discrete_share_per_column": {
+        "30": 0.0,
+        "43": 0.0,
+        "44": 0.0,
+        "46": 0.0001,
+        "47": 0.0001,
+        "48": 0.0,
+        "51": 0.0003
+      },
+      "smote_rows_with_any_invalid_discrete_value": 0.0004,
+      "clients": [
+        {
+          "rows": 681380,
+          "synthetic": 255464
+        },
+        {
+          "rows": 681380,
+          "synthetic": 255455
+        },
+        {
+          "rows": 681380,
+          "synthetic": 255245
+        },
+        {
+          "rows": 681380,
+          "synthetic": 255906
+        }
+      ],
+      "threshold_validation": {
+        "rows": 20000,
+        "part_of_client0_federated_training": true,
+        "synthetic_rows": 7554,
+        "synthetic_share": 0.3777,
+        "synthetic_share_of_attack_rows": 0.7456,
+        "synthetic_share_of_benign_rows": 0.0
+      }
+    },
+    "v13_manifest": {
+      "pipeline": "v13",
+      "dataset": "cicids2017",
+      "data_path": "data/raw/CIC-IDS2017",
+      "config": {
+        "num_clients": 4,
+        "partition_strategy": "label_balanced",
+        "dirichlet_alpha": 0.3,
+        "split_mode": "random",
+        "test_size": 0.2,
+        "split_seed": 2027,
+        "partition_seed": 42,
+        "val_frac": 0.1,
+        "balance_ratio": 4.0,
+        "conflict_policy": "drop",
+        "text_features": true,
+        "group_column": null,
+        "smote": false,
+        "scaler": "mean/std of the union of client training slices (federated aggregate)"
+      },
+      "raw_info": {
+        "inf_values_replaced_by_0": 4376,
+        "nan_values_replaced_by_0": 5734,
+        "dropped_all_nan_columns": [],
+        "files": [
+          "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv",
+          "Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv",
+          "Friday-WorkingHours-Morning.pcap_ISCX.csv",
+          "Monday-WorkingHours.pcap_ISCX.csv",
+          "Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv",
+          "Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv",
+          "Tuesday-WorkingHours.pcap_ISCX.csv",
+          "Wednesday-workingHours.pcap_ISCX.csv"
+        ]
+      },
+      "dedup": {
+        "records": 2830743,
+        "unique_vectors": 2498824,
+        "duplicate_records_removed": 331200,
+        "conflicting_label_vectors": 719,
+        "conflicting_label_records": 7144,
+        "conflict_policy": "drop",
+        "kept": 2498105
+      },
+      "n_features": 78,
+      "feature_names": [
+        "Destination Port",
+        "Flow Duration",
+        "Total Fwd Packets",
+        "Total Backward Packets",
+        "Total Length of Fwd Packets",
+        "Total Length of Bwd Packets",
+        "Fwd Packet Length Max",
+        "Fwd Packet Length Min",
+        "Fwd Packet Length Mean",
+        "Fwd Packet Length Std",
+        "Bwd Packet Length Max",
+        "Bwd Packet Length Min",
+        "Bwd Packet Length Mean",
+        "Bwd Packet Length Std",
+        "Flow Bytes/s",
+        "Flow Packets/s",
+        "Flow IAT Mean",
+        "Flow IAT Std",
+        "Flow IAT Max",
+        "Flow IAT Min",
+        "Fwd IAT Total",
+        "Fwd IAT Mean",
+        "Fwd IAT Std",
+        "Fwd IAT Max",
+        "Fwd IAT Min",
+        "Bwd IAT Total",
+        "Bwd IAT Mean",
+        "Bwd IAT Std",
+        "Bwd IAT Max",
+        "Bwd IAT Min",
+        "Fwd PSH Flags",
+        "Bwd PSH Flags",
+        "Fwd URG Flags",
+        "Bwd URG Flags",
+        "Fwd Header Length",
+        "Bwd Header Length",
+        "Fwd Packets/s",
+        "Bwd Packets/s",
+        "Min Packet Length",
+        "Max Packet Length",
+        "Packet Length Mean",
+        "Packet Length Std",
+        "Packet Length Variance",
+        "FIN Flag Count",
+        "SYN Flag Count",
+        "RST Flag Count",
+        "PSH Flag Count",
+        "ACK Flag Count",
+        "URG Flag Count",
+        "CWE Flag Count",
+        "ECE Flag Count",
+        "Down/Up Ratio",
+        "Average Packet Size",
+        "Avg Fwd Segment Size",
+        "Avg Bwd Segment Size",
+        "Fwd Header Length.1",
+        "Fwd Avg Bytes/Bulk",
+        "Fwd Avg Packets/Bulk",
+        "Fwd Avg Bulk Rate",
+        "Bwd Avg Bytes/Bulk",
+        "Bwd Avg Packets/Bulk",
+        "Bwd Avg Bulk Rate",
+        "Subflow Fwd Packets",
+        "Subflow Fwd Bytes",
+        "Subflow Bwd Packets",
+        "Subflow Bwd Bytes",
+        "Init_Win_bytes_forward",
+        "Init_Win_bytes_backward",
+        "act_data_pkt_fwd",
+        "min_seg_size_forward",
+        "Active Mean",
+        "Active Std",
+        "Active Max",
+        "Active Min",
+        "Idle Mean",
+        "Idle Std",
+        "Idle Max",
+        "Idle Min"
+      ],
+      "categorical_label_encoded": [],
+      "test": {
+        "n": 499621,
+        "attack": 85029,
+        "benign": 414592,
+        "hash": "34a854b89b377e4a",
+        "attack_families": {
+          "BENIGN": 414592,
+          "DoS Hulk": 34505,
+          "DDoS": 25821,
+          "PortScan": 18004,
+          "DoS GoldenEye": 2005,
+          "FTP-Patator": 1131,
+          "DoS Slowhttptest": 1071,
+          "DoS slowloris": 1048,
+          "SSH-Patator": 682,
+          "Bot": 371,
+          "Web Attack \ufffd Brute Force": 258,
+          "Web Attack \ufffd XSS": 119,
+          "Infiltration": 9,
+          "Web Attack \ufffd Sql Injection": 3,
+          "Heartbleed": 2
+        }
+      },
+      "clients": [
+        {
+          "train": {
+            "n": 382630,
+            "attack": 76526,
+            "benign": 306104,
+            "hash": "47667dbcecb45bea"
+          },
+          "val": {
+            "n": 49962,
+            "attack": 8503,
+            "benign": 41459,
+            "hash": "cd400c38a4b9d159"
+          },
+          "balance": {
+            "before": [
+              373134,
+              76526
+            ],
+            "after": [
+              306104,
+              76526
+            ]
+          }
+        },
+        {
+          "train": {
+            "n": 382630,
+            "attack": 76526,
+            "benign": 306104,
+            "hash": "370c3029e55f0878"
+          },
+          "val": {
+            "n": 49962,
+            "attack": 8503,
+            "benign": 41459,
+            "hash": "90bbff870ec85495"
+          },
+          "balance": {
+            "before": [
+              373133,
+              76526
+            ],
+            "after": [
+              306104,
+              76526
+            ]
+          }
+        },
+        {
+          "train": {
+            "n": 382630,
+            "attack": 76526,
+            "benign": 306104,
+            "hash": "8dd041317ce682ca"
+          },
+          "val": {
+            "n": 49962,
+            "attack": 8503,
+            "benign": 41459,
+            "hash": "4475f1a80b73a111"
+          },
+          "balance": {
+            "before": [
+              373133,
+              76526
+            ],
+            "after": [
+              306104,
+              76526
+            ]
+          }
+        },
+        {
+          "train": {
+            "n": 382625,
+            "attack": 76525,
+            "benign": 306100,
+            "hash": "1a8485adb44c05cb"
+          },
+          "val": {
+            "n": 49962,
+            "attack": 8503,
+            "benign": 41459,
+            "hash": "fd1764c1ac550e87"
+          },
+          "balance": {
+            "before": [
+              373133,
+              76525
+            ],
+            "after": [
+              306100,
+              76525
+            ]
+          }
+        }
+      ]
+    },
+    "split_overlap": {
+      "new_test": 499621,
+      "old_test": 499909,
+      "new_test_records_that_were_in_old_test": 100169,
+      "share": 0.2005
+    },
+    "extremes": {
+      "top_records": [
+        {
+          "id": "Tuesday-WorkingHours.pcap_ISCX.csv:1267",
+          "attack": "BENIGN",
+          "feature": "Fwd Header Length",
+          "z": -1148.7,
+          "raw_value": -32212235446.19287
+        },
+        {
+          "id": "Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv:103957",
+          "attack": "BENIGN",
+          "feature": "Total Length of Fwd Packets",
+          "z": 1067.2,
+          "raw_value": 12899999.91769886
+        },
+        {
+          "id": "Tuesday-WorkingHours.pcap_ISCX.csv:281248",
+          "attack": "BENIGN",
+          "feature": "Bwd Header Length",
+          "z": -609.3,
+          "raw_value": -1073741294.5827789
+        },
+        {
+          "id": "Tuesday-WorkingHours.pcap_ISCX.csv:283",
+          "attack": "BENIGN",
+          "feature": "Bwd Header Length",
+          "z": -609.3,
+          "raw_value": -1073741294.5827789
+        },
+        {
+          "id": "Tuesday-WorkingHours.pcap_ISCX.csv:292036",
+          "attack": "BENIGN",
+          "feature": "Bwd Header Length",
+          "z": -609.3,
+          "raw_value": -1073741294.5827789
+        },
+        {
+          "id": "Tuesday-WorkingHours.pcap_ISCX.csv:295",
+          "attack": "BENIGN",
+          "feature": "Bwd Header Length",
+          "z": -609.3,
+          "raw_value": -1073740971.9098129
+        },
+        {
+          "id": "Tuesday-WorkingHours.pcap_ISCX.csv:292",
+          "attack": "BENIGN",
+          "feature": "min_seg_size_forward",
+          "z": -427.1,
+          "raw_value": -536870644.959919
+        },
+        {
+          "id": "Tuesday-WorkingHours.pcap_ISCX.csv:1268",
+          "attack": "BENIGN",
+          "feature": "min_seg_size_forward",
+          "z": -427.1,
+          "raw_value": -536870644.959919
+        },
+        {
+          "id": "Tuesday-WorkingHours.pcap_ISCX.csv:392300",
+          "attack": "BENIGN",
+          "feature": "min_seg_size_forward",
+          "z": -427.1,
+          "raw_value": -536870644.959919
+        },
+        {
+          "id": "Monday-WorkingHours.pcap_ISCX.csv:20526",
+          "attack": "BENIGN",
+          "feature": "act_data_pkt_fwd",
+          "z": 349.9,
+          "raw_value": 204290.00865451247
+        },
+        {
+          "id": "Monday-WorkingHours.pcap_ISCX.csv:19002",
+          "attack": "BENIGN",
+          "feature": "act_data_pkt_fwd",
+          "z": 343.4,
+          "raw_value": 200511.00432400405
+        },
+        {
+          "id": "Friday-WorkingHours-Morning.pcap_ISCX.csv:12729",
+          "attack": "BENIGN",
+          "feature": "act_data_pkt_fwd",
+          "z": 340.2,
+          "raw_value": 198636.00513149425
+        },
+        {
+          "id": "Wednesday-workingHours.pcap_ISCX.csv:721",
+          "attack": "BENIGN",
+          "feature": "act_data_pkt_fwd",
+          "z": 337.6,
+          "raw_value": 197124.0078636706
+        },
+        {
+          "id": "Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv:12468",
+          "attack": "BENIGN",
+          "feature": "act_data_pkt_fwd",
+          "z": 326.5,
+          "raw_value": 190639.00538270175
+        },
+        {
+          "id": "Wednesday-workingHours.pcap_ISCX.csv:5321",
+          "attack": "BENIGN",
+          "feature": "act_data_pkt_fwd",
+          "z": 324.4,
+          "raw_value": 189375.00182203948
+        },
+        {
+          "id": "Wednesday-workingHours.pcap_ISCX.csv:7768",
+          "attack": "BENIGN",
+          "feature": "act_data_pkt_fwd",
+          "z": 322.8,
+          "raw_value": 188473.00243855268
+        },
+        {
+          "id": "Friday-WorkingHours-Morning.pcap_ISCX.csv:14876",
+          "attack": "BENIGN",
+          "feature": "act_data_pkt_fwd",
+          "z": 321.3,
+          "raw_value": 187587.00264907628
+        },
+        {
+          "id": "Friday-WorkingHours-Morning.pcap_ISCX.csv:11852",
+          "attack": "BENIGN",
+          "feature": "act_data_pkt_fwd",
+          "z": 319.3,
+          "raw_value": 186424.00320694968
+        },
+        {
+          "id": "Friday-WorkingHours-Morning.pcap_ISCX.csv:24349",
+          "attack": "BENIGN",
+          "feature": "act_data_pkt_fwd",
+          "z": 302.9,
+          "raw_value": 176856.9942993559
+        },
+        {
+          "id": "Monday-WorkingHours.pcap_ISCX.csv:22743",
+          "attack": "BENIGN",
+          "feature": "act_data_pkt_fwd",
+          "z": 300.9,
+          "raw_value": 175660.00017418712
+        },
+        {
+          "id": "Monday-WorkingHours.pcap_ISCX.csv:32503",
+          "attack": "BENIGN",
+          "feature": "act_data_pkt_fwd",
+          "z": 297.0,
+          "raw_value": 173382.99781947583
+        },
+        {
+          "id": "Tuesday-WorkingHours.pcap_ISCX.csv:43222",
+          "attack": "BENIGN",
+          "feature": "Subflow Bwd Bytes",
+          "z": 294.9,
+          "raw_value": 627039035.4104004
+        },
+        {
+          "id": "Wednesday-workingHours.pcap_ISCX.csv:2665",
+          "attack": "BENIGN",
+          "feature": "act_data_pkt_fwd",
+          "z": 273.6,
+          "raw_value": 159735.00560711697
+        },
+        {
+          "id": "Tuesday-WorkingHours.pcap_ISCX.csv:15761",
+          "attack": "BENIGN",
+          "feature": "Total Backward Packets",
+          "z": 260.1,
+          "raw_value": 242974.00727996975
+        },
+        {
+          "id": "Tuesday-WorkingHours.pcap_ISCX.csv:15854",
+          "attack": "BENIGN",
+          "feature": "Total Fwd Packets",
+          "z": 247.4,
+          "raw_value": 173762.00127147976
+        },
+        {
+          "id": "Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv:72581",
+          "attack": "Infiltration",
+          "feature": "Subflow Fwd Bytes",
+          "z": 237.5,
+          "raw_value": 2866110.051265076
+        },
+        {
+          "id": "Monday-WorkingHours.pcap_ISCX.csv:3846",
+          "attack": "BENIGN",
+          "feature": "act_data_pkt_fwd",
+          "z": 235.7,
+          "raw_value": 137606.99694928154
+        },
+        {
+          "id": "Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv:115035",
+          "attack": "BENIGN",
+          "feature": "Down/Up Ratio",
+          "z": 222.4,
+          "raw_value": 156.0000008198258
+        },
+        {
+          "id": "Tuesday-WorkingHours.pcap_ISCX.csv:17919",
+          "attack": "BENIGN",
+          "feature": "Total Backward Packets",
+          "z": 210.1,
+          "raw_value": 196249.00211674534
+        },
+        {
+          "id": "Tuesday-WorkingHours.pcap_ISCX.csv:13210",
+          "attack": "BENIGN",
+          "feature": "Total Backward Packets",
+          "z": 209.0,
+          "raw_value": 195198.00465586223
+        }
+      ],
+      "share_rows_max_abs_z_gt_5": 0.120503,
+      "share_rows_max_abs_z_gt_10": 0.028488,
+      "share_rows_max_abs_z_gt_100": 7.1e-05,
+      "share_rows_max_abs_z_gt_1000": 1e-06,
+      "max_abs_z": 1148.7
+    }
+  },
+  "ton_iot": {
+    "raw": {
+      "records": 211043,
+      "attack": 161043,
+      "benign": 50000,
+      "attack_families": {
+        "normal": 50000,
+        "backdoor": 20000,
+        "ddos": 20000,
+        "dos": 20000,
+        "injection": 20000,
+        "password": 20000,
+        "ransomware": 20000,
+        "scanning": 20000,
+        "xss": 20000,
+        "mitm": 1043
+      },
+      "negative_values_per_column": {},
+      "constant_columns": [],
+      "categorical_label_encoded": [
+        "proto",
+        "service",
+        "conn_state",
+        "dns_AA",
+        "dns_RD",
+        "dns_RA",
+        "dns_rejected",
+        "ssl_version",
+        "ssl_cipher",
+        "ssl_resumed",
+        "ssl_established",
+        "ssl_subject",
+        "ssl_issuer",
+        "http_method",
+        "http_user_agent",
+        "http_orig_mime_types",
+        "http_resp_mime_types",
+        "weird_name",
+        "weird_notice"
+      ],
+      "files": [
+        "train_test_network.csv"
+      ],
+      "dropped_text": [
+        "dns_query",
+        "http_uri"
+      ],
+      "n_base_features": 37
+    },
+    "old_pipeline": {
+      "train_rows": 129710,
+      "synthetic_rows": 45570,
+      "synthetic_share": 0.3513,
+      "smote_invalid_discrete_share_per_column": {
+        "1": 0.0003,
+        "2": 0.001,
+        "6": 0.0065,
+        "12": 0.0009,
+        "13": 0.0063,
+        "14": 0.0006,
+        "15": 0.0004,
+        "16": 0.0011,
+        "17": 0.0003,
+        "18": 0.0003,
+        "20": 0.0001,
+        "22": 0.0,
+        "23": 0.0001,
+        "24": 0.0001,
+        "25": 0.0012,
+        "26": 0.0001,
+        "28": 0.0004,
+        "30": 0.0006,
+        "31": 0.0009,
+        "32": 0.0001,
+        "33": 0.0012,
+        "34": 0.0008,
+        "35": 0.0001,
+        "36": 0.0001,
+        "37": 0.0309,
+        "38": 0.0078,
+        "39": 0.0073,
+        "40": 0.0025,
+        "41": 0.0031,
+        "42": 0.0021
+      },
+      "smote_rows_with_any_invalid_discrete_value": 0.0469,
+      "clients": [
+        {
+          "rows": 32428,
+          "synthetic": 11481
+        },
+        {
+          "rows": 32428,
+          "synthetic": 11376
+        },
+        {
+          "rows": 32428,
+          "synthetic": 11373
+        },
+        {
+          "rows": 32426,
+          "synthetic": 11340
+        }
+      ],
+      "threshold_validation": {
+        "rows": 8000,
+        "part_of_client0_federated_training": true,
+        "synthetic_rows": 2807,
+        "synthetic_share": 0.3509,
+        "synthetic_share_of_attack_rows": 0.0,
+        "synthetic_share_of_benign_rows": 0.7101
+      }
+    },
+    "v13_manifest": {
+      "pipeline": "v13",
+      "dataset": "ton_iot",
+      "data_path": "data/raw/TON_IoT",
+      "config": {
+        "num_clients": 4,
+        "partition_strategy": "label_balanced",
+        "dirichlet_alpha": 0.3,
+        "split_mode": "random",
+        "test_size": 0.2,
+        "split_seed": 2027,
+        "partition_seed": 42,
+        "val_frac": 0.1,
+        "balance_ratio": 4.0,
+        "conflict_policy": "drop",
+        "text_features": true,
+        "group_column": null,
+        "smote": false,
+        "scaler": "mean/std of the union of client training slices (federated aggregate)"
+      },
+      "raw_info": {
+        "files": [
+          "train_test_network.csv"
+        ],
+        "dropped_text": [
+          "dns_query",
+          "http_uri"
+        ],
+        "n_base_features": 37
+      },
+      "dedup": {
+        "records": 211043,
+        "unique_vectors": 105168,
+        "duplicate_records_removed": 105867,
+        "conflicting_label_vectors": 8,
+        "conflicting_label_records": 314,
+        "conflict_policy": "drop",
+        "kept": 105160
+      },
+      "n_features": 43,
+      "feature_names": [
+        "dst_port",
+        "proto",
+        "service",
+        "duration",
+        "src_bytes",
+        "dst_bytes",
+        "conn_state",
+        "missed_bytes",
+        "src_pkts",
+        "src_ip_bytes",
+        "dst_pkts",
+        "dst_ip_bytes",
+        "dns_qclass",
+        "dns_qtype",
+        "dns_rcode",
+        "dns_AA",
+        "dns_RD",
+        "dns_RA",
+        "dns_rejected",
+        "ssl_version",
+        "ssl_cipher",
+        "ssl_resumed",
+        "ssl_established",
+        "ssl_subject",
+        "ssl_issuer",
+        "http_trans_depth",
+        "http_method",
+        "http_version",
+        "http_request_body_len",
+        "http_response_body_len",
+        "http_status_code",
+        "http_user_agent",
+        "http_orig_mime_types",
+        "http_resp_mime_types",
+        "weird_name",
+        "weird_addl",
+        "weird_notice",
+        "dns_query_len",
+        "dns_query_digits",
+        "dns_query_special",
+        "http_uri_len",
+        "http_uri_digits",
+        "http_uri_special"
+      ],
+      "categorical_label_encoded": [
+        "proto",
+        "service",
+        "conn_state",
+        "dns_AA",
+        "dns_RD",
+        "dns_RA",
+        "dns_rejected",
+        "ssl_version",
+        "ssl_cipher",
+        "ssl_resumed",
+        "ssl_established",
+        "ssl_subject",
+        "ssl_issuer",
+        "http_method",
+        "http_user_agent",
+        "http_orig_mime_types",
+        "http_resp_mime_types",
+        "weird_name",
+        "weird_notice"
+      ],
+      "test": {
+        "n": 21032,
+        "attack": 16212,
+        "benign": 4820,
+        "hash": "cbca45264927c39c",
+        "attack_families": {
+          "normal": 4820,
+          "injection": 3871,
+          "password": 3119,
+          "dos": 2954,
+          "ddos": 2512,
+          "xss": 1666,
+          "scanning": 1142,
+          "backdoor": 486,
+          "ransomware": 249,
+          "mitm": 213
+        }
+      },
+      "clients": [
+        {
+          "train": {
+            "n": 18930,
+            "attack": 14592,
+            "benign": 4338,
+            "hash": "785bf24ccf311e2c"
+          },
+          "val": {
+            "n": 2103,
+            "attack": 1621,
+            "benign": 482,
+            "hash": "c56353199885e7f9"
+          },
+          "balance": {
+            "before": [
+              4338,
+              14592
+            ],
+            "after": [
+              4338,
+              14592
+            ]
+          }
+        },
+        {
+          "train": {
+            "n": 18930,
+            "attack": 14592,
+            "benign": 4338,
+            "hash": "feecd1089f70b854"
+          },
+          "val": {
+            "n": 2103,
+            "attack": 1621,
+            "benign": 482,
+            "hash": "34ab1434df83b14c"
+          },
+          "balance": {
+            "before": [
+              4338,
+              14592
+            ],
+            "after": [
+              4338,
+              14592
+            ]
+          }
+        },
+        {
+          "train": {
+            "n": 18928,
+            "attack": 14591,
+            "benign": 4337,
+            "hash": "415a5db1fa06321b"
+          },
+          "val": {
+            "n": 2103,
+            "attack": 1621,
+            "benign": 482,
+            "hash": "8cba3bfb87e3911b"
+          },
+          "balance": {
+            "before": [
+              4337,
+              14591
+            ],
+            "after": [
+              4337,
+              14591
+            ]
+          }
+        },
+        {
+          "train": {
+            "n": 18928,
+            "attack": 14591,
+            "benign": 4337,
+            "hash": "39e281af9e248c03"
+          },
+          "val": {
+            "n": 2103,
+            "attack": 1621,
+            "benign": 482,
+            "hash": "e817c815521267f5"
+          },
+          "balance": {
+            "before": [
+              4337,
+              14591
+            ],
+            "after": [
+              4337,
+              14591
+            ]
+          }
+        }
+      ]
+    },
+    "split_overlap": {
+      "new_test": 21032,
+      "old_test": 21036,
+      "new_test_records_that_were_in_old_test": 4175,
+      "share": 0.1985
+    },
+    "extremes": {
+      "top_records": [
+        {
+          "id": "train_test_network.csv:45094",
+          "attack": "dos",
+          "feature": "dst_ip_bytes",
+          "z": 272.4,
+          "raw_value": 86395521.84589386
+        },
+        {
+          "id": "train_test_network.csv:95128",
+          "attack": "normal",
+          "feature": "http_response_body_len",
+          "z": 267.3,
+          "raw_value": 13424383.359280348
+        },
+        {
+          "id": "train_test_network.csv:83129",
+          "attack": "normal",
+          "feature": "dst_pkts",
+          "z": 229.7,
+          "raw_value": 121941.99636473879
+        },
+        {
+          "id": "train_test_network.csv:208219",
+          "attack": "xss",
+          "feature": "http_uri_special",
+          "z": 218.2,
+          "raw_value": 251.9999917439418
+        },
+        {
+          "id": "train_test_network.csv:39547",
+          "attack": "ddos",
+          "feature": "missed_bytes",
+          "z": 186.9,
+          "raw_value": 909211720.8373642
+        },
+        {
+          "id": "train_test_network.csv:80281",
+          "attack": "mitm",
+          "feature": "src_ip_bytes",
+          "z": 185.0,
+          "raw_value": 6522625.736024141
+        },
+        {
+          "id": "train_test_network.csv:20417",
+          "attack": "ddos",
+          "feature": "ssl_issuer",
+          "z": 164.1,
+          "raw_value": 4.000000145007789
+        },
+        {
+          "id": "train_test_network.csv:37187",
+          "attack": "ddos",
+          "feature": "ssl_issuer",
+          "z": 164.1,
+          "raw_value": 4.000000145007789
+        },
+        {
+          "id": "train_test_network.csv:78988",
+          "attack": "injection",
+          "feature": "dst_bytes",
+          "z": 162.8,
+          "raw_value": 3913853370.236267
+        },
+        {
+          "id": "train_test_network.csv:99258",
+          "attack": "normal",
+          "feature": "http_request_body_len",
+          "z": 155.6,
+          "raw_value": 1585.9999899089307
+        },
+        {
+          "id": "train_test_network.csv:110812",
+          "attack": "normal",
+          "feature": "ssl_subject",
+          "z": 148.4,
+          "raw_value": 3.9999998826814362
+        },
+        {
+          "id": "train_test_network.csv:103578",
+          "attack": "normal",
+          "feature": "ssl_subject",
+          "z": 148.4,
+          "raw_value": 3.9999998826814362
+        },
+        {
+          "id": "train_test_network.csv:99259",
+          "attack": "normal",
+          "feature": "http_request_body_len",
+          "z": 121.9,
+          "raw_value": 1242.00002495417
+        },
+        {
+          "id": "train_test_network.csv:110742",
+          "attack": "normal",
+          "feature": "http_request_body_len",
+          "z": 121.9,
+          "raw_value": 1242.00002495417
+        },
+        {
+          "id": "train_test_network.csv:110743",
+          "attack": "normal",
+          "feature": "http_request_body_len",
+          "z": 121.9,
+          "raw_value": 1242.00002495417
+        },
+        {
+          "id": "train_test_network.csv:201575",
+          "attack": "xss",
+          "feature": "http_uri_special",
+          "z": 119.5,
+          "raw_value": 138.00000381796417
+        },
+        {
+          "id": "train_test_network.csv:282",
+          "attack": "backdoor",
+          "feature": "duration",
+          "z": 117.9,
+          "raw_value": 93516.9280305393
+        },
+        {
+          "id": "train_test_network.csv:527",
+          "attack": "backdoor",
+          "feature": "duration",
+          "z": 117.7,
+          "raw_value": 93367.5831831973
+        },
+        {
+          "id": "train_test_network.csv:1412",
+          "attack": "backdoor",
+          "feature": "duration",
+          "z": 117.1,
+          "raw_value": 92891.96369104832
+        },
+        {
+          "id": "train_test_network.csv:1586",
+          "attack": "backdoor",
+          "feature": "duration",
+          "z": 117.0,
+          "raw_value": 92789.951422669
+        },
+        {
+          "id": "train_test_network.csv:1743",
+          "attack": "backdoor",
+          "feature": "duration",
+          "z": 116.9,
+          "raw_value": 92768.37609419413
+        },
+        {
+          "id": "train_test_network.csv:107691",
+          "attack": "normal",
+          "feature": "http_trans_depth",
+          "z": 94.3,
+          "raw_value": 9.999999652051656
+        },
+        {
+          "id": "train_test_network.csv:110836",
+          "attack": "normal",
+          "feature": "http_trans_depth",
+          "z": 94.3,
+          "raw_value": 9.999999652051656
+        },
+        {
+          "id": "train_test_network.csv:80256",
+          "attack": "mitm",
+          "feature": "src_ip_bytes",
+          "z": 93.0,
+          "raw_value": 3278525.9296147525
+        },
+        {
+          "id": "train_test_network.csv:107699",
+          "attack": "normal",
+          "feature": "http_trans_depth",
+          "z": 84.9,
+          "raw_value": 9.000000110449207
+        },
+        {
+          "id": "train_test_network.csv:110844",
+          "attack": "normal",
+          "feature": "http_trans_depth",
+          "z": 84.9,
+          "raw_value": 9.000000110449207
+        },
+        {
+          "id": "train_test_network.csv:107673",
+          "attack": "normal",
+          "feature": "ssl_issuer",
+          "z": 82.0,
+          "raw_value": 1.9999999972474143
+        },
+        {
+          "id": "train_test_network.csv:110843",
+          "attack": "normal",
+          "feature": "http_trans_depth",
+          "z": 75.4,
+          "raw_value": 7.999999760224625
+        },
+        {
+          "id": "train_test_network.csv:107698",
+          "attack": "normal",
+          "feature": "http_trans_depth",
+          "z": 75.4,
+          "raw_value": 7.999999760224625
+        },
+        {
+          "id": "train_test_network.csv:105211",
+          "attack": "normal",
+          "feature": "ssl_subject",
+          "z": 74.2,
+          "raw_value": 1.999999938411122
+        }
+      ],
+      "share_rows_max_abs_z_gt_5": 0.071517,
+      "share_rows_max_abs_z_gt_10": 0.011147,
+      "share_rows_max_abs_z_gt_100": 0.000277,
+      "share_rows_max_abs_z_gt_1000": 0.0,
+      "max_abs_z": 272.4
+    }
+  }
+}

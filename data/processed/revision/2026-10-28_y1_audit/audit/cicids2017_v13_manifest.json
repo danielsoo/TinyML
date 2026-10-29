@@ -1,0 +1,248 @@
+{
+  "pipeline": "v13",
+  "dataset": "cicids2017",
+  "data_path": "data/raw/CIC-IDS2017",
+  "config": {
+    "num_clients": 4,
+    "partition_strategy": "label_balanced",
+    "dirichlet_alpha": 0.3,
+    "split_mode": "random",
+    "test_size": 0.2,
+    "split_seed": 2027,
+    "partition_seed": 42,
+    "val_frac": 0.1,
+    "balance_ratio": 4.0,
+    "conflict_policy": "drop",
+    "text_features": true,
+    "group_column": null,
+    "smote": false,
+    "scaler": "mean/std of the union of client training slices (federated aggregate)"
+  },
+  "raw_info": {
+    "inf_values_replaced_by_0": 4376,
+    "nan_values_replaced_by_0": 5734,
+    "dropped_all_nan_columns": [],
+    "files": [
+      "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv",
+      "Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv",
+      "Friday-WorkingHours-Morning.pcap_ISCX.csv",
+      "Monday-WorkingHours.pcap_ISCX.csv",
+      "Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv",
+      "Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv",
+      "Tuesday-WorkingHours.pcap_ISCX.csv",
+      "Wednesday-workingHours.pcap_ISCX.csv"
+    ]
+  },
+  "dedup": {
+    "records": 2830743,
+    "unique_vectors": 2498824,
+    "duplicate_records_removed": 331200,
+    "conflicting_label_vectors": 719,
+    "conflicting_label_records": 7144,
+    "conflict_policy": "drop",
+    "kept": 2498105
+  },
+  "n_features": 78,
+  "feature_names": [
+    "Destination Port",
+    "Flow Duration",
+    "Total Fwd Packets",
+    "Total Backward Packets",
+    "Total Length of Fwd Packets",
+    "Total Length of Bwd Packets",
+    "Fwd Packet Length Max",
+    "Fwd Packet Length Min",
+    "Fwd Packet Length Mean",
+    "Fwd Packet Length Std",
+    "Bwd Packet Length Max",
+    "Bwd Packet Length Min",
+    "Bwd Packet Length Mean",
+    "Bwd Packet Length Std",
+    "Flow Bytes/s",
+    "Flow Packets/s",
+    "Flow IAT Mean",
+    "Flow IAT Std",
+    "Flow IAT Max",
+    "Flow IAT Min",
+    "Fwd IAT Total",
+    "Fwd IAT Mean",
+    "Fwd IAT Std",
+    "Fwd IAT Max",
+    "Fwd IAT Min",
+    "Bwd IAT Total",
+    "Bwd IAT Mean",
+    "Bwd IAT Std",
+    "Bwd IAT Max",
+    "Bwd IAT Min",
+    "Fwd PSH Flags",
+    "Bwd PSH Flags",
+    "Fwd URG Flags",
+    "Bwd URG Flags",
+    "Fwd Header Length",
+    "Bwd Header Length",
+    "Fwd Packets/s",
+    "Bwd Packets/s",
+    "Min Packet Length",
+    "Max Packet Length",
+    "Packet Length Mean",
+    "Packet Length Std",
+    "Packet Length Variance",
+    "FIN Flag Count",
+    "SYN Flag Count",
+    "RST Flag Count",
+    "PSH Flag Count",
+    "ACK Flag Count",
+    "URG Flag Count",
+    "CWE Flag Count",
+    "ECE Flag Count",
+    "Down/Up Ratio",
+    "Average Packet Size",
+    "Avg Fwd Segment Size",
+    "Avg Bwd Segment Size",
+    "Fwd Header Length.1",
+    "Fwd Avg Bytes/Bulk",
+    "Fwd Avg Packets/Bulk",
+    "Fwd Avg Bulk Rate",
+    "Bwd Avg Bytes/Bulk",
+    "Bwd Avg Packets/Bulk",
+    "Bwd Avg Bulk Rate",
+    "Subflow Fwd Packets",
+    "Subflow Fwd Bytes",
+    "Subflow Bwd Packets",
+    "Subflow Bwd Bytes",
+    "Init_Win_bytes_forward",
+    "Init_Win_bytes_backward",
+    "act_data_pkt_fwd",
+    "min_seg_size_forward",
+    "Active Mean",
+    "Active Std",
+    "Active Max",
+    "Active Min",
+    "Idle Mean",
+    "Idle Std",
+    "Idle Max",
+    "Idle Min"
+  ],
+  "categorical_label_encoded": [],
+  "test": {
+    "n": 499621,
+    "attack": 85029,
+    "benign": 414592,
+    "hash": "34a854b89b377e4a",
+    "attack_families": {
+      "BENIGN": 414592,
+      "DoS Hulk": 34505,
+      "DDoS": 25821,
+      "PortScan": 18004,
+      "DoS GoldenEye": 2005,
+      "FTP-Patator": 1131,
+      "DoS Slowhttptest": 1071,
+      "DoS slowloris": 1048,
+      "SSH-Patator": 682,
+      "Bot": 371,
+      "Web Attack \ufffd Brute Force": 258,
+      "Web Attack \ufffd XSS": 119,
+      "Infiltration": 9,
+      "Web Attack \ufffd Sql Injection": 3,
+      "Heartbleed": 2
+    }
+  },
+  "clients": [
+    {
+      "train": {
+        "n": 382630,
+        "attack": 76526,
+        "benign": 306104,
+        "hash": "47667dbcecb45bea"
+      },
+      "val": {
+        "n": 49962,
+        "attack": 8503,
+        "benign": 41459,
+        "hash": "cd400c38a4b9d159"
+      },
+      "balance": {
+        "before": [
+          373134,
+          76526
+        ],
+        "after": [
+          306104,
+          76526
+        ]
+      }
+    },
+    {
+      "train": {
+        "n": 382630,
+        "attack": 76526,
+        "benign": 306104,
+        "hash": "370c3029e55f0878"
+      },
+      "val": {
+        "n": 49962,
+        "attack": 8503,
+        "benign": 41459,
+        "hash": "90bbff870ec85495"
+      },
+      "balance": {
+        "before": [
+          373133,
+          76526
+        ],
+        "after": [
+          306104,
+          76526
+        ]
+      }
+    },
+    {
+      "train": {
+        "n": 382630,
+        "attack": 76526,
+        "benign": 306104,
+        "hash": "8dd041317ce682ca"
+      },
+      "val": {
+        "n": 49962,
+        "attack": 8503,
+        "benign": 41459,
+        "hash": "4475f1a80b73a111"
+      },
+      "balance": {
+        "before": [
+          373133,
+          76526
+        ],
+        "after": [
+          306104,
+          76526
+        ]
+      }
+    },
+    {
+      "train": {
+        "n": 382625,
+        "attack": 76525,
+        "benign": 306100,
+        "hash": "1a8485adb44c05cb"
+      },
+      "val": {
+        "n": 49962,
+        "attack": 8503,
+        "benign": 41459,
+        "hash": "fd1764c1ac550e87"
+      },
+      "balance": {
+        "before": [
+          373133,
+          76525
+        ],
+        "after": [
+          306100,
+          76525
+        ]
+      }
+    }
+  ]
+}
