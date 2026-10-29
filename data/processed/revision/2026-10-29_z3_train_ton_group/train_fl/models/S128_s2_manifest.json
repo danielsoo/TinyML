@@ -1,0 +1,282 @@
+{
+  "pipeline": "v13",
+  "dataset": "ton_iot",
+  "data_path": "data/raw/TON_IoT",
+  "config": {
+    "num_clients": 4,
+    "partition_strategy": "label_balanced",
+    "dirichlet_alpha": 0.3,
+    "split_mode": "group",
+    "test_size": 0.2,
+    "split_seed": 2027,
+    "partition_seed": 42,
+    "val_frac": 0.1,
+    "balance_ratio": 4.0,
+    "conflict_policy": "drop",
+    "text_features": true,
+    "group_column": null,
+    "smote": false,
+    "drop_negative": true,
+    "exclude_old_test": true,
+    "scaler": "mean/std of the union of client training slices (federated aggregate)"
+  },
+  "raw_info": {
+    "files": [
+      "train_test_network.csv"
+    ],
+    "dropped_text": [
+      "dns_query",
+      "http_uri"
+    ],
+    "n_base_features": 37
+  },
+  "invalid_records": {
+    "records_removed": 0,
+    "negative_by_column": {},
+    "removed_by_family": {},
+    "sentinel_columns_kept": []
+  },
+  "dedup": {
+    "records": 211043,
+    "unique_vectors": 105168,
+    "duplicate_records_removed": 105867,
+    "conflicting_label_vectors": 8,
+    "conflicting_label_records": 314,
+    "conflict_policy": "drop",
+    "kept": 105160
+  },
+  "old_test_records_excluded_from_test": 21032,
+  "group_split": {
+    "column": "src_ip",
+    "test_hosts": 15,
+    "train_hosts": 36,
+    "dropped_old_test_records_of_test_hosts": 5697,
+    "test_share_by_family": {
+      "backdoor": 0.02,
+      "ddos": 0.168,
+      "dos": 0.083,
+      "injection": 0.608,
+      "mitm": 0.488,
+      "normal": 0.131,
+      "password": 0.517,
+      "ransomware": 0.275,
+      "scanning": 0.128,
+      "xss": 0.061
+    }
+  },
+  "n_features": 43,
+  "feature_names": [
+    "dst_port",
+    "proto",
+    "service",
+    "duration",
+    "src_bytes",
+    "dst_bytes",
+    "conn_state",
+    "missed_bytes",
+    "src_pkts",
+    "src_ip_bytes",
+    "dst_pkts",
+    "dst_ip_bytes",
+    "dns_qclass",
+    "dns_qtype",
+    "dns_rcode",
+    "dns_AA",
+    "dns_RD",
+    "dns_RA",
+    "dns_rejected",
+    "ssl_version",
+    "ssl_cipher",
+    "ssl_resumed",
+    "ssl_established",
+    "ssl_subject",
+    "ssl_issuer",
+    "http_trans_depth",
+    "http_method",
+    "http_version",
+    "http_request_body_len",
+    "http_response_body_len",
+    "http_status_code",
+    "http_user_agent",
+    "http_orig_mime_types",
+    "http_resp_mime_types",
+    "weird_name",
+    "weird_addl",
+    "weird_notice",
+    "dns_query_len",
+    "dns_query_digits",
+    "dns_query_special",
+    "http_uri_len",
+    "http_uri_digits",
+    "http_uri_special"
+  ],
+  "categorical_label_encoded": [
+    "proto",
+    "service",
+    "conn_state",
+    "dns_AA",
+    "dns_RD",
+    "dns_RA",
+    "dns_rejected",
+    "ssl_version",
+    "ssl_cipher",
+    "ssl_resumed",
+    "ssl_established",
+    "ssl_subject",
+    "ssl_issuer",
+    "http_method",
+    "http_user_agent",
+    "http_orig_mime_types",
+    "http_resp_mime_types",
+    "weird_name",
+    "weird_notice"
+  ],
+  "test": {
+    "n": 22866,
+    "attack": 20329,
+    "benign": 2537,
+    "hash": "81b92ea812f852d9",
+    "attack_families": {
+      "injection": 9603,
+      "password": 6367,
+      "normal": 2537,
+      "ddos": 1691,
+      "dos": 962,
+      "scanning": 575,
+      "xss": 421,
+      "mitm": 405,
+      "ransomware": 266,
+      "backdoor": 39
+    }
+  },
+  "clients": [
+    {
+      "train": {
+        "n": 17235,
+        "attack": 12521,
+        "benign": 4714,
+        "hash": "9c9161f1c91d3f2c"
+      },
+      "val": {
+        "n": 1915,
+        "attack": 1391,
+        "benign": 524,
+        "hash": "98c0a695b9e9e19b"
+      },
+      "balance": {
+        "before": [
+          4714,
+          12521
+        ],
+        "after": [
+          4714,
+          12521
+        ]
+      }
+    },
+    {
+      "train": {
+        "n": 17234,
+        "attack": 12520,
+        "benign": 4714,
+        "hash": "4823062e6528a678"
+      },
+      "val": {
+        "n": 1915,
+        "attack": 1391,
+        "benign": 524,
+        "hash": "6d7d3794ee36b255"
+      },
+      "balance": {
+        "before": [
+          4714,
+          12520
+        ],
+        "after": [
+          4714,
+          12520
+        ]
+      }
+    },
+    {
+      "train": {
+        "n": 17234,
+        "attack": 12520,
+        "benign": 4714,
+        "hash": "1b56a77e21553948"
+      },
+      "val": {
+        "n": 1915,
+        "attack": 1391,
+        "benign": 524,
+        "hash": "0b577a6bf8d94e94"
+      },
+      "balance": {
+        "before": [
+          4714,
+          12520
+        ],
+        "after": [
+          4714,
+          12520
+        ]
+      }
+    },
+    {
+      "train": {
+        "n": 17234,
+        "attack": 12520,
+        "benign": 4714,
+        "hash": "31a93d84146d27e8"
+      },
+      "val": {
+        "n": 1915,
+        "attack": 1391,
+        "benign": 524,
+        "hash": "3c6eb055542f3017"
+      },
+      "balance": {
+        "before": [
+          4714,
+          12520
+        ],
+        "after": [
+          4714,
+          12520
+        ]
+      }
+    }
+  ],
+  "federated": {
+    "num_rounds": 60,
+    "fraction_fit": 1.0,
+    "fraction_evaluate": 1.0,
+    "local_epochs": 3,
+    "batch_size": 128,
+    "learning_rate": 0.001,
+    "use_class_weights": true,
+    "use_focal_loss": true,
+    "focal_loss_alpha": 0.5,
+    "use_distillation": false,
+    "server_momentum": 0.5,
+    "server_learning_rate": 0.1,
+    "lr_decay_type": "cosine",
+    "lr_decay_rate": 0.97,
+    "lr_drop_rate": 0.5,
+    "lr_epochs_drop": 5,
+    "lr_min": 0.0001,
+    "use_qat": false,
+    "min_fit_clients": 4,
+    "min_evaluate_clients": 4,
+    "min_available_clients": 4,
+    "seed": 2
+  },
+  "model": {
+    "name": "mlp",
+    "hidden_units": [
+      358,
+      179,
+      89
+    ]
+  }
+}
