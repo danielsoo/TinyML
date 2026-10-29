@@ -1,0 +1,139 @@
+seed,arm,budget_kb,far_budget,from,to,attacks_lost,attacks_recovered,false_alarms_added,false_alarms_removed,lost_by_family,recovered_by_family
+1,F8,-,0.01,teacher,int8,20,390,22,1,"{""ddos"": 19, ""xss"": 1}","{""ransomware"": 178, ""xss"": 90, ""scanning"": 73, ""injection"": 19, ""mitm"": 14, ""password"": 6, ""ddos"": 5, ""dos"": 5}"
+1,F8,-,0.05,teacher,int8,1,0,12,10,"{""ddos"": 1}",{}
+1,P,80,0.01,teacher,compact_fp32,242,260,14,2,"{""dos"": 119, ""mitm"": 62, ""password"": 22, ""scanning"": 17, ""ddos"": 12, ""injection"": 6, ""xss"": 3, ""ransomware"": 1}","{""ransomware"": 179, ""scanning"": 54, ""xss"": 12, ""ddos"": 6, ""mitm"": 6, ""dos"": 2, ""password"": 1}"
+1,P,80,0.01,compact_fp32,int8,1,298,8,1,"{""ddos"": 1}","{""dos"": 118, ""scanning"": 68, ""mitm"": 67, ""password"": 22, ""ddos"": 16, ""injection"": 6, ""ransomware"": 1}"
+1,P,80,0.05,teacher,compact_fp32,26,1,33,58,"{""dos"": 12, ""ransomware"": 8, ""mitm"": 3, ""injection"": 2, ""password"": 1}","{""dos"": 1}"
+1,P,80,0.05,compact_fp32,int8,7,0,8,10,"{""password"": 6, ""ddos"": 1}",{}
+1,Q,80,0.01,teacher,compact_fp32,242,260,14,2,"{""dos"": 119, ""mitm"": 62, ""password"": 22, ""scanning"": 17, ""ddos"": 12, ""injection"": 6, ""xss"": 3, ""ransomware"": 1}","{""ransomware"": 179, ""scanning"": 54, ""xss"": 12, ""ddos"": 6, ""mitm"": 6, ""dos"": 2, ""password"": 1}"
+1,Q,80,0.01,compact_fp32,qat_float,971,109,17,21,"{""dos"": 326, ""ransomware"": 187, ""xss"": 145, ""scanning"": 90, ""injection"": 83, ""ddos"": 74, ""mitm"": 50, ""password"": 13, ""backdoor"": 3}","{""scanning"": 93, ""dos"": 6, ""backdoor"": 4, ""password"": 4, ""ddos"": 1, ""ransomware"": 1}"
+1,Q,80,0.01,qat_float,int8,0,0,0,0,{},{}
+1,Q,80,0.05,teacher,compact_fp32,26,1,33,58,"{""dos"": 12, ""ransomware"": 8, ""mitm"": 3, ""injection"": 2, ""password"": 1}","{""dos"": 1}"
+1,Q,80,0.05,compact_fp32,qat_float,217,10,34,22,"{""dos"": 205, ""ddos"": 6, ""xss"": 3, ""mitm"": 1, ""password"": 1, ""scanning"": 1}","{""dos"": 6, ""scanning"": 2, ""mitm"": 1, ""password"": 1}"
+1,Q,80,0.05,qat_float,int8,0,1,0,0,{},"{""password"": 1}"
+1,R,80,0.01,teacher,compact_fp32,61,261,16,3,"{""ddos"": 20, ""scanning"": 15, ""mitm"": 11, ""dos"": 6, ""password"": 5, ""xss"": 3, ""injection"": 1}","{""ransomware"": 179, ""scanning"": 52, ""mitm"": 14, ""xss"": 11, ""ddos"": 3, ""dos"": 1, ""password"": 1}"
+1,R,80,0.01,compact_fp32,int8,63,35,4,6,"{""scanning"": 23, ""ddos"": 13, ""mitm"": 13, ""dos"": 9, ""password"": 2, ""ransomware"": 2, ""xss"": 1}","{""mitm"": 10, ""scanning"": 8, ""ddos"": 7, ""password"": 5, ""dos"": 3, ""backdoor"": 1, ""injection"": 1}"
+1,R,80,0.05,teacher,compact_fp32,21,1,27,48,"{""dos"": 9, ""ransomware"": 8, ""injection"": 2, ""mitm"": 2}","{""dos"": 1}"
+1,R,80,0.05,compact_fp32,int8,0,0,3,18,{},{}
+1,S,80,0.01,teacher,compact_fp32,10,144,13,3,"{""mitm"": 5, ""ddos"": 3, ""dos"": 2}","{""scanning"": 98, ""mitm"": 14, ""xss"": 12, ""ddos"": 8, ""backdoor"": 5, ""dos"": 5, ""password"": 1, ""ransomware"": 1}"
+1,S,80,0.01,compact_fp32,int8,21,239,7,9,"{""ddos"": 13, ""dos"": 3, ""mitm"": 3, ""password"": 2}","{""ransomware"": 178, ""scanning"": 60, ""mitm"": 1}"
+1,S,80,0.05,teacher,compact_fp32,2,0,18,30,"{""dos"": 2}",{}
+1,S,80,0.05,compact_fp32,int8,5,1,8,3,"{""password"": 3, ""ddos"": 2}","{""injection"": 1}"
+1,SQ,80,0.01,teacher,compact_fp32,10,144,13,3,"{""mitm"": 5, ""ddos"": 3, ""dos"": 2}","{""scanning"": 98, ""mitm"": 14, ""xss"": 12, ""ddos"": 8, ""backdoor"": 5, ""dos"": 5, ""password"": 1, ""ransomware"": 1}"
+1,SQ,80,0.01,compact_fp32,int8,1375,36,16,22,"{""dos"": 429, ""xss"": 379, ""scanning"": 224, ""password"": 138, ""mitm"": 82, ""injection"": 79, ""ddos"": 35, ""backdoor"": 5, ""ransomware"": 4}","{""mitm"": 15, ""dos"": 9, ""ddos"": 4, ""password"": 4, ""scanning"": 4}"
+1,SQ,80,0.05,teacher,compact_fp32,2,0,18,30,"{""dos"": 2}",{}
+1,SQ,80,0.05,compact_fp32,int8,152,1,34,40,"{""dos"": 136, ""ransomware"": 8, ""ddos"": 5, ""mitm"": 2, ""password"": 1}","{""dos"": 1}"
+1,P,128,0.01,teacher,compact_fp32,105,254,11,2,"{""scanning"": 72, ""ddos"": 15, ""dos"": 7, ""mitm"": 3, ""password"": 3, ""xss"": 3, ""ransomware"": 2}","{""ransomware"": 179, ""scanning"": 46, ""xss"": 12, ""ddos"": 11, ""mitm"": 4, ""dos"": 1, ""password"": 1}"
+1,P,128,0.01,compact_fp32,int8,19,94,3,1,"{""ddos"": 19}","{""scanning"": 83, ""password"": 3, ""ddos"": 2, ""dos"": 2, ""mitm"": 2, ""ransomware"": 2}"
+1,P,128,0.05,teacher,compact_fp32,21,3,29,45,"{""dos"": 9, ""ransomware"": 8, ""injection"": 2, ""mitm"": 2}","{""dos"": 2, ""scanning"": 1}"
+1,P,128,0.05,compact_fp32,int8,7,8,5,25,"{""password"": 4, ""ddos"": 1, ""dos"": 1, ""scanning"": 1}","{""ransomware"": 8}"
+1,Q,128,0.01,teacher,compact_fp32,105,254,11,2,"{""scanning"": 72, ""ddos"": 15, ""dos"": 7, ""mitm"": 3, ""password"": 3, ""xss"": 3, ""ransomware"": 2}","{""ransomware"": 179, ""scanning"": 46, ""xss"": 12, ""ddos"": 11, ""mitm"": 4, ""dos"": 1, ""password"": 1}"
+1,Q,128,0.01,compact_fp32,qat_float,1761,107,15,16,"{""xss"": 641, ""dos"": 426, ""ransomware"": 180, ""injection"": 178, ""scanning"": 105, ""ddos"": 89, ""mitm"": 79, ""password"": 42, ""backdoor"": 21}","{""scanning"": 74, ""mitm"": 16, ""dos"": 6, ""backdoor"": 4, ""password"": 4, ""ransomware"": 2, ""ddos"": 1}"
+1,Q,128,0.01,qat_float,int8,2191,0,0,19,"{""ddos"": 985, ""xss"": 601, ""password"": 241, ""injection"": 168, ""scanning"": 93, ""mitm"": 48, ""ransomware"": 38, ""dos"": 12, ""backdoor"": 5}",{}
+1,Q,128,0.05,teacher,compact_fp32,21,3,29,45,"{""dos"": 9, ""ransomware"": 8, ""injection"": 2, ""mitm"": 2}","{""dos"": 2, ""scanning"": 1}"
+1,Q,128,0.05,compact_fp32,qat_float,228,8,31,23,"{""dos"": 213, ""ddos"": 4, ""mitm"": 4, ""xss"": 4, ""scanning"": 2, ""password"": 1}","{""dos"": 4, ""scanning"": 2, ""mitm"": 1, ""password"": 1}"
+1,Q,128,0.05,qat_float,int8,0,0,1,0,{},{}
+1,R,128,0.01,teacher,compact_fp32,4,467,27,1,"{""dos"": 2, ""ddos"": 1, ""mitm"": 1}","{""ransomware"": 179, ""scanning"": 137, ""xss"": 95, ""mitm"": 24, ""injection"": 19, ""dos"": 5, ""ddos"": 4, ""password"": 4}"
+1,R,128,0.01,compact_fp32,int8,101,43,7,9,"{""scanning"": 88, ""mitm"": 11, ""ddos"": 1, ""xss"": 1}","{""mitm"": 15, ""scanning"": 13, ""password"": 6, ""backdoor"": 4, ""ddos"": 3, ""dos"": 2}"
+1,R,128,0.05,teacher,compact_fp32,14,1,28,37,"{""dos"": 7, ""ddos"": 3, ""injection"": 2, ""mitm"": 2}","{""dos"": 1}"
+1,R,128,0.05,compact_fp32,int8,9,3,6,27,"{""ransomware"": 8, ""dos"": 1}","{""ddos"": 3}"
+1,S,128,0.01,teacher,compact_fp32,58,400,23,10,"{""mitm"": 24, ""ddos"": 14, ""scanning"": 7, ""dos"": 6, ""password"": 6, ""injection"": 1}","{""ransomware"": 178, ""xss"": 96, ""scanning"": 73, ""injection"": 19, ""mitm"": 18, ""ddos"": 7, ""backdoor"": 5, ""dos"": 2, ""password"": 2}"
+1,S,128,0.01,compact_fp32,int8,20,76,6,1,"{""ddos"": 17, ""mitm"": 2, ""scanning"": 1}","{""scanning"": 61, ""mitm"": 8, ""password"": 4, ""dos"": 3}"
+1,S,128,0.05,teacher,compact_fp32,9,2,26,37,"{""dos"": 7, ""mitm"": 2}","{""dos"": 1, ""injection"": 1}"
+1,S,128,0.05,compact_fp32,int8,6,5,2,15,"{""ddos"": 2, ""password"": 2, ""dos"": 1, ""injection"": 1}","{""ransomware"": 5}"
+1,SQ,128,0.01,teacher,compact_fp32,58,400,23,10,"{""mitm"": 24, ""ddos"": 14, ""scanning"": 7, ""dos"": 6, ""password"": 6, ""injection"": 1}","{""ransomware"": 178, ""xss"": 96, ""scanning"": 73, ""injection"": 19, ""mitm"": 18, ""ddos"": 7, ""backdoor"": 5, ""dos"": 2, ""password"": 2}"
+1,SQ,128,0.01,compact_fp32,int8,1375,93,27,28,"{""dos"": 422, ""xss"": 417, ""ransomware"": 179, ""injection"": 97, ""scanning"": 90, ""mitm"": 89, ""password"": 45, ""ddos"": 34, ""backdoor"": 2}","{""mitm"": 42, ""dos"": 17, ""ddos"": 16, ""password"": 10, ""scanning"": 7, ""injection"": 1}"
+1,SQ,128,0.05,teacher,compact_fp32,9,2,26,37,"{""dos"": 7, ""mitm"": 2}","{""dos"": 1, ""injection"": 1}"
+1,SQ,128,0.05,compact_fp32,int8,152,6,38,45,"{""dos"": 136, ""ransomware"": 8, ""ddos"": 5, ""injection"": 1, ""mitm"": 1, ""password"": 1}","{""dos"": 5, ""mitm"": 1}"
+2,F8,-,0.01,teacher,int8,18,450,29,1,"{""ddos"": 18}","{""ransomware"": 178, ""scanning"": 106, ""xss"": 84, ""mitm"": 36, ""injection"": 20, ""dos"": 11, ""password"": 10, ""ddos"": 5}"
+2,F8,-,0.05,teacher,int8,1,5,3,4,"{""password"": 1}","{""ransomware"": 5}"
+2,P,80,0.01,teacher,compact_fp32,22,323,15,2,"{""dos"": 8, ""scanning"": 7, ""mitm"": 3, ""xss"": 3, ""password"": 1}","{""ransomware"": 179, ""scanning"": 110, ""mitm"": 20, ""dos"": 7, ""password"": 4, ""ddos"": 2, ""injection"": 1}"
+2,P,80,0.01,compact_fp32,int8,5,14,5,1,"{""ddos"": 4, ""scanning"": 1}","{""scanning"": 4, ""dos"": 3, ""mitm"": 3, ""ddos"": 2, ""password"": 2}"
+2,P,80,0.05,teacher,compact_fp32,28,0,31,35,"{""dos"": 9, ""ransomware"": 8, ""backdoor"": 5, ""injection"": 2, ""mitm"": 2, ""ddos"": 1, ""xss"": 1}",{}
+2,P,80,0.05,compact_fp32,int8,10,0,13,10,"{""password"": 6, ""ddos"": 4}",{}
+2,Q,80,0.01,teacher,compact_fp32,22,323,15,2,"{""dos"": 8, ""scanning"": 7, ""mitm"": 3, ""xss"": 3, ""password"": 1}","{""ransomware"": 179, ""scanning"": 110, ""mitm"": 20, ""dos"": 7, ""password"": 4, ""ddos"": 2, ""injection"": 1}"
+2,Q,80,0.01,compact_fp32,qat_float,4577,13,25,27,"{""xss"": 1253, ""ddos"": 1074, ""dos"": 611, ""scanning"": 520, ""injection"": 364, ""backdoor"": 249, ""ransomware"": 238, ""password"": 149, ""mitm"": 119}","{""mitm"": 9, ""dos"": 3, ""ddos"": 1}"
+2,Q,80,0.01,qat_float,int8,11264,0,0,43,"{""injection"": 3497, ""password"": 2950, ""dos"": 2292, ""ddos"": 1385, ""xss"": 445, ""scanning"": 438, ""backdoor"": 216, ""mitm"": 32, ""ransomware"": 9}",{}
+2,Q,80,0.05,teacher,compact_fp32,28,0,31,35,"{""dos"": 9, ""ransomware"": 8, ""backdoor"": 5, ""injection"": 2, ""mitm"": 2, ""ddos"": 1, ""xss"": 1}",{}
+2,Q,80,0.05,compact_fp32,qat_float,73,21,66,28,"{""dos"": 59, ""password"": 6, ""backdoor"": 3, ""mitm"": 3, ""injection"": 1, ""scanning"": 1}","{""dos"": 9, ""backdoor"": 5, ""mitm"": 3, ""scanning"": 3, ""password"": 1}"
+2,Q,80,0.05,qat_float,int8,0,0,0,0,{},{}
+2,R,80,0.01,teacher,compact_fp32,2,335,24,2,"{""ddos"": 1, ""mitm"": 1}","{""ransomware"": 179, ""scanning"": 113, ""mitm"": 30, ""dos"": 7, ""password"": 4, ""ddos"": 1, ""injection"": 1}"
+2,R,80,0.01,compact_fp32,int8,202,185,6,12,"{""ransomware"": 178, ""mitm"": 15, ""dos"": 4, ""xss"": 3, ""password"": 2}","{""xss"": 82, ""scanning"": 59, ""injection"": 19, ""mitm"": 11, ""dos"": 8, ""ddos"": 3, ""password"": 3}"
+2,R,80,0.05,teacher,compact_fp32,8,2,32,12,"{""dos"": 6, ""ddos"": 1, ""xss"": 1}","{""dos"": 2}"
+2,R,80,0.05,compact_fp32,int8,10,0,4,25,"{""ransomware"": 8, ""dos"": 2}",{}
+2,S,80,0.01,teacher,compact_fp32,9,293,11,1,"{""mitm"": 4, ""xss"": 3, ""ddos"": 1, ""dos"": 1}","{""ransomware"": 179, ""scanning"": 76, ""mitm"": 17, ""dos"": 11, ""password"": 4, ""ddos"": 3, ""xss"": 2, ""injection"": 1}"
+2,S,80,0.01,compact_fp32,int8,4,85,4,1,"{""ddos"": 4}","{""scanning"": 64, ""mitm"": 15, ""ddos"": 3, ""dos"": 1, ""password"": 1, ""xss"": 1}"
+2,S,80,0.05,teacher,compact_fp32,7,1,30,9,"{""dos"": 3, ""mitm"": 2, ""ddos"": 1, ""xss"": 1}","{""injection"": 1}"
+2,S,80,0.05,compact_fp32,int8,7,0,2,8,"{""password"": 6, ""ddos"": 1}",{}
+2,SQ,80,0.01,teacher,compact_fp32,9,293,11,1,"{""mitm"": 4, ""xss"": 3, ""ddos"": 1, ""dos"": 1}","{""ransomware"": 179, ""scanning"": 76, ""mitm"": 17, ""dos"": 11, ""password"": 4, ""ddos"": 3, ""xss"": 2, ""injection"": 1}"
+2,SQ,80,0.01,compact_fp32,int8,2158,14,24,25,"{""xss"": 634, ""dos"": 620, ""scanning"": 251, ""ransomware"": 183, ""password"": 150, ""mitm"": 116, ""injection"": 109, ""ddos"": 75, ""backdoor"": 20}","{""mitm"": 10, ""dos"": 4}"
+2,SQ,80,0.05,teacher,compact_fp32,7,1,30,9,"{""dos"": 3, ""mitm"": 2, ""ddos"": 1, ""xss"": 1}","{""injection"": 1}"
+2,SQ,80,0.05,compact_fp32,int8,74,3,15,34,"{""dos"": 62, ""password"": 7, ""injection"": 3, ""mitm"": 2}","{""dos"": 3}"
+2,P,128,0.01,teacher,compact_fp32,126,290,12,2,"{""mitm"": 42, ""dos"": 23, ""ddos"": 21, ""password"": 21, ""scanning"": 10, ""injection"": 6, ""xss"": 3}","{""ransomware"": 179, ""scanning"": 104, ""mitm"": 5, ""dos"": 1, ""password"": 1}"
+2,P,128,0.01,compact_fp32,int8,4,116,2,0,"{""ddos"": 4}","{""mitm"": 48, ""password"": 22, ""dos"": 18, ""scanning"": 10, ""ddos"": 9, ""injection"": 7, ""xss"": 2}"
+2,P,128,0.05,teacher,compact_fp32,19,2,35,22,"{""ransomware"": 8, ""dos"": 6, ""password"": 3, ""ddos"": 1, ""xss"": 1}","{""ddos"": 1, ""dos"": 1}"
+2,P,128,0.05,compact_fp32,int8,4,0,1,9,"{""password"": 3, ""ddos"": 1}",{}
+2,Q,128,0.01,teacher,compact_fp32,126,290,12,2,"{""mitm"": 42, ""dos"": 23, ""ddos"": 21, ""password"": 21, ""scanning"": 10, ""injection"": 6, ""xss"": 3}","{""ransomware"": 179, ""scanning"": 104, ""mitm"": 5, ""dos"": 1, ""password"": 1}"
+2,Q,128,0.01,compact_fp32,qat_float,2326,32,25,24,"{""xss"": 613, ""scanning"": 499, ""dos"": 413, ""backdoor"": 249, ""ransomware"": 238, ""password"": 125, ""injection"": 80, ""mitm"": 62, ""ddos"": 47}","{""ddos"": 19, ""mitm"": 9, ""dos"": 4}"
+2,Q,128,0.01,qat_float,int8,13397,0,0,43,"{""injection"": 3774, ""password"": 2951, ""dos"": 2470, ""ddos"": 2407, ""xss"": 1085, ""scanning"": 450, ""backdoor"": 216, ""mitm"": 35, ""ransomware"": 9}",{}
+2,Q,128,0.05,teacher,compact_fp32,19,2,35,22,"{""ransomware"": 8, ""dos"": 6, ""password"": 3, ""ddos"": 1, ""xss"": 1}","{""ddos"": 1, ""dos"": 1}"
+2,Q,128,0.05,compact_fp32,qat_float,74,8,39,34,"{""dos"": 60, ""mitm"": 5, ""backdoor"": 3, ""injection"": 3, ""password"": 3}","{""dos"": 4, ""scanning"": 2, ""mitm"": 1, ""password"": 1}"
+2,Q,128,0.05,qat_float,int8,0,0,3,0,{},{}
+2,R,128,0.01,teacher,compact_fp32,115,282,16,3,"{""mitm"": 54, ""password"": 20, ""ddos"": 18, ""dos"": 14, ""injection"": 6, ""scanning"": 3}","{""ransomware"": 145, ""scanning"": 112, ""mitm"": 19, ""dos"": 3, ""xss"": 2, ""password"": 1}"
+2,R,128,0.01,compact_fp32,int8,20,363,17,8,"{""mitm"": 13, ""dos"": 3, ""password"": 2, ""xss"": 2}","{""xss"": 82, ""mitm"": 80, ""scanning"": 65, ""ransomware"": 34, ""password"": 32, ""injection"": 26, ""dos"": 25, ""ddos"": 19}"
+2,R,128,0.05,teacher,compact_fp32,14,0,33,27,"{""ransomware"": 8, ""dos"": 5, ""ddos"": 1}",{}
+2,R,128,0.05,compact_fp32,int8,2,5,9,13,"{""ddos"": 1, ""xss"": 1}","{""dos"": 3, ""ddos"": 2}"
+2,S,128,0.01,teacher,compact_fp32,60,458,31,7,"{""mitm"": 22, ""xss"": 13, ""scanning"": 8, ""dos"": 7, ""password"": 6, ""ddos"": 4}","{""ransomware"": 178, ""scanning"": 141, ""xss"": 85, ""injection"": 19, ""mitm"": 17, ""ddos"": 6, ""backdoor"": 5, ""dos"": 4, ""password"": 3}"
+2,S,128,0.01,compact_fp32,int8,5,55,13,1,"{""ddos"": 3, ""scanning"": 1, ""xss"": 1}","{""scanning"": 31, ""mitm"": 14, ""dos"": 5, ""ddos"": 2, ""xss"": 2, ""password"": 1}"
+2,S,128,0.05,teacher,compact_fp32,12,7,30,18,"{""dos"": 6, ""ddos"": 2, ""injection"": 2, ""mitm"": 1, ""xss"": 1}","{""ransomware"": 5, ""ddos"": 1, ""dos"": 1}"
+2,S,128,0.05,compact_fp32,int8,8,0,6,15,"{""password"": 3, ""ransomware"": 3, ""ddos"": 1, ""dos"": 1}",{}
+2,SQ,128,0.01,teacher,compact_fp32,60,458,31,7,"{""mitm"": 22, ""xss"": 13, ""scanning"": 8, ""dos"": 7, ""password"": 6, ""ddos"": 4}","{""ransomware"": 178, ""scanning"": 141, ""xss"": 85, ""injection"": 19, ""mitm"": 17, ""ddos"": 6, ""backdoor"": 5, ""dos"": 4, ""password"": 3}"
+2,SQ,128,0.01,compact_fp32,int8,15925,0,0,56,"{""injection"": 3879, ""password"": 3093, ""dos"": 2898, ""ddos"": 2458, ""xss"": 1773, ""scanning"": 988, ""backdoor"": 470, ""ransomware"": 246, ""mitm"": 120}",{}
+2,SQ,128,0.05,teacher,compact_fp32,12,7,30,18,"{""dos"": 6, ""ddos"": 2, ""injection"": 2, ""mitm"": 1, ""xss"": 1}","{""ransomware"": 5, ""ddos"": 1, ""dos"": 1}"
+2,SQ,128,0.05,compact_fp32,int8,85,8,59,51,"{""dos"": 63, ""ransomware"": 13, ""mitm"": 5, ""password"": 3, ""ddos"": 1}","{""dos"": 6, ""ddos"": 1, ""mitm"": 1}"
+3,F8,-,0.01,teacher,int8,15,33,1,1,"{""ddos"": 15}","{""mitm"": 12, ""dos"": 7, ""xss"": 7, ""scanning"": 5, ""ddos"": 1, ""password"": 1}"
+3,F8,-,0.05,teacher,int8,4,0,10,10,"{""password"": 3, ""ddos"": 1}",{}
+3,P,80,0.01,teacher,compact_fp32,629,118,17,23,"{""dos"": 208, ""xss"": 191, ""injection"": 95, ""mitm"": 76, ""password"": 26, ""ddos"": 22, ""scanning"": 10, ""ransomware"": 1}","{""scanning"": 77, ""mitm"": 15, ""password"": 7, ""xss"": 7, ""dos"": 6, ""ddos"": 5, ""ransomware"": 1}"
+3,P,80,0.01,compact_fp32,int8,34,36,1,3,"{""ddos"": 20, ""mitm"": 7, ""password"": 6, ""dos"": 1}","{""scanning"": 34, ""mitm"": 1, ""ransomware"": 1}"
+3,P,80,0.05,teacher,compact_fp32,8,3,33,34,"{""dos"": 4, ""mitm"": 2, ""backdoor"": 1, ""xss"": 1}","{""injection"": 3}"
+3,P,80,0.05,compact_fp32,int8,20,0,12,8,"{""ddos"": 7, ""password"": 7, ""dos"": 5, ""backdoor"": 1}",{}
+3,Q,80,0.01,teacher,compact_fp32,629,118,17,23,"{""dos"": 208, ""xss"": 191, ""injection"": 95, ""mitm"": 76, ""password"": 26, ""ddos"": 22, ""scanning"": 10, ""ransomware"": 1}","{""scanning"": 77, ""mitm"": 15, ""password"": 7, ""xss"": 7, ""dos"": 6, ""ddos"": 5, ""ransomware"": 1}"
+3,Q,80,0.01,compact_fp32,qat_float,389,29,11,12,"{""dos"": 216, ""scanning"": 113, ""xss"": 32, ""ddos"": 10, ""mitm"": 9, ""password"": 6, ""ransomware"": 2, ""injection"": 1}","{""scanning"": 24, ""dos"": 5}"
+3,Q,80,0.01,qat_float,int8,778,0,0,20,"{""xss"": 246, ""ransomware"": 180, ""scanning"": 170, ""password"": 116, ""dos"": 24, ""ddos"": 22, ""injection"": 16, ""mitm"": 4}",{}
+3,Q,80,0.05,teacher,compact_fp32,8,3,33,34,"{""dos"": 4, ""mitm"": 2, ""backdoor"": 1, ""xss"": 1}","{""injection"": 3}"
+3,Q,80,0.05,compact_fp32,qat_float,83,9,46,48,"{""dos"": 60, ""mitm"": 9, ""ransomware"": 8, ""injection"": 3, ""password"": 3}","{""dos"": 7, ""backdoor"": 1, ""xss"": 1}"
+3,Q,80,0.05,qat_float,int8,0,0,0,0,{},{}
+3,R,80,0.01,teacher,compact_fp32,117,121,20,19,"{""xss"": 82, ""injection"": 19, ""ddos"": 5, ""mitm"": 4, ""password"": 4, ""dos"": 3}","{""scanning"": 78, ""mitm"": 23, ""xss"": 7, ""ddos"": 5, ""dos"": 4, ""password"": 3, ""ransomware"": 1}"
+3,R,80,0.01,compact_fp32,int8,79,134,13,8,"{""scanning"": 51, ""dos"": 14, ""mitm"": 8, ""ddos"": 5, ""xss"": 1}","{""xss"": 84, ""injection"": 19, ""mitm"": 12, ""password"": 10, ""dos"": 5, ""ddos"": 4}"
+3,R,80,0.05,teacher,compact_fp32,11,1,42,40,"{""mitm"": 9, ""dos"": 2}","{""dos"": 1}"
+3,R,80,0.05,compact_fp32,int8,9,3,2,8,"{""ddos"": 4, ""mitm"": 3, ""dos"": 2}","{""injection"": 2, ""mitm"": 1}"
+3,S,80,0.01,teacher,compact_fp32,365,91,7,24,"{""ransomware"": 178, ""scanning"": 109, ""mitm"": 37, ""ddos"": 20, ""dos"": 11, ""password"": 9, ""injection"": 1}","{""scanning"": 63, ""mitm"": 12, ""xss"": 11, ""ddos"": 2, ""dos"": 2, ""backdoor"": 1}"
+3,S,80,0.01,compact_fp32,int8,53,122,19,3,"{""scanning"": 53}","{""mitm"": 42, ""scanning"": 37, ""ddos"": 20, ""dos"": 10, ""password"": 8, ""backdoor"": 2, ""injection"": 1, ""ransomware"": 1, ""xss"": 1}"
+3,S,80,0.05,teacher,compact_fp32,1,9,42,23,"{""dos"": 1}","{""ransomware"": 4, ""injection"": 3, ""dos"": 2}"
+3,S,80,0.05,compact_fp32,int8,7,0,3,19,"{""dos"": 3, ""ransomware"": 3, ""mitm"": 1}",{}
+3,SQ,80,0.01,teacher,compact_fp32,365,91,7,24,"{""ransomware"": 178, ""scanning"": 109, ""mitm"": 37, ""ddos"": 20, ""dos"": 11, ""password"": 9, ""injection"": 1}","{""scanning"": 63, ""mitm"": 12, ""xss"": 11, ""ddos"": 2, ""dos"": 2, ""backdoor"": 1}"
+3,SQ,80,0.01,compact_fp32,int8,969,158,28,24,"{""dos"": 417, ""xss"": 234, ""injection"": 95, ""mitm"": 88, ""scanning"": 83, ""password"": 25, ""ddos"": 23, ""ransomware"": 3, ""backdoor"": 1}","{""scanning"": 79, ""mitm"": 35, ""ddos"": 20, ""password"": 12, ""dos"": 10, ""injection"": 1, ""ransomware"": 1}"
+3,SQ,80,0.05,teacher,compact_fp32,1,9,42,23,"{""dos"": 1}","{""ransomware"": 4, ""injection"": 3, ""dos"": 2}"
+3,SQ,80,0.05,compact_fp32,int8,29,9,62,46,"{""ransomware"": 12, ""dos"": 7, ""mitm"": 5, ""backdoor"": 3, ""injection"": 2}","{""dos"": 4, ""scanning"": 3, ""mitm"": 1, ""password"": 1}"
+3,P,128,0.01,teacher,compact_fp32,612,99,13,21,"{""dos"": 207, ""xss"": 191, ""injection"": 95, ""mitm"": 68, ""password"": 26, ""ddos"": 22, ""scanning"": 3}","{""scanning"": 64, ""mitm"": 9, ""xss"": 7, ""ddos"": 6, ""dos"": 6, ""password"": 6, ""ransomware"": 1}"
+3,P,128,0.01,compact_fp32,int8,24,515,4,0,"{""ddos"": 18, ""password"": 6}","{""dos"": 202, ""xss"": 109, ""injection"": 76, ""mitm"": 66, ""ddos"": 22, ""password"": 21, ""scanning"": 19}"
+3,P,128,0.05,teacher,compact_fp32,12,3,36,34,"{""ransomware"": 8, ""dos"": 2, ""mitm"": 2}","{""injection"": 3}"
+3,P,128,0.05,compact_fp32,int8,5,0,8,8,"{""password"": 3, ""ddos"": 1, ""dos"": 1}",{}
+3,Q,128,0.01,teacher,compact_fp32,612,99,13,21,"{""dos"": 207, ""xss"": 191, ""injection"": 95, ""mitm"": 68, ""password"": 26, ""ddos"": 22, ""scanning"": 3}","{""scanning"": 64, ""mitm"": 9, ""xss"": 7, ""ddos"": 6, ""dos"": 6, ""password"": 6, ""ransomware"": 1}"
+3,Q,128,0.01,compact_fp32,qat_float,665,40,15,22,"{""dos"": 201, ""ransomware"": 180, ""scanning"": 131, ""password"": 95, ""xss"": 36, ""mitm"": 17, ""ddos"": 5}","{""scanning"": 33, ""dos"": 5, ""mitm"": 2}"
+3,Q,128,0.01,qat_float,int8,14,0,0,1,"{""dos"": 13, ""mitm"": 1}",{}
+3,Q,128,0.05,teacher,compact_fp32,12,3,36,34,"{""ransomware"": 8, ""dos"": 2, ""mitm"": 2}","{""injection"": 3}"
+3,Q,128,0.05,compact_fp32,qat_float,70,6,47,36,"{""dos"": 60, ""mitm"": 9, ""injection"": 1}","{""dos"": 5, ""mitm"": 1}"
+3,Q,128,0.05,qat_float,int8,0,0,0,0,{},{}
+3,R,128,0.01,teacher,compact_fp32,4,114,10,8,"{""mitm"": 2, ""ddos"": 1, ""dos"": 1}","{""scanning"": 86, ""mitm"": 8, ""xss"": 7, ""dos"": 6, ""ddos"": 3, ""password"": 3, ""ransomware"": 1}"
+3,R,128,0.01,compact_fp32,int8,52,27,7,6,"{""scanning"": 19, ""ddos"": 15, ""xss"": 6, ""dos"": 5, ""mitm"": 5, ""password"": 2}","{""mitm"": 18, ""dos"": 3, ""backdoor"": 2, ""xss"": 2, ""ddos"": 1, ""password"": 1}"
+3,R,128,0.05,teacher,compact_fp32,5,3,35,22,"{""mitm"": 5}","{""injection"": 3}"
+3,R,128,0.05,compact_fp32,int8,14,4,9,33,"{""ddos"": 7, ""mitm"": 5, ""dos"": 1, ""injection"": 1}","{""mitm"": 4}"
+3,S,128,0.01,teacher,compact_fp32,149,49,3,19,"{""scanning"": 66, ""ransomware"": 31, ""mitm"": 27, ""password"": 11, ""dos"": 7, ""ddos"": 6, ""injection"": 1}","{""scanning"": 38, ""xss"": 7, ""mitm"": 2, ""ddos"": 1, ""dos"": 1}"
+3,S,128,0.01,compact_fp32,int8,19,198,17,0,"{""ddos"": 18, ""xss"": 1}","{""scanning"": 116, ""ransomware"": 31, ""mitm"": 29, ""password"": 9, ""dos"": 7, ""backdoor"": 3, ""ddos"": 2, ""injection"": 1}"
+3,S,128,0.05,teacher,compact_fp32,1,9,27,9,"{""mitm"": 1}","{""ransomware"": 5, ""dos"": 2, ""injection"": 2}"
+3,S,128,0.05,compact_fp32,int8,9,0,23,33,"{""dos"": 4, ""injection"": 2, ""ddos"": 1, ""mitm"": 1, ""password"": 1}",{}
+3,SQ,128,0.01,teacher,compact_fp32,149,49,3,19,"{""scanning"": 66, ""ransomware"": 31, ""mitm"": 27, ""password"": 11, ""dos"": 7, ""ddos"": 6, ""injection"": 1}","{""scanning"": 38, ""xss"": 7, ""mitm"": 2, ""ddos"": 1, ""dos"": 1}"
+3,SQ,128,0.01,compact_fp32,int8,1022,126,26,25,"{""dos"": 416, ""xss"": 226, ""ransomware"": 148, ""injection"": 95, ""mitm"": 80, ""password"": 24, ""ddos"": 22, ""scanning"": 11}","{""scanning"": 69, ""mitm"": 29, ""dos"": 10, ""password"": 9, ""ddos"": 7, ""injection"": 1, ""ransomware"": 1}"
+3,SQ,128,0.05,teacher,compact_fp32,1,9,27,9,"{""mitm"": 1}","{""ransomware"": 5, ""dos"": 2, ""injection"": 2}"
+3,SQ,128,0.05,compact_fp32,int8,88,8,78,55,"{""dos"": 62, ""ransomware"": 13, ""password"": 6, ""backdoor"": 3, ""mitm"": 3, ""injection"": 1}","{""dos"": 3, ""scanning"": 3, ""mitm"": 1, ""password"": 1}"
