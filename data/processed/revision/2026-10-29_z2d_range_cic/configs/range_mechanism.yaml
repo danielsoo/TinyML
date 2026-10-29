@@ -1,0 +1,9 @@
+# Spec for scripts/range_mechanism.py (step range_mechanism)
+dataset_config: config/v13/cic_fl.yaml
+train_dir: data/processed/revision/2026-10-29_z2_train_cic/train_fl
+compare_dir: data/processed/revision/2026-10-29_z2b_compare_cic_fed/compare_arms
+seeds: [1, 2, 3]
+models: [F, PQ_80, PQ_128, S80, S128]
+far_budgets: [0.01, 0.05]
+calib: {n: 2000, client: 0, draws: 3, clip: 5.0, hidden_pct: pct9999, extreme_z: 10.0,
+  n_extreme: 10}
