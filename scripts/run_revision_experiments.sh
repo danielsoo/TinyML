@@ -7,7 +7,7 @@
 #   bash scripts/run_revision_experiments.sh --with-failed --with-scaling   # + fixed-LR row, 20/50 clients
 #   bash scripts/run_revision_experiments.sh --config-dir config/tuning/<job>   # alternate configs
 #   bash scripts/run_revision_experiments.sh --steps non_iid          # subset of: baseline_ablation,non_iid,client_scaling,
-#                                                                     #   fixed_lr,qat_fl,robustness,compression_ablation,quant_distill,local_only,ptq_calibration,qat_stability,compression_combos,recall_priority,attack_counts,ton_sweep,quant_lit,audit,train_fl,compare_arms,range_mechanism,device_bundle,device_e7
+#                                                                     #   fixed_lr,qat_fl,robustness,compression_ablation,quant_distill,local_only,ptq_calibration,qat_stability,compression_combos,recall_priority,attack_counts,ton_sweep,quant_lit,audit,train_fl,compare_arms,range_mechanism,device_bundle,device_agree
 #   bash scripts/run_revision_experiments.sh --steps compression_ablation --config-dir <dir with compression_ablation.yaml>
 # Re-running with the same --out resumes: finished steps are skipped.
 set -uo pipefail
@@ -147,14 +147,14 @@ if wanted device_bundle; then
   step device_bundle python scripts/device_agreement.py prepare \
     --spec "$CONFIG_DIR/device_bundle.yaml" --output-dir "$OUT/device_bundle" || FAILED=1
 fi
-if wanted device_e7; then
+if wanted device_agree; then
   # Flash esp32_agreement and run the agreement test on every connected board (guide E7).
   # Windows Python through WSL interop: the boards' COM ports are only visible on the Windows side.
   win_py() { "$(command -v py.exe || echo /mnt/c/Windows/py.exe)" "$@" < /dev/null; }
-  win_py scripts/run_e7_device.py --spec "$CONFIG_DIR/device_e7.yaml" --output-dir "$OUT/device_e7" --probe
+  win_py scripts/run_e7_device.py --spec "$CONFIG_DIR/device_agree.yaml" --output-dir "$OUT/device_e7" --probe
   if [ $? -eq 3 ]; then echo "waiting: no board to test is connected"; exit 3; fi
-  step device_e7 win_py scripts/run_e7_device.py \
-    --spec "$CONFIG_DIR/device_e7.yaml" --output-dir "$OUT/device_e7" || FAILED=1
+  step device_agree win_py scripts/run_e7_device.py \
+    --spec "$CONFIG_DIR/device_agree.yaml" --output-dir "$OUT/device_e7" || FAILED=1
 fi
 if wanted audit; then
   # Data / implementation audit (docs/AUDIT.md)
