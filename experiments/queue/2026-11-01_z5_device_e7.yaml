@@ -1,0 +1,7 @@
+id: 2026-11-01_z5_device_e7
+config_dir: config/jobs/2026-11-01_z5_device_e7
+steps: device_e7
+flags: []
+why: 'E7 on the boards: flash esp32_agreement on every connected ESP32 / ESP32-S3
+  and stream the 4,058 TON + 5,902 CIC bundle inputs through 12 models; outputs compared
+  bit-for-bit with the host. ~1-2 h.'
