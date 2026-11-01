@@ -151,6 +151,8 @@ if wanted device_e7; then
   # Flash esp32_agreement and run the agreement test on every connected board (guide E7).
   # Windows Python through WSL interop: the boards' COM ports are only visible on the Windows side.
   win_py() { "$(command -v py.exe || echo /mnt/c/Windows/py.exe)" "$@" < /dev/null; }
+  win_py scripts/run_e7_device.py --spec "$CONFIG_DIR/device_e7.yaml" --output-dir "$OUT/device_e7" --probe
+  if [ $? -eq 3 ]; then echo "waiting: no board to test is connected"; exit 3; fi
   step device_e7 win_py scripts/run_e7_device.py \
     --spec "$CONFIG_DIR/device_e7.yaml" --output-dir "$OUT/device_e7" || FAILED=1
 fi

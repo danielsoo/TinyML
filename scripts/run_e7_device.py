@@ -13,6 +13,9 @@ Spec (YAML):
     - {name: esp32, env: esp32dev, vid: 0x10C4}               # CP2102 bridge (classic ESP32)
     - {name: esp32s3, env: esp32-s3-native-usb, vid: 0x303A}  # ESP32-S3 native USB
   limit: null      # inputs per model (null = all)
+  skip_done_in: <summary.json of an earlier device_e7 run>   # optional: boards already done there are skipped
+Exit code 3 (with --probe, or when none of the remaining boards is connected): nothing to do yet;
+the PC worker retries the job at its next poll, so boards can be plugged in one at a time.
 """
 from __future__ import annotations
 
@@ -52,6 +55,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--spec", required=True)
     ap.add_argument("--output-dir", required=True)
+    ap.add_argument("--probe", action="store_true", help="only check whether a board to test is connected")
     a = ap.parse_args()
     ensure("pyyaml", "yaml")
     ensure("pyserial", "serial")
@@ -60,16 +64,34 @@ def main():
     from serial.tools import list_ports
 
     spec = yaml.safe_load(open(a.spec, encoding="utf-8"))
+    done = set()
+    for f in [spec.get("skip_done_in")] + [str(Path(a.output_dir) / "summary.json")]:
+        if f and (ROOT / f).exists():
+            prev = json.loads((ROOT / f).read_text(encoding="utf-8"))
+            done |= {n for n, s in prev.get("boards", {}).items() if s.get("status") == "ok"}
+    todo = [b for b in spec["boards"] if b["name"] not in done]
+    if not todo:
+        print("every board in the spec is already done")
+        return 0
+    present = [b["name"] for b in todo if find_port(int(b["vid"]))]
+    print(f"boards done: {sorted(done)}; to do: {[b['name'] for b in todo]}; connected: {present}")
+    if not present:
+        print("no board to test is connected yet (exit 3: retry later)")
+        return 3
+    if a.probe:
+        return 0
     out = Path(a.output_dir)
     out.mkdir(parents=True, exist_ok=True)
     print("python:", sys.executable, sys.version.split()[0])
     ports = [{"device": p.device, "vid": p.vid, "pid": p.pid, "description": p.description}
              for p in list_ports.comports()]
     print("serial ports:", ports)
-    summary = {"ports": ports, "boards": {}}
+    old = out / "summary.json"
+    summary = json.loads(old.read_text(encoding="utf-8")) if old.exists() else {"boards": {}}
+    summary["ports"] = ports
     from scripts.device_agreement import run as run_agreement
 
-    for b in spec["boards"]:
+    for b in todo:
         name, env, vid = b["name"], b["env"], int(b["vid"])
         port = find_port(vid)
         if not port:

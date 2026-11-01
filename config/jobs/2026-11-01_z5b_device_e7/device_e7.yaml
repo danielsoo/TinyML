@@ -1,0 +1,7 @@
+# Spec for scripts/run_e7_device.py (step device_e7): the board(s) not done in z5
+bundle: data/processed/revision/2026-10-29_z4_device_bundle/device_bundle
+boards:
+  - {name: esp32, env: esp32dev, vid: 0x10C4}
+  - {name: esp32s3, env: esp32-s3-native-usb, vid: 0x303A}
+limit: null
+skip_done_in: data/processed/revision/2026-11-01_z5_device_e7/device_e7/summary.json

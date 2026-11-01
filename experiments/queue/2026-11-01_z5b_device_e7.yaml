@@ -1,0 +1,6 @@
+id: 2026-11-01_z5b_device_e7
+config_dir: config/jobs/2026-11-01_z5b_device_e7
+steps: device_e7
+flags: []
+why: 'E7, second board: runs on whichever board was not done in z5; waits (retried
+  every poll) until that board is plugged in.'
