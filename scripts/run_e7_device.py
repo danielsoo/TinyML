@@ -10,8 +10,9 @@ bundle. Boards that are not plugged in are reported and skipped.
 Spec (YAML):
   bundle: data/processed/revision/2026-10-29_z4_device_bundle/device_bundle
   boards:
-    - {name: esp32, env: esp32dev, vid: 0x10C4}               # CP2102 bridge (classic ESP32)
-    - {name: esp32s3, env: esp32-s3-native-usb, vid: 0x303A}  # ESP32-S3 native USB
+    - {name: esp32, env: esp32dev, vids: [0x10C4, 0x1A86, 0x0403]}   # USB-UART bridge (classic ESP32)
+    - {name: esp32s3, env: esp32-s3-native-usb, vids: [0x303A]}      # ESP32-S3 native USB
+    # or {..., port: COM3} to pick the port explicitly
   limit: null      # inputs per model (null = all)
   skip_done_in: <summary.json of an earlier device_e7 run>   # optional: boards already done there are skipped
 Exit code 3 (with --probe, or when none of the remaining boards is connected): nothing to do yet;
@@ -41,12 +42,28 @@ def ensure(pkg: str, module: str) -> None:
         __import__(module)
     except ImportError:
         subprocess.run([sys.executable, "-m", "pip", "install", "--user", pkg], check=True)
+        # a user site-packages directory created just now is not on sys.path yet
+        import importlib
+        import site
+        site.addsitedir(site.getusersitepackages())
+        importlib.invalidate_caches()
+        __import__(module)
 
 
-def find_port(vid: int):
+# USB vendor ids of the serial bridges on ESP32 dev boards
+BRIDGE_VIDS = {0x10C4: "Silicon Labs CP210x", 0x1A86: "WCH CH340/CH343", 0x0403: "FTDI FT232"}
+ESPRESSIF_VID = 0x303A  # ESP32-S3 native USB
+
+
+def find_port(b: dict):
+    """Port for a board spec: explicit `port`, else the first port whose vendor id is in `vids`."""
     from serial.tools import list_ports
-    for p in list_ports.comports():
-        if p.vid == vid:
+    ports = list_ports.comports()
+    if b.get("port"):
+        return b["port"] if any(p.device == b["port"] for p in ports) else None
+    vids = [int(v) for v in (b.get("vids") or [b["vid"]])]
+    for p in ports:
+        if p.vid in vids:
             return p.device
     return None
 
@@ -73,7 +90,11 @@ def main():
     if not todo:
         print("every board in the spec is already done")
         return 0
-    present = [b["name"] for b in todo if find_port(int(b["vid"]))]
+    from serial.tools import list_ports as _lp
+    for p in _lp.comports():
+        print(f"  port {p.device}: vid={p.vid if p.vid is None else hex(p.vid)} pid={p.pid if p.pid is None else hex(p.pid)} "
+              f"{p.description} | {p.hwid}")
+    present = [b["name"] for b in todo if find_port(b)]
     print(f"boards done: {sorted(done)}; to do: {[b['name'] for b in todo]}; connected: {present}")
     if not present:
         print("no board to test is connected yet (exit 3: retry later)")
@@ -92,10 +113,10 @@ def main():
     from scripts.device_agreement import run as run_agreement
 
     for b in todo:
-        name, env, vid = b["name"], b["env"], int(b["vid"])
-        port = find_port(vid)
+        name, env = b["name"], b["env"]
+        port = find_port(b)
         if not port:
-            print(f"⏭  {name}: no port with USB vendor id {vid:#06x} (board not connected)")
+            print(f"⏭  {name}: not connected")
             summary["boards"][name] = {"status": "not connected"}
             continue
         print(f"▶ {name}: build + upload ({env}) on {port}", flush=True)
@@ -110,7 +131,7 @@ def main():
             summary["boards"][name] = {"status": "build/upload failed", "log_tail": tail}
             continue
         time.sleep(6)  # native USB re-enumerates after the reset
-        port = find_port(vid) or port
+        port = find_port(b) or port
         print(f"▶ {name}: agreement run on {port}", flush=True)
         try:
             rc = run_agreement(str(ROOT / spec["bundle"]), port, str(out / name), spec.get("limit"),

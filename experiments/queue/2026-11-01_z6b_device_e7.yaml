@@ -1,0 +1,5 @@
+id: 2026-11-01_z6b_device_e7
+config_dir: config/jobs/2026-11-01_z6b_device_e7
+steps: device_agree
+flags: []
+why: 'E7, second board: the board not done in z6; waits until it is plugged in.'

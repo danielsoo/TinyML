@@ -1,0 +1,7 @@
+id: 2026-11-01_z6_device_e7
+config_dir: config/jobs/2026-11-01_z6_device_e7
+steps: device_agree
+flags: []
+why: 'E7 on the boards (re-run of z5 after the pip-path and port-detection fixes):
+  flashes esp32_agreement on whichever board is connected and streams the TON + CIC
+  bundle inputs through 12 models. Waits until a board is connected. ~1 h per board.'
