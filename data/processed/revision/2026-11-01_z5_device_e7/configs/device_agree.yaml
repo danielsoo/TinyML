@@ -1,0 +1,6 @@
+# Spec for scripts/run_e7_device.py (step device_e7)
+bundle: data/processed/revision/2026-10-29_z4_device_bundle/device_bundle
+boards:
+  - {name: esp32, env: esp32dev, vid: 0x10C4}               # CP2102 USB-UART bridge (classic ESP32 DevKit)
+  - {name: esp32s3, env: esp32-s3-native-usb, vid: 0x303A}  # ESP32-S3 native USB port
+limit: null
