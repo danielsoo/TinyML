@@ -10,7 +10,8 @@ bundle. Boards that are not plugged in are reported and skipped.
 Spec (YAML):
   bundle: data/processed/revision/2026-10-29_z4_device_bundle/device_bundle
   boards:
-    - {name: esp32, env: esp32dev, vids: [0x10C4, 0x1A86, 0x0403]}   # USB-UART bridge (classic ESP32)
+    - {name: esp32, env: esp32dev, vids: [0x10C4, 0x1A86, 0x0403],   # USB-UART bridge (classic ESP32)
+       alt: {name: esp32s3, env: esp32-s3-devkitc-1, marker: ESP32-S3}}  # ... or an ESP32-S3 on its UART port
     - {name: esp32s3, env: esp32-s3-native-usb, vids: [0x303A]}      # ESP32-S3 native USB
     # or {..., port: COM3} to pick the port explicitly
   limit: null      # inputs per model (null = all)
@@ -119,12 +120,26 @@ def main():
             print(f"⏭  {name}: not connected")
             summary["boards"][name] = {"status": "not connected"}
             continue
-        print(f"▶ {name}: build + upload ({env}) on {port}", flush=True)
-        log = out / f"{name}_platformio.log"
-        with open(log, "w", encoding="utf-8", errors="replace") as fh:
-            rc = subprocess.run([sys.executable, "-m", "platformio", "run", "-d", str(ROOT / "esp32_agreement"),
-                                 "-e", env, "-t", "upload", "--upload-port", port],
-                                stdout=fh, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL).returncode
+        def upload(name, env):
+            print(f"▶ {name}: build + upload ({env}) on {port}", flush=True)
+            log = out / f"{name}_platformio.log"
+            with open(log, "w", encoding="utf-8", errors="replace") as fh:
+                rc = subprocess.run([sys.executable, "-m", "platformio", "run", "-d", str(ROOT / "esp32_agreement"),
+                                     "-e", env, "-t", "upload", "--upload-port", port],
+                                    stdout=fh, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL).returncode
+            return rc, log
+
+        rc, log = upload(name, env)
+        alt = b.get("alt")
+        if rc != 0 and alt and alt["marker"] in log.read_text(encoding="utf-8", errors="replace"):
+            # a bridge port can belong to either chip (e.g. an ESP32-S3 on its UART "COM" port):
+            # esptool names the chip it found, so flash the matching firmware instead
+            print(f"  {port} is an {alt['marker']}: switching to {alt['env']}")
+            name, env = alt["name"], alt["env"]
+            if name in done:
+                print(f"⏭  {name}: already done")
+                continue
+            rc, log = upload(name, env)
         if rc != 0:
             tail = log.read_text(encoding="utf-8", errors="replace").splitlines()[-30:]
             print(f"❌ {name}: platformio failed (rc={rc})\n" + "\n".join(tail))
