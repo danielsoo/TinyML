@@ -1,0 +1,125 @@
+  port COM1: vid=None pid=None Communications Port (COM1) | ACPI\PNP0501\0
+  port COM5: vid=0x303a pid=0x1001 USB Serial Device (COM5) | USB VID:PID=303A:1001 SER=C4:9E:7E:07:3D:3C
+boards done: []; to do: ['esp32', 'esp32s3']; connected: ['esp32s3']
+python: C:\Users\danie\AppData\Local\Programs\Python\Python312\python.exe 3.12.10
+serial ports: [{'device': 'COM1', 'vid': None, 'pid': None, 'description': 'Communications Port (COM1)'}, {'device': 'COM5', 'vid': 12346, 'pid': 4097, 'description': 'USB Serial Device (COM5)'}]
+⏭  esp32: not connected
+▶ esp32s3: build + upload (esp32-s3-native-usb) on COM5
+▶ esp32s3: agreement run on COM5
+device: {'chip': 'ESP32-S3', 'cores': '2', 'cpu_mhz': '240', 'flash_bytes': '16777216', 'sdk': 'v4.4.7-dirty'}
+  ton_R80: 0/4462
+  ton_R80: 500/4462
+  ton_R80: 1000/4462
+  ton_R80: 1500/4462
+  ton_R80: 2000/4462
+  ton_R80: 2500/4462
+  ton_R80: 3000/4462
+  ton_R80: 3500/4462
+  ton_R80: 4000/4462
+✅ ton_R80: exact 4286/4462, max diff 5.0 steps, decisions FAR0.01: 4462/4462, FAR0.05: 4461/4462, invoke median 5556.0 us
+  ton_S80: 0/4462
+  ton_S80: 500/4462
+  ton_S80: 1000/4462
+  ton_S80: 1500/4462
+  ton_S80: 2000/4462
+  ton_S80: 2500/4462
+  ton_S80: 3000/4462
+  ton_S80: 3500/4462
+  ton_S80: 4000/4462
+✅ ton_S80: exact 170/4462, max diff 170.0 steps, decisions FAR0.01: 2209/4462, FAR0.05: 4269/4462, invoke median 5558.0 us
+  ton_P80: 0/4462
+  ton_P80: 500/4462
+  ton_P80: 1000/4462
+  ton_P80: 1500/4462
+  ton_P80: 2000/4462
+  ton_P80: 2500/4462
+  ton_P80: 3000/4462
+  ton_P80: 3500/4462
+  ton_P80: 4000/4462
+✅ ton_P80: exact 1550/4462, max diff 254.0 steps, decisions FAR0.01: 3141/4462, FAR0.05: 4369/4462, invoke median 5555.0 us
+❌ ton_QC80: ERROR no reply to model selection (device reset?)
+  ton_PQ80_minmax: 0/4462
+  ton_PQ80_minmax: 500/4462
+  ton_PQ80_minmax: 1000/4462
+  ton_PQ80_minmax: 1500/4462
+  ton_PQ80_minmax: 2000/4462
+  ton_PQ80_minmax: 2500/4462
+  ton_PQ80_minmax: 3000/4462
+  ton_PQ80_minmax: 3500/4462
+  ton_PQ80_minmax: 4000/4462
+✅ ton_PQ80_minmax: exact 3759/4462, max diff 97.0 steps, decisions FAR0.01: 4161/4462, FAR0.05: 4134/4462, invoke median 5547.0 us
+  ton_PQ80_int16: 0/4462
+  ton_PQ80_int16: 500/4462
+  ton_PQ80_int16: 1000/4462
+  ton_PQ80_int16: 1500/4462
+  ton_PQ80_int16: 2000/4462
+  ton_PQ80_int16: 2500/4462
+  ton_PQ80_int16: 3000/4462
+  ton_PQ80_int16: 3500/4462
+  ton_PQ80_int16: 4000/4462
+✅ ton_PQ80_int16: exact 425/4462, max diff 255.0390625 steps, decisions FAR0.01: 3379/4462, FAR0.05: 4346/4462, invoke median 6344.0 us
+  ton_S80_pt: 0/4462
+  ton_S80_pt: 500/4462
+❌ ton_S80_pt vec 601: no reply (device crashed or reset); reconnecting
+✅ ton_S80_pt: exact 498/601, max diff 1.0 steps, decisions FAR0.01: 601/601, FAR0.05: 601/601, invoke median 5555 us
+❌ ton_P80_pt: ERROR no reply to model selection (device reset?)
+❌ cic_R80: ERROR no reply to model selection (device reset?)
+  cic_S80: 0/5902
+  cic_S80: 500/5902
+  cic_S80: 1000/5902
+  cic_S80: 1500/5902
+  cic_S80: 2000/5902
+  cic_S80: 2500/5902
+  cic_S80: 3000/5902
+  cic_S80: 3500/5902
+  cic_S80: 4000/5902
+  cic_S80: 4500/5902
+  cic_S80: 5000/5902
+  cic_S80: 5500/5902
+✅ cic_S80: exact 5446/5902, max diff 6.0 steps, decisions FAR0.01: 5898/5902, FAR0.05: 5880/5902, invoke median 6472.0 us
+  cic_P80: 0/5902
+  cic_P80: 500/5902
+  cic_P80: 1000/5902
+  cic_P80: 1500/5902
+  cic_P80: 2000/5902
+  cic_P80: 2500/5902
+❌ cic_P80 vec 2559: no reply (device crashed or reset); reconnecting
+✅ cic_P80: exact 2496/2559, max diff 16.0 steps, decisions FAR0.01: 2553/2559, FAR0.05: 2556/2559, invoke median 6475 us
+  cic_QC80: 0/5902
+  cic_QC80: 500/5902
+  cic_QC80: 1000/5902
+  cic_QC80: 1500/5902
+  cic_QC80: 2000/5902
+  cic_QC80: 2500/5902
+  cic_QC80: 3000/5902
+  cic_QC80: 3500/5902
+  cic_QC80: 4000/5902
+  cic_QC80: 4500/5902
+  cic_QC80: 5000/5902
+  cic_QC80: 5500/5902
+✅ cic_QC80: exact 5317/5902, max diff 24.0 steps, decisions FAR0.01: 5511/5902, FAR0.05: 5900/5902, invoke median 6476.0 us
+  cic_PQ80_minmax: 0/5902
+  cic_PQ80_minmax: 500/5902
+  cic_PQ80_minmax: 1000/5902
+  cic_PQ80_minmax: 1500/5902
+  cic_PQ80_minmax: 2000/5902
+  cic_PQ80_minmax: 2500/5902
+  cic_PQ80_minmax: 3000/5902
+  cic_PQ80_minmax: 3500/5902
+  cic_PQ80_minmax: 4000/5902
+  cic_PQ80_minmax: 4500/5902
+  cic_PQ80_minmax: 5000/5902
+  cic_PQ80_minmax: 5500/5902
+✅ cic_PQ80_minmax: exact 5733/5902, max diff 47.0 steps, decisions FAR0.01: 5845/5902, FAR0.05: 5895/5902, invoke median 6471.0 us
+  cic_PQ80_int16: 0/5902
+  cic_PQ80_int16: 500/5902
+  cic_PQ80_int16: 1000/5902
+  cic_PQ80_int16: 1500/5902
+  cic_PQ80_int16: 2000/5902
+  cic_PQ80_int16: 2500/5902
+  cic_PQ80_int16: 3000/5902
+  cic_PQ80_int16: 3500/5902
+  cic_PQ80_int16: 4000/5902
+❌ cic_PQ80_int16 vec 4137: no reply (device crashed or reset); reconnecting
+✅ cic_PQ80_int16: exact 1214/4137, max diff 254.8515625 steps, decisions FAR0.01: 3283/4137, FAR0.05: 3636/4137, invoke median 7391 us
+Saved data\processed\revision\2026-11-05_z8_device_e7\device_e7\esp32s3\device_agreement.md

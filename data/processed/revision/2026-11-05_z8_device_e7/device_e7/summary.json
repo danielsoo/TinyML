@@ -1,0 +1,25 @@
+{
+  "boards": {
+    "esp32": {
+      "status": "not connected"
+    },
+    "esp32s3": {
+      "status": "ok",
+      "port": "COM5"
+    }
+  },
+  "ports": [
+    {
+      "device": "COM1",
+      "vid": null,
+      "pid": null,
+      "description": "Communications Port (COM1)"
+    },
+    {
+      "device": "COM5",
+      "vid": 12346,
+      "pid": 4097,
+      "description": "USB Serial Device (COM5)"
+    }
+  ]
+}

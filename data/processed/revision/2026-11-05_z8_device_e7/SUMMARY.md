@@ -1,0 +1,33 @@
+# Revision experiments (full)
+
+- commit: d65edd20917a7b141110de034ea953d97aab40e0
+- configs: config/jobs/2026-11-05_z8_device_e7 (eval_split: )
+- host: Linux 6.18.54.1-microsoft-standard-WSL2 x86_64, 16 cores
+- device_agree: 12 min
+
+# E7 device agreement
+
+## esp32: not connected
+
+## esp32s3: ok
+
+# Device agreement (ESP32-S3, 240 MHz)
+
+| model | inputs | exact output match | max diff (INT8 steps) | decisions FAR 1% | decisions FAR 5% | flash B | arena B | quantize µs | invoke µs (median / p95) |
+|---|---|---|---|---|---|---|---|---|---|
+| ton_R80 | 4462 | 4286 | 5.00 | 4462/4462 | 4461/4462 | 58056 | 1440 | 3.0 | 5556.0 / 5561 |
+| ton_S80 | 4462 | 170 | 170.00 | 2209/4462 | 4269/4462 | 67936 | 1440 | 3.0 | 5558.0 / 5564 |
+| ton_P80 | 4462 | 1550 | 254.00 | 3141/4462 | 4369/4462 | 67936 | 1440 | 3.0 | 5555.0 / 5564 |
+| ton_QC80 | – | ERROR no reply to model selection (device reset?) | | | | | | | |
+| ton_PQ80_minmax | 4462 | 3759 | 97.00 | 4161/4462 | 4134/4462 | 58056 | 1440 | 3.0 | 5547.0 / 5557 |
+| ton_PQ80_int16 | 4462 | 425 | 255.04 | 3379/4462 | 4346/4462 | 73456 | 1824 | 3.0 | 6344.0 / 6361 |
+| ton_S80_pt | 601 | 498 | 1.00 | 601/601 | 601/601 | 57184 | 1440 | 3 | 5555 / 5565 |
+| ton_P80_pt | – | ERROR no reply to model selection (device reset?) | | | | | | | |
+| cic_R80 | – | ERROR no reply to model selection (device reset?) | | | | | | | |
+| cic_S80 | 5902 | 5446 | 6.00 | 5898/5902 | 5880/5902 | 67016 | 1456 | 4.0 | 6472.0 / 6481 |
+| cic_P80 | 2559 | 2496 | 16.00 | 2553/2559 | 2556/2559 | 67008 | 1456 | 5 | 6475 / 6485 |
+| cic_QC80 | 5902 | 5317 | 24.00 | 5511/5902 | 5900/5902 | 67000 | 1456 | 5.0 | 6476.0 / 6484 |
+| cic_PQ80_minmax | 5902 | 5733 | 47.00 | 5845/5902 | 5895/5902 | 67016 | 1456 | 5.0 | 6471.0 / 6487 |
+| cic_PQ80_int16 | 4137 | 1214 | 254.85 | 3283/4137 | 3636/4137 | 82416 | 1824 | 4 | 7391 / 7405 |
+
+
