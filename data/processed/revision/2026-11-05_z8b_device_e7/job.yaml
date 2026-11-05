@@ -1,0 +1,6 @@
+id: 2026-11-05_z8b_device_e7
+config_dir: config/jobs/2026-11-05_z8b_device_e7
+steps: device_agree
+flags: []
+why: E7 with bundle v2, second board (the one not done in z8); waits until it is plugged
+  in.

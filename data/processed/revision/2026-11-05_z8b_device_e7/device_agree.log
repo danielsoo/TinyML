@@ -1,0 +1,167 @@
+  port COM3: vid=0x10c4 pid=0xea60 Silicon Labs CP210x USB to UART Bridge (COM3) | USB VID:PID=10C4:EA60 SER=0001 LOCATION=1-1.3
+  port COM1: vid=None pid=None Communications Port (COM1) | ACPI\PNP0501\0
+boards done: ['esp32s3']; to do: ['esp32']; connected: ['esp32']
+python: C:\Users\danie\AppData\Local\Programs\Python\Python312\python.exe 3.12.10
+serial ports: [{'device': 'COM3', 'vid': 4292, 'pid': 60000, 'description': 'Silicon Labs CP210x USB to UART Bridge (COM3)'}, {'device': 'COM1', 'vid': None, 'pid': None, 'description': 'Communications Port (COM1)'}]
+▶ esp32: build + upload (esp32dev) on COM3
+▶ esp32: agreement run on COM3
+device: {}
+  ton_R80: 0/4462
+  ton_R80: 500/4462
+  ton_R80: 1000/4462
+  ton_R80: 1500/4462
+  ton_R80: 2000/4462
+  ton_R80: 2500/4462
+  ton_R80: 3000/4462
+  ton_R80: 3500/4462
+  ton_R80: 4000/4462
+✅ ton_R80: exact 4286/4462, max diff 5.0 steps, decisions FAR0.01: 4462/4462, FAR0.05: 4461/4462, invoke median 13193.0 us
+  ton_S80: 0/4462
+  ton_S80: 500/4462
+  ton_S80: 1000/4462
+  ton_S80: 1500/4462
+  ton_S80: 2000/4462
+  ton_S80: 2500/4462
+  ton_S80: 3000/4462
+  ton_S80: 3500/4462
+  ton_S80: 4000/4462
+✅ ton_S80: exact 170/4462, max diff 170.0 steps, decisions FAR0.01: 2209/4462, FAR0.05: 4269/4462, invoke median 13206.0 us
+  ton_P80: 0/4462
+  ton_P80: 500/4462
+  ton_P80: 1000/4462
+  ton_P80: 1500/4462
+  ton_P80: 2000/4462
+  ton_P80: 2500/4462
+  ton_P80: 3000/4462
+  ton_P80: 3500/4462
+  ton_P80: 4000/4462
+✅ ton_P80: exact 1550/4462, max diff 254.0 steps, decisions FAR0.01: 3141/4462, FAR0.05: 4369/4462, invoke median 13293.0 us
+  ton_QC80: 0/4462
+  ton_QC80: 500/4462
+  ton_QC80: 1000/4462
+  ton_QC80: 1500/4462
+  ton_QC80: 2000/4462
+  ton_QC80: 2500/4462
+  ton_QC80: 3000/4462
+  ton_QC80: 3500/4462
+  ton_QC80: 4000/4462
+✅ ton_QC80: exact 4250/4462, max diff 4.0 steps, decisions FAR0.01: 4456/4462, FAR0.05: 4462/4462, invoke median 13201.0 us
+  ton_PQ80_minmax: 0/4462
+  ton_PQ80_minmax: 500/4462
+  ton_PQ80_minmax: 1000/4462
+  ton_PQ80_minmax: 1500/4462
+  ton_PQ80_minmax: 2000/4462
+  ton_PQ80_minmax: 2500/4462
+  ton_PQ80_minmax: 3000/4462
+  ton_PQ80_minmax: 3500/4462
+  ton_PQ80_minmax: 4000/4462
+✅ ton_PQ80_minmax: exact 3759/4462, max diff 97.0 steps, decisions FAR0.01: 4161/4462, FAR0.05: 4134/4462, invoke median 13333.0 us
+  ton_PQ80_int16: 0/4462
+  ton_PQ80_int16: 500/4462
+  ton_PQ80_int16: 1000/4462
+  ton_PQ80_int16: 1500/4462
+  ton_PQ80_int16: 2000/4462
+  ton_PQ80_int16: 2500/4462
+  ton_PQ80_int16: 3000/4462
+  ton_PQ80_int16: 3500/4462
+  ton_PQ80_int16: 4000/4462
+✅ ton_PQ80_int16: exact 425/4462, max diff 255.0390625 steps, decisions FAR0.01: 3379/4462, FAR0.05: 4346/4462, invoke median 13830.0 us
+  ton_S80_pt: 0/4462
+  ton_S80_pt: 500/4462
+  ton_S80_pt: 1000/4462
+  ton_S80_pt: 1500/4462
+  ton_S80_pt: 2000/4462
+  ton_S80_pt: 2500/4462
+  ton_S80_pt: 3000/4462
+  ton_S80_pt: 3500/4462
+  ton_S80_pt: 4000/4462
+✅ ton_S80_pt: exact 4099/4462, max diff 4.0 steps, decisions FAR0.01: 4462/4462, FAR0.05: 4458/4462, invoke median 13353.0 us
+  ton_P80_pt: 0/4462
+  ton_P80_pt: 500/4462
+  ton_P80_pt: 1000/4462
+  ton_P80_pt: 1500/4462
+  ton_P80_pt: 2000/4462
+  ton_P80_pt: 2500/4462
+  ton_P80_pt: 3000/4462
+  ton_P80_pt: 3500/4462
+  ton_P80_pt: 4000/4462
+✅ ton_P80_pt: exact 4417/4462, max diff 6.0 steps, decisions FAR0.01: 4461/4462, FAR0.05: 4462/4462, invoke median 13179.0 us
+  cic_R80: 0/5902
+  cic_R80: 500/5902
+  cic_R80: 1000/5902
+  cic_R80: 1500/5902
+  cic_R80: 2000/5902
+  cic_R80: 2500/5902
+  cic_R80: 3000/5902
+  cic_R80: 3500/5902
+  cic_R80: 4000/5902
+  cic_R80: 4500/5902
+  cic_R80: 5000/5902
+  cic_R80: 5500/5902
+✅ cic_R80: exact 5431/5902, max diff 6.0 steps, decisions FAR0.01: 5882/5902, FAR0.05: 5885/5902, invoke median 15376.0 us
+  cic_S80: 0/5902
+  cic_S80: 500/5902
+  cic_S80: 1000/5902
+  cic_S80: 1500/5902
+  cic_S80: 2000/5902
+  cic_S80: 2500/5902
+  cic_S80: 3000/5902
+  cic_S80: 3500/5902
+  cic_S80: 4000/5902
+  cic_S80: 4500/5902
+  cic_S80: 5000/5902
+  cic_S80: 5500/5902
+✅ cic_S80: exact 5446/5902, max diff 6.0 steps, decisions FAR0.01: 5898/5902, FAR0.05: 5880/5902, invoke median 15366.0 us
+  cic_P80: 0/5902
+  cic_P80: 500/5902
+  cic_P80: 1000/5902
+  cic_P80: 1500/5902
+  cic_P80: 2000/5902
+  cic_P80: 2500/5902
+  cic_P80: 3000/5902
+  cic_P80: 3500/5902
+  cic_P80: 4000/5902
+  cic_P80: 4500/5902
+  cic_P80: 5000/5902
+  cic_P80: 5500/5902
+✅ cic_P80: exact 5710/5902, max diff 16.0 steps, decisions FAR0.01: 5878/5902, FAR0.05: 5877/5902, invoke median 15358.0 us
+  cic_QC80: 0/5902
+  cic_QC80: 500/5902
+  cic_QC80: 1000/5902
+  cic_QC80: 1500/5902
+  cic_QC80: 2000/5902
+  cic_QC80: 2500/5902
+  cic_QC80: 3000/5902
+  cic_QC80: 3500/5902
+  cic_QC80: 4000/5902
+  cic_QC80: 4500/5902
+  cic_QC80: 5000/5902
+  cic_QC80: 5500/5902
+✅ cic_QC80: exact 5317/5902, max diff 24.0 steps, decisions FAR0.01: 5511/5902, FAR0.05: 5900/5902, invoke median 15267.0 us
+  cic_PQ80_minmax: 0/5902
+  cic_PQ80_minmax: 500/5902
+  cic_PQ80_minmax: 1000/5902
+  cic_PQ80_minmax: 1500/5902
+  cic_PQ80_minmax: 2000/5902
+  cic_PQ80_minmax: 2500/5902
+  cic_PQ80_minmax: 3000/5902
+  cic_PQ80_minmax: 3500/5902
+  cic_PQ80_minmax: 4000/5902
+  cic_PQ80_minmax: 4500/5902
+  cic_PQ80_minmax: 5000/5902
+  cic_PQ80_minmax: 5500/5902
+✅ cic_PQ80_minmax: exact 5733/5902, max diff 47.0 steps, decisions FAR0.01: 5845/5902, FAR0.05: 5895/5902, invoke median 15320.0 us
+  cic_PQ80_int16: 0/5902
+  cic_PQ80_int16: 500/5902
+  cic_PQ80_int16: 1000/5902
+  cic_PQ80_int16: 1500/5902
+  cic_PQ80_int16: 2000/5902
+  cic_PQ80_int16: 2500/5902
+  cic_PQ80_int16: 3000/5902
+  cic_PQ80_int16: 3500/5902
+  cic_PQ80_int16: 4000/5902
+  cic_PQ80_int16: 4500/5902
+  cic_PQ80_int16: 5000/5902
+  cic_PQ80_int16: 5500/5902
+✅ cic_PQ80_int16: exact 2389/5902, max diff 254.8515625 steps, decisions FAR0.01: 4952/5902, FAR0.05: 5292/5902, invoke median 16106.0 us
+Saved data\processed\revision\2026-11-05_z8b_device_e7\device_e7\esp32\device_agreement.md

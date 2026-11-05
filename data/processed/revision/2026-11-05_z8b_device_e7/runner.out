@@ -1,0 +1,9 @@
+Output: data/processed/revision/2026-11-05_z8b_device_e7
+  port COM3: vid=0x10c4 pid=0xea60 Silicon Labs CP210x USB to UART Bridge (COM3) | USB VID:PID=10C4:EA60 SER=0001 LOCATION=1-1.3
+  port COM1: vid=None pid=None Communications Port (COM1) | ACPI\PNP0501\0
+boards done: ['esp32s3']; to do: ['esp32']; connected: ['esp32']
+▶ device_agree  (2026-11-04 23:05:48)
+✅ device_agree finished in 26 min
+
+Summary: data/processed/revision/2026-11-05_z8b_device_e7/SUMMARY.md
+All steps OK.
