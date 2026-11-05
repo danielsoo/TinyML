@@ -1,0 +1,51 @@
+  port COM1: vid=None pid=None Communications Port (COM1) | ACPI\PNP0501\0
+  port COM5: vid=0x303a pid=0x1001 USB Serial Device (COM5) | USB VID:PID=303A:1001 SER=C4:9E:7E:07:3D:3C
+boards done: []; to do: ['esp32', 'esp32s3']; connected: ['esp32s3']
+python: C:\Users\danie\AppData\Local\Programs\Python\Python312\python.exe 3.12.10
+serial ports: [{'device': 'COM1', 'vid': None, 'pid': None, 'description': 'Communications Port (COM1)'}, {'device': 'COM5', 'vid': 12346, 'pid': 4097, 'description': 'USB Serial Device (COM5)'}]
+⏭  esp32: not connected
+▶ esp32s3: build + upload (esp32-s3-native-usb) on COM5
+▶ esp32s3: agreement run on COM5
+device: {}
+  ton_R80: 0/4058
+  ton_R80: 500/4058
+  ton_R80: 1000/4058
+  ton_R80: 1500/4058
+  ton_R80: 2000/4058
+  ton_R80: 2500/4058
+  ton_R80: 3000/4058
+  ton_R80: 3500/4058
+  ton_R80: 4000/4058
+✅ ton_R80: exact 3900/4058, max diff 5.0 steps, decisions FAR0.01: 4058/4058, FAR0.05: 4057/4058, invoke median 5567.0 us
+  ton_S80: 0/4058
+  ton_S80: 500/4058
+  ton_S80: 1000/4058
+  ton_S80: 1500/4058
+  ton_S80: 2000/4058
+  ton_S80: 2500/4058
+  ton_S80: 3000/4058
+  ton_S80: 3500/4058
+  ton_S80: 4000/4058
+✅ ton_S80: exact 161/4058, max diff 170.0 steps, decisions FAR0.01: 2091/4058, FAR0.05: 3909/4058, invoke median 5574.0 us
+  ton_P80: 0/4058
+  ton_P80: 500/4058
+  ton_P80: 1000/4058
+  ton_P80: 1500/4058
+  ton_P80: 2000/4058
+  ton_P80: 2500/4058
+  ton_P80: 3000/4058
+  ton_P80: 3500/4058
+  ton_P80: 4000/4058
+✅ ton_P80: exact 1446/4058, max diff 254.0 steps, decisions FAR0.01: 2854/4058, FAR0.05: 3966/4058, invoke median 5568.0 us
+  ton_QC80: 0/4058
+  ton_QC80: 500/4058
+  ton_QC80: 1000/4058
+  ton_QC80: 1500/4058
+  ton_QC80: 2000/4058
+  ton_QC80: 2500/4058
+  ton_QC80: 3000/4058
+  ton_QC80: 3500/4058
+  ton_QC80: 4000/4058
+✅ ton_QC80: exact 3896/4058, max diff 6.0 steps, decisions FAR0.01: 4054/4058, FAR0.05: 4057/4058, invoke median 5568.0 us
+  ton_PQ80_minmax: 0/4058
+❌ esp32s3: TimeoutError("no reply from device (partial: b'')")

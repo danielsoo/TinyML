@@ -1,0 +1,670 @@
+Processing esp32-s3-native-usb (board: esp32-s3-devkitc-1; platform: espressif32@^6.5.0; framework: arduino)
+--------------------------------------------------------------------------------
+Library Manager: Installing tanakamasayuki/TensorFlowLite_ESP32 @ 1.0.0
+Unpacking 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100%
+Library Manager: TensorFlowLite_ESP32@1.0.0 has been installed!
+Verbose mode can be enabled via `-v, --verbose` option
+[gen_model_data] 12 models from C:\Users\danie\Documents\Projects\TinyML\data/processed/revision/2026-10-29_z4_device_bundle/device_bundle
+CONFIGURATION: https://docs.platformio.org/page/boards/espressif32/esp32-s3-devkitc-1.html
+PLATFORM: Espressif 32 (6.13.0) > Espressif ESP32-S3-DevKitC-1-N8 (8 MB QD, No PSRAM)
+HARDWARE: ESP32S3 240MHz, 320KB RAM, 8MB Flash
+DEBUG: Current (esp-builtin) On-board (esp-builtin) External (cmsis-dap, esp-bridge, esp-prog, iot-bus-jtag, jlink, minimodule, olimex-arm-usb-ocd, olimex-arm-usb-ocd-h, olimex-arm-usb-tiny-h, olimex-jtag-tiny, tumpa)
+PACKAGES: 
+ - framework-arduinoespressif32 @ 3.20017.241212+sha.dcc1105b 
+ - tool-esptoolpy @ 2.41100.260830 (4.11.0) 
+ - tool-mkfatfs @ 2.0.1 
+ - tool-mklittlefs @ 1.203.210628 (2.3) 
+ - tool-mkspiffs @ 2.230.0 (2.30) 
+ - toolchain-riscv32-esp @ 8.4.0+2021r2-patch5 
+ - toolchain-xtensa-esp32s3 @ 8.4.0+2021r2-patch5
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 34 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- TensorFlowLite_ESP32 @ 1.0.0
+Building in release mode
+Compiling .pio\build\esp32-s3-native-usb\src\main.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\src\model_data.cc.o
+Building .pio\build\esp32-s3-native-usb\bootloader.bin
+Generating partitions .pio\build\esp32-s3-native-usb\partitions.bin
+esptool.py v4.11.0
+Creating esp32s3 image...
+Merged 1 ELF section
+Successfully created esp32s3 image.
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\bus\i2c_bus.c.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\bus\i2s_lcd_esp32_driver.c.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\bus\i2s_lcd_esp32s2_driver.c.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\bus\spi_bus.c.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\screen\controller_driver\ili9341\ili9341.c.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\screen\controller_driver\ili9486\ili9486.c.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\screen\controller_driver\ili9488\ili9488.c.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\screen\controller_driver\ili9806\ili9806.c.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\screen\controller_driver\nt35510\nt35510.c.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\screen\controller_driver\rm68120\rm68120.c.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\screen\controller_driver\ssd1306\ssd1306.c.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\screen\controller_driver\ssd1307\ssd1307.c.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\screen\controller_driver\ssd1322\ssd1322.c.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\screen\controller_driver\ssd1351\ssd1351.c.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\screen\controller_driver\ssd1963\ssd1963.c.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\screen\controller_driver\st7789\st7789.c.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\screen\controller_driver\st7796\st7796.c.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\screen\interface_driver\scr_interface_driver.c.o
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/rm68120/rm68120.c: In function 'lcd_rm68120_set_rotation':
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/rm68120/rm68120.c:179:11: warning: implicit declaration of function 'LCD_WRITE_REG'; did you mean 'I2S_DATE_REG'? [-Wimplicit-function-declaration]
+     ret = LCD_WRITE_REG(RM68120_MADCTL, reg_data);
+           ^~~~~~~~~~~~~
+           I2S_DATE_REG
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/rm68120/rm68120.c: In function 'lcd_rm68120_set_window':
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/rm68120/rm68120.c:213:12: warning: implicit declaration of function 'LCD_WRITE_CMD'; did you mean 'SPI_FWRITE_QUAD'? [-Wimplicit-function-declaration]
+     ret |= LCD_WRITE_CMD(RM68120_RAMWR);
+            ^~~~~~~~~~~~~
+            SPI_FWRITE_QUAD
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/rm68120/rm68120.c: In function 'lcd_rm68120_write_ram_data':
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/rm68120/rm68120.c:223:12: warning: implicit declaration of function 'LCD_WRITE'; did you mean 'REG_WRITE'? [-Wimplicit-function-declaration]
+     return LCD_WRITE(data, 2);
+            ^~~~~~~~~
+            REG_WRITE
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/rm68120/rm68120.c: In function 'lcd_rm68120_draw_bitmap':
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/rm68120/rm68120.c:241:5: warning: implicit declaration of function 'LCD_IFACE_ACQUIRE' [-Wimplicit-function-declaration]
+     LCD_IFACE_ACQUIRE();
+     ^~~~~~~~~~~~~~~~~
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/rm68120/rm68120.c:249:5: warning: implicit declaration of function 'LCD_IFACE_RELEASE'; did you mean 'QMD_TRACE_ELEM'? [-Wimplicit-function-declaration]
+     LCD_IFACE_RELEASE();
+     ^~~~~~~~~~~~~~~~~
+     QMD_TRACE_ELEM
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ssd1322/ssd1322.c: In function 'lcd_ssd1322_init':
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ssd1322/ssd1322.c:109:5: warning: implicit declaration of function 'LCD_WRITE_CMD'; did you mean 'SPI_FWRITE_QUAD'? [-Wimplicit-function-declaration]
+     LCD_WRITE_CMD(SSD1322_SETCOMMANDLOCK);// 0xFD
+     ^~~~~~~~~~~~~
+     SPI_FWRITE_QUAD
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ssd1322/ssd1322.c:110:5: warning: implicit declaration of function 'LCD_WRITE_DATA'; did you mean 'SPI_FWRITE_DUAL'? [-Wimplicit-function-declaration]
+     LCD_WRITE_DATA(0x12);// Unlock OLED driver IC
+     ^~~~~~~~~~~~~~
+     SPI_FWRITE_DUAL
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ssd1322/ssd1322.c: In function 'lcd_ssd1322_draw_bitmap':
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ssd1322/ssd1322.c:277:11: warning: implicit declaration of function 'LCD_WRITE'; did you mean 'REG_WRITE'? [-Wimplicit-function-declaration]
+     ret = LCD_WRITE(p, w * LCD_BPP / 8 * h);
+           ^~~~~~~~~
+           REG_WRITE
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ssd1306/ssd1306.c: In function 'lcd_ssd1306_init':
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ssd1306/ssd1306.c:132:5: warning: implicit declaration of function 'LCD_WRITE_CMD'; did you mean 'SPI_FWRITE_QUAD'? [-Wimplicit-function-declaration]
+     LCD_WRITE_CMD(0xAE); //--turn off oled panel
+     ^~~~~~~~~~~~~
+     SPI_FWRITE_QUAD
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ssd1306/ssd1306.c: In function 'lcd_ssd1306_draw_bitmap':
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ssd1306/ssd1306.c:265:5: warning: implicit declaration of function 'LCD_IFACE_ACQUIRE' [-Wimplicit-function-declaration]
+     LCD_IFACE_ACQUIRE();
+     ^~~~~~~~~~~~~~~~~
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ssd1306/ssd1306.c:271:11: warning: implicit declaration of function 'LCD_WRITE'; did you mean 'REG_WRITE'? [-Wimplicit-function-declaration]
+     ret = LCD_WRITE(p, w * LCD_BPP / 8 * h);
+           ^~~~~~~~~
+           REG_WRITE
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\screen\screen_driver.c.o
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ssd1307/ssd1307.c: In function 'lcd_ssd1307_init':
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ssd1306/ssd1306.c:272:5: warning: implicit declaration of function 'LCD_IFACE_RELEASE'; did you mean 'QMD_TRACE_ELEM'? [-Wimplicit-function-declaration]
+     LCD_IFACE_RELEASE();
+     ^~~~~~~~~~~~~~~~~
+     QMD_TRACE_ELEM
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ssd1307/ssd1307.c:134:5: warning: implicit declaration of function 'LCD_WRITE_CMD'; did you mean 'SPI_FWRITE_QUAD'? [-Wimplicit-function-declaration]
+     LCD_WRITE_CMD(0xAE); //--turn off oled panel
+     ^~~~~~~~~~~~~
+     SPI_FWRITE_QUAD
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ssd1307/ssd1307.c: In function 'lcd_ssd1307_draw_bitmap':
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ssd1307/ssd1307.c:267:5: warning: implicit declaration of function 'LCD_IFACE_ACQUIRE' [-Wimplicit-function-declaration]
+     LCD_IFACE_ACQUIRE();
+     ^~~~~~~~~~~~~~~~~
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ssd1307/ssd1307.c:273:11: warning: implicit declaration of function 'LCD_WRITE'; did you mean 'REG_WRITE'? [-Wimplicit-function-declaration]
+     ret = LCD_WRITE(p, w * LCD_BPP / 8 * h);
+           ^~~~~~~~~
+           REG_WRITE
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ili9341/ili9341.c: In function 'lcd_ili9341_set_rotation':
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ili9341/ili9341.c:179:11: warning: implicit declaration of function 'LCD_WRITE_REG'; did you mean 'I2S_DATE_REG'? [-Wimplicit-function-declaration]
+     ret = LCD_WRITE_REG(LCD_MADCTL, reg_data);
+           ^~~~~~~~~~~~~
+           I2S_DATE_REG
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\screen\screen_utility\screen_utility.c.o
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ili9341/ili9341.c: In function 'lcd_ili9341_set_window':
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ili9341/ili9341.c:204:12: warning: implicit declaration of function 'LCD_WRITE_CMD' [-Wimplicit-function-declaration]
+     ret |= LCD_WRITE_CMD(LCD_CASET);
+            ^~~~~~~~~~~~~
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ssd1307/ssd1307.c:274:5: warning: implicit declaration of function 'LCD_IFACE_RELEASE'; did you mean 'QMD_TRACE_ELEM'? [-Wimplicit-function-declaration]
+     LCD_IFACE_RELEASE();
+     ^~~~~~~~~~~~~~~~~
+     QMD_TRACE_ELEM
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ili9341/ili9341.c:205:12: warning: implicit declaration of function 'LCD_WRITE_DATA'; did you mean 'LCD_SWRESET'? [-Wimplicit-function-declaration]
+     ret |= LCD_WRITE_DATA(x0 >> 8);
+            ^~~~~~~~~~~~~~
+            LCD_SWRESET
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ili9341/ili9341.c: In function 'lcd_ili9341_write_ram_data':
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ili9341/ili9341.c:230:12: warning: implicit declaration of function 'LCD_WRITE'; did you mean 'REG_WRITE'? [-Wimplicit-function-declaration]
+     return LCD_WRITE(data, 2);
+            ^~~~~~~~~
+            REG_WRITE
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ili9341/ili9341.c: In function 'lcd_ili9341_draw_bitmap':
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ili9341/ili9341.c:248:5: warning: implicit declaration of function 'LCD_IFACE_ACQUIRE' [-Wimplicit-function-declaration]
+     LCD_IFACE_ACQUIRE();
+     ^~~~~~~~~~~~~~~~~
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ili9806/ili9806.c: In function 'lcd_ili9806_set_rotation':
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ili9806/ili9806.c:178:11: warning: implicit declaration of function 'LCD_WRITE_REG'; did you mean 'I2S_DATE_REG'? [-Wimplicit-function-declaration]
+     ret = LCD_WRITE_REG(ILI9806_MADCTL, reg_data);
+           ^~~~~~~~~~~~~
+           I2S_DATE_REG
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ili9806/ili9806.c: In function 'lcd_ili9806_set_window':
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ili9806/ili9806.c:203:12: warning: implicit declaration of function 'LCD_WRITE_CMD'; did you mean 'SPI_FWRITE_QUAD'? [-Wimplicit-function-declaration]
+     ret |= LCD_WRITE_CMD(ILI9806_CASET);
+            ^~~~~~~~~~~~~
+            SPI_FWRITE_QUAD
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ili9341/ili9341.c:256:5: warning: implicit declaration of function 'LCD_IFACE_RELEASE'; did you mean 'QMD_TRACE_ELEM'? [-Wimplicit-function-declaration]
+     LCD_IFACE_RELEASE();
+     ^~~~~~~~~~~~~~~~~
+     QMD_TRACE_ELEM
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ili9806/ili9806.c:204:12: warning: implicit declaration of function 'LCD_WRITE_DATA'; did you mean 'SPI_FWRITE_DUAL'? [-Wimplicit-function-declaration]
+     ret |= LCD_WRITE_DATA(x0 >> 8);
+            ^~~~~~~~~~~~~~
+            SPI_FWRITE_DUAL
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ili9806/ili9806.c: In function 'lcd_ili9806_write_ram_data':
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ili9806/ili9806.c:225:12: warning: implicit declaration of function 'LCD_WRITE'; did you mean 'REG_WRITE'? [-Wimplicit-function-declaration]
+     return LCD_WRITE(data, 2);
+            ^~~~~~~~~
+            REG_WRITE
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/nt35510/nt35510.c: In function 'lcd_nt35510_set_rotation':
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/nt35510/nt35510.c:179:11: warning: implicit declaration of function 'LCD_WRITE_REG'; did you mean 'I2S_DATE_REG'? [-Wimplicit-function-declaration]
+     ret = LCD_WRITE_REG(NT35510_MADCTL, reg_data);
+           ^~~~~~~~~~~~~
+           I2S_DATE_REG
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/nt35510/nt35510.c: In function 'lcd_nt35510_set_window':
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/nt35510/nt35510.c:213:12: warning: implicit declaration of function 'LCD_WRITE_CMD'; did you mean 'SPI_FWRITE_QUAD'? [-Wimplicit-function-declaration]
+     ret |= LCD_WRITE_CMD(NT35510_RAMWR);
+            ^~~~~~~~~~~~~
+            SPI_FWRITE_QUAD
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/nt35510/nt35510.c: In function 'lcd_nt35510_write_ram_data':
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/nt35510/nt35510.c:223:12: warning: implicit declaration of function 'LCD_WRITE'; did you mean 'REG_WRITE'? [-Wimplicit-function-declaration]
+     return LCD_WRITE(data, 2);
+            ^~~~~~~~~
+            REG_WRITE
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ili9806/ili9806.c: In function 'lcd_ili9806_draw_bitmap':
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ili9806/ili9806.c:243:5: warning: implicit declaration of function 'LCD_IFACE_ACQUIRE' [-Wimplicit-function-declaration]
+     LCD_IFACE_ACQUIRE();
+     ^~~~~~~~~~~~~~~~~
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ili9806/ili9806.c:251:5: warning: implicit declaration of function 'LCD_IFACE_RELEASE'; did you mean 'QMD_TRACE_ELEM'? [-Wimplicit-function-declaration]
+     LCD_IFACE_RELEASE();
+     ^~~~~~~~~~~~~~~~~
+     QMD_TRACE_ELEM
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/nt35510/nt35510.c: In function 'lcd_nt35510_draw_bitmap':
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/nt35510/nt35510.c:241:5: warning: implicit declaration of function 'LCD_IFACE_ACQUIRE' [-Wimplicit-function-declaration]
+     LCD_IFACE_ACQUIRE();
+     ^~~~~~~~~~~~~~~~~
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ssd1351/ssd1351.c: In function 'lcd_ssd1351_init':
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ssd1351/ssd1351.c:122:5: warning: implicit declaration of function 'LCD_WRITE_CMD'; did you mean 'SPI_FWRITE_QUAD'? [-Wimplicit-function-declaration]
+     LCD_WRITE_CMD(SSD1351_CMD_COMMANDLOCK);// Set command lock, 1 arg
+     ^~~~~~~~~~~~~
+     SPI_FWRITE_QUAD
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ili9488/ili9488.c: In function 'lcd_ili9488_set_rotation':
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ssd1351/ssd1351.c:123:5: warning: implicit declaration of function 'LCD_WRITE_DATA'; did you mean 'SPI_FWRITE_DUAL'? [-Wimplicit-function-declaration]
+     LCD_WRITE_DATA(0x12);
+     ^~~~~~~~~~~~~~
+     SPI_FWRITE_DUAL
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ili9488/ili9488.c:244:11: warning: implicit declaration of function 'LCD_WRITE_REG'; did you mean 'I2S_DATE_REG'? [-Wimplicit-function-declaration]
+     ret = LCD_WRITE_REG(ILI9488_MADCTL, reg_data);
+           ^~~~~~~~~~~~~
+           I2S_DATE_REG
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ili9488/ili9488.c: In function 'lcd_ili9488_set_invert':
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ili9488/ili9488.c:264:12: warning: implicit declaration of function 'LCD_WRITE_CMD'; did you mean 'SPI_FWRITE_QUAD'? [-Wimplicit-function-declaration]
+     return LCD_WRITE_CMD(is_invert ? ILI9488_INVON : ILI9488_INVOFF);
+            ^~~~~~~~~~~~~
+            SPI_FWRITE_QUAD
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/nt35510/nt35510.c:249:5: warning: implicit declaration of function 'LCD_IFACE_RELEASE'; did you mean 'QMD_TRACE_ELEM'? [-Wimplicit-function-declaration]
+     LCD_IFACE_RELEASE();
+     ^~~~~~~~~~~~~~~~~
+     QMD_TRACE_ELEM
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ssd1351/ssd1351.c: In function 'lcd_ssd1351_write_ram_data':
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ssd1351/ssd1351.c:287:12: warning: implicit declaration of function 'LCD_WRITE'; did you mean 'REG_WRITE'? [-Wimplicit-function-declaration]
+     return LCD_WRITE(data, 2);
+            ^~~~~~~~~
+            REG_WRITE
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ili9488/ili9488.c: In function 'lcd_ili9488_set_window':
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ili9488/ili9488.c:275:12: warning: implicit declaration of function 'LCD_WRITE_DATA'; did you mean 'SPI_FWRITE_DUAL'? [-Wimplicit-function-declaration]
+     ret |= LCD_WRITE_DATA(x0 >> 8);
+            ^~~~~~~~~~~~~~
+            SPI_FWRITE_DUAL
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ili9488/ili9488.c: In function 'lcd_ili9488_write_ram_data':
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ili9488/ili9488.c:295:12: warning: implicit declaration of function 'LCD_WRITE'; did you mean 'REG_WRITE'? [-Wimplicit-function-declaration]
+     return LCD_WRITE(data, 2);
+            ^~~~~~~~~
+            REG_WRITE
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ssd1351/ssd1351.c: In function 'lcd_ssd1351_draw_bitmap':
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ssd1351/ssd1351.c:305:5: warning: implicit declaration of function 'LCD_IFACE_ACQUIRE' [-Wimplicit-function-declaration]
+     LCD_IFACE_ACQUIRE();
+     ^~~~~~~~~~~~~~~~~
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\c\common.cpp.o
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ili9488/ili9488.c: In function 'lcd_ili9488_draw_bitmap':
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ili9488/ili9488.c:313:5: warning: implicit declaration of function 'LCD_IFACE_ACQUIRE' [-Wimplicit-function-declaration]
+     LCD_IFACE_ACQUIRE();
+     ^~~~~~~~~~~~~~~~~
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ssd1351/ssd1351.c:313:5: warning: implicit declaration of function 'LCD_IFACE_RELEASE'; did you mean 'QMD_TRACE_ELEM'? [-Wimplicit-function-declaration]
+     LCD_IFACE_RELEASE();
+     ^~~~~~~~~~~~~~~~~
+     QMD_TRACE_ELEM
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ili9488/ili9488.c:321:5: warning: implicit declaration of function 'LCD_IFACE_RELEASE'; did you mean 'QMD_TRACE_ELEM'? [-Wimplicit-function-declaration]
+     LCD_IFACE_RELEASE();
+     ^~~~~~~~~~~~~~~~~
+     QMD_TRACE_ELEM
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\core\api\error_reporter.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\core\api\flatbuffer_conversions.cpp.o
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ili9486/ili9486.c: In function 'lcd_ili9486_set_rotation':
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ili9486/ili9486.c:176:11: warning: implicit declaration of function 'LCD_WRITE_REG'; did you mean 'I2S_DATE_REG'? [-Wimplicit-function-declaration]
+     ret = LCD_WRITE_REG(ILI9486_MADCTL, reg_data);
+           ^~~~~~~~~~~~~
+           I2S_DATE_REG
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ili9486/ili9486.c: In function 'lcd_ili9486_set_window':
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ili9486/ili9486.c:201:12: warning: implicit declaration of function 'LCD_WRITE_CMD'; did you mean 'SPI_FWRITE_QUAD'? [-Wimplicit-function-declaration]
+     ret |= LCD_WRITE_CMD(ILI9486_CASET);
+            ^~~~~~~~~~~~~
+            SPI_FWRITE_QUAD
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ili9486/ili9486.c:202:12: warning: implicit declaration of function 'LCD_WRITE_DATA'; did you mean 'SPI_FWRITE_DUAL'? [-Wimplicit-function-declaration]
+     ret |= LCD_WRITE_DATA(x0 >> 8);
+            ^~~~~~~~~~~~~~
+            SPI_FWRITE_DUAL
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ili9486/ili9486.c: In function 'lcd_ili9486_write_ram_data':
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ili9486/ili9486.c:222:12: warning: implicit declaration of function 'LCD_WRITE'; did you mean 'REG_WRITE'? [-Wimplicit-function-declaration]
+     return LCD_WRITE(data, 2);
+            ^~~~~~~~~
+            REG_WRITE
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\core\api\op_resolver.cpp.o
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ili9486/ili9486.c: In function 'lcd_ili9486_draw_bitmap':
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ili9486/ili9486.c:240:5: warning: implicit declaration of function 'LCD_IFACE_ACQUIRE' [-Wimplicit-function-declaration]
+     LCD_IFACE_ACQUIRE();
+     ^~~~~~~~~~~~~~~~~
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\core\api\tensor_utils.cpp.o
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ili9486/ili9486.c:248:5: warning: implicit declaration of function 'LCD_IFACE_RELEASE'; did you mean 'QMD_TRACE_ELEM'? [-Wimplicit-function-declaration]
+     LCD_IFACE_RELEASE();
+     ^~~~~~~~~~~~~~~~~
+     QMD_TRACE_ELEM
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\experimental\microfrontend\lib\fft.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\experimental\microfrontend\lib\fft_util.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\experimental\microfrontend\lib\filterbank.c.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\experimental\microfrontend\lib\filterbank_util.c.o
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/st7789/st7789.c: In function 'lcd_st7789_init_reg':
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/st7789/st7789.c:77:5: warning: implicit declaration of function 'LCD_WRITE_CMD' [-Wimplicit-function-declaration]
+     LCD_WRITE_CMD(0x3A);
+     ^~~~~~~~~~~~~
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/st7789/st7789.c:78:5: warning: implicit declaration of function 'LCD_WRITE_DATA'; did you mean 'LCD_SWRESET'? [-Wimplicit-function-declaration]
+     LCD_WRITE_DATA(0x05);
+     ^~~~~~~~~~~~~~
+     LCD_SWRESET
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/st7789/st7789.c: In function 'lcd_st7789_set_rotation':
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/st7789/st7789.c:252:11: warning: implicit declaration of function 'LCD_WRITE_REG'; did you mean 'I2S_DATE_REG'? [-Wimplicit-function-declaration]
+     ret = LCD_WRITE_REG(LCD_MADCTL, reg_data);
+           ^~~~~~~~~~~~~
+           I2S_DATE_REG
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/st7789/st7789.c: In function 'lcd_st7789_write_ram_data':
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/st7789/st7789.c:298:12: warning: implicit declaration of function 'LCD_WRITE'; did you mean 'REG_WRITE'? [-Wimplicit-function-declaration]
+     return LCD_WRITE(data, 2);
+            ^~~~~~~~~
+            REG_WRITE
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/st7789/st7789.c: In function 'lcd_st7789_draw_bitmap':
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/st7789/st7789.c:321:5: warning: implicit declaration of function 'LCD_IFACE_ACQUIRE' [-Wimplicit-function-declaration]
+     LCD_IFACE_ACQUIRE();
+     ^~~~~~~~~~~~~~~~~
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/st7789/st7789.c:329:5: warning: implicit declaration of function 'LCD_IFACE_RELEASE'; did you mean 'QMD_TRACE_ELEM'? [-Wimplicit-function-declaration]
+     LCD_IFACE_RELEASE();
+     ^~~~~~~~~~~~~~~~~
+     QMD_TRACE_ELEM
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\experimental\microfrontend\lib\frontend.c.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\experimental\microfrontend\lib\frontend_util.c.o
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ssd1963/ssd1963.c: In function 'lcd_ssd1963_set_rotation':
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ssd1963/ssd1963.c:189:11: warning: implicit declaration of function 'LCD_WRITE_REG'; did you mean 'I2S_DATE_REG'? [-Wimplicit-function-declaration]
+     ret = LCD_WRITE_REG(SSD1963_MADCTL, reg_data);
+           ^~~~~~~~~~~~~
+           I2S_DATE_REG
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ssd1963/ssd1963.c: In function 'lcd_ssd1963_set_window':
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ssd1963/ssd1963.c:214:5: warning: implicit declaration of function 'LCD_WRITE_CMD'; did you mean 'SPI_FWRITE_QUAD'? [-Wimplicit-function-declaration]
+     LCD_WRITE_CMD(SSD1963_CASET);
+     ^~~~~~~~~~~~~
+     SPI_FWRITE_QUAD
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ssd1963/ssd1963.c:215:5: warning: implicit declaration of function 'LCD_WRITE_DATA'; did you mean 'SPI_FWRITE_DUAL'? [-Wimplicit-function-declaration]
+     LCD_WRITE_DATA(x0 >> 8);
+     ^~~~~~~~~~~~~~
+     SPI_FWRITE_DUAL
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ssd1963/ssd1963.c: In function 'lcd_ssd1963_write_ram_data':
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ssd1963/ssd1963.c:235:12: warning: implicit declaration of function 'LCD_WRITE'; did you mean 'REG_WRITE'? [-Wimplicit-function-declaration]
+     return LCD_WRITE(data, 2);
+            ^~~~~~~~~
+            REG_WRITE
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ssd1963/ssd1963.c: In function 'lcd_ssd1963_draw_bitmap':
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ssd1963/ssd1963.c:254:5: warning: implicit declaration of function 'LCD_IFACE_ACQUIRE' [-Wimplicit-function-declaration]
+     LCD_IFACE_ACQUIRE();
+     ^~~~~~~~~~~~~~~~~
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/ssd1963/ssd1963.c:261:5: warning: implicit declaration of function 'LCD_IFACE_RELEASE'; did you mean 'QMD_TRACE_ELEM'? [-Wimplicit-function-declaration]
+     LCD_IFACE_RELEASE();
+     ^~~~~~~~~~~~~~~~~
+     QMD_TRACE_ELEM
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\experimental\microfrontend\lib\kiss_fft_int16.cpp.o
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/st7796/st7796.c: In function 'lcd_st7796_set_rotation':
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/st7796/st7796.c:184:11: warning: implicit declaration of function 'LCD_WRITE_REG'; did you mean 'I2S_DATE_REG'? [-Wimplicit-function-declaration]
+     ret = LCD_WRITE_REG(LCD_MADCTL, reg_data);
+           ^~~~~~~~~~~~~
+           I2S_DATE_REG
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/st7796/st7796.c: In function 'lcd_st7796_set_window':
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/st7796/st7796.c:209:12: warning: implicit declaration of function 'LCD_WRITE_CMD' [-Wimplicit-function-declaration]
+     ret |= LCD_WRITE_CMD(LCD_CASET);
+            ^~~~~~~~~~~~~
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/st7796/st7796.c:210:12: warning: implicit declaration of function 'LCD_WRITE_DATA'; did you mean 'LCD_SWRESET'? [-Wimplicit-function-declaration]
+     ret |= LCD_WRITE_DATA(x0 >> 8);
+            ^~~~~~~~~~~~~~
+            LCD_SWRESET
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/st7796/st7796.c: In function 'lcd_st7796_write_ram_data':
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/st7796/st7796.c:231:12: warning: implicit declaration of function 'LCD_WRITE'; did you mean 'REG_WRITE'? [-Wimplicit-function-declaration]
+     return LCD_WRITE(data, 2);
+            ^~~~~~~~~
+            REG_WRITE
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/st7796/st7796.c: In function 'lcd_st7796_draw_bitmap':
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/st7796/st7796.c:254:5: warning: implicit declaration of function 'LCD_IFACE_ACQUIRE' [-Wimplicit-function-declaration]
+     LCD_IFACE_ACQUIRE();
+     ^~~~~~~~~~~~~~~~~
+.pio/libdeps/esp32-s3-native-usb/TensorFlowLite_ESP32/src/screen/controller_driver/st7796/st7796.c:262:5: warning: implicit declaration of function 'LCD_IFACE_RELEASE'; did you mean 'QMD_TRACE_ELEM'? [-Wimplicit-function-declaration]
+     LCD_IFACE_RELEASE();
+     ^~~~~~~~~~~~~~~~~
+     QMD_TRACE_ELEM
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\experimental\microfrontend\lib\log_lut.c.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\experimental\microfrontend\lib\log_scale.c.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\experimental\microfrontend\lib\log_scale_util.c.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\experimental\microfrontend\lib\noise_reduction.c.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\experimental\microfrontend\lib\noise_reduction_util.c.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\experimental\microfrontend\lib\pcan_gain_control.c.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\experimental\microfrontend\lib\pcan_gain_control_util.c.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\experimental\microfrontend\lib\window.c.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\experimental\microfrontend\lib\window_util.c.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\kernels\internal\quantization_util.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\kernels\internal\reference\portable_tensor_utils.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\kernels\kernel_util.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\all_ops_resolver.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\arena_allocator\non_persistent_arena_buffer_allocator.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\arena_allocator\recording_simple_memory_allocator.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\arena_allocator\simple_memory_allocator.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\debug_log.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\fake_micro_context.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\flatbuffer_utils.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\activations.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\activations_common.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\add.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\add_common.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\add_n.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\arg_min_max.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\assign_variable.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\batch_to_space_nd.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\broadcast_args.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\broadcast_to.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\call_once.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\cast.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\ceil.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\circular_buffer.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\circular_buffer_common.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\comparisons.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\concatenation.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\conv.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\conv_common.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\cumsum.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\depth_to_space.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\depthwise_conv.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\depthwise_conv_common.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\dequantize.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\dequantize_common.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\detection_postprocess.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\elementwise.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\elu.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\ethosu.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\exp.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\expand_dims.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\fill.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\floor.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\floor_div.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\floor_mod.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\fully_connected.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\fully_connected_common.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\gather.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\gather_nd.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\hard_swish.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\hard_swish_common.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\if.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\kernel_runner.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\kernel_util.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\l2_pool_2d.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\l2norm.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\leaky_relu.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\leaky_relu_common.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\log_softmax.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\logical.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\logical_common.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\logistic.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\logistic_common.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\lstm_eval.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\maximum_minimum.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\micro_tensor_utils.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\mirror_pad.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\mul.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\mul_common.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\neg.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\pack.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\pad.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\pooling.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\pooling_common.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\prelu.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\prelu_common.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\quantize.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\quantize_common.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\read_variable.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\reduce.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\reshape.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\resize_bilinear.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\resize_nearest_neighbor.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\round.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\shape.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\slice.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\softmax.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\softmax_common.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\space_to_batch_nd.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\space_to_depth.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\split.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\split_v.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\squared_difference.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\squeeze.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\strided_slice.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\sub.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\sub_common.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\svdf.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\svdf_common.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\tanh.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\transpose.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\transpose_conv.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\unidirectional_sequence_lstm.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\unpack.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\var_handle.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\while.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\kernels\zeros_like.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\memory_helpers.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\memory_planner\greedy_memory_planner.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\memory_planner\linear_memory_planner.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\memory_planner\non_persistent_buffer_planner_shim.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\micro_allocation_info.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\micro_allocator.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\micro_context.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\micro_error_reporter.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\micro_graph.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\micro_interpreter.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\micro_profiler.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\micro_resource_variable.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\micro_string.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\micro_time.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\micro_utils.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\mock_micro_graph.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\recording_micro_allocator.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\system_setup.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\test_helper_custom_ops.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\micro\test_helpers.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\tensorflow\lite\schema\schema_utils.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\third_party\kissfft\kiss_fft.c.o
+Compiling .pio\build\esp32-s3-native-usb\lib7c9\TensorFlowLite_ESP32\third_party\kissfft\tools\kiss_fftr.c.o
+Compiling .pio\build\esp32-s3-native-usb\FrameworkArduino\Esp.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\FrameworkArduino\FirmwareMSC.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\FrameworkArduino\FunctionalInterrupt.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\FrameworkArduino\HWCDC.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\FrameworkArduino\HardwareSerial.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\FrameworkArduino\IPAddress.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\FrameworkArduino\IPv6Address.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\FrameworkArduino\MD5Builder.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\FrameworkArduino\Print.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\FrameworkArduino\Stream.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\FrameworkArduino\StreamString.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\FrameworkArduino\Tone.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\FrameworkArduino\USB.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\FrameworkArduino\USBCDC.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\FrameworkArduino\USBMSC.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\FrameworkArduino\WMath.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\FrameworkArduino\WString.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\FrameworkArduino\base64.cpp.o
+Archiving .pio\build\esp32-s3-native-usb\lib7c9\libTensorFlowLite_ESP32.a
+Compiling .pio\build\esp32-s3-native-usb\FrameworkArduino\cbuf.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\FrameworkArduino\esp32-hal-adc.c.o
+Compiling .pio\build\esp32-s3-native-usb\FrameworkArduino\esp32-hal-bt.c.o
+Compiling .pio\build\esp32-s3-native-usb\FrameworkArduino\esp32-hal-cpu.c.o
+Compiling .pio\build\esp32-s3-native-usb\FrameworkArduino\esp32-hal-dac.c.o
+Compiling .pio\build\esp32-s3-native-usb\FrameworkArduino\esp32-hal-gpio.c.o
+Compiling .pio\build\esp32-s3-native-usb\FrameworkArduino\esp32-hal-i2c-slave.c.o
+Compiling .pio\build\esp32-s3-native-usb\FrameworkArduino\esp32-hal-i2c.c.o
+Compiling .pio\build\esp32-s3-native-usb\FrameworkArduino\esp32-hal-ledc.c.o
+Compiling .pio\build\esp32-s3-native-usb\FrameworkArduino\esp32-hal-matrix.c.o
+Compiling .pio\build\esp32-s3-native-usb\FrameworkArduino\esp32-hal-misc.c.o
+Compiling .pio\build\esp32-s3-native-usb\FrameworkArduino\esp32-hal-psram.c.o
+Compiling .pio\build\esp32-s3-native-usb\FrameworkArduino\esp32-hal-rgb-led.c.o
+Compiling .pio\build\esp32-s3-native-usb\FrameworkArduino\esp32-hal-rmt.c.o
+Compiling .pio\build\esp32-s3-native-usb\FrameworkArduino\esp32-hal-sigmadelta.c.o
+Compiling .pio\build\esp32-s3-native-usb\FrameworkArduino\esp32-hal-spi.c.o
+Compiling .pio\build\esp32-s3-native-usb\FrameworkArduino\esp32-hal-time.c.o
+Compiling .pio\build\esp32-s3-native-usb\FrameworkArduino\esp32-hal-timer.c.o
+Compiling .pio\build\esp32-s3-native-usb\FrameworkArduino\esp32-hal-tinyusb.c.o
+Compiling .pio\build\esp32-s3-native-usb\FrameworkArduino\esp32-hal-touch.c.o
+Compiling .pio\build\esp32-s3-native-usb\FrameworkArduino\esp32-hal-uart.c.o
+Compiling .pio\build\esp32-s3-native-usb\FrameworkArduino\firmware_msc_fat.c.o
+Compiling .pio\build\esp32-s3-native-usb\FrameworkArduino\libb64\cdecode.c.o
+Compiling .pio\build\esp32-s3-native-usb\FrameworkArduino\libb64\cencode.c.o
+Compiling .pio\build\esp32-s3-native-usb\FrameworkArduino\main.cpp.o
+Compiling .pio\build\esp32-s3-native-usb\FrameworkArduino\stdlib_noniso.c.o
+Compiling .pio\build\esp32-s3-native-usb\FrameworkArduino\wiring_pulse.c.o
+Compiling .pio\build\esp32-s3-native-usb\FrameworkArduino\wiring_shift.c.o
+Archiving .pio\build\esp32-s3-native-usb\libFrameworkArduino.a
+Linking .pio\build\esp32-s3-native-usb\firmware.elf
+Retrieving maximum program size .pio\build\esp32-s3-native-usb\firmware.elf
+Checking size .pio\build\esp32-s3-native-usb\firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [==        ]  22.8% (used 74828 bytes from 327680 bytes)
+Flash: [====      ]  41.2% (used 1295133 bytes from 3145728 bytes)
+Building .pio\build\esp32-s3-native-usb\firmware.bin with action:
+  "$PYTHONEXE" "$OBJCOPY" --chip esp32s3 elf2image --flash_mode ${__get_board_flash_mode(__env__)} --flash_freq ${__get_board_f_image(__env__)} --flash_size 8MB --elf-sha256-offset 0xb0 -o $TARGET $SOURCES
+Building .pio\build\esp32-s3-native-usb\firmware.bin
+esptool.py v4.11.0
+Creating esp32s3 image...
+Merged 2 ELF sections
+Successfully created esp32s3 image.
+Configuring upload protocol...
+AVAILABLE: cmsis-dap, esp-bridge, esp-builtin, esp-prog, espota, esptool, iot-bus-jtag, jlink, minimodule, olimex-arm-usb-ocd, olimex-arm-usb-ocd-h, olimex-arm-usb-tiny-h, olimex-jtag-tiny, tumpa
+CURRENT: upload_protocol = esptool
+Looking for upload port...
+Using manually specified: COM5
+Uploading .pio\build\esp32-s3-native-usb\firmware.bin
+esptool.py v4.11.0
+Serial port COM5
+Connecting...
+Chip is ESP32-S3 (QFN56) (revision v0.2)
+Features: WiFi, BLE, Embedded PSRAM 8MB (AP_3v3)
+Crystal is 40MHz
+USB mode: USB-Serial/JTAG
+MAC: c4:9e:7e:07:3d:3c
+Uploading stub...
+Running stub...
+Stub running...
+Changing baud rate to 460800
+Changed.
+Configuring flash size...
+Flash will be erased from 0x00000000 to 0x00003fff...
+Flash will be erased from 0x00008000 to 0x00008fff...
+Flash will be erased from 0x0000e000 to 0x0000ffff...
+Flash will be erased from 0x00010000 to 0x0014cfff...
+SHA digest in image updated
+Compressed 15104 bytes to 10430...
+Writing at 0x00000000... (100 %)
+Wrote 15104 bytes (10430 compressed) at 0x00000000 in 0.2 seconds (effective 519.7 kbit/s)...
+Hash of data verified.
+Compressed 3072 bytes to 137...
+Writing at 0x00008000... (100 %)
+Wrote 3072 bytes (137 compressed) at 0x00008000 in 0.1 seconds (effective 234.9 kbit/s)...
+Hash of data verified.
+Compressed 8192 bytes to 47...
+Writing at 0x0000e000... (100 %)
+Wrote 8192 bytes (47 compressed) at 0x0000e000 in 0.1 seconds (effective 547.3 kbit/s)...
+Hash of data verified.
+Compressed 1295504 bytes to 845827...
+Writing at 0x00010000... (1 %)
+Writing at 0x00015251... (3 %)
+Writing at 0x0001a6d1... (5 %)
+Writing at 0x0001f797... (7 %)
+Writing at 0x0002624b... (9 %)
+Writing at 0x0002c3eb... (11 %)
+Writing at 0x00032412... (13 %)
+Writing at 0x00038469... (15 %)
+Writing at 0x0003e6e0... (17 %)
+Writing at 0x000445ad... (19 %)
+Writing at 0x0004a5a1... (21 %)
+Writing at 0x000508f4... (23 %)
+Writing at 0x00056a52... (25 %)
+Writing at 0x0005c59b... (26 %)
+Writing at 0x00062303... (28 %)
+Writing at 0x000681c6... (30 %)
+Writing at 0x0006e2e5... (32 %)
+Writing at 0x00074229... (34 %)
+Writing at 0x00079978... (36 %)
+Writing at 0x0007e5f0... (38 %)
+Writing at 0x00082e98... (40 %)
+Writing at 0x0008976b... (42 %)
+Writing at 0x0008e96b... (44 %)
+Writing at 0x00093dcb... (46 %)
+Writing at 0x00099554... (48 %)
+Writing at 0x0009e9aa... (50 %)
+Writing at 0x000a42c1... (51 %)
+Writing at 0x000a8f66... (53 %)
+Writing at 0x000adbfb... (55 %)
+Writing at 0x000b2dd3... (57 %)
+Writing at 0x000b88dd... (59 %)
+Writing at 0x000bd592... (61 %)
+Writing at 0x000c1d2c... (63 %)
+Writing at 0x000c865b... (65 %)
+Writing at 0x000cdb25... (67 %)
+Writing at 0x000d2f48... (69 %)
+Writing at 0x000e15a0... (71 %)
+Writing at 0x000f184c... (73 %)
+Writing at 0x000f910c... (75 %)
+Writing at 0x000fe90f... (76 %)
+Writing at 0x00104b71... (78 %)
+Writing at 0x0010bc33... (80 %)
+Writing at 0x00111182... (82 %)
+Writing at 0x00116c92... (84 %)
+Writing at 0x0011cd35... (86 %)
+Writing at 0x00122423... (88 %)
+Writing at 0x00127e89... (90 %)
+Writing at 0x0012d58c... (92 %)
+Writing at 0x00132a30... (94 %)
+Writing at 0x00138082... (96 %)
+Writing at 0x0013fc4f... (98 %)
+Writing at 0x00148bdc... (100 %)
+Wrote 1295504 bytes (845827 compressed) at 0x00010000 in 8.7 seconds (effective 1188.8 kbit/s)...
+Hash of data verified.
+
+Leaving...
+Hard resetting via RTS pin...
+======================== [SUCCESS] Took 222.28 seconds ========================
+
+Environment          Status    Duration
+-------------------  --------  ------------
+esp32-s3-native-usb  SUCCESS   00:03:42.282
+========================= 1 succeeded in 00:03:42.282 =========================
