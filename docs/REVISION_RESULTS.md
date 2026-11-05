@@ -713,17 +713,23 @@ bits vs. the host TFLite interpreter:
 | ton_R80 | per-tensor | 4,462 | 4,286 | 5 | 4,462 / 4,462 | 4,461 | 5.56 |
 | ton_S80 | per-channel | 4,462 | 170 | 170 | **2,209** | 4,269 | 5.56 |
 | ton_P80 | per-channel | 4,462 | 1,550 | 254 | **3,141** | 4,369 | 5.56 |
-| ton_S80_pt (per-tensor re-export) | per-tensor | 601 (reset) | 498 | 1 | 601 / 601 | 601 | 5.56 |
+| ton_S80_pt (per-tensor re-export) | per-tensor | 4,462 | 4,099 | 4 | 4,462 / 4,462 | 4,458 | 5.56 |
+| ton_P80_pt (per-tensor re-export) | per-tensor | 4,462 | 4,417 | 6 | 4,461 / 4,462 | 4,462 | 5.55 |
+| ton_QC80 | per-tensor | 4,462 | 4,250 | 4 | 4,456 / 4,462 | 4,462 | 5.55 |
 | ton_PQ80_minmax | per-tensor | 4,462 | 3,759 | 97 | 4,161 | 4,134 | 5.55 |
 | ton_PQ80_int16 (16-bit act.) | per-channel | 4,462 | 425 | 255 | 3,379 | 4,346 | 6.34 |
 | cic_S80 | per-tensor | 5,902 | 5,446 | 6 | 5,898 / 5,902 | 5,880 | 6.47 |
-| cic_P80 | per-tensor | 2,559 (reset) | 2,496 | 16 | 2,553 / 2,559 | 2,556 | 6.48 |
+| cic_R80 | per-tensor | 5,902 | 5,431 | 6 | 5,882 / 5,902 | 5,885 | 6.48 |
+| cic_P80 | per-tensor | 5,902 | 5,710 | 16 | 5,878 / 5,902 | 5,877 | 6.47 |
 | cic_QC80 | per-tensor | 5,902 | 5,317 | 24 | 5,511 / 5,902 | 5,900 | 6.48 |
 | cic_PQ80_minmax | per-tensor | 5,902 | 5,733 | 47 | 5,845 / 5,902 | 5,895 | 6.47 |
-| cic_PQ80_int16 | per-channel | 4,137 (reset) | 1,214 | 255 | 3,283 | 3,636 | 7.39 |
+| cic_PQ80_int16 | per-channel | 5,902 | 2,389 | 255 | 4,952 | 5,292 | 7.39 |
 
-ton_QC80, ton_P80_pt and cic_R80 were lost to device resets (the board restarted 6 times over
-14 model sessions; the old host loop then moved on). Refill with a resume-after-reset loop: z8c.
+Rows for ton_QC80, ton_S80_pt, ton_P80_pt, cic_R80, cic_P80 and cic_PQ80_int16 come from job z8c
+(z8 lost them to spontaneous board restarts; the host loop now reconnects and resumes: one restart
+each in cic_R80 / cic_P80 / cic_PQ80_int16, no input skipped, so the restarts are not input-driven).
+Re-exporting S80 / P80 with per-tensor weights restores agreement (4,462 / 4,462 and 4,461 / 4,462
+decisions at FAR 1%).
 - Per-tensor INT8 models: device and host differ by at most a few output steps except on inputs
   next to the threshold, where the near-threshold inputs (chosen within two steps) flip; on the
   random and out-of-range records decisions agree on >= 99.7%. The min/max-range models (huge
