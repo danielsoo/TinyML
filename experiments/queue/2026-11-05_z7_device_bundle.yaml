@@ -1,0 +1,6 @@
+id: 2026-11-05_z7_device_bundle
+config_dir: config/jobs/2026-11-05_z7_device_bundle
+steps: device_bundle
+flags: []
+why: 'E7 bundle v2: adds per-tensor INT8 re-exports of TON S80 and P80 (z6 showed
+  per-channel Dense weights give wrong outputs on the TFLM 1.0.0 runtime). ~5 min.'

@@ -682,4 +682,27 @@ P 94.79 ± 1.42; Q 52.9 ± 45.8; SQ 56.9 ± 49.2.
 
 ### Status
 - E5 (independent runs): all tables are over 3 teacher seeds.
-- E7 (device agreement on thousands of inputs, memory / latency breakdown): needs the boards.
+- E7 (device agreement on thousands of inputs, memory / latency breakdown): first board run below;
+  full run with bundle v2 queued (z7, z8, z8b).
+
+### E7, first run (job z6: ESP32-S3, 240 MHz, TFLM via TensorFlowLite_ESP32 1.0.0)
+4,058 TON inputs per model (1,500 random test records, records within two output steps of a
+threshold, 800 out-of-range records, 400 synthetic extremes, 10 zero vectors), device output
+bits vs. the host TFLite interpreter:
+
+| model | weight quantization | exact output | max diff (INT8 steps) | decisions agree FAR 1% / 5% |
+|---|---|---|---|---|
+| ton_R80 (distill + clip + QAT) | per-tensor | 3,900 / 4,058 | 5 | 4,058 / 4,057 |
+| ton_QC80 (QAT on clipped inputs) | per-tensor | 3,896 / 4,058 | 6 | 4,054 / 4,057 |
+| ton_S80 (strong PTQ: TFLite converter) | **per-channel** | 161 / 4,058 | 170 | **2,091** / 3,909 |
+| ton_P80 (strong PTQ: TFLite converter) | **per-channel** | 1,446 / 4,058 | 254 | **2,854** / 3,966 |
+| ton_PQ80_minmax (per-tensor, min/max input range) | per-tensor | – | – | device crashed on the first input |
+
+- A new silent failure: the TFLite converter's default per-channel Dense weight scales are not
+  honoured by the TFLM 1.0.0 runtime of the Arduino library; the model loads and runs, but half
+  of the decisions differ from the host. Host-side evaluation of such a model says nothing about
+  the device. Per-tensor models agree (the remaining differences are a few output steps, from
+  the runtime's rounding, and change at most 4 of 4,058 decisions).
+- Invoke latency on the ESP32-S3: 5.57 ms median (p95 5.58 ms) for every 57-68 KB TON model;
+  arena 1,440 B.
+- Bundle v2 adds per-tensor re-exports of S80 / P80; the host loop now survives a device crash.

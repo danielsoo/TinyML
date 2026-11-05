@@ -144,6 +144,10 @@ void loop() {
     }
     run_vector();
   } else if (cmd == 'I') {
+    Serial.printf("DEVICE chip=%s cores=%d cpu_mhz=%u flash_bytes=%u sdk=%s\n",
+                  ESP.getChipModel(), static_cast<int>(ESP.getChipCores()),
+                  static_cast<unsigned>(ESP.getCpuFreqMHz()),
+                  static_cast<unsigned>(ESP.getFlashChipSize()), ESP.getSdkVersion());
     for (int i = 0; i < kNumModels; ++i)
       Serial.printf("MODEL idx=%d name=%s bytes=%u\n", i, kModels[i].name, kModels[i].len);
     Serial.printf("READY models=%d arena=%d\n", kNumModels, kTensorArenaSize);

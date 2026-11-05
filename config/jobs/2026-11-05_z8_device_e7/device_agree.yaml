@@ -1,0 +1,7 @@
+# Spec for scripts/run_e7_device.py (step device_agree)
+bundle: data/processed/revision/2026-11-05_z7_device_bundle/device_bundle
+boards:
+  - {name: esp32, env: esp32dev, vids: [0x10C4, 0x1A86, 0x0403],   # USB-UART bridge (classic ESP32 DevKit)
+     alt: {name: esp32s3, env: esp32-s3-devkitc-1, marker: ESP32-S3}}  # or an ESP32-S3 on its UART (COM) port
+  - {name: esp32s3, env: esp32-s3-native-usb, vids: [0x303A]}      # ESP32-S3 native USB port
+limit: null

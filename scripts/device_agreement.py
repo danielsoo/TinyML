@@ -60,9 +60,18 @@ def prepare(spec_path: str, out_dir: str) -> int:
         rng = np.random.default_rng(int(ds.get("seed", 1)))
         models = []
         for m in ds["models"]:
-            src = ROOT / m["path"]
             dst = out / "models" / f"{m['name']}.tflite"
-            shutil.copyfile(src, dst)
+            if "keras" in m:
+                # per-tensor INT8 PTQ of a Keras model (calibration: 2,000 records of client 0, clipped);
+                # TFLite's default per-channel Dense weights are not supported by older TFLM runtimes
+                from scripts.compression_ablation import _load_fl_model
+                from scripts.quant_lit_methods import convert_int8_per_tensor
+                xc = fd.clients[0].train.x
+                rep = xc[np.random.default_rng(11).permutation(len(xc))[:2000]]
+                c = float(m.get("clip", clip))
+                convert_int8_per_tensor(_load_fl_model(str(ROOT / m["keras"])), np.clip(rep, -c, c), dst)
+            else:
+                shutil.copyfile(ROOT / m["path"], dst)
             pv, pt = tflite_probs(dst, xv), tflite_probs(dst, xt)
             thr = {str(b): threshold_at_far(pv, yv, b) for b in fars}
             models.append((m["name"], dst, pt, thr))
@@ -152,6 +161,26 @@ def run(bundle_dir: str, port: str, out_dir: str | None, limit: int | None, baud
     if not banner(8.0):  # no reset on open (e.g. native USB): ask for the model list
         ser.write(b"I")
         banner(5.0)
+
+    def reconnect() -> None:
+        """After a device crash / reset: reopen the port (native USB re-enumerates) and resync."""
+        nonlocal ser
+        try:
+            ser.close()
+        except Exception:
+            pass
+        t_end = time.time() + 60
+        while time.time() < t_end:
+            time.sleep(3)
+            try:
+                ser = serial.Serial(port, baud, timeout=0.5)
+                break
+            except Exception:
+                continue
+        time.sleep(2)
+        if not banner(8.0):
+            ser.write(b"I")
+            banner(5.0)
     if not dev_models:
         print("❌ no model list from the device (wrong port or firmware?)")
         return 1
@@ -167,9 +196,13 @@ def run(bundle_dir: str, port: str, out_dir: str | None, limit: int | None, baud
         cats = np.load(bdir / f"categories_{ds}.npy")
         if limit:
             X, host, cats = X[:limit], host[:limit], cats[:limit]
-        ser.reset_input_buffer()
-        ser.write(b"S" + bytes([dev_models[name]]))
-        line = _readline(ser)
+        try:
+            ser.reset_input_buffer()
+            ser.write(b"S" + bytes([dev_models[name]]))
+            line = _readline(ser)
+        except (TimeoutError, serial.SerialException, OSError):
+            line = "ERROR no reply to model selection (device reset?)"
+            reconnect()
         if not line.startswith("SELECTED"):
             print(f"❌ {name}: {line}")
             report["models"][name] = {"error": line}
@@ -178,9 +211,16 @@ def run(bundle_dir: str, port: str, out_dir: str | None, limit: int | None, baud
         dev = np.full(len(X), np.nan, np.float32)
         tq, ti, td = [], [], []
         t0 = time.time()
+        crashed = None
         for i, x in enumerate(X):
-            ser.write(b"X" + x.astype("<f4").tobytes())
-            line = _readline(ser)
+            try:
+                ser.write(b"X" + x.astype("<f4").tobytes())
+                line = _readline(ser)
+            except (TimeoutError, serial.SerialException, OSError):
+                crashed = i
+                print(f"❌ {name} vec {i}: no reply (device crashed or reset); reconnecting", flush=True)
+                reconnect()
+                break
             if not line.startswith("Y "):
                 print(f"❌ {name} vec {i}: {line}")
                 break
@@ -195,6 +235,7 @@ def run(bundle_dir: str, port: str, out_dir: str | None, limit: int | None, baud
                "max_abs_diff": float(diff.max()) if diff.size else None,
                "max_diff_output_steps": float(diff.max() / STEP) if diff.size else None,
                "selected": sel, "flash_bytes": m["bytes"], "seconds": round(time.time() - t0, 1),
+               "crashed_at_vector": crashed,
                "latency_us": {k: {"median": statistics.median(v), "p95": float(np.percentile(v, 95)),
                                   "max": max(v)} for k, v in (("quantize_input", tq), ("invoke", ti),
                                                              ("dequantize_output", td)) if v},
@@ -220,6 +261,9 @@ def run(bundle_dir: str, port: str, out_dir: str | None, limit: int | None, baud
             continue
         da = r["decision_agreement"]
         lat = r["latency_us"]
+        if not lat:
+            lines.append(f"| {name} | 0 | device crashed at vector {r.get('crashed_at_vector')} | | | | {r['flash_bytes']} | | | |")
+            continue
         lines.append(f"| {name} | {r['n']} | {r['exact_match']} | {r['max_diff_output_steps']:.2f} | "
                      f"{da.get('0.01', {}).get('agree')}/{r['n']} | {da.get('0.05', {}).get('agree')}/{r['n']} | "
                      f"{r['flash_bytes']} | {r['selected'].get('arena_used')} | {lat['quantize_input']['median']} | "

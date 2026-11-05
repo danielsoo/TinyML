@@ -1,0 +1,6 @@
+id: 2026-11-05_z8_device_e7
+config_dir: config/jobs/2026-11-05_z8_device_e7
+steps: device_agree
+flags: []
+why: 'E7 on the boards with bundle v2 (z7): every model, crash-tolerant host loop.
+  Waits until a board is connected. ~30 min per board.'
