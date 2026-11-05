@@ -1,0 +1,6 @@
+id: 2026-11-05_z8c_device_e7_s3_fill
+config_dir: config/jobs/2026-11-05_z8c_device_e7_s3_fill
+steps: device_agree
+flags: []
+why: 'E7 on the ESP32-S3: the six models that z8 lost to device resets, with the host
+  loop that now resumes after a reset. ~15 min.'

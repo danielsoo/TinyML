@@ -16,6 +16,7 @@ Spec (YAML):
     # or {..., port: COM3} to pick the port explicitly
   limit: null      # inputs per model (null = all)
   skip_done_in: <summary.json of an earlier device_e7 run>   # optional: boards already done there are skipped
+  models: [ton_QC80, ...]   # optional: only these models
 Exit code 3 (with --probe, or when none of the remaining boards is connected): nothing to do yet;
 the PC worker retries the job at its next poll, so boards can be plugged in one at a time.
 """
@@ -150,7 +151,7 @@ def main():
         print(f"▶ {name}: agreement run on {port}", flush=True)
         try:
             rc = run_agreement(str(ROOT / spec["bundle"]), port, str(out / name), spec.get("limit"),
-                               int(b.get("baud", 921600)))
+                               int(b.get("baud", 921600)), spec.get("models"))
             summary["boards"][name] = {"status": "ok" if rc == 0 else f"rc={rc}", "port": port}
         except Exception as err:  # keep going with the next board
             print(f"❌ {name}: {err!r}")

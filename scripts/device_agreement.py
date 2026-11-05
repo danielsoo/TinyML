@@ -134,7 +134,8 @@ def _kv(line: str) -> dict:
     return dict(p.split("=", 1) for p in line.split()[1:] if "=" in p)
 
 
-def run(bundle_dir: str, port: str, out_dir: str | None, limit: int | None, baud: int) -> int:
+def run(bundle_dir: str, port: str, out_dir: str | None, limit: int | None, baud: int,
+        models: list | None = None) -> int:
     import serial  # pip install pyserial
 
     bdir = Path(bundle_dir)
@@ -186,8 +187,21 @@ def run(bundle_dir: str, port: str, out_dir: str | None, limit: int | None, baud
         return 1
     print("device:", device)
     report = {"device": device, "port": port, "models": {}}
+    def select(name: str) -> str:
+        line = "ERROR no reply to model selection (device reset?)"
+        for _ in range(3):
+            try:
+                ser.reset_input_buffer()
+                ser.write(b"S" + bytes([dev_models[name]]))
+                return _readline(ser)
+            except (TimeoutError, serial.SerialException, OSError):
+                reconnect()
+        return line
+
     for m in bundle["models"]:
         name, ds = m["name"], m["dataset"]
+        if models and name not in models:
+            continue
         if name not in dev_models:
             print(f"⏭  {name} not in firmware")
             continue
@@ -196,13 +210,7 @@ def run(bundle_dir: str, port: str, out_dir: str | None, limit: int | None, baud
         cats = np.load(bdir / f"categories_{ds}.npy")
         if limit:
             X, host, cats = X[:limit], host[:limit], cats[:limit]
-        try:
-            ser.reset_input_buffer()
-            ser.write(b"S" + bytes([dev_models[name]]))
-            line = _readline(ser)
-        except (TimeoutError, serial.SerialException, OSError):
-            line = "ERROR no reply to model selection (device reset?)"
-            reconnect()
+        line = select(name)
         if not line.startswith("SELECTED"):
             print(f"❌ {name}: {line}")
             report["models"][name] = {"error": line}
@@ -211,16 +219,35 @@ def run(bundle_dir: str, port: str, out_dir: str | None, limit: int | None, baud
         dev = np.full(len(X), np.nan, np.float32)
         tq, ti, td = [], [], []
         t0 = time.time()
-        crashed = None
-        for i, x in enumerate(X):
+        crashed, resets, retried, skipped = None, 0, -1, []
+        i = 0
+        while i < len(X):
+            x = X[i]
             try:
                 ser.write(b"X" + x.astype("<f4").tobytes())
                 line = _readline(ser)
             except (TimeoutError, serial.SerialException, OSError):
-                crashed = i
-                print(f"❌ {name} vec {i}: no reply (device crashed or reset); reconnecting", flush=True)
+                # device reset: reconnect, reselect and resume; an input that fails twice is skipped
+                resets += 1
+                print(f"⚠  {name} vec {i}: no reply (device reset); reconnecting and resuming", flush=True)
                 reconnect()
-                break
+                if retried == i:
+                    skipped.append(i)
+                    i += 1
+                retried = i
+                if not select(name).startswith("SELECTED"):
+                    crashed = i
+                    print(f"❌ {name}: could not reselect after reset")
+                    break
+                continue
+            if line.startswith(("DEVICE", "MODEL", "READY")):  # the board rebooted without dropping the port
+                resets += 1
+                print(f"⚠  {name} vec {i}: device restarted; reselecting and resuming", flush=True)
+                banner(3.0)
+                if not select(name).startswith("SELECTED"):
+                    crashed = i
+                    break
+                continue
             if not line.startswith("Y "):
                 print(f"❌ {name} vec {i}: {line}")
                 break
@@ -229,13 +256,14 @@ def run(bundle_dir: str, port: str, out_dir: str | None, limit: int | None, baud
             tq.append(int(q)); ti.append(int(inv)); td.append(int(dq))
             if i % 500 == 0:
                 print(f"  {name}: {i}/{len(X)}", flush=True)
+            i += 1
         ok = ~np.isnan(dev)
         diff = np.abs(dev[ok] - host[ok])
         res = {"n": int(ok.sum()), "exact_match": int(np.sum(dev[ok] == host[ok])),
                "max_abs_diff": float(diff.max()) if diff.size else None,
                "max_diff_output_steps": float(diff.max() / STEP) if diff.size else None,
                "selected": sel, "flash_bytes": m["bytes"], "seconds": round(time.time() - t0, 1),
-               "crashed_at_vector": crashed,
+               "crashed_at_vector": crashed, "device_resets": resets, "inputs_skipped_after_two_resets": skipped,
                "latency_us": {k: {"median": statistics.median(v), "p95": float(np.percentile(v, 95)),
                                   "max": max(v)} for k, v in (("quantize_input", tq), ("invoke", ti),
                                                              ("dequantize_output", td)) if v},
@@ -285,10 +313,11 @@ def main():
     r.add_argument("--out")
     r.add_argument("--limit", type=int)
     r.add_argument("--baud", type=int, default=921600)
+    r.add_argument("--models", nargs="*", help="only these model names")
     a = ap.parse_args()
     if a.cmd == "prepare":
         return prepare(a.spec, a.output_dir)
-    return run(a.bundle, a.port, a.out, a.limit, a.baud)
+    return run(a.bundle, a.port, a.out, a.limit, a.baud, a.models)
 
 
 if __name__ == "__main__":
