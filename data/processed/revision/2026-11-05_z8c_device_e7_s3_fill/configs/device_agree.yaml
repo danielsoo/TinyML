@@ -1,0 +1,7 @@
+# Spec for scripts/run_e7_device.py (step device_agree): ESP32-S3 models missing or partial in z8
+# (device resets), with the resume-after-reset host loop
+bundle: data/processed/revision/2026-11-05_z7_device_bundle/device_bundle
+boards:
+  - {name: esp32s3, env: esp32-s3-native-usb, vids: [0x303A]}
+limit: null
+models: [ton_QC80, ton_S80_pt, ton_P80_pt, cic_R80, cic_P80, cic_PQ80_int16]

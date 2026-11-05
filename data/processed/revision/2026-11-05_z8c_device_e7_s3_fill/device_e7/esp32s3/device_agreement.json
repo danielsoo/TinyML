@@ -1,0 +1,756 @@
+{
+  "device": {
+    "chip": "ESP32-S3",
+    "cores": "2",
+    "cpu_mhz": "240",
+    "flash_bytes": "16777216",
+    "sdk": "v4.4.7-dirty"
+  },
+  "port": "COM5",
+  "models": {
+    "ton_QC80": {
+      "n": 4462,
+      "exact_match": 4250,
+      "max_abs_diff": 0.015625,
+      "max_diff_output_steps": 4.0,
+      "selected": {
+        "idx": "3",
+        "name": "ton_QC80",
+        "dim": "43",
+        "arena_used": "1440",
+        "in_type": "float32",
+        "in_scale": "0",
+        "in_zp": "0",
+        "out_type": "float32"
+      },
+      "flash_bytes": 58040,
+      "seconds": 30.4,
+      "crashed_at_vector": null,
+      "device_resets": 0,
+      "inputs_skipped_after_two_resets": [],
+      "latency_us": {
+        "quantize_input": {
+          "median": 3.0,
+          "p95": 4.0,
+          "max": 11
+        },
+        "invoke": {
+          "median": 5554.0,
+          "p95": 5563.0,
+          "max": 5676
+        },
+        "dequantize_output": {
+          "median": 1.0,
+          "p95": 1.0,
+          "max": 9
+        }
+      },
+      "decision_agreement": {
+        "0.01": {
+          "agree": 4456,
+          "n": 4462,
+          "threshold": 0.9375000596046448
+        },
+        "0.05": {
+          "agree": 4462,
+          "n": 4462,
+          "threshold": 0.1093750074505806
+        }
+      },
+      "by_category": {
+        "near_threshold:ton_P80:0.01": {
+          "n": 300,
+          "exact_match": 293
+        },
+        "near_threshold:ton_P80:0.05": {
+          "n": 31,
+          "exact_match": 2
+        },
+        "near_threshold:ton_P80_pt:0.01": {
+          "n": 182,
+          "exact_match": 179
+        },
+        "near_threshold:ton_P80_pt:0.05": {
+          "n": 78,
+          "exact_match": 49
+        },
+        "near_threshold:ton_PQ80_int16:0.01": {
+          "n": 168,
+          "exact_match": 164
+        },
+        "near_threshold:ton_PQ80_int16:0.05": {
+          "n": 36,
+          "exact_match": 7
+        },
+        "near_threshold:ton_PQ80_minmax:0.01": {
+          "n": 93,
+          "exact_match": 89
+        },
+        "near_threshold:ton_PQ80_minmax:0.05": {
+          "n": 300,
+          "exact_match": 290
+        },
+        "near_threshold:ton_QC80:0.01": {
+          "n": 190,
+          "exact_match": 178
+        },
+        "near_threshold:ton_QC80:0.05": {
+          "n": 5,
+          "exact_match": 4
+        },
+        "near_threshold:ton_R80:0.01": {
+          "n": 80,
+          "exact_match": 75
+        },
+        "near_threshold:ton_R80:0.05": {
+          "n": 19,
+          "exact_match": 17
+        },
+        "near_threshold:ton_S80:0.01": {
+          "n": 122,
+          "exact_match": 109
+        },
+        "near_threshold:ton_S80:0.05": {
+          "n": 4,
+          "exact_match": 1
+        },
+        "near_threshold:ton_S80_pt:0.01": {
+          "n": 138,
+          "exact_match": 120
+        },
+        "near_threshold:ton_S80_pt:0.05": {
+          "n": 6,
+          "exact_match": 3
+        },
+        "out_of_range": {
+          "n": 800,
+          "exact_match": 791
+        },
+        "random": {
+          "n": 1500,
+          "exact_match": 1483
+        },
+        "synthetic_extreme": {
+          "n": 400,
+          "exact_match": 386
+        },
+        "zeros": {
+          "n": 10,
+          "exact_match": 10
+        }
+      }
+    },
+    "ton_S80_pt": {
+      "n": 4462,
+      "exact_match": 4099,
+      "max_abs_diff": 0.015625,
+      "max_diff_output_steps": 4.0,
+      "selected": {
+        "idx": "6",
+        "name": "ton_S80_pt",
+        "dim": "43",
+        "arena_used": "1440",
+        "in_type": "float32",
+        "in_scale": "0",
+        "in_zp": "0",
+        "out_type": "float32"
+      },
+      "flash_bytes": 57184,
+      "seconds": 30.5,
+      "crashed_at_vector": null,
+      "device_resets": 0,
+      "inputs_skipped_after_two_resets": [],
+      "latency_us": {
+        "quantize_input": {
+          "median": 3.0,
+          "p95": 3.0,
+          "max": 11
+        },
+        "invoke": {
+          "median": 5557.0,
+          "p95": 5564.0,
+          "max": 5681
+        },
+        "dequantize_output": {
+          "median": 1.0,
+          "p95": 1.0,
+          "max": 9
+        }
+      },
+      "decision_agreement": {
+        "0.01": {
+          "agree": 4462,
+          "n": 4462,
+          "threshold": 0.6992188096046448
+        },
+        "0.05": {
+          "agree": 4458,
+          "n": 4462,
+          "threshold": 0.3671875298023224
+        }
+      },
+      "by_category": {
+        "near_threshold:ton_P80:0.01": {
+          "n": 300,
+          "exact_match": 300
+        },
+        "near_threshold:ton_P80:0.05": {
+          "n": 31,
+          "exact_match": 31
+        },
+        "near_threshold:ton_P80_pt:0.01": {
+          "n": 182,
+          "exact_match": 181
+        },
+        "near_threshold:ton_P80_pt:0.05": {
+          "n": 78,
+          "exact_match": 78
+        },
+        "near_threshold:ton_PQ80_int16:0.01": {
+          "n": 168,
+          "exact_match": 168
+        },
+        "near_threshold:ton_PQ80_int16:0.05": {
+          "n": 36,
+          "exact_match": 32
+        },
+        "near_threshold:ton_PQ80_minmax:0.01": {
+          "n": 93,
+          "exact_match": 91
+        },
+        "near_threshold:ton_PQ80_minmax:0.05": {
+          "n": 300,
+          "exact_match": 297
+        },
+        "near_threshold:ton_QC80:0.01": {
+          "n": 190,
+          "exact_match": 180
+        },
+        "near_threshold:ton_QC80:0.05": {
+          "n": 5,
+          "exact_match": 5
+        },
+        "near_threshold:ton_R80:0.01": {
+          "n": 80,
+          "exact_match": 80
+        },
+        "near_threshold:ton_R80:0.05": {
+          "n": 19,
+          "exact_match": 17
+        },
+        "near_threshold:ton_S80:0.01": {
+          "n": 122,
+          "exact_match": 115
+        },
+        "near_threshold:ton_S80:0.05": {
+          "n": 4,
+          "exact_match": 3
+        },
+        "near_threshold:ton_S80_pt:0.01": {
+          "n": 138,
+          "exact_match": 136
+        },
+        "near_threshold:ton_S80_pt:0.05": {
+          "n": 6,
+          "exact_match": 5
+        },
+        "out_of_range": {
+          "n": 800,
+          "exact_match": 724
+        },
+        "random": {
+          "n": 1500,
+          "exact_match": 1274
+        },
+        "synthetic_extreme": {
+          "n": 400,
+          "exact_match": 372
+        },
+        "zeros": {
+          "n": 10,
+          "exact_match": 10
+        }
+      }
+    },
+    "ton_P80_pt": {
+      "n": 4462,
+      "exact_match": 4417,
+      "max_abs_diff": 0.0234375,
+      "max_diff_output_steps": 6.0,
+      "selected": {
+        "idx": "7",
+        "name": "ton_P80_pt",
+        "dim": "43",
+        "arena_used": "1440",
+        "in_type": "float32",
+        "in_scale": "0",
+        "in_zp": "0",
+        "out_type": "float32"
+      },
+      "flash_bytes": 57200,
+      "seconds": 30.3,
+      "crashed_at_vector": null,
+      "device_resets": 0,
+      "inputs_skipped_after_two_resets": [],
+      "latency_us": {
+        "quantize_input": {
+          "median": 3.0,
+          "p95": 4.0,
+          "max": 11
+        },
+        "invoke": {
+          "median": 5549.0,
+          "p95": 5559.0,
+          "max": 5665
+        },
+        "dequantize_output": {
+          "median": 1.0,
+          "p95": 1.0,
+          "max": 9
+        }
+      },
+      "decision_agreement": {
+        "0.01": {
+          "agree": 4461,
+          "n": 4462,
+          "threshold": 0.9453125596046448
+        },
+        "0.05": {
+          "agree": 4462,
+          "n": 4462,
+          "threshold": 0.1015625074505806
+        }
+      },
+      "by_category": {
+        "near_threshold:ton_P80:0.01": {
+          "n": 300,
+          "exact_match": 294
+        },
+        "near_threshold:ton_P80:0.05": {
+          "n": 31,
+          "exact_match": 31
+        },
+        "near_threshold:ton_P80_pt:0.01": {
+          "n": 182,
+          "exact_match": 177
+        },
+        "near_threshold:ton_P80_pt:0.05": {
+          "n": 78,
+          "exact_match": 78
+        },
+        "near_threshold:ton_PQ80_int16:0.01": {
+          "n": 168,
+          "exact_match": 161
+        },
+        "near_threshold:ton_PQ80_int16:0.05": {
+          "n": 36,
+          "exact_match": 34
+        },
+        "near_threshold:ton_PQ80_minmax:0.01": {
+          "n": 93,
+          "exact_match": 93
+        },
+        "near_threshold:ton_PQ80_minmax:0.05": {
+          "n": 300,
+          "exact_match": 300
+        },
+        "near_threshold:ton_QC80:0.01": {
+          "n": 190,
+          "exact_match": 189
+        },
+        "near_threshold:ton_QC80:0.05": {
+          "n": 5,
+          "exact_match": 5
+        },
+        "near_threshold:ton_R80:0.01": {
+          "n": 80,
+          "exact_match": 76
+        },
+        "near_threshold:ton_R80:0.05": {
+          "n": 19,
+          "exact_match": 19
+        },
+        "near_threshold:ton_S80:0.01": {
+          "n": 122,
+          "exact_match": 121
+        },
+        "near_threshold:ton_S80:0.05": {
+          "n": 4,
+          "exact_match": 4
+        },
+        "near_threshold:ton_S80_pt:0.01": {
+          "n": 138,
+          "exact_match": 137
+        },
+        "near_threshold:ton_S80_pt:0.05": {
+          "n": 6,
+          "exact_match": 6
+        },
+        "out_of_range": {
+          "n": 800,
+          "exact_match": 795
+        },
+        "random": {
+          "n": 1500,
+          "exact_match": 1497
+        },
+        "synthetic_extreme": {
+          "n": 400,
+          "exact_match": 390
+        },
+        "zeros": {
+          "n": 10,
+          "exact_match": 10
+        }
+      }
+    },
+    "cic_R80": {
+      "n": 5902,
+      "exact_match": 5431,
+      "max_abs_diff": 0.0234375,
+      "max_diff_output_steps": 6.0,
+      "selected": {
+        "idx": "8",
+        "name": "cic_R80",
+        "dim": "78",
+        "arena_used": "1456",
+        "in_type": "float32",
+        "in_scale": "0",
+        "in_zp": "0",
+        "out_type": "float32"
+      },
+      "flash_bytes": 67016,
+      "seconds": 72.5,
+      "crashed_at_vector": null,
+      "device_resets": 1,
+      "inputs_skipped_after_two_resets": [],
+      "latency_us": {
+        "quantize_input": {
+          "median": 4.0,
+          "p95": 5.0,
+          "max": 12
+        },
+        "invoke": {
+          "median": 6483.0,
+          "p95": 6490.0,
+          "max": 6604
+        },
+        "dequantize_output": {
+          "median": 1.0,
+          "p95": 1.0,
+          "max": 9
+        }
+      },
+      "decision_agreement": {
+        "0.01": {
+          "agree": 5882,
+          "n": 5902,
+          "threshold": 0.2500000298023224
+        },
+        "0.05": {
+          "agree": 5885,
+          "n": 5902,
+          "threshold": 0.1562500149011612
+        }
+      },
+      "by_category": {
+        "near_threshold:cic_P80:0.01": {
+          "n": 300,
+          "exact_match": 226
+        },
+        "near_threshold:cic_P80:0.05": {
+          "n": 300,
+          "exact_match": 286
+        },
+        "near_threshold:cic_PQ80_int16:0.01": {
+          "n": 100,
+          "exact_match": 95
+        },
+        "near_threshold:cic_PQ80_int16:0.05": {
+          "n": 300,
+          "exact_match": 281
+        },
+        "near_threshold:cic_PQ80_minmax:0.01": {
+          "n": 300,
+          "exact_match": 240
+        },
+        "near_threshold:cic_PQ80_minmax:0.05": {
+          "n": 300,
+          "exact_match": 278
+        },
+        "near_threshold:cic_QC80:0.01": {
+          "n": 300,
+          "exact_match": 289
+        },
+        "near_threshold:cic_QC80:0.05": {
+          "n": 300,
+          "exact_match": 287
+        },
+        "near_threshold:cic_R80:0.01": {
+          "n": 300,
+          "exact_match": 272
+        },
+        "near_threshold:cic_R80:0.05": {
+          "n": 300,
+          "exact_match": 275
+        },
+        "near_threshold:cic_S80:0.01": {
+          "n": 92,
+          "exact_match": 85
+        },
+        "near_threshold:cic_S80:0.05": {
+          "n": 300,
+          "exact_match": 275
+        },
+        "out_of_range": {
+          "n": 800,
+          "exact_match": 763
+        },
+        "random": {
+          "n": 1500,
+          "exact_match": 1394
+        },
+        "synthetic_extreme": {
+          "n": 400,
+          "exact_match": 375
+        },
+        "zeros": {
+          "n": 10,
+          "exact_match": 10
+        }
+      }
+    },
+    "cic_P80": {
+      "n": 5902,
+      "exact_match": 5710,
+      "max_abs_diff": 0.0625,
+      "max_diff_output_steps": 16.0,
+      "selected": {
+        "idx": "10",
+        "name": "cic_P80",
+        "dim": "78",
+        "arena_used": "1456",
+        "in_type": "float32",
+        "in_scale": "0",
+        "in_zp": "0",
+        "out_type": "float32"
+      },
+      "flash_bytes": 67008,
+      "seconds": 72.5,
+      "crashed_at_vector": null,
+      "device_resets": 1,
+      "inputs_skipped_after_two_resets": [],
+      "latency_us": {
+        "quantize_input": {
+          "median": 5.0,
+          "p95": 5.0,
+          "max": 13
+        },
+        "invoke": {
+          "median": 6473.0,
+          "p95": 6485.0,
+          "max": 6596
+        },
+        "dequantize_output": {
+          "median": 1.0,
+          "p95": 1.0,
+          "max": 9
+        }
+      },
+      "decision_agreement": {
+        "0.01": {
+          "agree": 5878,
+          "n": 5902,
+          "threshold": 0.3789062798023224
+        },
+        "0.05": {
+          "agree": 5877,
+          "n": 5902,
+          "threshold": 0.02343750186264515
+        }
+      },
+      "by_category": {
+        "near_threshold:cic_P80:0.01": {
+          "n": 300,
+          "exact_match": 278
+        },
+        "near_threshold:cic_P80:0.05": {
+          "n": 300,
+          "exact_match": 254
+        },
+        "near_threshold:cic_PQ80_int16:0.01": {
+          "n": 100,
+          "exact_match": 81
+        },
+        "near_threshold:cic_PQ80_int16:0.05": {
+          "n": 300,
+          "exact_match": 300
+        },
+        "near_threshold:cic_PQ80_minmax:0.01": {
+          "n": 300,
+          "exact_match": 289
+        },
+        "near_threshold:cic_PQ80_minmax:0.05": {
+          "n": 300,
+          "exact_match": 295
+        },
+        "near_threshold:cic_QC80:0.01": {
+          "n": 300,
+          "exact_match": 290
+        },
+        "near_threshold:cic_QC80:0.05": {
+          "n": 300,
+          "exact_match": 298
+        },
+        "near_threshold:cic_R80:0.01": {
+          "n": 300,
+          "exact_match": 285
+        },
+        "near_threshold:cic_R80:0.05": {
+          "n": 300,
+          "exact_match": 290
+        },
+        "near_threshold:cic_S80:0.01": {
+          "n": 92,
+          "exact_match": 82
+        },
+        "near_threshold:cic_S80:0.05": {
+          "n": 300,
+          "exact_match": 294
+        },
+        "out_of_range": {
+          "n": 800,
+          "exact_match": 789
+        },
+        "random": {
+          "n": 1500,
+          "exact_match": 1483
+        },
+        "synthetic_extreme": {
+          "n": 400,
+          "exact_match": 392
+        },
+        "zeros": {
+          "n": 10,
+          "exact_match": 10
+        }
+      }
+    },
+    "cic_PQ80_int16": {
+      "n": 5902,
+      "exact_match": 2389,
+      "max_abs_diff": 0.995513916015625,
+      "max_diff_output_steps": 254.8515625,
+      "selected": {
+        "idx": "13",
+        "name": "cic_PQ80_int16",
+        "dim": "78",
+        "arena_used": "1824",
+        "in_type": "float32",
+        "in_scale": "0",
+        "in_zp": "0",
+        "out_type": "float32"
+      },
+      "flash_bytes": 82416,
+      "seconds": 78.0,
+      "crashed_at_vector": null,
+      "device_resets": 1,
+      "inputs_skipped_after_two_resets": [],
+      "latency_us": {
+        "quantize_input": {
+          "median": 4.0,
+          "p95": 5.0,
+          "max": 13
+        },
+        "invoke": {
+          "median": 7389.5,
+          "p95": 7403.0,
+          "max": 7492
+        },
+        "dequantize_output": {
+          "median": 1.0,
+          "p95": 1.0,
+          "max": 9
+        }
+      },
+      "decision_agreement": {
+        "0.01": {
+          "agree": 4952,
+          "n": 5902,
+          "threshold": 0.1442260891199112
+        },
+        "0.05": {
+          "agree": 5292,
+          "n": 5902,
+          "threshold": 0.006622314918786287
+        }
+      },
+      "by_category": {
+        "near_threshold:cic_P80:0.01": {
+          "n": 300,
+          "exact_match": 0
+        },
+        "near_threshold:cic_P80:0.05": {
+          "n": 300,
+          "exact_match": 0
+        },
+        "near_threshold:cic_PQ80_int16:0.01": {
+          "n": 100,
+          "exact_match": 0
+        },
+        "near_threshold:cic_PQ80_int16:0.05": {
+          "n": 300,
+          "exact_match": 196
+        },
+        "near_threshold:cic_PQ80_minmax:0.01": {
+          "n": 300,
+          "exact_match": 0
+        },
+        "near_threshold:cic_PQ80_minmax:0.05": {
+          "n": 300,
+          "exact_match": 182
+        },
+        "near_threshold:cic_QC80:0.01": {
+          "n": 300,
+          "exact_match": 1
+        },
+        "near_threshold:cic_QC80:0.05": {
+          "n": 300,
+          "exact_match": 201
+        },
+        "near_threshold:cic_R80:0.01": {
+          "n": 300,
+          "exact_match": 0
+        },
+        "near_threshold:cic_R80:0.05": {
+          "n": 300,
+          "exact_match": 5
+        },
+        "near_threshold:cic_S80:0.01": {
+          "n": 92,
+          "exact_match": 4
+        },
+        "near_threshold:cic_S80:0.05": {
+          "n": 300,
+          "exact_match": 6
+        },
+        "out_of_range": {
+          "n": 800,
+          "exact_match": 623
+        },
+        "random": {
+          "n": 1500,
+          "exact_match": 913
+        },
+        "synthetic_extreme": {
+          "n": 400,
+          "exact_match": 248
+        },
+        "zeros": {
+          "n": 10,
+          "exact_match": 10
+        }
+      }
+    }
+  }
+}
