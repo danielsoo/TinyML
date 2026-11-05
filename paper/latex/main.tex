@@ -42,9 +42,10 @@ extreme records in a 2,000-record calibration draw drive recall to 0\%, and quan
 training (QAT) fails for the same reason because it learns that range from unclipped inputs.
 Bounding the input range removes both failures at no cost. Hidden-layer ranges and the 8-bit output
 grid matter little; the residual loss comes from coarse activations near the operating point and is
-recovered by 16-bit activations. The ranking holds on hosts never seen in training. On an ESP32-S3
+recovered by 16-bit activations. The ranking holds on hosts never seen in training. On an ESP32-S3 and an ESP32
 the per-tensor INT8 models reproduce the host decisions on all but at most one of 2,700 random and
-stress inputs per model at 5.6--6.5\,ms per flow, while models with per-channel weight scales, the converter's
+stress inputs per model, at 5.6--6.5\,ms per flow (13.2--15.4\,ms on an ESP32), with bit-identical
+outputs on both chips, while models with per-channel weight scales, the converter's
 default, silently disagree on half of their decisions.
 \end{abstract}
 
@@ -429,26 +430,26 @@ steps of a validation threshold of any model, 800 records with a feature beyond 
 one feature set to $\pm$50 or $\pm$1,000\,SD, and 10 zero vectors (4,462 on \ton, 5,902 on \cic).
 
 \begin{table}[t]
-\caption{E7 on an ESP32-S3 (240\,MHz): share of outputs within one INT8 output step of the host,
-decisions agreeing at the 1\% FAR threshold on all inputs and on the 1,500 random records, invoke
-latency (median). Arena 1.4\,KB (1.8\,KB for 16-bit).}
+\caption{E7: share of outputs within one INT8 output step of the host, decisions agreeing at the 1\%
+FAR threshold on all inputs and on the 1,500 random records, and median invoke latency on an ESP32-S3
+and an ESP32 (both 240\,MHz). The two chips return bit-identical outputs. Arena 1.4\,KB (1.8\,KB for 16-bit).}
 \label{tab:e7}
 \small\setlength{\tabcolsep}{2pt}
 \begin{adjustbox}{max width=\columnwidth}
-\begin{tabular}{llrrrr}
+\begin{tabular}{llrrrrr}
 \toprule
-model & weights & $\le$1 step & all inputs & random & ms \\
+model & weights & $\le$1 step & all inputs & random & S3 ms & ESP32 ms \\
 \midrule
-\ton R80 & per-tensor & 97.9\% & 4,462/4,462 & 1,500/1,500 & 5.56 \\
-\ton QC80 & per-tensor & 97.4\% & 4,456/4,462 & 1,500/1,500 & 5.55 \\
-\ton S80, per-tensor export & per-tensor & 99.2\% & 4,462/4,462 & 1,500/1,500 & 5.56 \\
-\ton P80, per-tensor export & per-tensor & 99.8\% & 4,461/4,462 & 1,500/1,500 & 5.55 \\
-\ton S80 (strong PTQ) & per-channel & 4.9\% & 2,209/4,462 & 443/1,500 & 5.56 \\
-\ton P80 (strong PTQ) & per-channel & 40.9\% & 3,141/4,462 & 705/1,500 & 5.56 \\
-\cic R80 & per-tensor & 96.4\% & 5,882/5,902 & 1,500/1,500 & 6.48 \\
-\cic S80 & per-tensor & 97.2\% & 5,898/5,902 & 1,500/1,500 & 6.47 \\
-\cic P80 & per-tensor & 97.9\% & 5,878/5,902 & 1,499/1,500 & 6.47 \\
-\cic 16-bit act. & per-channel & 67.5\% & 4,952/5,902 & 1,425/1,500 & 7.39 \\
+\ton R80 & per-tensor & 97.9\% & 4,462/4,462 & 1,500/1,500 & 5.56 & 13.19 \\
+\ton QC80 & per-tensor & 97.4\% & 4,456/4,462 & 1,500/1,500 & 5.55 & 13.20 \\
+\ton S80, per-tensor export & per-tensor & 99.2\% & 4,462/4,462 & 1,500/1,500 & 5.56 & 13.35 \\
+\ton P80, per-tensor export & per-tensor & 99.8\% & 4,461/4,462 & 1,500/1,500 & 5.55 & 13.18 \\
+\ton S80 (strong PTQ) & per-channel & 4.9\% & 2,209/4,462 & 443/1,500 & 5.56 & 13.21 \\
+\ton P80 (strong PTQ) & per-channel & 40.9\% & 3,141/4,462 & 705/1,500 & 5.56 & 13.29 \\
+\cic R80 & per-tensor & 96.4\% & 5,882/5,902 & 1,500/1,500 & 6.48 & 15.38 \\
+\cic S80 & per-tensor & 97.2\% & 5,898/5,902 & 1,500/1,500 & 6.47 & 15.37 \\
+\cic P80 & per-tensor & 97.9\% & 5,878/5,902 & 1,499/1,500 & 6.47 & 15.36 \\
+\cic 16-bit act. & per-channel & 67.5\% & 4,952/5,902 & 1,425/1,500 & 7.39 & 16.11 \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
@@ -464,9 +465,11 @@ per-channel scales. Re-exporting the same models with per-tensor scales restores
 (4,462 / 4,462). The 16-bit-activation remedy of \S\ref{sec:e4} is likewise not reproduced and needs
 a newer TFLM build. Host-side evaluation of such models says nothing about the device, which is why we
 recommend this streaming check before reporting on-device accuracy.
-The models classify a flow in 5.6\,ms (\ton, 43 features) and 6.5\,ms (\cic, 78 features) on the
-ESP32-S3; input quantization takes 3--5\,$\mu$s and the arena 1.4\,KB. \pending{ESP32 (240\,MHz Xtensa
-LX6) results of job z8b go here.}
+The ESP32 (Xtensa LX6) returns bit-identical outputs to the ESP32-S3 (LX7) for all 14 models and
+72,548 inputs, so every deviation from the host comes from the runtime, not the chip; it ran the
+whole stream without a reset, while the S3 restarted a few times at random inputs and resumed. A flow
+takes 5.6\,ms (\ton, 43 features) and 6.5\,ms (\cic, 78 features) on the ESP32-S3 and 13.2\,ms and
+15.4\,ms on the ESP32; input quantization takes 3--13\,$\mu$s and the arena 1.4\,KB.
 
 %% =====================================================================
 \section{Threats to Validity}\label{sec:limits}
@@ -475,7 +478,7 @@ LX6) results of job z8b go here.}
 hosts, making test FAR noisy. \emph{Seeds}: three federated runs per configuration; the float teacher's
 1\%-FAR recall varies by up to 2 points across runs, and claims about it are stated as sensitivity.
 \emph{Labels}: \cic contains labelling errors~\cite{engelen2021troubleshooting}; we drop impossible values
-and conflicting labels but do not relabel. \emph{Runtime}: one TFLM release and reference kernels;
+and conflicting labels but do not relabel. \emph{Runtime}: one TFLM release with reference kernels on two ESP32 chips;
 optimized kernels change latency and newer releases support per-channel and 16-bit models.
 \emph{Threat model}: no adversarial or poisoning study~\cite{nguyen2022flame}.
 

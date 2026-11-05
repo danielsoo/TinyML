@@ -740,3 +740,11 @@ decisions at FAR 1%).
 - Latency (ESP32-S3, 240 MHz): 5.6 ms (TON, 43 inputs) / 6.5 ms (CIC, 78 inputs) per flow for every
   57-68 KB INT8 model, 6.3-7.4 ms with 16-bit activations; arena 1.4-1.8 KB; input quantization
   3-5 µs.
+
+### E7, classic ESP32 (job z8b; ESP32-D0WD, Xtensa LX6, 240 MHz; same bundle v2 and firmware)
+All 14 models ran over the full inputs without a single reset. The device outputs are
+**bit-identical to the ESP32-S3's** for every model and input (72,548 outputs), so all deviations
+from the host come from the TFLM runtime, not from the chip; the agreement figures above hold for
+both boards. Invoke latency (median): 13.2-13.4 ms (TON, 57-68 KB), 15.3-15.4 ms (CIC, 65-67 KB),
+13.8 / 16.1 ms with 16-bit activations; input quantization 11-13 µs; arena 1.4 KB (1.8 KB for 16-bit).
+
