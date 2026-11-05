@@ -1,51 +1,43 @@
 # Provenance of every number in main.tex
 
-All numbers come from our own runs on the user's PC (WSL2, RTX 5070 host, CPU simulation).
-Each run directory under `data/processed/revision/<run>/` contains `job.yaml`, `git_commit.txt`, the configs, step logs
-(`*.log`) and result files. External facts are cited in the paper (references.bib).
+All numbers come from our own runs on the user's PC (WSL2, CPU simulation of Flower) and on two
+boards (ESP32-S3 N16R8, ESP-WROOM-32). Each run directory under `data/processed/revision/<job>/`
+holds `job.yaml`, `git_commit.txt`, the configs, step logs (`*.log`) and result files. The numbers
+are collected in `docs/REVISION_RESULTS.md` (section "v13.1 re-run"); the audit is `docs/AUDIT.md`.
+Pipeline: `src/data/fed_pipeline.py` with `config/v13/*.yaml`. Results of the earlier, exploratory
+pipeline (jobs before 2026-10-28, manuscript `archive/main_v12_exploratory.tex`) are not used.
 
-## Run identifiers used in the captions (all under `data/processed/revision/`)
-| ID | Run directory |
+## Jobs (all under `data/processed/revision/`)
+| Job | What it produced |
 |---|---|
-| A | 2026-10-03_v2_cic_full (training-time QAT, CIC-IDS2017) |
-| B | 2026-10-03_b_v3_float_cic (CIC-IDS2017 FL, centralized, Dirichlet) |
-| E | 2026-10-04_e_float_compression_ablation |
-| F, G | 2026-10-04_f_robustness, 2026-10-04_g_prune_sweep |
-| I | 2026-10-04_i_fixed_lr_cic |
-| J, K | 2026-10-04_j_quant_distill, 2026-10-04_k_local_only |
-| L, M | 2026-10-04_l_ptq_calibration, 2026-10-04_m_qat_stability |
-| N | 2026-10-05_n_compression_combos |
-| O, P, Q | 2026-10-05_o_recall_priority, 2026-10-05_p_recall_priority2, 2026-10-05_q_attack_counts |
-| S | 2026-10-05_s_ton_sweep (TON_IoT recipe, TON_IoT FL model) |
-| T | 2026-10-05_t_recall_priority_ton2 |
-| U | 2026-10-05_u_toniot_v2 (TON_IoT centralized, 2nd run, fixed LR, Dirichlet, QAT) |
-| V, W | 2026-10-05_v_toniot_v2_downstream, 2026-10-05_w_toniot_v2_sweep_robustness |
-| X1–X4 | 2026-10-05_x1_calib_methods, _x2_ptq_init_qat, _x3_data_free_calib, _x4_learned_clip_qat |
-| X5, X6 | 2026-10-05_x5_recall_fixed_cic, 2026-10-05_x6_recall_fixed_ton |
+| 2026-10-28_y1_audit | audit of the old pipeline (Appendix A, §3.1 numbers on SMOTE, duplicates, data errors) |
+| 2026-10-29_z1_train_ton | TON_IoT teachers F and compact S80 / S128, seeds 1-3, with manifests |
+| 2026-10-29_z2_train_cic | CIC-IDS2017 teachers F and compact S80 / S128, seeds 1-3 |
+| 2026-10-29_z3_train_ton_group | TON_IoT host-grouped split (E6), F / S80 / S128, seeds 1-3 |
+| 2026-10-29_z1d_compare_ton_fed, z2b_compare_cic_fed | E1 / E2, federated fine-tuning (F, F8, P, Q, R, S, SQ) |
+| 2026-10-29_z1e_compare_ton_client, z2c_compare_cic_client | E1, one-client fine-tuning |
+| 2026-10-29_z1g_compare_ton_qc, z2e_compare_cic_qc | QC, SQC (QAT on clipped inputs) |
+| 2026-10-29_z3b_compare_ton_group | E6, all arms on the host-grouped split |
+| 2026-10-29_z1f_range_ton, z2d_range_cic | E3, E4 (first rows) |
+| 2026-10-29_z1h_range_ton2, z2f_range_cic2 | E3, E4 with clipped-FP32 and 16-bit rows |
+| 2026-10-29_z4_device_bundle, 2026-11-05_z7_device_bundle | E7 input bundles (v1, v2 with per-tensor re-exports) |
+| 2026-11-01_z6_device_e7 | E7 first ESP32-S3 run (per-channel finding) |
+| 2026-11-05_z8_device_e7, z8c_device_e7_s3_fill | E7 on the ESP32-S3 |
+| 2026-11-05_z8b_device_e7 | E7 on the ESP32 |
+
+Superseded (kept as pipeline checks): 2026-10-28_y2_train_ton and 2026-10-28_y2b_compare_ton_fed
+(v13 before the two audit rules), 2026-10-29_z1b / z1c (threshold tie bug), 2026-11-01_z5 (step-name
+and pip-path bugs).
 
 ## Paper items
-| Paper item | Run ID | Result file(s) |
-|---|---|---|
-| Table 1 (CIC rows) | B, I | `data/processed/revision/2026-10-03_b_v3_float_cic/baseline/baseline_ablation.json`, `.../non_iid/non_iid_ablation.json`, `data/processed/revision/2026-10-04_i_fixed_lr_cic/fixed_lr/non_iid_ablation.json` |
-| Table 1 (TON rows) | S, U | `data/processed/revision/2026-10-05_s_ton_sweep/ton_sweep/ton_sweep.json` (federated near-IID = `best_text_alpha05_test`), `data/processed/revision/2026-10-05_u_toniot_v2/{baseline,non_iid,fixed_lr}/*.json` |
-| Table 2 (local-only) | K, V | `data/processed/revision/2026-10-04_k_local_only/local_only/local_only.json`, `data/processed/revision/2026-10-05_v_toniot_v2_downstream/local_only/local_only.json` |
-| Table 3, client-choice paragraph | E, V | `data/processed/revision/2026-10-04_e_float_compression_ablation/compression_ablation/compression_ablation.json`, `data/processed/revision/2026-10-05_v_toniot_v2_downstream/compression_ablation/compression_ablation.json` |
-| Figure 1 | G, W | `data/processed/revision/2026-10-04_g_prune_sweep/compression_ablation/compression_ablation.json`, `data/processed/revision/2026-10-05_w_toniot_v2_sweep_robustness/compression_ablation/compression_ablation.json` (plot: `scripts/plot_prune_sweep.py`) |
-| Table 4 (quantization methods) | J, V | `data/processed/revision/2026-10-04_j_quant_distill/quant_distill/quant_distill.json`, `data/processed/revision/2026-10-05_v_toniot_v2_downstream/quant_distill/quant_distill.json` |
-| Table 5 (calibration), QAT draws | L, M, V | `data/processed/revision/2026-10-04_l_ptq_calibration/ptq_calibration/ptq_calibration.json`, `data/processed/revision/2026-10-04_m_qat_stability/qat_stability/qat_stability.json`, `data/processed/revision/2026-10-05_v_toniot_v2_downstream/{ptq_calibration,qat_stability}/*.json` |
-| Table 6 (range estimators, data-free calibration) | X1, X3 | `data/processed/revision/2026-10-05_x1_calib_methods/quant_lit/quant_lit_summary.csv`, `data/processed/revision/2026-10-05_x3_data_free_calib/quant_lit/quant_lit_summary.csv` |
-| Table 7 (QAT ranges, learned clipping), Section 4.4 range values | X2, X4 | `data/processed/revision/2026-10-05_x2_ptq_init_qat/quant_lit/{quant_lit_summary.csv,quant_lit.csv (ranges column)}`, `data/processed/revision/2026-10-05_x4_learned_clip_qat/quant_lit/quant_lit_summary.csv` |
-| Section 4.5 (training-time QAT) | A, U | `data/processed/revision/2026-10-03_v2_cic_full/` (logs + baseline_ablation.json), `data/processed/revision/2026-10-05_u_toniot_v2/qat_fl/non_iid_ablation.json` |
-| Table 8 (distillation) | J, V | same files as Table 4 (rows with part = distill) |
-| Table 9 (pipelines) | N, V | `data/processed/revision/2026-10-05_n_compression_combos/compression_combos/compression_combos.json`, `data/processed/revision/2026-10-05_v_toniot_v2_downstream/compression_combos/compression_combos.json` |
-| Table 10 (recall priority) | O, P, T | `data/processed/revision/2026-10-05_o_recall_priority/recall_priority/recall_priority.json`, `data/processed/revision/2026-10-05_p_recall_priority2/recall_priority/recall_priority.json`, `data/processed/revision/2026-10-05_t_recall_priority_ton2/recall_priority/recall_priority.json` |
-| Section 4.8, fixed QAT ranges / CLE on the deployed recipes | X5, X6 | `data/processed/revision/2026-10-05_x5_recall_fixed_cic/recall_priority/recall_priority_summary.csv`, `data/processed/revision/2026-10-05_x6_recall_fixed_ton/recall_priority/recall_priority_summary.csv` |
-| Table 11 (per attack type) | P, Q | `missed_by_type` fields in run P's json; test counts `data/processed/revision/2026-10-05_q_attack_counts/attack_counts/attack_type_counts.json` |
-| Table 12 (robustness) | F, W | `data/processed/revision/2026-10-04_f_robustness/robustness/robustness.md`, `data/processed/revision/2026-10-05_w_toniot_v2_sweep_robustness/robustness/robustness.md` |
-| Table 13 (failure modes) | — | `docs/REVISION_RESULTS.md` ("Bugs found"), fixes in `src/federated/client.py`, `compression.py`, `src/tinyml/export_tflite.py` |
-| Section 4.10 / Table 13 / Appendix C (ESP32 + ESP32-S3), abstract and conclusion latency | ESP32 and ESP32-S3 runs | `data/processed/ablation/esp32s3_benchmark.json` (+ `.log`; hiBCTR ESP32-S3 N16R8 board, FT232R bridge, env esp32-s3-devkitc-1) and `data/processed/ablation/esp32_benchmark.json` (+ raw serial log `esp32_benchmark.log`), collected by `scripts/collect_esp32_benchmark.py` from `esp32_tflite_project/` (TensorFlowLite_ESP32 1.0.0) on an ELEGOO ESP-WROOM-32 board (ESP32-D0WD-V3, 240 MHz, ESP-IDF v4.4.7) |
-| Appendix B (TON recipe) | S | `data/processed/revision/2026-10-05_s_ton_sweep/ton_sweep/ton_sweep.json` |
-| Dataset statistics (Section 3.1) | B, U | loader logs (`baseline_ablation.log`) of runs B and U |
-
-Deployed models: CIC `data/processed/revision/2026-10-05_p_recall_priority2/recall_priority/cic_near_iid/kdclip_p30_d0.tflite` (threshold 0.1914),
-TON `data/processed/revision/2026-10-05_t_recall_priority_ton2/recall_priority/ton_near_iid_v2/kdclip_fed_d0.tflite` (threshold 0.2070).
+| Paper item | Source |
+|---|---|
+| Table 1 | `*_train_*/train_fl/models/F_s1_manifest.json` (dedup, invalid_records, test, clients) |
+| Table 2 | `compare_arms/compare_arms_summary.csv` of z1d, z2b (fed), z1e, z2c (1 client), z1g, z2e (QC, SQC) |
+| Table 3 | z3b `compare_arms_summary.csv` |
+| Table 4, Figure 1 | `compare_arms_transitions.csv` of z2b, z1d (FAR 0.01, budget 80, summed over seeds) |
+| Table 5, Figure 2 | z2d, z1f `range_mechanism/e3_summary.csv` (model PQ_80) |
+| Table 6 | z2f, z1h `range_mechanism/e4_summary.csv` |
+| Table 7 | Tables 2, 5, 6 and Table 8 |
+| Table 8 | `device_e7/<board>/device_agreement.json` and `device_*.npy` of z8, z8c (S3) and z8b (ESP32), compared with the host outputs of the z7 bundle |
+| §3.4 tie-group pitfall | z1b vs z1d (same models, float64 vs float32 thresholds) |

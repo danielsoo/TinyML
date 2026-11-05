@@ -12,6 +12,12 @@
 \usepackage{placeins}
 \usepackage{xspace}
 \usepackage{array}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.17}
+\usepgfplotslibrary{groupplots}
+\usetikzlibrary{patterns}
+% categorical series colours (validated: lightness band, chroma, CVD and normal-vision separation)
+\definecolor{sA}{HTML}{2A78D6}\definecolor{sB}{HTML}{EB6834}\definecolor{sC}{HTML}{1BAF7A}\definecolor{sD}{HTML}{EDA100}
 \newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
 \newcommand{\cic}{CIC-IDS2017\xspace}
 \newcommand{\ton}{TON\_IoT\xspace}
@@ -286,7 +292,11 @@ Table~\ref{tab:e2} counts the test attacks whose decision changes between stages
 fine-tuning move thousands of decisions in both directions; the INT8 conversion moves few, except
 when the input range is wrong. For Q the loss happens in QAT itself, before conversion: 45,603 attacks
 (three runs) are lost between the compact FP32 and the QAT float model and 15 in the conversion. R's
-conversion loses 127 attacks where P's loses 1,040, mostly web attacks and DoS Hulk.
+conversion loses 127 attacks where P's loses 1,040 (Figure~\ref{fig:e2}): P's losses concentrate in
+the small web-attack families (brute force 360, XSS 168) and DoS Hulk, which R keeps; S80 loses mostly
+DoS Hulk and Bot flows. Two of P's three largest losses are among the smallest families (1,507 web
+brute-force and 652 XSS records in the whole dataset): aggregate recall hides where a coarse INT8 model
+gives up.
 
 \begin{table}[t]
 \caption{Test attacks lost / recovered between stages at the 1\% FAR operating point (sum over three
@@ -315,12 +325,63 @@ R & FP32$\rightarrow$INT8 & 104 & 46 & scanning 73 \\
 \end{adjustbox}
 \end{table}
 
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+\begin{axis}[xbar, bar width=3pt, width=0.8\columnwidth, height=6.2cm, xmin=0, xmax=400,
+  xlabel={attacks lost at INT8 conversion (3 runs)}, xlabel style={font=\footnotesize},
+  symbolic y coords={DDoS,Bot,Slowhttptest,slowloris,PortScan,GoldenEye,Web XSS,DoS Hulk,Web brute force},
+  ytick=data, y tick label style={font=\footnotesize}, x tick label style={font=\footnotesize},
+  xmajorgrids, grid style={gray!25}, axis line style={gray!60}, tick style={gray!60},
+  enlarge y limits=0.07, legend style={font=\footnotesize, draw=none, at={(0.98,0.03)}, anchor=south east}]
+\addplot[fill=sA, draw=white] coordinates {(13,DDoS) (29,Bot) (44,Slowhttptest) (48,slowloris) (50,PortScan) (53,GoldenEye) (168,Web XSS) (250,DoS Hulk) (360,Web brute force)};
+\addplot[fill=sB, draw=white] coordinates {(9,DDoS) (6,Bot) (2,Slowhttptest) (5,slowloris) (9,PortScan) (32,GoldenEye) (0,Web XSS) (56,DoS Hulk) (3,Web brute force)};
+\addplot[fill=sC, draw=white] coordinates {(10,DDoS) (67,Bot) (1,Slowhttptest) (1,slowloris) (7,PortScan) (1,GoldenEye) (1,Web XSS) (266,DoS Hulk) (0,Web brute force)};
+\legend{P (strong PTQ), R (distill + clip + QAT), S80 (from scratch)}
+\end{axis}
+\end{tikzpicture}
+\caption{E2 on \cic: test attacks that the compact FP32 model detects and its INT8 version misses, at
+the 1\% FAR operating point, by family (80\,KB, sum over three runs). Totals: P 1,040, R 127, S80 369.}
+\label{fig:e2}
+\end{figure}
 \subsection{Input Range versus Hidden Range (E3)}\label{sec:e3}
+
+\begin{figure*}[t]
+\centering
+\begin{tikzpicture}
+\begin{groupplot}[group style={group size=2 by 1, horizontal sep=1.6cm},
+  ybar, /pgf/bar width=7pt, width=0.47\textwidth, height=4.1cm, ymin=0, ymax=105,
+  ylabel={recall at 1\% FAR (\%)}, ylabel style={font=\footnotesize},
+  symbolic x coords={random,+10 extremes,no extremes}, xtick=data,
+  x tick label style={font=\footnotesize}, y tick label style={font=\footnotesize},
+  ymajorgrids, grid style={gray!25}, axis line style={gray!60}, tick style={gray!60},
+  enlarge x limits=0.22, title style={font=\small}]
+\nextgroupplot[title={\cic}, legend to name=e3legend, legend columns=2,
+  legend style={font=\footnotesize, draw=none, column sep=6pt}]
+\addplot[fill=sA, draw=white] coordinates {(random,70.9) (+10 extremes,0.0) (no extremes,98.0)};
+\addplot[fill=sB, draw=white, postaction={pattern=north east lines, pattern color=white}] coordinates {(random,98.9) (+10 extremes,98.9) (no extremes,99.0)};
+\addplot[fill=sC, draw=white] coordinates {(random,73.9) (+10 extremes,12.7) (no extremes,98.5)};
+\addplot[fill=sD, draw=white, postaction={pattern=north east lines, pattern color=white}] coordinates {(random,99.1) (+10 extremes,99.0) (no extremes,99.0)};
+\legend{{A: input min/max, hidden min/max},{B: input clipped, hidden min/max},{C: input min/max, hidden 99.99th pct},{D: input clipped, hidden 99.99th pct}}
+\nextgroupplot[title={\ton}]
+\addplot[fill=sA, draw=white] coordinates {(random,63.5) (+10 extremes,23.3) (no extremes,96.4)};
+\addplot[fill=sB, draw=white, postaction={pattern=north east lines, pattern color=white}] coordinates {(random,96.3) (+10 extremes,96.1) (no extremes,96.6)};
+\addplot[fill=sC, draw=white] coordinates {(random,63.6) (+10 extremes,23.3) (no extremes,96.4)};
+\addplot[fill=sD, draw=white, postaction={pattern=north east lines, pattern color=white}] coordinates {(random,96.2) (+10 extremes,96.2) (no extremes,96.6)};
+\end{groupplot}
+\end{tikzpicture}\\[2pt]
+\pgfplotslegendfromname{e3legend}
+\caption{E3: recall of the pruned and fine-tuned 80\,KB model when only the quantization ranges change
+(same FP32 model and calibration draw; mean over three runs and three draws). Hatched bars clip the
+input range to $\pm$5\,SD. Values in Table~\ref{tab:e3}.}
+\label{fig:e3}
+\end{figure*}
 To isolate the cause we fix the compact FP32 model and the calibration draw and vary only the ranges,
 exporting per-tensor fake-quantized models: input range min/max or clipped to $\pm$5\,SD, crossed with
 hidden ranges min/max or 99.99th percentile. Each cell is calibrated with three random 2,000-record
 draws, the same draws with the client's ten most extreme records swapped in, and draws without any
-record beyond 10\,SD (Table~\ref{tab:e3}).
+record beyond 10\,SD (Figure~\ref{fig:e3}, Table~\ref{tab:e3}).
 
 \begin{table}[t]
 \caption{E3: recall (\%) at 1\% FAR of the pruned and fine-tuned 80\,KB model, by input range (rows A/C:
@@ -472,6 +533,20 @@ takes 5.6\,ms (\ton, 43 features) and 6.5\,ms (\cic, 78 features) on the ESP32-S
 15.4\,ms on the ESP32; input quantization takes 3--13\,$\mu$s and the arena 1.4\,KB.
 
 %% =====================================================================
+\section{Recommendations}\label{sec:recs}
+\begin{enumerate}
+\item Choose thresholds at a FAR budget on real, client-held validation records, never on oversampled
+  ones, and compute them in the output's own precision (\S\ref{sec:metrics}).
+\item Bound the input range before PTQ and QAT: clip the calibration and QAT inputs or drop extreme
+  records from the calibration draw. Check the exported input step in standard deviations: in our models
+  a step of 0.15\,SD or more always collapsed recall at 1\% FAR, and 0.05\,SD never did.
+\item Report a compact model trained federatively from scratch at the same budget; it is the baseline a
+  compression pipeline has to beat.
+\item Report losses per attack family: small families are lost first and aggregate recall hides it.
+\item Export per-tensor weights unless the device runtime is known to support per-channel scales, and
+  verify on the device by streaming inputs near the threshold and beyond the input range.
+\end{enumerate}
+
 \section{Threats to Validity}\label{sec:limits}
 \emph{Scope}: two datasets, binary detection, one model family (MLP) and four clients. \emph{Splits}:
 \cic has no host field, so the unseen-host test is \ton-only, and its benign test set comes from few
