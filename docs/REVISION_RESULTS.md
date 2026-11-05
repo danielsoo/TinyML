@@ -706,3 +706,31 @@ bits vs. the host TFLite interpreter:
 - Invoke latency on the ESP32-S3: 5.57 ms median (p95 5.58 ms) for every 57-68 KB TON model;
   arena 1,440 B.
 - Bundle v2 adds per-tensor re-exports of S80 / P80; the host loop now survives a device crash.
+
+### E7, ESP32-S3 with bundle v2 (job z8; TON 4,462 / CIC 5,902 inputs per model)
+| model | weights | inputs run | exact | max diff (steps) | decisions FAR 1% | FAR 5% | invoke ms |
+|---|---|---|---|---|---|---|---|
+| ton_R80 | per-tensor | 4,462 | 4,286 | 5 | 4,462 / 4,462 | 4,461 | 5.56 |
+| ton_S80 | per-channel | 4,462 | 170 | 170 | **2,209** | 4,269 | 5.56 |
+| ton_P80 | per-channel | 4,462 | 1,550 | 254 | **3,141** | 4,369 | 5.56 |
+| ton_S80_pt (per-tensor re-export) | per-tensor | 601 (reset) | 498 | 1 | 601 / 601 | 601 | 5.56 |
+| ton_PQ80_minmax | per-tensor | 4,462 | 3,759 | 97 | 4,161 | 4,134 | 5.55 |
+| ton_PQ80_int16 (16-bit act.) | per-channel | 4,462 | 425 | 255 | 3,379 | 4,346 | 6.34 |
+| cic_S80 | per-tensor | 5,902 | 5,446 | 6 | 5,898 / 5,902 | 5,880 | 6.47 |
+| cic_P80 | per-tensor | 2,559 (reset) | 2,496 | 16 | 2,553 / 2,559 | 2,556 | 6.48 |
+| cic_QC80 | per-tensor | 5,902 | 5,317 | 24 | 5,511 / 5,902 | 5,900 | 6.48 |
+| cic_PQ80_minmax | per-tensor | 5,902 | 5,733 | 47 | 5,845 / 5,902 | 5,895 | 6.47 |
+| cic_PQ80_int16 | per-channel | 4,137 (reset) | 1,214 | 255 | 3,283 | 3,636 | 7.39 |
+
+ton_QC80, ton_P80_pt and cic_R80 were lost to device resets (the board restarted 6 times over
+14 model sessions; the old host loop then moved on). Refill with a resume-after-reset loop: z8c.
+- Per-tensor INT8 models: device and host differ by at most a few output steps except on inputs
+  next to the threshold, where the near-threshold inputs (chosen within two steps) flip; on the
+  random and out-of-range records decisions agree on >= 99.7%. The min/max-range models (huge
+  input step) deviate most (47-97 steps): the runtime's rounding of a coarse input grid differs.
+- Per-channel models (TFLite converter default) and the 16-bit-activation models are not
+  reproduced by this runtime (TensorFlowLite_ESP32 1.0.0): half of the decisions change. The
+  16-bit remedy of E4 therefore needs a newer TFLM build on the device.
+- Latency (ESP32-S3, 240 MHz): 5.6 ms (TON, 43 inputs) / 6.5 ms (CIC, 78 inputs) per flow for every
+  57-68 KB INT8 model, 6.3-7.4 ms with 16-bit activations; arena 1.4-1.8 KB; input quantization
+  3-5 µs.
