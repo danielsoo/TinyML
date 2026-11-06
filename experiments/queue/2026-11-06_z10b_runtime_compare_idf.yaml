@@ -1,0 +1,7 @@
+id: 2026-11-06_z10b_runtime_compare_idf
+config_dir: config/jobs/2026-11-06_z10b_runtime_compare_idf
+steps: device_agree
+flags: []
+why: 'Retry of the current esp-tflite-micro runtime half of the z10 runtime comparison
+  (the ESP-IDF build needed pkg_resources). Classic ESP32 must be plugged in. First
+  build downloads ESP-IDF tools, ~20-30 min.'

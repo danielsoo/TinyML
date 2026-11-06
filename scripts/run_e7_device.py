@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 import time
@@ -68,6 +69,28 @@ def find_port(b: dict):
         if p.vid in vids:
             return p.device
     return None
+
+
+def ensure_idf_python() -> None:
+    """espressif32@6.5.0's ESP-IDF builder imports pkg_resources, which Python 3.12 no longer ships
+    (setuptools is not preinstalled, and setuptools >= 81 drops pkg_resources). Install an older
+    setuptools for the PlatformIO interpreter and for any ESP-IDF virtualenv PlatformIO created."""
+    pys = [sys.executable]
+    penv = Path.home() / ".platformio" / "penv"
+    for d in penv.glob(".espidf-*"):
+        for exe in (d / "Scripts" / "python.exe", d / "bin" / "python"):
+            if exe.exists():
+                pys.append(str(exe))
+    for py in pys:
+        ok = subprocess.run([py, "-c", "import pkg_resources"], capture_output=True).returncode == 0
+        if not ok:
+            extra = ["--user"] if py == sys.executable else []
+            print(f"  installing setuptools<81 (pkg_resources) for {py}", flush=True)
+            subprocess.run([py, "-m", "pip", "install", *extra, "setuptools<81"], stdin=subprocess.DEVNULL)
+    import importlib
+    import site
+    site.addsitedir(site.getusersitepackages())
+    importlib.invalidate_caches()
 
 
 def save_build_meta(project: Path, env: str, dest: Path) -> None:
@@ -149,7 +172,15 @@ def main():
             return rc, log
 
         project = b.get("project", "esp32_agreement")  # esp32_agreement_idf: current esp-tflite-micro runtime
+        is_idf = project.endswith("_idf")
+        if is_idf:
+            ensure_idf_python()
         rc, log = upload(name, env)
+        if rc != 0 and is_idf and "pkg_resources" in log.read_text(encoding="utf-8", errors="replace"):
+            # first build creates the ESP-IDF virtualenv; give it setuptools as well and retry once
+            ensure_idf_python()
+            os.replace(log, log.with_suffix(".attempt1.log"))
+            rc, log = upload(name, env)
         alt = b.get("alt")
         if rc != 0 and alt and alt["marker"] in log.read_text(encoding="utf-8", errors="replace"):
             # a bridge port can belong to either chip (e.g. an ESP32-S3 on its UART "COM" port):
