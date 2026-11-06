@@ -1,16 +1,16 @@
 # Completion record for Dr. Saha's list (email of 2026-11-05)
 
 Numbers: `docs/REVISION_RESULTS.md` (v13.1), `docs/model_hashes.csv`, and the job folders under
-`data/processed/revision/`. Jobs queued on 2026-11-06: **z9** (`saha_checks`, PC only, ~20-40 min) and
-**z10** (`runtime_compare`, classic ESP32 on the PC, ~15 min). Nothing is retrained; thresholds stay frozen.
+`data/processed/revision/`. Jobs run on 2026-11-06: **z9** (`saha_checks`, done: §1b, §2b, §4b) and
+**z10** (`runtime_compare`, classic ESP32; pending). Nothing was retrained; thresholds stayed frozen.
 
 ## Completion table
 | # | Item | Existing evidence | Unresolved | Additional execution? |
 |---|---|---|---|---|
-| 1 | E1/E5 operating points | Per-run recall **and achieved test FAR** for every arm, both budgets, random split and unseen hosts (§1 below, from `compare_arms_rows.csv`); run-paired differences (§1) | Record-level paired tests (McNemar) need the test labels, which are rebuilt on the PC | z9 (no retraining, saved scores + frozen thresholds) |
-| 2 | Exact deployed models | SHA-256, size, weight-scale type and conversion setting of every principal export (`docs/model_hashes.csv`); op versions (§2). Strong PTQ selected **per-channel** exports in 11 of 27 F8/P/S runs, so those Table 2 rows are not deployable on the old runtime | Recall / FAR of per-tensor replacements; of the two flashed re-exports | z9: strong PTQ restricted to per-tensor candidates for every F8/P/S run + the two flashed files |
+| 1 | E1/E5 operating points | Per-run recall **and achieved test FAR** for every arm, both budgets, random split and unseen hosts; run-paired and record-level paired differences with exact McNemar tests (§1, §1b) | None | Done (z9) |
+| 2 | Exact deployed models | SHA-256, size, weight-scale type and conversion of every export (`docs/model_hashes.csv`, §2); per-tensor strong-PTQ replacements for all 27 F8/P/S runs and the two flashed files, with recall, FAR, size, hash (§2b) | None (whether the new runtime runs the per-channel exports: z10) | Done (z9) |
 | 3 | E7 disagreements, resets, stream completeness | Every disagreement classified (§3): per-tensor INT8 models add **0** missed attacks (one CIC record for S80 at 1%) and only false alarms on inputs chosen within two steps of the threshold; 0 disagreements on 1,500 random records except one. Resets: accounted (§3); final streams complete, no missing or duplicated records; S3 and ESP32 outputs bit-identical | Nothing | No |
-| 4 | Split provenance and freeze history | Manifests with SHA-256 per partition (every `*_manifest.json`); rules for the new test split (no record of the old test split); timeline with freeze points and post-hoc additions (§4) | Exact overlap counts of the new partitions with the old training pool | z9 (counts only) |
+| 4 | Split provenance and freeze history | Manifests with SHA-256 per partition; overlap counts with the old split (§4b); timeline with freeze points and post-hoc additions (§4) | None; no validity problem found | Done (z9) |
 | 5 | Resources and reproducibility | Static RAM / flash from the linker, arena, latency definition (§5); reproducibility map (§5) | Run-time heap (free / minimum free) not logged so far | z10 logs heap for both runtimes |
 | - | Range experiments: simulation vs export | E3/E4 INT8 cells are **exported** TFLite INT8 models run in the TFLite interpreter; only the "QAT float" stage (Table 4, E1 `qat` rows) is fake-quant simulation. Failure/recovery pair verified in exports (E3 A vs B/D) and the failing min/max export also on both boards (§6) | Nothing | No |
 | new | Runtime comparison | Old runtime results for the same files on the same board (z8b) | Current Espressif TFLM port | z10: ton_S80 (per-channel, failing), ton_S80_pt (per-tensor), ton_PQ80_int16 (16-bit) through both runtimes on the classic ESP32, identical files and inputs; records runtime versions, kernel config, op versions, outputs, decisions |
@@ -65,7 +65,27 @@ Run-paired differences in recall (points; seeds 1 / 2 / 3), 1% budget:
 | R - S80 | +0.24 +0.47 +1.62 | +0.41 -0.20 -0.02 | +0.12 -1.30 +1.62 |
 
 R - P is positive in all six random-split runs; S80 - P in five of six. On unseen hosts every compact model is
-below the teacher in every run. Record-level discordant counts and exact McNemar p-values: z9 (`paired`).
+below the teacher in every run.
+
+### 1b. Record-level paired comparisons (z9, `saha_checks.json` → `paired`)
+Same test records, frozen thresholds, 1% budget; attacks detected only by A / only by B, exact two-sided
+McNemar p. Recomputing recall and FAR from the saved scores reproduces every row of `compare_arms_rows.csv`
+exactly for the INT8 arms; for the FP32 teacher at most 7 attack decisions differ (its scores are stored as
+float16).
+| pair | TON (s1 / s2 / s3) | CIC (s1 / s2 / s3) | TON hosts (s1 / s2 / s3) |
+|---|---|---|---|
+| R vs P | +352/-29, +514/-23, +219/-8 (p < 1e-54) | +712/-2, +521/-190, +298/-21 (p < 1e-35) | +661/-80, +116/-230, +714/-90 |
+| S80 vs P | +304/-20, +440/-26, +260/-311 | +673/-312, +590/-93, +316/-24 | +648/-92, +184/-33, +738/-443 |
+| QC vs P | +349/-33, +360/-2, +83/-47 | +640/-1, +402/-52, +275/-40 | +679/-11, +126/-290, +459/-41 |
+| R vs S80 | +151/-112, +119/-42, +313/-51 | +384/-35, +99/-265, +31/-46 (p 0.11) | +88/-63, +30/-295, +487/-158 |
+| R vs F | +404/-13, +449/-6, +63/-6 | +1667/-75, +4361/-204, +1250/-88 | +59/-329, +24/-483, +30/-296 |
+| F8 vs F | +390/-20, +451/-18, +33/-15 | +1474/-198, +4448/-138, +1203/-237 | +57/-56 (p 1.0), +24/-74, +17/-45 |
+
+On the random splits, R and QC detect significantly more attacks than P in every run (p <= 0.002), R more
+than the teacher in every run, S80 more than the teacher in five of six (TON run 3: fewer); R vs S80 is mixed. False alarms move by tens (TON) to about two thousand (CIC)
+records in each direction at the same 1% budget. On unseen hosts the teacher detects significantly more
+attacks than R, S80 and P in every run, and every INT8 model avoids the same 121-flow benign cluster
+the teacher flags in runs 1 and 3 (FA +0/-121).
 
 ## 2. Exact deployed models
 `docs/model_hashes.csv`: file, bytes, SHA-256, weight-scale type and conversion (QAT export, or the
@@ -76,7 +96,28 @@ per-channel model at load time and then ignores its scales. Strong PTQ chose a p
 (`tfl_max` / `tfl_clip5`) in TON P 2/3, S 2/3, F8 1/3; CIC P 1/3, S 2/3, F8 2/3; TON hosts P 1/3. All QAT
 arms (Q, QC, R, SQ, SQC) are per-tensor by construction. z9 reports, for every F8/P/S run, the per-tensor
 strong-PTQ replacement (same calibration draw and selection rule, per-tensor candidates only) and the two
-flashed re-exports (ton_S80_pt, ton_P80_pt): recall, FAR, size, hash.
+flashed re-exports (ton_S80_pt, ton_P80_pt): recall, FAR, size, hash (§2b).
+
+### 2b. Per-tensor replacements (z9, `saha_checks.json` → `exports`)
+Strong PTQ restricted to per-tensor candidates (same 2,000-record calibration draw and selection rule).
+Recall % at 1% FAR, mean ± SD over seeds (test FAR %), next to the Table 2 export:
+| dataset | arm | Table 2 export | per-tensor replacement | size (KB) |
+|---|---|---|---|---|
+| TON | F8 | 98.37 ± 0.08 (1.18) | 98.35 ± 0.06 (1.19) | 188-189 |
+| TON | P | 96.40 ± 0.92 (0.95) | 96.57 ± 1.89 (0.98) | 56-57 |
+| TON | S80 | 97.73 ± 0.64 (0.98) | 97.57 ± 0.52 (1.01) | 56-57 |
+| CIC | F8 | 99.46 ± 0.14 (0.94) | 99.33 ± 0.54 (0.90) | 206-207 |
+| CIC | P | 99.09 ± 0.25 (0.94) | 99.12 ± 0.37 (0.92) | 65 |
+| CIC | S80 | 99.54 ± 0.22 (0.92) | 99.57 ± 0.24 (0.97) | 65 |
+| TON hosts | F8 | 98.08 ± 0.18 (0.00) | 98.14 ± 0.17 (0.00) | 189 |
+| TON hosts | P | 94.79 ± 1.42 (0.00) | 93.81 ± 0.27 (0.00) | 57 |
+| TON hosts | S80 | 96.43 ± 0.92 (0.00) | 96.48 ± 0.94 (0.00) | 56-57 |
+
+Where the original selection was already per-tensor the replacement is the same model (identical metrics).
+The largest single-run change is TON-hosts P run 2 (96.42 → 93.50) and TON P run 1 (96.42 → 97.98). The two
+files flashed in E7: ton_S80_pt 97.67 / 0.93 (5%: 99.83 / 4.23), 57,184 B, SHA-256 766e6832…; ton_P80_pt
+97.98 / 1.00 (5%: 99.78 / 4.11), 57,200 B, 477dfba8…. No conclusion of RQ1-RQ3 changes; the paper's Tables 2
+and 3 now report the per-tensor (deployable) numbers.
 
 ## 3. E7 disagreements, resets and stream completeness
 Decisions where device and host differ, at the frozen thresholds (bundle v2, identical on both boards):
@@ -126,7 +167,21 @@ mode (checked by compare_arms before evaluation). Relationship to the old split:
 contain **no** record of the old test split (re-derived by `fed_pipeline.old_test_ids`); new client
 training/validation slices may contain old test records. Exploratory models of the old pipeline were trained
 on its training pool, so records of the new test split were seen in training by those earlier models; no model
-or threshold used in the paper was trained on them. z9 counts each overlap.
+or threshold used in the paper was trained on them.
+
+### 4b. Overlap with the old split (z9, `saha_checks.json` → `provenance`)
+| split | new test: in old test / in old training pool | new client training: in old test | new client validation: in old test |
+|---|---|---|---|
+| TON random | 0 / 21,032 (all) | 18,927 of 75,716 | 2,105 of 8,412 |
+| TON hosts | 0 / 22,866 (all) | 13,797 of 68,937 | 1,538 of 7,660 |
+| CIC random | 0 / 499,038 (all) | 382,551 of 1,529,825 | 49,739 of 199,616 |
+
+Every record of the new test splits was in the old pipeline's training pool, so the exploratory models of
+the old pipeline (which guided the hypotheses, not the final arms) saw them in training. None of the
+models, thresholds or calibration draws reported in the paper did: they were trained and selected only on
+the new client slices, and the method settings were fixed before any new test result (§4). The old test
+records now sit in the new training and validation slices, where no evaluation uses them. We therefore see
+no concrete validity problem and no reason for another split.
 
 ## 5. Resources, latency definition, reproducibility
 Memory, classic ESP32 test firmware (Arduino, TFLM 1.0.0, 14 models embedded): static RAM 77,612 B of

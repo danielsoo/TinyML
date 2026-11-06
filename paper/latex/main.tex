@@ -201,7 +201,8 @@ For each teacher seed and memory budget (80\,KB: structured pruning keeps 50\% o
 \emph{Strong PTQ} builds seven calibrations from 2,000 records of client 0 (TFLite min/max with and
 without $\pm$5\,SD input clipping, per-tensor 99.9 / 99.99th percentile, MSE~\cite{banner2019aciq},
 KL~\cite{wu2020integer}, clipped 99.99th percentile) and keeps the one with the best mean validation
-recall at the two FAR budgets. Fine-tuning uses 10k records per client, either FedAvg over all four
+recall at the two FAR budgets; reported models are restricted to the per-tensor candidates (\S\ref{sec:device}).
+Fine-tuning uses 10k records per client, either FedAvg over all four
 clients or one client alone (the client-data constraint).
 
 \subsection{Operating Points and Metrics}\label{sec:metrics}
@@ -221,7 +222,9 @@ arms Q and SQ lies within 0.2 points of the teacher (99.7--99.9\% on \ton, 99.8-
 \begin{table}[t]
 \caption{Attack recall (\%) at a 1\% FAR budget chosen on client validation data, mean $\pm$ SD over three
 federated runs; test FAR in brackets. 80\,KB budget; fine-tuning FedAvg over four clients (10k records each).
-1-cl.: fine-tuning on one client's 10k records.}
+1-cl.: fine-tuning on one client's 10k records. F8, P and S80 use strong PTQ restricted to per-tensor weight
+scales, the form the runtime of \S\ref{sec:device} executes correctly; allowing per-channel exports changes their
+mean recall by at most 0.2 points ($^\dagger$: entries from that unrestricted selection).}
 \label{tab:e1}
 \small\setlength{\tabcolsep}{2pt}
 \begin{adjustbox}{max width=\columnwidth}
@@ -230,16 +233,16 @@ federated runs; test FAR in brackets. 80\,KB budget; fine-tuning FedAvg over fou
 arm & KB & \ton & \cic & 1-cl.\ \ton / \cic \\
 \midrule
 F (FP32) & -- & 96.68$\pm$1.38 [0.84] & 96.89$\pm$2.05 [0.98] & \\
-F8 & 189/207 & 98.37$\pm$0.08 [1.18] & 99.46$\pm$0.14 [0.94] & \\
-P & 66/65 & 96.40$\pm$0.92 [0.95] & 99.09$\pm$0.25 [0.94] & 96.92 / 99.06 \\
+F8 & 188/206 & 98.35$\pm$0.06 [1.19] & 99.33$\pm$0.54 [0.90] & \\
+P & 57/65 & 96.57$\pm$1.89 [0.98] & 99.12$\pm$0.37 [0.92] & 96.92$^\dagger$ / 99.06$^\dagger$ \\
 Q & 57/65 & 55.4$\pm$48.8 [0.61] & 81.9$\pm$9.2 [0.80] & 59.6 / 88.5 \\
 QC & 57/65 & 97.86$\pm$0.44 [1.01] & 99.57$\pm$0.10 [0.94] & \\
 R & 57/65 & \textbf{98.51}$\pm$0.11 [1.16] & \textbf{99.60}$\pm$0.15 [0.92] & 97.80 / 99.52 \\
-S80 & 57/65 & 97.73$\pm$0.64 [0.98] & 99.54$\pm$0.22 [0.92] & \\
+S80 & 57/65 & 97.57$\pm$0.52 [1.01] & 99.57$\pm$0.24 [0.97] & \\
 SQ & 57/65 & 59.0$\pm$51.1 [0.55] & 84.8$\pm$5.4 [0.82] & \\
 SQC & 57/65 & 97.71$\pm$1.09 [1.01] & 99.59$\pm$0.07 [0.97] & \\
 \midrule
-\multicolumn{5}{l}{128\,KB budget: P 97.78 / 99.19, QC 98.24 / 99.56, R 98.72 / 99.64, S128 98.58 / 99.37} \\
+\multicolumn{5}{l}{128\,KB budget: P$^\dagger$ 97.78 / 99.19, QC 98.24 / 99.56, R 98.72 / 99.64, S128$^\dagger$ 98.58 / 99.37} \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
@@ -265,22 +268,23 @@ changes recall by at most 0.8 points relative to fine-tuning across all clients 
 only the failing Q arm moves more, in both directions.
 
 \paragraph{Unseen hosts (E6).} On the host-grouped \ton split (Table~\ref{tab:e6}) compression costs
-1.6--1.9 (R, S, QC) to 3.4 points (P) relative to the teacher, more than on the random split, with the same
+1.6--1.9 (R, S, QC) to 4.4 points (P) relative to the teacher, more than on the random split, with the same
 ranking; the QAT collapse and its repair reproduce. The FAR budget chosen on validation does not
 transfer to unseen hosts for the float models (test FAR 3.2\% at a 1\% budget), while the INT8 models
 stay below it; with 2,537 benign test records from few hosts this FAR estimate is noisy.
 
 \begin{table}[t]
-\caption{\ton, unseen source hosts (E6): recall (\%) at a 1\% validation FAR budget, 80\,KB, three runs.}
+\caption{\ton, unseen source hosts (E6): recall (\%) at a 1\% validation FAR budget, 80\,KB, three runs
+(F8, P, S80 with per-tensor strong PTQ).}
 \label{tab:e6}
 \small\setlength{\tabcolsep}{3pt}
 \begin{tabular}{lllll}
 \toprule
 F & F8 & R & S80 & QC \\
-98.20$\pm$0.11 & 98.08$\pm$0.18 & 96.57$\pm$0.62 & 96.43$\pm$0.92 & 96.30$\pm$0.87 \\
+98.20$\pm$0.11 & 98.14$\pm$0.17 & 96.57$\pm$0.62 & 96.48$\pm$0.94 & 96.30$\pm$0.87 \\
 \midrule
 SQC & P & Q & SQ & \\
-95.96$\pm$1.60 & 94.79$\pm$1.42 & 52.9$\pm$45.8 & 56.9$\pm$49.2 & \\
+95.96$\pm$1.60 & 93.81$\pm$0.27 & 52.9$\pm$45.8 & 56.9$\pm$49.2 & \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -300,7 +304,7 @@ gives up.
 
 \begin{table}[t]
 \caption{Test attacks lost / recovered between stages at the 1\% FAR operating point (sum over three
-runs, 80\,KB). Families with the most losses in brackets.}
+runs, 80\,KB; P as first selected, including per-channel exports). Families with the most losses in brackets.}
 \label{tab:e2}
 \small\setlength{\tabcolsep}{2pt}
 \begin{adjustbox}{max width=\columnwidth}
@@ -342,7 +346,8 @@ R & FP32$\rightarrow$INT8 & 104 & 46 & scanning 73 \\
 \end{axis}
 \end{tikzpicture}
 \caption{E2 on \cic: test attacks that the compact FP32 model detects and its INT8 version misses, at
-the 1\% FAR operating point, by family (80\,KB, sum over three runs). Totals: P 1,040, R 127, S80 369.}
+the 1\% FAR operating point, by family (80\,KB, sum over three runs; P and S80 as first selected, including
+per-channel exports). Totals: P 1,040, R 127, S80 369.}
 \label{fig:e2}
 \end{figure}
 \subsection{Input Range versus Hidden Range (E3)}\label{sec:e3}
@@ -455,7 +460,7 @@ Table~\ref{tab:remedies} lists what worked, its effect and its cost. Bounding th
 remedy that matters: it is free on the device, needs no extra client data, and turns the two failure
 modes (min/max calibration with extreme records, QAT on unclipped inputs) into the best arms.
 Excluding extreme records from the calibration draw is the gentler variant for models that use the
-tails. Distillation helps on \ton at 80\,KB (+2.1 over P) and adds 0.5 on \cic. Training a compact
+tails. Distillation helps on \ton at 80\,KB (+1.9 over P) and adds 0.5 on \cic. Training a compact
 model from scratch removes the compression step altogether at the price of a second federated
 training (26\,min vs.\ 40\,min for the \cic teacher). 16-bit activations remove the remaining tie loss
 but enlarge the arena and, as \S\ref{sec:device} shows, need runtime support. Fine-tuning data were
@@ -472,7 +477,7 @@ remedy & effect & cost \\
 \midrule
 clip calibration inputs $\pm$5\,SD, or drop records beyond 10\,SD & \cic 0.0$\rightarrow$98.9--99.0 with extreme records in the draw & none on device \\
 QAT on clipped inputs (QC, SQC) & \ton 55.4$\rightarrow$97.9, \cic 81.9$\rightarrow$99.6 & none \\
-distillation from F (R vs.\ P) & \ton +2.1, \cic +0.5 & teacher pass over client data \\
+distillation from F (R vs.\ P) & \ton +1.9, \cic +0.5 & teacher pass over client data \\
 compact model from scratch (S) & equal to P/R on \cic & second federated training \\
 16-bit activations & \cic lost attacks 462$\rightarrow$131 & arena 1.4$\rightarrow$1.8\,KB, +14\% latency, runtime support \\
 per-tensor weight scales & device agreement (\S\ref{sec:device}) & none \\

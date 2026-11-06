@@ -748,3 +748,13 @@ from the host come from the TFLM runtime, not from the chip; the agreement figur
 both boards. Invoke latency (median): 13.2-13.4 ms (TON, 57-68 KB), 15.3-15.4 ms (CIC, 65-67 KB),
 13.8 / 16.1 ms with 16-bit activations; input quantization 11-13 µs; arena 1.4 KB (1.8 KB for 16-bit).
 
+### Completion checks for Dr. Saha (job 2026-11-06_z9_saha_checks; details in docs/SAHA_COMPLETION.md)
+- Per-tensor strong PTQ for every F8 / P / S80 run (the deployable form on TensorFlowLite_ESP32 1.0.0):
+  recall at 1% FAR TON F8 98.35, P 96.57, S80 97.57; CIC F8 99.33, P 99.12, S80 99.57; TON hosts F8 98.14,
+  P 93.81, S80 96.48 (Table 2 / 3 of the paper now use these). Mean change vs the unrestricted selection
+  <= 0.2 points on the random splits, -0.98 for P on unseen hosts.
+- Record-level McNemar tests (frozen thresholds): R and QC beat P in every random-split run (p <= 0.002);
+  R beats the teacher in every random-split run; on unseen hosts the teacher beats R, S80 and P in every run.
+- Split provenance: no new test record was in the old test split; all were in the old training pool
+  (used only by the exploratory models); old test records now sit in client training/validation slices.
+
