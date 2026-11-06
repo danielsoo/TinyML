@@ -1,0 +1,4 @@
+## Current Espressif TFLM port; the resolved version and hash are written to dependencies.lock
+dependencies:
+  idf: ">=4.4"
+  espressif/esp-tflite-micro: ">=1.2.0"

@@ -70,6 +70,24 @@ def find_port(b: dict):
     return None
 
 
+def save_build_meta(project: Path, env: str, dest: Path) -> None:
+    """Runtime provenance: library / component versions and the effective build configuration."""
+    import shutil
+    dest.mkdir(parents=True, exist_ok=True)
+    pats = [f".pio/libdeps/{env}/TensorFlowLite_ESP32/library.*", f".pio/libdeps/{env}/TensorFlowLite_ESP32/.piopm",
+            "dependencies.lock", f"sdkconfig.{env}", "managed_components/espressif__esp-tflite-micro/idf_component.yml",
+            "managed_components/espressif__esp-tflite-micro/.component_hash", "managed_components/espressif__esp-nn/idf_component.yml",
+            "platformio.ini", "sdkconfig.defaults"]
+    for pat in pats:
+        for f in project.glob(pat):
+            shutil.copyfile(f, dest / (project.name + "__" + f.parent.name + "__" + f.name.lstrip(".")))
+    try:
+        import platformio
+        (dest / "platformio_version.txt").write_text(platformio.__version__, encoding="utf-8")
+    except Exception:
+        pass
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--spec", required=True)
@@ -125,11 +143,12 @@ def main():
             print(f"▶ {name}: build + upload ({env}) on {port}", flush=True)
             log = out / f"{name}_platformio.log"
             with open(log, "w", encoding="utf-8", errors="replace") as fh:
-                rc = subprocess.run([sys.executable, "-m", "platformio", "run", "-d", str(ROOT / "esp32_agreement"),
+                rc = subprocess.run([sys.executable, "-m", "platformio", "run", "-d", str(ROOT / project),
                                      "-e", env, "-t", "upload", "--upload-port", port],
                                     stdout=fh, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL).returncode
             return rc, log
 
+        project = b.get("project", "esp32_agreement")  # esp32_agreement_idf: current esp-tflite-micro runtime
         rc, log = upload(name, env)
         alt = b.get("alt")
         if rc != 0 and alt and alt["marker"] in log.read_text(encoding="utf-8", errors="replace"):
@@ -150,6 +169,7 @@ def main():
         port = find_port(b) or port
         print(f"▶ {name}: agreement run on {port}", flush=True)
         try:
+            save_build_meta(ROOT / project, env, out / name / "build_meta")
             rc = run_agreement(str(ROOT / spec["bundle"]), port, str(out / name), spec.get("limit"),
                                int(b.get("baud", 921600)), spec.get("models"))
             summary["boards"][name] = {"status": "ok" if rc == 0 else f"rc={rc}", "port": port}

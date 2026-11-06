@@ -150,8 +150,9 @@ def run(bundle_dir: str, port: str, out_dir: str | None, limit: int | None, baud
         t_end = time.time() + seconds
         while time.time() < t_end:
             line = ser.readline().decode(errors="replace").strip()
-            if line.startswith("DEVICE"):
-                device.update(_kv(line))
+            if line.startswith(("DEVICE", "RUNTIME", "MEMORY")):
+                device.update({(k if line.startswith("DEVICE") else f"{line.split()[0].lower()}_{k}"): v
+                               for k, v in _kv(line).items()})
             elif line.startswith("MODEL"):
                 kv = _kv(line)
                 dev_models[kv["name"]] = int(kv["idx"])
@@ -240,7 +241,7 @@ def run(bundle_dir: str, port: str, out_dir: str | None, limit: int | None, baud
                     print(f"❌ {name}: could not reselect after reset")
                     break
                 continue
-            if line.startswith(("DEVICE", "MODEL", "READY")):  # the board rebooted without dropping the port
+            if line.startswith(("DEVICE", "RUNTIME", "MEMORY", "MODEL", "READY")):  # the board rebooted without dropping the port
                 resets += 1
                 print(f"⚠  {name} vec {i}: device restarted; reselecting and resuming", flush=True)
                 banner(3.0)

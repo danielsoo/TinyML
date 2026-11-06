@@ -1,0 +1,11 @@
+# Spec for scripts/run_e7_device.py (step device_agree): the same model files and inputs through
+# both runtimes on the same classic ESP32 (Dr. Saha, 2026-11-05): first the Arduino TensorFlowLite_ESP32
+# 1.0.0 build (esp32_agreement, reference kernels), then the current Espressif port
+# (esp32_agreement_idf, espressif/esp-tflite-micro). Failing per-channel model ton_S80, its per-tensor
+# re-export ton_S80_pt, and the 16-bit-activation model ton_PQ80_int16 (same run, no extra cost).
+bundle: data/processed/revision/2026-11-05_z7_device_bundle/device_bundle
+boards:
+  - {name: esp32_runtime_arduino_tflm_1_0_0, env: esp32dev, project: esp32_agreement, vids: [0x10C4, 0x1A86, 0x0403]}
+  - {name: esp32_runtime_esp_tflite_micro, env: esp32dev, project: esp32_agreement_idf, vids: [0x10C4, 0x1A86, 0x0403]}
+limit: null
+models: [ton_S80, ton_S80_pt, ton_PQ80_int16]

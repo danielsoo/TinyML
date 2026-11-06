@@ -7,7 +7,7 @@
 #   bash scripts/run_revision_experiments.sh --with-failed --with-scaling   # + fixed-LR row, 20/50 clients
 #   bash scripts/run_revision_experiments.sh --config-dir config/tuning/<job>   # alternate configs
 #   bash scripts/run_revision_experiments.sh --steps non_iid          # subset of: baseline_ablation,non_iid,client_scaling,
-#                                                                     #   fixed_lr,qat_fl,robustness,compression_ablation,quant_distill,local_only,ptq_calibration,qat_stability,compression_combos,recall_priority,attack_counts,ton_sweep,quant_lit,audit,train_fl,compare_arms,range_mechanism,device_bundle,device_agree
+#                                                                     #   fixed_lr,qat_fl,robustness,compression_ablation,quant_distill,local_only,ptq_calibration,qat_stability,compression_combos,recall_priority,attack_counts,ton_sweep,quant_lit,audit,train_fl,compare_arms,range_mechanism,device_bundle,device_agree,saha_checks
 #   bash scripts/run_revision_experiments.sh --steps compression_ablation --config-dir <dir with compression_ablation.yaml>
 # Re-running with the same --out resumes: finished steps are skipped.
 set -uo pipefail
@@ -151,10 +151,18 @@ if wanted device_agree; then
   # Flash esp32_agreement and run the agreement test on every connected board (guide E7).
   # Windows Python through WSL interop: the boards' COM ports are only visible on the Windows side.
   win_py() { "$(command -v py.exe || echo /mnt/c/Windows/py.exe)" "$@" < /dev/null; }
+  # converter version (the bundle models were converted with this TensorFlow on the PC)
+  python -c "import tensorflow as tf, sys; print('tensorflow', tf.__version__, 'python', sys.version.split()[0])" \
+    > "$OUT/converter_version.txt" 2>&1 || true
   win_py scripts/run_e7_device.py --spec "$CONFIG_DIR/device_agree.yaml" --output-dir "$OUT/device_e7" --probe
   if [ $? -eq 3 ]; then echo "waiting: no board to test is connected"; exit 3; fi
   step device_agree win_py scripts/run_e7_device.py \
     --spec "$CONFIG_DIR/device_agree.yaml" --output-dir "$OUT/device_e7" || FAILED=1
+fi
+if wanted saha_checks; then
+  # Provenance of the rebuilt splits, per-tensor export evaluation, record-level paired tests
+  step saha_checks python scripts/saha_checks.py \
+    --spec "$CONFIG_DIR/saha_checks.yaml" --output-dir "$OUT/saha_checks" || FAILED=1
 fi
 if wanted audit; then
   # Data / implementation audit (docs/AUDIT.md)
@@ -184,7 +192,7 @@ fi
   echo "- host: $(uname -srm), $(nproc) cores"
   for f in "$OUT"/*.done; do [ -f "$f" ] && echo "- $(basename "$f" .done): $(( $(cat "$f") / 60 )) min"; done
   echo
-  for md in "$OUT"/baseline/baseline_ablation.md "$OUT"/non_iid/non_iid_ablation.md "$OUT"/client_scaling/non_iid_ablation.md "$OUT"/compression_ablation/compression_ablation.md "$OUT"/fixed_lr/non_iid_ablation.md "$OUT"/qat_fl/non_iid_ablation.md "$OUT"/robustness/robustness.md "$OUT"/quant_distill/quant_distill.md "$OUT"/local_only/local_only.md "$OUT"/ptq_calibration/ptq_calibration.md "$OUT"/qat_stability/qat_stability.md "$OUT"/compression_combos/compression_combos.md "$OUT"/recall_priority/recall_priority.md "$OUT"/attack_counts/attack_type_counts.md "$OUT"/ton_sweep/ton_sweep.md "$OUT"/quant_lit/quant_lit.md "$OUT"/audit/audit.md "$OUT"/train_fl/train_fl.md "$OUT"/compare_arms/compare_arms.md "$OUT"/range_mechanism/range_mechanism.md "$OUT"/device_e7/device_e7.md; do
+  for md in "$OUT"/baseline/baseline_ablation.md "$OUT"/non_iid/non_iid_ablation.md "$OUT"/client_scaling/non_iid_ablation.md "$OUT"/compression_ablation/compression_ablation.md "$OUT"/fixed_lr/non_iid_ablation.md "$OUT"/qat_fl/non_iid_ablation.md "$OUT"/robustness/robustness.md "$OUT"/quant_distill/quant_distill.md "$OUT"/local_only/local_only.md "$OUT"/ptq_calibration/ptq_calibration.md "$OUT"/qat_stability/qat_stability.md "$OUT"/compression_combos/compression_combos.md "$OUT"/recall_priority/recall_priority.md "$OUT"/attack_counts/attack_type_counts.md "$OUT"/ton_sweep/ton_sweep.md "$OUT"/quant_lit/quant_lit.md "$OUT"/audit/audit.md "$OUT"/train_fl/train_fl.md "$OUT"/compare_arms/compare_arms.md "$OUT"/range_mechanism/range_mechanism.md "$OUT"/device_e7/device_e7.md "$OUT"/saha_checks/saha_checks.md; do
     [ -f "$md" ] && { cat "$md"; echo; }
   done
 } > "$OUT/SUMMARY.md"

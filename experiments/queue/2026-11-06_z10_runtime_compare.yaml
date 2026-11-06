@@ -1,0 +1,8 @@
+id: 2026-11-06_z10_runtime_compare
+config_dir: config/jobs/2026-11-06_z10_runtime_compare
+steps: device_agree
+flags: []
+why: 'Runtime comparison requested by Dr. Saha: identical model files and inputs on
+  the classic ESP32 with the old Arduino TFLM runtime and the current esp-tflite-micro
+  port (per-channel ton_S80, per-tensor ton_S80_pt, 16-bit ton_PQ80_int16). Waits
+  until the ESP32 is plugged in. ~15 min.'

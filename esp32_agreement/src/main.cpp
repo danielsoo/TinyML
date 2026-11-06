@@ -78,9 +78,10 @@ void select_model(int idx) {
     dim = 0;
     return;
   }
-  Serial.printf("SELECTED idx=%d name=%s dim=%d arena_used=%u in_type=%s in_scale=%.9g in_zp=%d out_type=%s\n",
+  Serial.printf("SELECTED idx=%d name=%s dim=%d arena_used=%u in_type=%s in_scale=%.9g in_zp=%d out_type=%s free_heap=%u\n",
                 idx, kModels[idx].name, dim, static_cast<unsigned>(interpreter->arena_used_bytes()),
-                type_name(in->type), in->params.scale, in->params.zero_point, type_name(out->type));
+                type_name(in->type), in->params.scale, in->params.zero_point, type_name(out->type),
+                static_cast<unsigned>(ESP.getFreeHeap()));
 }
 
 void run_vector() {
@@ -121,6 +122,9 @@ void setup() {
                 ESP.getChipModel(), static_cast<int>(ESP.getChipCores()),
                 static_cast<unsigned>(ESP.getCpuFreqMHz()),
                 static_cast<unsigned>(ESP.getFlashChipSize()), ESP.getSdkVersion());
+  Serial.println("RUNTIME name=TensorFlowLite_ESP32-1.0.0 kernels=reference");
+  Serial.printf("MEMORY free_heap=%u min_free_heap=%u arena_static=%d\n", static_cast<unsigned>(ESP.getFreeHeap()),
+                static_cast<unsigned>(ESP.getMinFreeHeap()), kTensorArenaSize);
   for (int i = 0; i < kNumModels; ++i)
     Serial.printf("MODEL idx=%d name=%s bytes=%u\n", i, kModels[i].name, kModels[i].len);
   Serial.printf("READY models=%d arena=%d\n", kNumModels, kTensorArenaSize);
@@ -148,6 +152,9 @@ void loop() {
                   ESP.getChipModel(), static_cast<int>(ESP.getChipCores()),
                   static_cast<unsigned>(ESP.getCpuFreqMHz()),
                   static_cast<unsigned>(ESP.getFlashChipSize()), ESP.getSdkVersion());
+    Serial.println("RUNTIME name=TensorFlowLite_ESP32-1.0.0 kernels=reference");
+    Serial.printf("MEMORY free_heap=%u min_free_heap=%u arena_static=%d\n", static_cast<unsigned>(ESP.getFreeHeap()),
+                  static_cast<unsigned>(ESP.getMinFreeHeap()), kTensorArenaSize);
     for (int i = 0; i < kNumModels; ++i)
       Serial.printf("MODEL idx=%d name=%s bytes=%u\n", i, kModels[i].name, kModels[i].len);
     Serial.printf("READY models=%d arena=%d\n", kNumModels, kTensorArenaSize);

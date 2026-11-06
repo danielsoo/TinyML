@@ -38,3 +38,9 @@ worker.out
 esp32_agreement/.pio/
 esp32_agreement/src/model_data.cc
 esp32_agreement/include/model_data.h
+esp32_agreement_idf/.pio/
+esp32_agreement_idf/managed_components/
+esp32_agreement_idf/dependencies.lock
+esp32_agreement_idf/sdkconfig.*
+!esp32_agreement_idf/sdkconfig.defaults
+esp32_agreement_idf/src/model_data.*
