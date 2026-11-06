@@ -1,0 +1,101 @@
+Processing esp32dev (board: esp32dev; platform: espressif32@6.5.0; framework: espidf)
+--------------------------------------------------------------------------------
+Platform Manager: Installing espressif32 @ 6.5.0
+Downloading 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100%
+Unpacking 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100%
+Platform Manager: espressif32@6.5.0 has been installed!
+Tool Manager: Installing espressif/toolchain-xtensa-esp32 @ 12.2.0+20230208
+Downloading 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100%
+Unpacking 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100%
+Tool Manager: toolchain-xtensa-esp32@12.2.0+20230208 has been installed!
+Tool Manager: Installing platformio/toolchain-esp32ulp @ ~1.23500.0
+Downloading 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100%
+Unpacking 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100%
+Tool Manager: toolchain-esp32ulp@1.23500.220830 has been installed!
+Tool Manager: Installing espressif/tool-xtensa-esp-elf-gdb @ ~11.2.0
+Downloading 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100%
+Unpacking 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100%
+Tool Manager: tool-xtensa-esp-elf-gdb@11.2.0+20230208 has been installed!
+Tool Manager: Installing espressif/tool-riscv32-esp-elf-gdb @ ~11.2.0
+Downloading 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100%
+Unpacking 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100%
+Tool Manager: tool-riscv32-esp-elf-gdb@11.2.0+20220823 has been installed!
+Tool Manager: Installing platformio/framework-espidf @ ~3.50102.0
+Downloading 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100%
+Unpacking 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100%
+Tool Manager: framework-espidf@3.50102.240122 has been installed!
+Tool Manager: Installing platformio/tool-esptoolpy @ ~1.40501.0
+Downloading 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100%
+Unpacking 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100%
+Tool Manager: tool-esptoolpy@1.40501.0 has been installed!
+Tool Manager: Installing platformio/tool-cmake @ ~3.16.0
+Downloading 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100%
+Unpacking 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100%
+Tool Manager: tool-cmake@3.16.4 has been installed!
+Tool Manager: Installing platformio/tool-ninja @ ^1.7.0
+Downloading 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100%
+Unpacking 0% 10% 20%
+Tool Manager: tool-ninja@1.9.0 has been installed!
+Tool Manager: Installing platformio/tool-mconf @ ~1.4060000.0
+Downloading 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100%
+Unpacking 0% 10% 20% 30% 40% 50% 60% 70% 80%
+Tool Manager: tool-mconf@1.4060000.20190628 has been installed!
+Tool Manager: Installing platformio/tool-idf @ ~1.0.1
+Downloading 0% 10% 20%
+Unpacking 0% 10% 20%
+Tool Manager: tool-idf@1.0.1 has been installed!
+Verbose mode can be enabled via `-v, --verbose` option
+[gen_model_data] 3 models from C:\Users\danie\Documents\Projects\TinyML\data/processed/revision/2026-11-05_z7_device_bundle/device_bundle
+CONFIGURATION: https://docs.platformio.org/page/boards/espressif32/esp32dev.html
+PLATFORM: Espressif 32 (6.5.0) > Espressif ESP32 Dev Module
+HARDWARE: ESP32 240MHz, 320KB RAM, 4MB Flash
+DEBUG: Current (cmsis-dap) External (cmsis-dap, esp-bridge, esp-prog, iot-bus-jtag, jlink, minimodule, olimex-arm-usb-ocd, olimex-arm-usb-ocd-h, olimex-arm-usb-tiny-h, olimex-jtag-tiny, tumpa)
+PACKAGES: 
+ - framework-espidf @ 3.50102.240122 (5.1.2) 
+ - tool-cmake @ 3.16.4 
+ - tool-esptoolpy @ 1.40501.0 (4.5.1) 
+ - tool-idf @ 1.0.1 
+ - tool-mconf @ 1.4060000.20190628 (406.0.0) 
+ - tool-mkfatfs @ 2.0.1 
+ - tool-mklittlefs @ 1.203.210628 (2.3) 
+ - tool-mkspiffs @ 2.230.0 (2.30) 
+ - tool-ninja @ 1.9.0 
+ - tool-riscv32-esp-elf-gdb @ 11.2.0+20220823 
+ - tool-xtensa-esp-elf-gdb @ 11.2.0+20230208 
+ - toolchain-esp32ulp @ 1.23500.220830 (2.35.0) 
+ - toolchain-xtensa-esp32 @ 12.2.0+20230208
+ModuleNotFoundError: No module named 'pkg_resources':
+  File "C:\Users\danie\AppData\Local\Programs\Python\Python312\Lib\site-packages\platformio\builder\main.py", line 173:
+    env.SConscript("$BUILD_SCRIPT")
+  File "C:\Users\danie\.platformio\packages\tool-scons\scons-local-4.11.1\SCons\Script\SConscript.py", line 625:
+    return _SConscript(self.fs, *files, **subst_kw)
+  File "C:\Users\danie\.platformio\packages\tool-scons\scons-local-4.11.1\SCons\Script\SConscript.py", line 284:
+    exec(compile(scriptdata, scriptname, 'exec'), call_stack[-1].globals)
+  File "C:\Users\danie\.platformio\platforms\espressif32@6.5.0\builder\main.py", line 346:
+    target_elf = env.BuildProgram()
+  File "C:\Users\danie\.platformio\packages\tool-scons\scons-local-4.11.1\SCons\Util\envs.py", line 302:
+    return self.method(*nargs, **kwargs)
+  File "C:\Users\danie\AppData\Local\Programs\Python\Python312\Lib\site-packages\platformio\builder\tools\piobuild.py", line 61:
+    env.ProcessProgramDeps()
+  File "C:\Users\danie\.platformio\packages\tool-scons\scons-local-4.11.1\SCons\Util\envs.py", line 302:
+    return self.method(*nargs, **kwargs)
+  File "C:\Users\danie\AppData\Local\Programs\Python\Python312\Lib\site-packages\platformio\builder\tools\piobuild.py", line 122:
+    env.BuildFrameworks(env.get("PIOFRAMEWORK"))
+  File "C:\Users\danie\.platformio\packages\tool-scons\scons-local-4.11.1\SCons\Util\envs.py", line 302:
+    return self.method(*nargs, **kwargs)
+  File "C:\Users\danie\AppData\Local\Programs\Python\Python312\Lib\site-packages\platformio\builder\tools\piobuild.py", line 353:
+    SConscript(env.GetFrameworkScript(name), exports="env")
+  File "C:\Users\danie\.platformio\packages\tool-scons\scons-local-4.11.1\SCons\Script\SConscript.py", line 689:
+    return method(*args, **kw)
+  File "C:\Users\danie\.platformio\packages\tool-scons\scons-local-4.11.1\SCons\Script\SConscript.py", line 625:
+    return _SConscript(self.fs, *files, **subst_kw)
+  File "C:\Users\danie\.platformio\packages\tool-scons\scons-local-4.11.1\SCons\Script\SConscript.py", line 284:
+    exec(compile(scriptdata, scriptname, 'exec'), call_stack[-1].globals)
+  File "C:\Users\danie\.platformio\platforms\espressif32@6.5.0\builder\frameworks\espidf.py", line 29:
+    import pkg_resources
+========================= [FAILED] Took 98.59 seconds =========================
+
+Environment    Status    Duration
+-------------  --------  ------------
+esp32dev       FAILED    00:01:38.593
+==================== 1 failed, 0 succeeded in 00:01:38.593 ====================

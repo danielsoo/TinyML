@@ -1,0 +1,71 @@
+  port COM3: vid=0x10c4 pid=0xea60 Silicon Labs CP210x USB to UART Bridge (COM3) | USB VID:PID=10C4:EA60 SER=0001 LOCATION=1-1.3
+  port COM1: vid=None pid=None Communications Port (COM1) | ACPI\PNP0501\0
+boards done: []; to do: ['esp32_runtime_arduino_tflm_1_0_0', 'esp32_runtime_esp_tflite_micro']; connected: ['esp32_runtime_arduino_tflm_1_0_0', 'esp32_runtime_esp_tflite_micro']
+python: C:\Users\danie\AppData\Local\Programs\Python\Python312\python.exe 3.12.10
+serial ports: [{'device': 'COM3', 'vid': 4292, 'pid': 60000, 'description': 'Silicon Labs CP210x USB to UART Bridge (COM3)'}, {'device': 'COM1', 'vid': None, 'pid': None, 'description': 'Communications Port (COM1)'}]
+▶ esp32_runtime_arduino_tflm_1_0_0: build + upload (esp32dev) on COM3
+▶ esp32_runtime_arduino_tflm_1_0_0: agreement run on COM3
+device: {'runtime_name': 'TensorFlowLite_ESP32-1.0.0', 'runtime_kernels': 'reference', 'memory_free_heap': '291168', 'memory_min_free_heap': '285568', 'memory_arena_static': '49152'}
+  ton_S80: 0/4462
+  ton_S80: 500/4462
+  ton_S80: 1000/4462
+  ton_S80: 1500/4462
+  ton_S80: 2000/4462
+  ton_S80: 2500/4462
+  ton_S80: 3000/4462
+  ton_S80: 3500/4462
+  ton_S80: 4000/4462
+✅ ton_S80: exact 170/4462, max diff 170.0 steps, decisions FAR0.01: 2209/4462, FAR0.05: 4269/4462, invoke median 13272.0 us
+  ton_PQ80_int16: 0/4462
+  ton_PQ80_int16: 500/4462
+  ton_PQ80_int16: 1000/4462
+  ton_PQ80_int16: 1500/4462
+  ton_PQ80_int16: 2000/4462
+  ton_PQ80_int16: 2500/4462
+  ton_PQ80_int16: 3000/4462
+  ton_PQ80_int16: 3500/4462
+  ton_PQ80_int16: 4000/4462
+✅ ton_PQ80_int16: exact 425/4462, max diff 255.0390625 steps, decisions FAR0.01: 3379/4462, FAR0.05: 4346/4462, invoke median 13866.0 us
+  ton_S80_pt: 0/4462
+  ton_S80_pt: 500/4462
+  ton_S80_pt: 1000/4462
+  ton_S80_pt: 1500/4462
+  ton_S80_pt: 2000/4462
+  ton_S80_pt: 2500/4462
+  ton_S80_pt: 3000/4462
+  ton_S80_pt: 3500/4462
+  ton_S80_pt: 4000/4462
+✅ ton_S80_pt: exact 4099/4462, max diff 4.0 steps, decisions FAR0.01: 4462/4462, FAR0.05: 4458/4462, invoke median 13389.0 us
+Saved data\processed\revision\2026-11-06_z10_runtime_compare\device_e7\esp32_runtime_arduino_tflm_1_0_0\device_agreement.md
+▶ esp32_runtime_esp_tflite_micro: build + upload (esp32dev) on COM3
+❌ esp32_runtime_esp_tflite_micro: platformio failed (rc=1)
+  File "C:\Users\danie\.platformio\packages\tool-scons\scons-local-4.11.1\SCons\Script\SConscript.py", line 284:
+    exec(compile(scriptdata, scriptname, 'exec'), call_stack[-1].globals)
+  File "C:\Users\danie\.platformio\platforms\espressif32@6.5.0\builder\main.py", line 346:
+    target_elf = env.BuildProgram()
+  File "C:\Users\danie\.platformio\packages\tool-scons\scons-local-4.11.1\SCons\Util\envs.py", line 302:
+    return self.method(*nargs, **kwargs)
+  File "C:\Users\danie\AppData\Local\Programs\Python\Python312\Lib\site-packages\platformio\builder\tools\piobuild.py", line 61:
+    env.ProcessProgramDeps()
+  File "C:\Users\danie\.platformio\packages\tool-scons\scons-local-4.11.1\SCons\Util\envs.py", line 302:
+    return self.method(*nargs, **kwargs)
+  File "C:\Users\danie\AppData\Local\Programs\Python\Python312\Lib\site-packages\platformio\builder\tools\piobuild.py", line 122:
+    env.BuildFrameworks(env.get("PIOFRAMEWORK"))
+  File "C:\Users\danie\.platformio\packages\tool-scons\scons-local-4.11.1\SCons\Util\envs.py", line 302:
+    return self.method(*nargs, **kwargs)
+  File "C:\Users\danie\AppData\Local\Programs\Python\Python312\Lib\site-packages\platformio\builder\tools\piobuild.py", line 353:
+    SConscript(env.GetFrameworkScript(name), exports="env")
+  File "C:\Users\danie\.platformio\packages\tool-scons\scons-local-4.11.1\SCons\Script\SConscript.py", line 689:
+    return method(*args, **kw)
+  File "C:\Users\danie\.platformio\packages\tool-scons\scons-local-4.11.1\SCons\Script\SConscript.py", line 625:
+    return _SConscript(self.fs, *files, **subst_kw)
+  File "C:\Users\danie\.platformio\packages\tool-scons\scons-local-4.11.1\SCons\Script\SConscript.py", line 284:
+    exec(compile(scriptdata, scriptname, 'exec'), call_stack[-1].globals)
+  File "C:\Users\danie\.platformio\platforms\espressif32@6.5.0\builder\frameworks\espidf.py", line 29:
+    import pkg_resources
+========================= [FAILED] Took 98.59 seconds =========================
+
+Environment    Status    Duration
+-------------  --------  ------------
+esp32dev       FAILED    00:01:38.593
+==================== 1 failed, 0 succeeded in 00:01:38.593 ====================

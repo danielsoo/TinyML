@@ -1,0 +1,411 @@
+{
+  "device": {
+    "runtime_name": "TensorFlowLite_ESP32-1.0.0",
+    "runtime_kernels": "reference",
+    "memory_free_heap": "291168",
+    "memory_min_free_heap": "285568",
+    "memory_arena_static": "49152"
+  },
+  "port": "COM3",
+  "models": {
+    "ton_S80": {
+      "n": 4462,
+      "exact_match": 170,
+      "max_abs_diff": 0.6640625,
+      "max_diff_output_steps": 170.0,
+      "selected": {
+        "idx": "1",
+        "name": "ton_S80",
+        "dim": "43",
+        "arena_used": "1440",
+        "in_type": "float32",
+        "in_scale": "0",
+        "in_zp": "0",
+        "out_type": "float32",
+        "free_heap": "291168"
+      },
+      "flash_bytes": 67936,
+      "seconds": 75.2,
+      "crashed_at_vector": null,
+      "device_resets": 0,
+      "inputs_skipped_after_two_resets": [],
+      "latency_us": {
+        "quantize_input": {
+          "median": 11.0,
+          "p95": 11.0,
+          "max": 19
+        },
+        "invoke": {
+          "median": 13272.0,
+          "p95": 13285.0,
+          "max": 13351
+        },
+        "dequantize_output": {
+          "median": 9.0,
+          "p95": 9.0,
+          "max": 15
+        }
+      },
+      "decision_agreement": {
+        "0.01": {
+          "agree": 2209,
+          "n": 4462,
+          "threshold": 0.6914063096046448
+        },
+        "0.05": {
+          "agree": 4269,
+          "n": 4462,
+          "threshold": 0.3671875298023224
+        }
+      },
+      "by_category": {
+        "near_threshold:ton_P80:0.01": {
+          "n": 300,
+          "exact_match": 0
+        },
+        "near_threshold:ton_P80:0.05": {
+          "n": 31,
+          "exact_match": 0
+        },
+        "near_threshold:ton_P80_pt:0.01": {
+          "n": 182,
+          "exact_match": 0
+        },
+        "near_threshold:ton_P80_pt:0.05": {
+          "n": 78,
+          "exact_match": 0
+        },
+        "near_threshold:ton_PQ80_int16:0.01": {
+          "n": 168,
+          "exact_match": 0
+        },
+        "near_threshold:ton_PQ80_int16:0.05": {
+          "n": 36,
+          "exact_match": 0
+        },
+        "near_threshold:ton_PQ80_minmax:0.01": {
+          "n": 93,
+          "exact_match": 0
+        },
+        "near_threshold:ton_PQ80_minmax:0.05": {
+          "n": 300,
+          "exact_match": 0
+        },
+        "near_threshold:ton_QC80:0.01": {
+          "n": 190,
+          "exact_match": 0
+        },
+        "near_threshold:ton_QC80:0.05": {
+          "n": 5,
+          "exact_match": 0
+        },
+        "near_threshold:ton_R80:0.01": {
+          "n": 80,
+          "exact_match": 0
+        },
+        "near_threshold:ton_R80:0.05": {
+          "n": 19,
+          "exact_match": 0
+        },
+        "near_threshold:ton_S80:0.01": {
+          "n": 122,
+          "exact_match": 0
+        },
+        "near_threshold:ton_S80:0.05": {
+          "n": 4,
+          "exact_match": 0
+        },
+        "near_threshold:ton_S80_pt:0.01": {
+          "n": 138,
+          "exact_match": 0
+        },
+        "near_threshold:ton_S80_pt:0.05": {
+          "n": 6,
+          "exact_match": 0
+        },
+        "out_of_range": {
+          "n": 800,
+          "exact_match": 103
+        },
+        "random": {
+          "n": 1500,
+          "exact_match": 53
+        },
+        "synthetic_extreme": {
+          "n": 400,
+          "exact_match": 14
+        },
+        "zeros": {
+          "n": 10,
+          "exact_match": 0
+        }
+      }
+    },
+    "ton_PQ80_int16": {
+      "n": 4462,
+      "exact_match": 425,
+      "max_abs_diff": 0.996246337890625,
+      "max_diff_output_steps": 255.0390625,
+      "selected": {
+        "idx": "5",
+        "name": "ton_PQ80_int16",
+        "dim": "43",
+        "arena_used": "1824",
+        "in_type": "float32",
+        "in_scale": "0",
+        "in_zp": "0",
+        "out_type": "float32",
+        "free_heap": "291136"
+      },
+      "flash_bytes": 73456,
+      "seconds": 77.8,
+      "crashed_at_vector": null,
+      "device_resets": 0,
+      "inputs_skipped_after_two_resets": [],
+      "latency_us": {
+        "quantize_input": {
+          "median": 11.0,
+          "p95": 11.0,
+          "max": 19
+        },
+        "invoke": {
+          "median": 13866.0,
+          "p95": 13912.95,
+          "max": 13938
+        },
+        "dequantize_output": {
+          "median": 9.0,
+          "p95": 9.0,
+          "max": 16
+        }
+      },
+      "decision_agreement": {
+        "0.01": {
+          "agree": 3379,
+          "n": 4462,
+          "threshold": 0.9454041123390198
+        },
+        "0.05": {
+          "agree": 4346,
+          "n": 4462,
+          "threshold": 0.0953979566693306
+        }
+      },
+      "by_category": {
+        "near_threshold:ton_P80:0.01": {
+          "n": 300,
+          "exact_match": 0
+        },
+        "near_threshold:ton_P80:0.05": {
+          "n": 31,
+          "exact_match": 0
+        },
+        "near_threshold:ton_P80_pt:0.01": {
+          "n": 182,
+          "exact_match": 0
+        },
+        "near_threshold:ton_P80_pt:0.05": {
+          "n": 78,
+          "exact_match": 0
+        },
+        "near_threshold:ton_PQ80_int16:0.01": {
+          "n": 168,
+          "exact_match": 0
+        },
+        "near_threshold:ton_PQ80_int16:0.05": {
+          "n": 36,
+          "exact_match": 0
+        },
+        "near_threshold:ton_PQ80_minmax:0.01": {
+          "n": 93,
+          "exact_match": 0
+        },
+        "near_threshold:ton_PQ80_minmax:0.05": {
+          "n": 300,
+          "exact_match": 0
+        },
+        "near_threshold:ton_QC80:0.01": {
+          "n": 190,
+          "exact_match": 0
+        },
+        "near_threshold:ton_QC80:0.05": {
+          "n": 5,
+          "exact_match": 0
+        },
+        "near_threshold:ton_R80:0.01": {
+          "n": 80,
+          "exact_match": 0
+        },
+        "near_threshold:ton_R80:0.05": {
+          "n": 19,
+          "exact_match": 0
+        },
+        "near_threshold:ton_S80:0.01": {
+          "n": 122,
+          "exact_match": 0
+        },
+        "near_threshold:ton_S80:0.05": {
+          "n": 4,
+          "exact_match": 0
+        },
+        "near_threshold:ton_S80_pt:0.01": {
+          "n": 138,
+          "exact_match": 0
+        },
+        "near_threshold:ton_S80_pt:0.05": {
+          "n": 6,
+          "exact_match": 0
+        },
+        "out_of_range": {
+          "n": 800,
+          "exact_match": 326
+        },
+        "random": {
+          "n": 1500,
+          "exact_match": 63
+        },
+        "synthetic_extreme": {
+          "n": 400,
+          "exact_match": 36
+        },
+        "zeros": {
+          "n": 10,
+          "exact_match": 0
+        }
+      }
+    },
+    "ton_S80_pt": {
+      "n": 4462,
+      "exact_match": 4099,
+      "max_abs_diff": 0.015625,
+      "max_diff_output_steps": 4.0,
+      "selected": {
+        "idx": "6",
+        "name": "ton_S80_pt",
+        "dim": "43",
+        "arena_used": "1440",
+        "in_type": "float32",
+        "in_scale": "0",
+        "in_zp": "0",
+        "out_type": "float32",
+        "free_heap": "291136"
+      },
+      "flash_bytes": 57184,
+      "seconds": 75.7,
+      "crashed_at_vector": null,
+      "device_resets": 0,
+      "inputs_skipped_after_two_resets": [],
+      "latency_us": {
+        "quantize_input": {
+          "median": 11.0,
+          "p95": 11.0,
+          "max": 19
+        },
+        "invoke": {
+          "median": 13389.0,
+          "p95": 13403.0,
+          "max": 13422
+        },
+        "dequantize_output": {
+          "median": 8.0,
+          "p95": 9.0,
+          "max": 14
+        }
+      },
+      "decision_agreement": {
+        "0.01": {
+          "agree": 4462,
+          "n": 4462,
+          "threshold": 0.6992188096046448
+        },
+        "0.05": {
+          "agree": 4458,
+          "n": 4462,
+          "threshold": 0.3671875298023224
+        }
+      },
+      "by_category": {
+        "near_threshold:ton_P80:0.01": {
+          "n": 300,
+          "exact_match": 300
+        },
+        "near_threshold:ton_P80:0.05": {
+          "n": 31,
+          "exact_match": 31
+        },
+        "near_threshold:ton_P80_pt:0.01": {
+          "n": 182,
+          "exact_match": 181
+        },
+        "near_threshold:ton_P80_pt:0.05": {
+          "n": 78,
+          "exact_match": 78
+        },
+        "near_threshold:ton_PQ80_int16:0.01": {
+          "n": 168,
+          "exact_match": 168
+        },
+        "near_threshold:ton_PQ80_int16:0.05": {
+          "n": 36,
+          "exact_match": 32
+        },
+        "near_threshold:ton_PQ80_minmax:0.01": {
+          "n": 93,
+          "exact_match": 91
+        },
+        "near_threshold:ton_PQ80_minmax:0.05": {
+          "n": 300,
+          "exact_match": 297
+        },
+        "near_threshold:ton_QC80:0.01": {
+          "n": 190,
+          "exact_match": 180
+        },
+        "near_threshold:ton_QC80:0.05": {
+          "n": 5,
+          "exact_match": 5
+        },
+        "near_threshold:ton_R80:0.01": {
+          "n": 80,
+          "exact_match": 80
+        },
+        "near_threshold:ton_R80:0.05": {
+          "n": 19,
+          "exact_match": 17
+        },
+        "near_threshold:ton_S80:0.01": {
+          "n": 122,
+          "exact_match": 115
+        },
+        "near_threshold:ton_S80:0.05": {
+          "n": 4,
+          "exact_match": 3
+        },
+        "near_threshold:ton_S80_pt:0.01": {
+          "n": 138,
+          "exact_match": 136
+        },
+        "near_threshold:ton_S80_pt:0.05": {
+          "n": 6,
+          "exact_match": 5
+        },
+        "out_of_range": {
+          "n": 800,
+          "exact_match": 724
+        },
+        "random": {
+          "n": 1500,
+          "exact_match": 1274
+        },
+        "synthetic_extreme": {
+          "n": 400,
+          "exact_match": 372
+        },
+        "zeros": {
+          "n": 10,
+          "exact_match": 10
+        }
+      }
+    }
+  }
+}

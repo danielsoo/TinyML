@@ -1,0 +1,57 @@
+{
+  "boards": {
+    "esp32_runtime_arduino_tflm_1_0_0": {
+      "status": "ok",
+      "port": "COM3"
+    },
+    "esp32_runtime_esp_tflite_micro": {
+      "status": "build/upload failed",
+      "log_tail": [
+        "  File \"C:\\Users\\danie\\.platformio\\packages\\tool-scons\\scons-local-4.11.1\\SCons\\Script\\SConscript.py\", line 284:",
+        "    exec(compile(scriptdata, scriptname, 'exec'), call_stack[-1].globals)",
+        "  File \"C:\\Users\\danie\\.platformio\\platforms\\espressif32@6.5.0\\builder\\main.py\", line 346:",
+        "    target_elf = env.BuildProgram()",
+        "  File \"C:\\Users\\danie\\.platformio\\packages\\tool-scons\\scons-local-4.11.1\\SCons\\Util\\envs.py\", line 302:",
+        "    return self.method(*nargs, **kwargs)",
+        "  File \"C:\\Users\\danie\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\platformio\\builder\\tools\\piobuild.py\", line 61:",
+        "    env.ProcessProgramDeps()",
+        "  File \"C:\\Users\\danie\\.platformio\\packages\\tool-scons\\scons-local-4.11.1\\SCons\\Util\\envs.py\", line 302:",
+        "    return self.method(*nargs, **kwargs)",
+        "  File \"C:\\Users\\danie\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\platformio\\builder\\tools\\piobuild.py\", line 122:",
+        "    env.BuildFrameworks(env.get(\"PIOFRAMEWORK\"))",
+        "  File \"C:\\Users\\danie\\.platformio\\packages\\tool-scons\\scons-local-4.11.1\\SCons\\Util\\envs.py\", line 302:",
+        "    return self.method(*nargs, **kwargs)",
+        "  File \"C:\\Users\\danie\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\platformio\\builder\\tools\\piobuild.py\", line 353:",
+        "    SConscript(env.GetFrameworkScript(name), exports=\"env\")",
+        "  File \"C:\\Users\\danie\\.platformio\\packages\\tool-scons\\scons-local-4.11.1\\SCons\\Script\\SConscript.py\", line 689:",
+        "    return method(*args, **kw)",
+        "  File \"C:\\Users\\danie\\.platformio\\packages\\tool-scons\\scons-local-4.11.1\\SCons\\Script\\SConscript.py\", line 625:",
+        "    return _SConscript(self.fs, *files, **subst_kw)",
+        "  File \"C:\\Users\\danie\\.platformio\\packages\\tool-scons\\scons-local-4.11.1\\SCons\\Script\\SConscript.py\", line 284:",
+        "    exec(compile(scriptdata, scriptname, 'exec'), call_stack[-1].globals)",
+        "  File \"C:\\Users\\danie\\.platformio\\platforms\\espressif32@6.5.0\\builder\\frameworks\\espidf.py\", line 29:",
+        "    import pkg_resources",
+        "========================= [FAILED] Took 98.59 seconds =========================",
+        "",
+        "Environment    Status    Duration",
+        "-------------  --------  ------------",
+        "esp32dev       FAILED    00:01:38.593",
+        "==================== 1 failed, 0 succeeded in 00:01:38.593 ===================="
+      ]
+    }
+  },
+  "ports": [
+    {
+      "device": "COM3",
+      "vid": 4292,
+      "pid": 60000,
+      "description": "Silicon Labs CP210x USB to UART Bridge (COM3)"
+    },
+    {
+      "device": "COM1",
+      "vid": null,
+      "pid": null,
+      "description": "Communications Port (COM1)"
+    }
+  ]
+}
