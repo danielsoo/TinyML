@@ -27,7 +27,7 @@ RUNS = {  # label -> device output folder
     "esp-tflite-micro 1.4.2 (ESP-IDF 5.5), esp-nn kernels":
         REV / "2026-11-06_z10d_runtime_compare_idf55/device_e7/esp32_runtime_esp_tflite_micro",
     "esp-tflite-micro 1.4.2 (ESP-IDF 5.5), reference (ANSI C) kernels":
-        REV / "2026-11-06_z10e_runtime_kernels_ansi_c/device_e7/esp32_runtime_esp_tflite_micro_ansi_c",
+        REV / "2026-11-06_z10f_runtime_kernels_ansi_c/device_e7/esp32_runtime_esp_tflite_micro_ansi_c",
 }
 MODELS = ["ton_S80", "ton_S80_pt", "ton_PQ80_int16"]
 
