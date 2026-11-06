@@ -1,0 +1,53 @@
+{
+  "boards": {
+    "esp32_runtime_esp_tflite_micro_ansi_c": {
+      "status": "build/upload failed",
+      "log_tail": [
+        "-- The ASM compiler identification is GNU",
+        "-- Found assembler: C:/Users/danie/.platformio/packages/toolchain-xtensa-esp-elf/bin/xtensa-esp32-elf-gcc.exe",
+        "-- Detecting C compiler ABI info",
+        "-- Detecting C compiler ABI info - done",
+        "-- Check for working C compiler: C:/Users/danie/.platformio/packages/toolchain-xtensa-esp-elf/bin/xtensa-esp32-elf-gcc.exe - skipped",
+        "-- Detecting C compile features",
+        "-- Detecting C compile features - done",
+        "-- Detecting CXX compiler ABI info",
+        "-- Detecting CXX compiler ABI info - done",
+        "-- Check for working CXX compiler: C:/Users/danie/.platformio/packages/toolchain-xtensa-esp-elf/bin/xtensa-esp32-elf-g++.exe - skipped",
+        "-- Detecting CXX compile features",
+        "-- Detecting CXX compile features - done",
+        "-- Configuring incomplete, errors occurred!",
+        "",
+        "fatal: not a git repository (or any of the parent directories): .git",
+        "CMake Error at C:/Users/danie/.platformio/packages/framework-espidf/tools/cmake/project.cmake:671 (message):",
+        "  SDKCONFIG_DEFAULTS",
+        "  'C:/Users/danie/Documents/Projects/TinyML/esp32_agreement_idf/sdkconfig.ansi_c'",
+        "  does not exist.",
+        "Call Stack (most recent call first):",
+        "  CMakeLists.txt:3 (project)",
+        "",
+        "",
+        "",
+        "========================== [FAILED] Took 2.06 seconds ==========================",
+        "",
+        "Environment      Status    Duration",
+        "---------------  --------  ------------",
+        "esp32dev-ansi-c  FAILED    00:00:02.061",
+        "==================== 1 failed, 0 succeeded in 00:00:02.061 ===================="
+      ]
+    }
+  },
+  "ports": [
+    {
+      "device": "COM3",
+      "vid": 4292,
+      "pid": 60000,
+      "description": "Silicon Labs CP210x USB to UART Bridge (COM3)"
+    },
+    {
+      "device": "COM1",
+      "vid": null,
+      "pid": null,
+      "description": "Communications Port (COM1)"
+    }
+  ]
+}
