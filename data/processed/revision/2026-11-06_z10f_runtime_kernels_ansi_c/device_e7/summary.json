@@ -1,0 +1,22 @@
+{
+  "boards": {
+    "esp32_runtime_esp_tflite_micro_ansi_c": {
+      "status": "ok",
+      "port": "COM3"
+    }
+  },
+  "ports": [
+    {
+      "device": "COM3",
+      "vid": 4292,
+      "pid": 60000,
+      "description": "Silicon Labs CP210x USB to UART Bridge (COM3)"
+    },
+    {
+      "device": "COM1",
+      "vid": null,
+      "pid": null,
+      "description": "Communications Port (COM1)"
+    }
+  ]
+}

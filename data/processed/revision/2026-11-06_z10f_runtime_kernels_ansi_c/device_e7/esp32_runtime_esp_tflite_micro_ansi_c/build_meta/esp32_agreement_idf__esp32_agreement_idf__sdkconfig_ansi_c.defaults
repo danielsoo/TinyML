@@ -1,0 +1,3 @@
+# Reference (ANSI C) kernels instead of the esp-nn optimized ones; used only by env esp32dev-ansi-c
+CONFIG_NN_ANSI_C=y
+# CONFIG_NN_OPTIMIZED is not set
