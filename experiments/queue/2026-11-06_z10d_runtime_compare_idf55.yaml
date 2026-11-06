@@ -1,0 +1,7 @@
+id: 2026-11-06_z10d_runtime_compare_idf55
+config_dir: config/jobs/2026-11-06_z10d_runtime_compare_idf55
+steps: device_agree
+flags: []
+why: 'Third try of the esp-tflite-micro half of the z10 runtime comparison (ESP-IDF 5.5;
+  z10c failed only on the moved TFLM schema header). Classic ESP32 must be plugged in.
+  ESP-IDF is already downloaded, ~15 min.'

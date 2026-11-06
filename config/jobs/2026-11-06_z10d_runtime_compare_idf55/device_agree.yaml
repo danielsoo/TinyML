@@ -1,0 +1,7 @@
+# Third try of the esp-tflite-micro half of z10: z10c configured and compiled on ESP-IDF 5.5 but main.cc
+# included the old TFLM schema path (now tensorflow/lite/micro/schema/). Same bundle, models, board as z10.
+bundle: data/processed/revision/2026-11-05_z7_device_bundle/device_bundle
+boards:
+  - {name: esp32_runtime_esp_tflite_micro, env: esp32dev, project: esp32_agreement_idf, vids: [0x10C4, 0x1A86, 0x0403]}
+limit: null
+models: [ton_S80, ton_S80_pt, ton_PQ80_int16]
