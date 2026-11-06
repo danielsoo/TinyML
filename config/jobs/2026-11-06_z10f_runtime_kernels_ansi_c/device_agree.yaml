@@ -1,0 +1,10 @@
+# Retry of z10e (sdkconfig.ansi_c was git-ignored; now sdkconfig_ansi_c.defaults).
+# Kernel-configuration control for the z10 runtime comparison: the same esp-tflite-micro 1.4.2 /
+# ESP-IDF 5.5 build as z10d, but with esp-nn's optimized kernels off (CONFIG_NN_ANSI_C). On z10d the
+# int16x8 model ton_PQ80_int16 gave one constant output for every input; this tells whether the
+# esp-nn path or TFLM itself is responsible. Same bundle, models, board.
+bundle: data/processed/revision/2026-11-05_z7_device_bundle/device_bundle
+boards:
+  - {name: esp32_runtime_esp_tflite_micro_ansi_c, env: esp32dev-ansi-c, project: esp32_agreement_idf, vids: [0x10C4, 0x1A86, 0x0403]}
+limit: null
+models: [ton_S80, ton_S80_pt, ton_PQ80_int16]

@@ -1,0 +1,7 @@
+id: 2026-11-06_z10f_runtime_kernels_ansi_c
+config_dir: config/jobs/2026-11-06_z10f_runtime_kernels_ansi_c
+steps: device_agree
+flags: []
+why: 'Retry of z10e (config file was git-ignored). Kernel-configuration control for the runtime comparison: esp-tflite-micro with reference
+  (ANSI C) kernels instead of esp-nn, on the classic ESP32 (the int16 model gave a constant
+  output with esp-nn). ~15 min.'

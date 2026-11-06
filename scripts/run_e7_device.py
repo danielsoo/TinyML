@@ -100,7 +100,7 @@ def save_build_meta(project: Path, env: str, dest: Path) -> None:
     pats = [f".pio/libdeps/{env}/TensorFlowLite_ESP32/library.*", f".pio/libdeps/{env}/TensorFlowLite_ESP32/.piopm",
             "dependencies.lock", f"sdkconfig.{env}", "managed_components/espressif__esp-tflite-micro/idf_component.yml",
             "managed_components/espressif__esp-tflite-micro/.component_hash", "managed_components/espressif__esp-nn/idf_component.yml",
-            "platformio.ini", "sdkconfig.defaults", "sdkconfig.ansi_c"]
+            "platformio.ini", "sdkconfig.defaults", "sdkconfig_ansi_c.defaults"]
     for pat in pats:
         for f in project.glob(pat):
             shutil.copyfile(f, dest / (project.name + "__" + f.parent.name + "__" + f.name.lstrip(".")))
