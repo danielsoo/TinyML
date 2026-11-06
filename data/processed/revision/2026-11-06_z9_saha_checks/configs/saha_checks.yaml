@@ -1,0 +1,49 @@
+# Spec for scripts/saha_checks.py (step saha_checks); nothing is retrained, thresholds stay frozen.
+far_budgets: [0.01, 0.05]
+provenance:
+  ton_random: {dataset_config: config/v13/ton_fl.yaml}
+  ton_hosts: {dataset_config: config/v13/ton_fl_group.yaml}
+  cic_random: {dataset_config: config/v13/cic_fl.yaml}
+exports:
+  ton:
+    dataset_config: config/v13/ton_fl.yaml
+    seeds: [1, 2, 3]
+    models:   # [arm, Keras source, Table 2 export]
+      - [F8, "data/processed/revision/2026-10-29_z1_train_ton/train_fl/models/F_s{seed}.h5", "data/processed/revision/2026-10-29_z1d_compare_ton_fed/compare_arms/s{seed}/F8.tflite"]
+      - [P80, "data/processed/revision/2026-10-29_z1d_compare_ton_fed/compare_arms/s{seed}/PQ_80.h5", "data/processed/revision/2026-10-29_z1d_compare_ton_fed/compare_arms/s{seed}/P_80.tflite"]
+      - [S80, "data/processed/revision/2026-10-29_z1_train_ton/train_fl/models/S80_s{seed}.h5", "data/processed/revision/2026-10-29_z1d_compare_ton_fed/compare_arms/s{seed}/S_80.tflite"]
+    bundle_files:   # the exact files flashed in E7
+      ton_S80_pt: data/processed/revision/2026-11-05_z7_device_bundle/device_bundle/models/ton_S80_pt.tflite
+      ton_P80_pt: data/processed/revision/2026-11-05_z7_device_bundle/device_bundle/models/ton_P80_pt.tflite
+  cic:
+    dataset_config: config/v13/cic_fl.yaml
+    seeds: [1, 2, 3]
+    models:   # [arm, Keras source, Table 2 export]
+      - [F8, "data/processed/revision/2026-10-29_z2_train_cic/train_fl/models/F_s{seed}.h5", "data/processed/revision/2026-10-29_z2b_compare_cic_fed/compare_arms/s{seed}/F8.tflite"]
+      - [P80, "data/processed/revision/2026-10-29_z2b_compare_cic_fed/compare_arms/s{seed}/PQ_80.h5", "data/processed/revision/2026-10-29_z2b_compare_cic_fed/compare_arms/s{seed}/P_80.tflite"]
+      - [S80, "data/processed/revision/2026-10-29_z2_train_cic/train_fl/models/S80_s{seed}.h5", "data/processed/revision/2026-10-29_z2b_compare_cic_fed/compare_arms/s{seed}/S_80.tflite"]
+  ton_hosts:
+    dataset_config: config/v13/ton_fl_group.yaml
+    seeds: [1, 2, 3]
+    models:   # [arm, Keras source, Table 2 export]
+      - [F8, "data/processed/revision/2026-10-29_z3_train_ton_group/train_fl/models/F_s{seed}.h5", "data/processed/revision/2026-10-29_z3b_compare_ton_group/compare_arms/s{seed}/F8.tflite"]
+      - [P80, "data/processed/revision/2026-10-29_z3b_compare_ton_group/compare_arms/s{seed}/PQ_80.h5", "data/processed/revision/2026-10-29_z3b_compare_ton_group/compare_arms/s{seed}/P_80.tflite"]
+      - [S80, "data/processed/revision/2026-10-29_z3_train_ton_group/train_fl/models/S80_s{seed}.h5", "data/processed/revision/2026-10-29_z3b_compare_ton_group/compare_arms/s{seed}/S_80.tflite"]
+paired:
+  ton:
+    dataset_config: config/v13/ton_fl.yaml
+    rows_files: [data/processed/revision/2026-10-29_z1d_compare_ton_fed/compare_arms/compare_arms_rows.csv,
+                 data/processed/revision/2026-10-29_z1g_compare_ton_qc/compare_arms/compare_arms_rows.csv]
+    arms: [[F, "-", fp32], [F8, "-", int8], [P, "80", int8], [R, "80", int8], [S, "80", int8], [QC, "80", int8], [SQC, "80", int8]]
+    pairs: [[R, F], [S, F], [P, F], [R, P], [S, P], [QC, P], [R, S], [F8, F]]
+  cic:
+    dataset_config: config/v13/cic_fl.yaml
+    rows_files: [data/processed/revision/2026-10-29_z2b_compare_cic_fed/compare_arms/compare_arms_rows.csv,
+                 data/processed/revision/2026-10-29_z2e_compare_cic_qc/compare_arms/compare_arms_rows.csv]
+    arms: [[F, "-", fp32], [F8, "-", int8], [P, "80", int8], [R, "80", int8], [S, "80", int8], [QC, "80", int8], [SQC, "80", int8]]
+    pairs: [[R, F], [S, F], [P, F], [R, P], [S, P], [QC, P], [R, S], [F8, F]]
+  ton_hosts:
+    dataset_config: config/v13/ton_fl_group.yaml
+    rows_files: [data/processed/revision/2026-10-29_z3b_compare_ton_group/compare_arms/compare_arms_rows.csv]
+    arms: [[F, "-", fp32], [F8, "-", int8], [P, "80", int8], [R, "80", int8], [S, "80", int8], [QC, "80", int8], [SQC, "80", int8]]
+    pairs: [[R, F], [S, F], [P, F], [R, P], [S, P], [QC, P], [R, S], [F8, F]]

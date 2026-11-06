@@ -1,0 +1,8 @@
+id: 2026-11-06_z9_saha_checks
+config_dir: config/jobs/2026-11-06_z9_saha_checks
+steps: saha_checks
+flags: []
+why: 'Dr. Saha''s completion list: provenance of the rebuilt splits vs the old split,
+  recall/FAR/size/hash of the per-tensor re-exports (TON S80/P80, seeds 1-3) next
+  to the per-channel originals, record-level paired comparisons with frozen thresholds.
+  No retraining. ~20 min.'
