@@ -27,7 +27,8 @@ pipeline (jobs before 2026-10-28, manuscript `archive/main_v12_exploratory.tex`)
 
 Superseded (kept as pipeline checks): 2026-10-28_y2_train_ton and 2026-10-28_y2b_compare_ton_fed
 (v13 before the two audit rules), 2026-10-29_z1b / z1c (threshold tie bug), 2026-11-01_z5 (step-name
-and pip-path bugs).
+and pip-path bugs), 2026-11-06_z10b / z10c / z10e (ESP-IDF build set-up: pkg_resources, component-manager
+version, TFLM header path, git-ignored sdkconfig file; no measurements).
 
 ## Paper items
 | Paper item | Source |
@@ -40,4 +41,5 @@ and pip-path bugs).
 | Table 6 | z2f, z1h `range_mechanism/e4_summary.csv` |
 | Table 7 | Tables 2, 5, 6 and Table 8 |
 | Table 8 | `device_e7/<board>/device_agreement.json` and `device_*.npy` of z8, z8c (S3) and z8b (ESP32), compared with the host outputs of the z7 bundle |
+| Table 9, §7 current runtime | `docs/runtime_compare/runtime_compare.{md,csv}` from `scripts/runtime_compare.py` over z10 (TFLM 1.0.0), z10d (esp-tflite-micro 1.4.2, esp-nn), z10f (reference kernels); build provenance in each `device_e7/<board>/build_meta/` |
 | §3.4 tie-group pitfall | z1b vs z1d (same models, float64 vs float32 thresholds) |

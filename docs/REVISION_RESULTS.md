@@ -758,3 +758,15 @@ both boards. Invoke latency (median): 13.2-13.4 ms (TON, 57-68 KB), 15.3-15.4 ms
 - Split provenance: no new test record was in the old test split; all were in the old training pool
   (used only by the exploratory models); old test records now sit in client training/validation slices.
 
+### Runtime comparison (jobs z10, z10d, z10f; classic ESP32; details in docs/SAHA_COMPLETION.md §7)
+Same files and inputs through TFLM 1.0.0 (Arduino TensorFlowLite_ESP32) and esp-tflite-micro 1.4.2 on
+ESP-IDF 5.5 (esp-nn and reference kernels). Decisions equal to the host at FAR 1%, of 4,462:
+- ton_S80 (per-channel INT8): old 2,209, current **4,459** (3 extra detections). The E7 per-channel
+  failure is the old runtime's.
+- ton_S80_pt (per-tensor INT8): 4,462 on both; outputs bit-identical across runtimes and kernel settings.
+- ton_PQ80_int16 (16-bit activations, per-channel): old 3,379; current 1,894 with a constant output
+  (sigmoid of the output bias) for every input. 16-bit activations are a host-only result.
+- esp-nn vs reference kernels: bit-identical outputs, same image size, latency within 0.3% on this chip.
+- Invoke: 13.3 ms (old) vs 10.4 ms (current, -Og). Heap free 291 KB (old) / 215 KB (current), unchanged
+  during the stream. Arena used 1.4-1.8 KB (old), 1.9-5.9 KB (current).
+

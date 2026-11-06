@@ -2,18 +2,18 @@
 
 Numbers: `docs/REVISION_RESULTS.md` (v13.1), `docs/model_hashes.csv`, and the job folders under
 `data/processed/revision/`. Jobs run on 2026-11-06: **z9** (`saha_checks`, done: §1b, §2b, §4b) and
-**z10** (`runtime_compare`, classic ESP32; pending). Nothing was retrained; thresholds stayed frozen.
+**z10** (runtime comparison on the classic ESP32: z10 old runtime, z10d current runtime with esp-nn kernels, z10f current runtime with reference kernels; done: §7). Nothing was retrained; thresholds stayed frozen.
 
 ## Completion table
 | # | Item | Existing evidence | Unresolved | Additional execution? |
 |---|---|---|---|---|
 | 1 | E1/E5 operating points | Per-run recall **and achieved test FAR** for every arm, both budgets, random split and unseen hosts; run-paired and record-level paired differences with exact McNemar tests (§1, §1b) | None | Done (z9) |
-| 2 | Exact deployed models | SHA-256, size, weight-scale type and conversion of every export (`docs/model_hashes.csv`, §2); per-tensor strong-PTQ replacements for all 27 F8/P/S runs and the two flashed files, with recall, FAR, size, hash (§2b) | None (whether the new runtime runs the per-channel exports: z10) | Done (z9) |
+| 2 | Exact deployed models | SHA-256, size, weight-scale type and conversion of every export (`docs/model_hashes.csv`, §2); per-tensor strong-PTQ replacements for all 27 F8/P/S runs and the two flashed files, with recall, FAR, size, hash (§2b) | None. The current runtime runs the per-channel INT8 export correctly (§7) | Done (z9, z10) |
 | 3 | E7 disagreements, resets, stream completeness | Every disagreement classified (§3): per-tensor INT8 models add **0** missed attacks (one CIC record for S80 at 1%) and only false alarms on inputs chosen within two steps of the threshold; 0 disagreements on 1,500 random records except one. Resets: accounted (§3); final streams complete, no missing or duplicated records; S3 and ESP32 outputs bit-identical | Nothing | No |
 | 4 | Split provenance and freeze history | Manifests with SHA-256 per partition; overlap counts with the old split (§4b); timeline with freeze points and post-hoc additions (§4) | None; no validity problem found | Done (z9) |
-| 5 | Resources and reproducibility | Static RAM / flash from the linker, arena, latency definition (§5); reproducibility map (§5) | Run-time heap (free / minimum free) not logged so far | z10 logs heap for both runtimes |
+| 5 | Resources and reproducibility | Static RAM / flash from the linker, arena, latency definition (§5); reproducibility map (§5) | None. Run-time heap logged for both runtimes (§5) | Done (z10) |
 | - | Range experiments: simulation vs export | E3/E4 INT8 cells are **exported** TFLite INT8 models run in the TFLite interpreter; only the "QAT float" stage (Table 4, E1 `qat` rows) is fake-quant simulation. Failure/recovery pair verified in exports (E3 A vs B/D) and the failing min/max export also on both boards (§6) | Nothing | No |
-| new | Runtime comparison | Old runtime results for the same files on the same board (z8b) | Current Espressif TFLM port | z10: ton_S80 (per-channel, failing), ton_S80_pt (per-tensor), ton_PQ80_int16 (16-bit) through both runtimes on the classic ESP32, identical files and inputs; records runtime versions, kernel config, op versions, outputs, decisions |
+| new | Runtime comparison | Same three files, same 4,462 inputs, same classic ESP32 through TFLM 1.0.0 (Arduino) and esp-tflite-micro 1.4.2 / ESP-IDF 5.5 with esp-nn and with reference kernels; converter, component hashes, sdkconfig, op versions, outputs and decisions recorded (§7) | The int16x8 failure on the current runtime is located (all hidden activations zero) but not traced to a line of TFLM | Done (z10, z10d, z10f) |
 
 ## 1. Operating points per run (E1, E5, E6)
 Recall % / achieved test FAR % at the threshold chosen for a validation FAR budget of 1% (80 KB arms).
@@ -187,10 +187,18 @@ no concrete validity problem and no reason for another split.
 Memory, classic ESP32 test firmware (Arduino, TFLM 1.0.0, 14 models embedded): static RAM 77,612 B of
 327,680 (linker), of which 49,152 B is the statically allocated tensor arena; the models use 1,440-1,824 B
 of it. Non-arena static RAM: 28,460 B. Flash 1,418,881 B, of which 915,336 B are the 14 embedded models
-(57-82 KB each); runtime + core + firmware code about 503 KB. Heap at run time (free and minimum free) is
-logged from z10 on, for both runtimes. ESP32-S3: static RAM 74,828 B, flash 1,409,625 B.
+(57-82 KB each); runtime + core + firmware code about 503 KB. ESP32-S3: static RAM 74,828 B, flash 1,409,625 B.
+Heap at run time (z10, classic ESP32, logged at boot and after every model selection): old runtime 291,168 B
+free, minimum free 285,568 B over the whole stream; current runtime (ESP-IDF 5.5, 3 models embedded) 215,024 B
+free = minimum free, i.e. no heap allocation after start-up in either build (the arena is static). Current-runtime
+firmware: static RAM 61,364 B (49,152 B arena), flash 440,177 B with 198,576 B of models. Arena actually used:
+old runtime 1,440 B (INT8) / 1,824 B (16-bit); current runtime 1,944 B (per-tensor INT8), 5,528 B (per-channel
+INT8, which stores per-channel multipliers and shifts), 5,912 B (16-bit).
+Total run-time memory of a deployment is therefore static RAM (code data + arena) plus the heap the framework
+takes at start-up; the arena is 49,152 B of the 77,612 B (old) / 61,364 B (current) static RAM, and a model
+needs only 1.4-5.9 KB of it.
 Latency: `micros()` (old runtime) / `esp_timer_get_time()` (new) around `Invoke()` only. It includes the
-graph's input QUANTIZE (float to int8), the three FULLY_CONNECTED layers, LOGISTIC and DEQUANTIZE. It
+graph's input QUANTIZE (float to int8), the four FULLY_CONNECTED layers (three hidden, one output), LOGISTIC and DEQUANTIZE. It
 excludes the serial transfer, the copy of the float features into the input tensor (reported separately as
 `quantize_input`, 3-13 µs) and any feature extraction from packets.
 Reproducibility: configs `config/v13/*.yaml` and `config/jobs/<job>/`; seeds 1-3 (`federated.seed`); split
@@ -209,3 +217,43 @@ compare_arms,range_mechanism,device_agreement,run_e7_device,saha_checks}.py`.
   failing min/max export (PQ80_minmax = cell A, random draw, seed 1) also ran on both boards, where it
   reproduces the host within at most 97 output steps and the same decisions on 1,448/1,500 (TON) and
   1,496/1,500 (CIC) random records; the recovered models on the boards are the per-tensor R80 / QC80 exports.
+
+## 7. Runtime comparison (z10 / z10d / z10f; `docs/runtime_compare/runtime_compare.md`, `scripts/runtime_compare.py`)
+Same board (classic ESP32-D0WD, 240 MHz, COM3), same three model files (SHA-256 in `docs/model_hashes.csv`;
+converter TensorFlow 2.21.0), same 4,462 TON inputs, same host script and frozen thresholds:
+- **Old**: Arduino TensorFlowLite_ESP32 1.0.0 (TFLM with reference kernels), espressif32@6.5.0, `-Os`.
+- **Current**: espressif/esp-tflite-micro 1.4.2 (component hash `dfc88325...`) with espressif/esp-nn 1.4.2
+  (`8411b307...`) on ESP-IDF 5.5.0 (espressif32@6.12.0, component manager 2.x, `dependencies.lock` kept),
+  default `-Og`; once with esp-nn optimized kernels (`CONFIG_NN_OPTIMIZED`, z10d) and once with reference
+  kernels (`CONFIG_NN_ANSI_C`, z10f). `sdkconfig` of both builds kept in `build_meta/`.
+- All three files declare QUANTIZE v1, FULLY_CONNECTED v4, LOGISTIC v2, DEQUANTIZE v2. ton_S80 and
+  ton_PQ80_int16 have per-channel Dense scales (6 tensors), ton_S80_pt none. ton_PQ80_int16 runs int16
+  activations with int8 weights and int64 biases although its FULLY_CONNECTED is declared v4.
+
+| model | runtime | outputs = host | decisions = host, FAR 1% / 5% | changes at 1% | invoke ms |
+|---|---|---|---|---|---|
+| ton_S80 (per-channel INT8) | old | 170 | 2,209 / 4,269 | +2,069 misses, -23 false alarms | 13.27 |
+| ton_S80 | current, esp-nn or reference | 4,377 (max 3 output steps off) | **4,459 / 4,462** | +3 detections, nothing else | 10.43 / 10.41 |
+| ton_S80_pt (per-tensor INT8) | old | 4,099 (max 4 steps) | 4,462 / 4,458 | none (5%: -4 false alarms) | 13.39 |
+| ton_S80_pt | current, both kernels | **bit-identical to old** | 4,462 / 4,458 | same | 10.30 / 10.28 |
+| ton_PQ80_int16 (per-channel, 16-bit act.) | old | 425 | 3,379 / 4,346 | +933 misses | 13.87 |
+| ton_PQ80_int16 | current, both kernels | 0; one constant output 0.4455 for every input | 1,894 / 3,149 | +2,278 misses (5%: +1,211 false alarms) | 12.10 / 12.07 |
+
+Findings:
+1. The per-channel failure of E7 is a defect of the old runtime, not of the export: the current Espressif
+   port runs the same per-channel file with the host's decisions (3 differences in 4,462, all extra
+   detections of near-threshold attacks).
+2. Per-tensor INT8 models are runtime-independent here: bit-identical outputs on both runtimes and both
+   kernel settings, so every E7 result for per-tensor models holds on the current runtime too.
+3. Kernel configuration does not matter on this chip: the esp-nn and reference builds give bit-identical
+   outputs for all three models, the same image size (440,177 B) and latency within 0.3%, consistent with
+   esp-nn having no optimized path for these ops on the classic ESP32 (its optimizations target the S3).
+   Whether esp-nn changes outputs on the ESP32-S3 was not tested.
+4. The 16-bit-activation model is not deployable on either runtime. On the current one its output equals
+   sigmoid of the output-layer bias (-0.219 -> 0.4455) for every input, i.e. every hidden activation reaches
+   the last layer as zero; the old runtime ignores its per-channel scales instead. The host interpreter
+   (TF 2.21) runs it correctly. We stopped here: the 16-bit results of E4 remain host results on exported
+   models, and the paper says so. (Next step if needed: a per-tensor int16x8 export of the same model.)
+5. Latency: the current runtime is 22% faster on the INT8 models (13.3 -> 10.4 ms) even at `-Og`; the
+   current-runtime arena use is larger (1.9-5.9 KB vs 1.4-1.8 KB) but far below the 48 KB arena.
+

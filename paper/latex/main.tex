@@ -48,11 +48,12 @@ extreme records in a 2,000-record calibration draw drive recall to 0\%, and quan
 training (QAT) fails for the same reason because it learns that range from unclipped inputs.
 Bounding the input range removes both failures at no cost. Hidden-layer ranges and the 8-bit output
 grid matter little; the residual loss comes from coarse activations near the operating point and is
-recovered by 16-bit activations. The ranking holds on hosts never seen in training. On an ESP32-S3 and an ESP32
+recovered on the host by 16-bit activations. The ranking holds on hosts never seen in training. On an ESP32-S3 and an ESP32
 the per-tensor INT8 models reproduce the host decisions on all but at most one of 2,700 random and
 stress inputs per model, at 5.6--6.5\,ms per flow (13.2--15.4\,ms on an ESP32), with bit-identical
-outputs on both chips, while models with per-channel weight scales, the converter's
-default, silently disagree on half of their decisions.
+outputs on both chips and bit-identical outputs on an older and the current TFLM runtime. Models with
+per-channel weight scales, the converter's default, silently disagree on half of their decisions on the
+older runtime but not on the current one, and the 16-bit-activation model runs correctly on neither.
 \end{abstract}
 
 \keywords{federated learning, TinyML, intrusion detection, quantization, microcontrollers}
@@ -90,8 +91,9 @@ Our answers, on \cic and \ton with three federated runs per configuration:
   coarse INT8 outputs at the operating point (\S\ref{sec:rq2}).
 \item \textbf{RQ3.} Bounding the input range (clipped or extreme-free calibration, QAT on clipped
   inputs) removes the failures for free; distillation adds up to 2 points; 16-bit activations recover
-  the tie loss but need a runtime that supports them. On an ESP32-S3, per-tensor INT8 models reproduce
-  the host decisions, while per-channel models silently do not (\S\ref{sec:rq3}, \S\ref{sec:device}).
+  the tie loss on the host but ran correctly on no microcontroller runtime we tried. On two ESP32 chips and
+  two TFLM runtimes, per-tensor INT8 models reproduce the host decisions; per-channel models silently do
+  not on the older runtime (\S\ref{sec:rq3}, \S\ref{sec:device}).
 \end{itemize}
 We also contribute the audited protocol itself: client-owned partitions before any fitted step,
 real per-client validation slices, FAR-budget thresholds applied once to a test split disjoint from
@@ -201,7 +203,7 @@ For each teacher seed and memory budget (80\,KB: structured pruning keeps 50\% o
 \emph{Strong PTQ} builds seven calibrations from 2,000 records of client 0 (TFLite min/max with and
 without $\pm$5\,SD input clipping, per-tensor 99.9 / 99.99th percentile, MSE~\cite{banner2019aciq},
 KL~\cite{wu2020integer}, clipped 99.99th percentile) and keeps the one with the best mean validation
-recall at the two FAR budgets; reported models are restricted to the per-tensor candidates (\S\ref{sec:device}).
+recall at the two FAR budgets; reported models are restricted to the per-tensor candidates, which run correctly on both device runtimes (\S\ref{sec:device}).
 Fine-tuning uses 10k records per client, either FedAvg over all four
 clients or one client alone (the client-data constraint).
 
@@ -223,7 +225,7 @@ arms Q and SQ lies within 0.2 points of the teacher (99.7--99.9\% on \ton, 99.8-
 \caption{Attack recall (\%) at a 1\% FAR budget chosen on client validation data, mean $\pm$ SD over three
 federated runs; test FAR in brackets. 80\,KB budget; fine-tuning FedAvg over four clients (10k records each).
 1-cl.: fine-tuning on one client's 10k records. F8, P and S80 use strong PTQ restricted to per-tensor weight
-scales, the form the runtime of \S\ref{sec:device} executes correctly; allowing per-channel exports changes their
+scales, the form both runtimes of \S\ref{sec:device} execute correctly; allowing per-channel exports changes their
 mean recall by at most 0.2 points ($^\dagger$: entries from that unrestricted selection).}
 \label{tab:e1}
 \small\setlength{\tabcolsep}{2pt}
@@ -463,7 +465,7 @@ Excluding extreme records from the calibration draw is the gentler variant for m
 tails. Distillation helps on \ton at 80\,KB (+1.9 over P) and adds 0.5 on \cic. Training a compact
 model from scratch removes the compression step altogether at the price of a second federated
 training (26\,min vs.\ 40\,min for the \cic teacher). 16-bit activations remove the remaining tie loss
-but enlarge the arena and, as \S\ref{sec:device} shows, need runtime support. Fine-tuning data were
+but enlarge the arena and, as \S\ref{sec:device} shows, did not run correctly on either device runtime. Fine-tuning data were
 never the limiting resource: one client's 10k records suffice.
 
 \begin{table}[t]
@@ -479,7 +481,7 @@ clip calibration inputs $\pm$5\,SD, or drop records beyond 10\,SD & \cic 0.0$\ri
 QAT on clipped inputs (QC, SQC) & \ton 55.4$\rightarrow$97.9, \cic 81.9$\rightarrow$99.6 & none \\
 distillation from F (R vs.\ P) & \ton +1.9, \cic +0.5 & teacher pass over client data \\
 compact model from scratch (S) & equal to P/R on \cic & second federated training \\
-16-bit activations & \cic lost attacks 462$\rightarrow$131 & arena 1.4$\rightarrow$1.8\,KB, +14\% latency, runtime support \\
+16-bit activations & \cic lost attacks 462$\rightarrow$131 & arena 1.4$\rightarrow$1.8\,KB, +14\% latency; host only (\S\ref{sec:device}) \\
 per-tensor weight scales & device agreement (\S\ref{sec:device}) & none \\
 \bottomrule
 \end{tabular}
@@ -489,7 +491,7 @@ per-tensor weight scales & device agreement (\S\ref{sec:device}) & none \\
 %% =====================================================================
 \section{On-Device Agreement and Cost (E7)}\label{sec:device}
 A host result is only useful if the device reproduces it. We stream test inputs over serial to
-firmware (PlatformIO, TensorFlowLite\_\-ESP32 1.0.0, TFLM reference kernels) that runs each embedded
+firmware (PlatformIO, TensorFlowLite\_\-ESP32 1.0.0, TFLM reference kernels; the current runtime below) that runs each embedded
 model and returns the exact float32 output bits and per-stage timings, and compare with the host TFLite
 interpreter. Per model, the inputs are 1,500 random test records, the test records within two output
 steps of a validation threshold of any model, 800 records with a feature beyond 5\,SD, 400 records with
@@ -528,14 +530,47 @@ lie within two steps of the threshold. Models whose Dense weights carry per-chan
 TFLite converter's default and what strong PTQ selected for two \ton models, run without any error on
 this runtime but disagree with the host on half of the random records: the runtime ignores the
 per-channel scales. Re-exporting the same models with per-tensor scales restores agreement
-(4,462 / 4,462). The 16-bit-activation remedy of \S\ref{sec:e4} is likewise not reproduced and needs
-a newer TFLM build. Host-side evaluation of such models says nothing about the device, which is why we
-recommend this streaming check before reporting on-device accuracy.
+(4,462 / 4,462). The 16-bit-activation model is likewise not reproduced.
+
+\emph{Current runtime.} We ran the same files and inputs on the same ESP32 through the current
+Espressif port, esp-tflite-micro 1.4.2 on ESP-IDF 5.5, once with the esp-nn kernels and once with
+reference kernels (Table~\ref{tab:runtime}). It runs the per-channel S80 export with the host's
+decisions (three extra detections in 4,462), so the per-channel failure is the older runtime's. The
+per-tensor export gives bit-identical outputs on both runtimes, so the agreement of Table~\ref{tab:e7}
+for per-tensor models carries over. The 16-bit model returns one constant output, the sigmoid of its
+output-layer bias, for every input: all its hidden activations arrive at the last layer as zero.
+The two kernel settings give bit-identical outputs for all three models. Neither the export format nor
+a passing host evaluation tells which runtime will execute a model correctly, which is why we recommend
+this streaming check before reporting on-device accuracy.
+
+\begin{table}[t]
+\caption{The same files and 4,462 \ton inputs on the same ESP32 through TFLM 1.0.0 (old) and
+esp-tflite-micro 1.4.2 / ESP-IDF 5.5 (current; esp-nn and reference kernels give bit-identical outputs):
+outputs equal to the host, decisions agreeing at the 1\% FAR threshold, extra misses, median invoke latency.}
+\label{tab:runtime}
+\small\setlength{\tabcolsep}{2pt}
+\begin{adjustbox}{max width=\columnwidth}
+\begin{tabular}{llrrrr}
+\toprule
+model & runtime & outputs = host & decisions & extra misses & ms \\
+\midrule
+S80, per-channel & old & 170 & 2,209 & 2,069 & 13.27 \\
+S80, per-channel & current & 4,377 & 4,459 & 0 & 10.43 \\
+S80, per-tensor & old & 4,099 & 4,462 & 0 & 13.39 \\
+S80, per-tensor & current & 4,099 & 4,462 & 0 & 10.30 \\
+16-bit act., per-channel & old & 425 & 3,379 & 933 & 13.87 \\
+16-bit act., per-channel & current & 0 (constant) & 1,894 & 2,278 & 12.10 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
 The ESP32 (Xtensa LX6) returns bit-identical outputs to the ESP32-S3 (LX7) for all 14 models and
 72,548 inputs, so every deviation from the host comes from the runtime, not the chip; it ran the
 whole stream without a reset, while the S3 restarted a few times at random inputs and resumed. A flow
 takes 5.6\,ms (\ton, 43 features) and 6.5\,ms (\cic, 78 features) on the ESP32-S3 and 13.2\,ms and
-15.4\,ms on the ESP32; input quantization takes 3--13\,$\mu$s and the arena 1.4\,KB.
+15.4\,ms on the ESP32; input quantization takes 3--13\,$\mu$s and the arena 1.4\,KB. The current
+runtime is 22\% faster on the ESP32 (10.3--10.4\,ms) and uses 1.9\,KB of arena (5.5\,KB per-channel);
+neither build allocates heap after start-up.
 
 %% =====================================================================
 \section{Recommendations}\label{sec:recs}
@@ -548,7 +583,8 @@ takes 5.6\,ms (\ton, 43 features) and 6.5\,ms (\cic, 78 features) on the ESP32-S
 \item Report a compact model trained federatively from scratch at the same budget; it is the baseline a
   compression pipeline has to beat.
 \item Report losses per attack family: small families are lost first and aggregate recall hides it.
-\item Export per-tensor weights unless the device runtime is known to support per-channel scales, and
+\item Export per-tensor weights unless the device runtime is known to support per-channel scales (the
+  current Espressif port does, TFLM 1.0.0 does not), treat 16-bit activations as unverified on device, and
   verify on the device by streaming inputs near the threshold and beyond the input range.
 \end{enumerate}
 
@@ -558,8 +594,9 @@ takes 5.6\,ms (\ton, 43 features) and 6.5\,ms (\cic, 78 features) on the ESP32-S
 hosts, making test FAR noisy. \emph{Seeds}: three federated runs per configuration; the float teacher's
 1\%-FAR recall varies by up to 2 points across runs, and claims about it are stated as sensitivity.
 \emph{Labels}: \cic contains labelling errors~\cite{engelen2021troubleshooting}; we drop impossible values
-and conflicting labels but do not relabel. \emph{Runtime}: one TFLM release with reference kernels on two ESP32 chips;
-optimized kernels change latency and newer releases support per-channel and 16-bit models.
+and conflicting labels but do not relabel. \emph{Runtime}: TFLM 1.0.0 on two ESP32 chips and esp-tflite-micro 1.4.2 on the classic ESP32 only;
+esp-nn's optimized kernels, which target the ESP32-S3, were not tested on that chip, and we did not trace
+the 16-bit failure into the runtime source.
 \emph{Threat model}: no adversarial or poisoning study~\cite{nguyen2022flame}.
 
 \section{Conclusion}
@@ -569,7 +606,7 @@ compact model trained federatively from scratch does as well. When compression f
 quantization range is the cause, for post-training quantization and QAT alike, and bounding it is
 free. The remaining loss sits in coarse activations at the operating point. Finally, a model that is
 correct on the host can be silently wrong on the microcontroller: per-tensor INT8 models agree with
-the host on the device, per-channel ones do not on the runtime we used.
+the host on both runtimes we tested, per-channel ones only on the current one, and the 16-bit model on neither.
 
 \FloatBarrier
 \bibliographystyle{ACM-Reference-Format}
@@ -602,7 +639,7 @@ decisions on our layout.
 Six failures produced plausible numbers without any error: int8 weight exchange without scales in FL;
 QAT-wrapper stripping that copied no weights; BatchNorm folded on the wrong side; pruning that reset
 BatchNorm statistics; float64 thresholds compared with float32 INT8 outputs (\S\ref{sec:metrics}); and
-per-channel weight scales ignored by the microcontroller runtime (\S\ref{sec:device}). The checks that
+per-channel weight scales ignored by an older microcontroller runtime (\S\ref{sec:device}). The checks that
 catch them: dequantize-requantize equality at the receiver, copy-by-name with output comparison,
 equivalence assertions after folding, validation FAR asserted against the budget, and device streaming
 against the host.
