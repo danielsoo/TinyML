@@ -1,0 +1,48 @@
+  port COM3: vid=0x10c4 pid=0xea60 Silicon Labs CP210x USB to UART Bridge (COM3) | USB VID:PID=10C4:EA60 SER=0001 LOCATION=1-1.3
+  port COM1: vid=None pid=None Communications Port (COM1) | ACPI\PNP0501\0
+boards done: []; to do: ['esp32_runtime_esp_tflite_micro']; connected: ['esp32_runtime_esp_tflite_micro']
+python: C:\Users\danie\AppData\Local\Programs\Python\Python312\python.exe 3.12.10
+serial ports: [{'device': 'COM3', 'vid': 4292, 'pid': 60000, 'description': 'Silicon Labs CP210x USB to UART Bridge (COM3)'}, {'device': 'COM1', 'vid': None, 'pid': None, 'description': 'Communications Port (COM1)'}]
+  installing setuptools<81 (pkg_resources) for C:\Users\danie\.platformio\penv\.espidf-5.5.0\Scripts\python.exe
+Collecting setuptools<81
+  Using cached setuptools-80.10.2-py3-none-any.whl.metadata (6.6 kB)
+Using cached setuptools-80.10.2-py3-none-any.whl (1.1 MB)
+Installing collected packages: setuptools
+Successfully installed setuptools-80.10.2
+
+[notice] A new release of pip is available: 25.0.1 -> 26.3
+[notice] To update, run: C:\Users\danie\.platformio\penv\.espidf-5.5.0\Scripts\python.exe -m pip install --upgrade pip
+▶ esp32_runtime_esp_tflite_micro: build + upload (esp32dev) on COM3
+▶ esp32_runtime_esp_tflite_micro: agreement run on COM3
+device: {'chip': 'ESP32', 'cores': '2', 'cpu_mhz': '240', 'flash_bytes': '4194304', 'sdk': '5.5.0', 'runtime_name': 'esp-tflite-micro', 'runtime_kernels': 'esp-nn', 'memory_free_heap': '215024', 'memory_min_free_heap': '215024', 'memory_arena_static': '49152'}
+  ton_S80: 0/4462
+  ton_S80: 500/4462
+  ton_S80: 1000/4462
+  ton_S80: 1500/4462
+  ton_S80: 2000/4462
+  ton_S80: 2500/4462
+  ton_S80: 3000/4462
+  ton_S80: 3500/4462
+  ton_S80: 4000/4462
+✅ ton_S80: exact 4377/4462, max diff 3.0 steps, decisions FAR0.01: 4459/4462, FAR0.05: 4462/4462, invoke median 10425.5 us
+  ton_PQ80_int16: 0/4462
+  ton_PQ80_int16: 500/4462
+  ton_PQ80_int16: 1000/4462
+  ton_PQ80_int16: 1500/4462
+  ton_PQ80_int16: 2000/4462
+  ton_PQ80_int16: 2500/4462
+  ton_PQ80_int16: 3000/4462
+  ton_PQ80_int16: 3500/4462
+  ton_PQ80_int16: 4000/4462
+✅ ton_PQ80_int16: exact 0/4462, max diff 141.953125 steps, decisions FAR0.01: 1894/4462, FAR0.05: 3149/4462, invoke median 12098.0 us
+  ton_S80_pt: 0/4462
+  ton_S80_pt: 500/4462
+  ton_S80_pt: 1000/4462
+  ton_S80_pt: 1500/4462
+  ton_S80_pt: 2000/4462
+  ton_S80_pt: 2500/4462
+  ton_S80_pt: 3000/4462
+  ton_S80_pt: 3500/4462
+  ton_S80_pt: 4000/4462
+✅ ton_S80_pt: exact 4099/4462, max diff 4.0 steps, decisions FAR0.01: 4462/4462, FAR0.05: 4458/4462, invoke median 10295.0 us
+Saved data\processed\revision\2026-11-06_z10d_runtime_compare_idf55\device_e7\esp32_runtime_esp_tflite_micro\device_agreement.md

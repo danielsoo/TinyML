@@ -1,0 +1,416 @@
+{
+  "device": {
+    "chip": "ESP32",
+    "cores": "2",
+    "cpu_mhz": "240",
+    "flash_bytes": "4194304",
+    "sdk": "5.5.0",
+    "runtime_name": "esp-tflite-micro",
+    "runtime_kernels": "esp-nn",
+    "memory_free_heap": "215024",
+    "memory_min_free_heap": "215024",
+    "memory_arena_static": "49152"
+  },
+  "port": "COM3",
+  "models": {
+    "ton_S80": {
+      "n": 4462,
+      "exact_match": 4377,
+      "max_abs_diff": 0.01171875,
+      "max_diff_output_steps": 3.0,
+      "selected": {
+        "idx": "0",
+        "name": "ton_S80",
+        "dim": "43",
+        "arena_used": "5528",
+        "in_type": "float32",
+        "in_scale": "0",
+        "in_zp": "0",
+        "out_type": "float32",
+        "free_heap": "215024"
+      },
+      "flash_bytes": 67936,
+      "seconds": 63.0,
+      "crashed_at_vector": null,
+      "device_resets": 0,
+      "inputs_skipped_after_two_resets": [],
+      "latency_us": {
+        "quantize_input": {
+          "median": 13.0,
+          "p95": 14.0,
+          "max": 18
+        },
+        "invoke": {
+          "median": 10425.5,
+          "p95": 10435.0,
+          "max": 10440
+        },
+        "dequantize_output": {
+          "median": 9.0,
+          "p95": 9.0,
+          "max": 11
+        }
+      },
+      "decision_agreement": {
+        "0.01": {
+          "agree": 4459,
+          "n": 4462,
+          "threshold": 0.6914063096046448
+        },
+        "0.05": {
+          "agree": 4462,
+          "n": 4462,
+          "threshold": 0.3671875298023224
+        }
+      },
+      "by_category": {
+        "near_threshold:ton_P80:0.01": {
+          "n": 300,
+          "exact_match": 300
+        },
+        "near_threshold:ton_P80:0.05": {
+          "n": 31,
+          "exact_match": 31
+        },
+        "near_threshold:ton_P80_pt:0.01": {
+          "n": 182,
+          "exact_match": 181
+        },
+        "near_threshold:ton_P80_pt:0.05": {
+          "n": 78,
+          "exact_match": 78
+        },
+        "near_threshold:ton_PQ80_int16:0.01": {
+          "n": 168,
+          "exact_match": 167
+        },
+        "near_threshold:ton_PQ80_int16:0.05": {
+          "n": 36,
+          "exact_match": 36
+        },
+        "near_threshold:ton_PQ80_minmax:0.01": {
+          "n": 93,
+          "exact_match": 86
+        },
+        "near_threshold:ton_PQ80_minmax:0.05": {
+          "n": 300,
+          "exact_match": 296
+        },
+        "near_threshold:ton_QC80:0.01": {
+          "n": 190,
+          "exact_match": 190
+        },
+        "near_threshold:ton_QC80:0.05": {
+          "n": 5,
+          "exact_match": 4
+        },
+        "near_threshold:ton_R80:0.01": {
+          "n": 80,
+          "exact_match": 74
+        },
+        "near_threshold:ton_R80:0.05": {
+          "n": 19,
+          "exact_match": 19
+        },
+        "near_threshold:ton_S80:0.01": {
+          "n": 122,
+          "exact_match": 120
+        },
+        "near_threshold:ton_S80:0.05": {
+          "n": 4,
+          "exact_match": 4
+        },
+        "near_threshold:ton_S80_pt:0.01": {
+          "n": 138,
+          "exact_match": 135
+        },
+        "near_threshold:ton_S80_pt:0.05": {
+          "n": 6,
+          "exact_match": 5
+        },
+        "out_of_range": {
+          "n": 800,
+          "exact_match": 787
+        },
+        "random": {
+          "n": 1500,
+          "exact_match": 1474
+        },
+        "synthetic_extreme": {
+          "n": 400,
+          "exact_match": 380
+        },
+        "zeros": {
+          "n": 10,
+          "exact_match": 10
+        }
+      }
+    },
+    "ton_PQ80_int16": {
+      "n": 4462,
+      "exact_match": 0,
+      "max_abs_diff": 0.55450439453125,
+      "max_diff_output_steps": 141.953125,
+      "selected": {
+        "idx": "2",
+        "name": "ton_PQ80_int16",
+        "dim": "43",
+        "arena_used": "5912",
+        "in_type": "float32",
+        "in_scale": "0",
+        "in_zp": "0",
+        "out_type": "float32",
+        "free_heap": "215004"
+      },
+      "flash_bytes": 73456,
+      "seconds": 70.4,
+      "crashed_at_vector": null,
+      "device_resets": 0,
+      "inputs_skipped_after_two_resets": [],
+      "latency_us": {
+        "quantize_input": {
+          "median": 13.0,
+          "p95": 14.0,
+          "max": 18
+        },
+        "invoke": {
+          "median": 12098.0,
+          "p95": 12118.0,
+          "max": 12123
+        },
+        "dequantize_output": {
+          "median": 9.0,
+          "p95": 9.0,
+          "max": 13
+        }
+      },
+      "decision_agreement": {
+        "0.01": {
+          "agree": 1894,
+          "n": 4462,
+          "threshold": 0.9454041123390198
+        },
+        "0.05": {
+          "agree": 3149,
+          "n": 4462,
+          "threshold": 0.0953979566693306
+        }
+      },
+      "by_category": {
+        "near_threshold:ton_P80:0.01": {
+          "n": 300,
+          "exact_match": 0
+        },
+        "near_threshold:ton_P80:0.05": {
+          "n": 31,
+          "exact_match": 0
+        },
+        "near_threshold:ton_P80_pt:0.01": {
+          "n": 182,
+          "exact_match": 0
+        },
+        "near_threshold:ton_P80_pt:0.05": {
+          "n": 78,
+          "exact_match": 0
+        },
+        "near_threshold:ton_PQ80_int16:0.01": {
+          "n": 168,
+          "exact_match": 0
+        },
+        "near_threshold:ton_PQ80_int16:0.05": {
+          "n": 36,
+          "exact_match": 0
+        },
+        "near_threshold:ton_PQ80_minmax:0.01": {
+          "n": 93,
+          "exact_match": 0
+        },
+        "near_threshold:ton_PQ80_minmax:0.05": {
+          "n": 300,
+          "exact_match": 0
+        },
+        "near_threshold:ton_QC80:0.01": {
+          "n": 190,
+          "exact_match": 0
+        },
+        "near_threshold:ton_QC80:0.05": {
+          "n": 5,
+          "exact_match": 0
+        },
+        "near_threshold:ton_R80:0.01": {
+          "n": 80,
+          "exact_match": 0
+        },
+        "near_threshold:ton_R80:0.05": {
+          "n": 19,
+          "exact_match": 0
+        },
+        "near_threshold:ton_S80:0.01": {
+          "n": 122,
+          "exact_match": 0
+        },
+        "near_threshold:ton_S80:0.05": {
+          "n": 4,
+          "exact_match": 0
+        },
+        "near_threshold:ton_S80_pt:0.01": {
+          "n": 138,
+          "exact_match": 0
+        },
+        "near_threshold:ton_S80_pt:0.05": {
+          "n": 6,
+          "exact_match": 0
+        },
+        "out_of_range": {
+          "n": 800,
+          "exact_match": 0
+        },
+        "random": {
+          "n": 1500,
+          "exact_match": 0
+        },
+        "synthetic_extreme": {
+          "n": 400,
+          "exact_match": 0
+        },
+        "zeros": {
+          "n": 10,
+          "exact_match": 0
+        }
+      }
+    },
+    "ton_S80_pt": {
+      "n": 4462,
+      "exact_match": 4099,
+      "max_abs_diff": 0.015625,
+      "max_diff_output_steps": 4.0,
+      "selected": {
+        "idx": "1",
+        "name": "ton_S80_pt",
+        "dim": "43",
+        "arena_used": "1944",
+        "in_type": "float32",
+        "in_scale": "0",
+        "in_zp": "0",
+        "out_type": "float32",
+        "free_heap": "215004"
+      },
+      "flash_bytes": 57184,
+      "seconds": 62.4,
+      "crashed_at_vector": null,
+      "device_resets": 0,
+      "inputs_skipped_after_two_resets": [],
+      "latency_us": {
+        "quantize_input": {
+          "median": 13.0,
+          "p95": 14.0,
+          "max": 19
+        },
+        "invoke": {
+          "median": 10295.0,
+          "p95": 10299.0,
+          "max": 10304
+        },
+        "dequantize_output": {
+          "median": 9.0,
+          "p95": 9.0,
+          "max": 12
+        }
+      },
+      "decision_agreement": {
+        "0.01": {
+          "agree": 4462,
+          "n": 4462,
+          "threshold": 0.6992188096046448
+        },
+        "0.05": {
+          "agree": 4458,
+          "n": 4462,
+          "threshold": 0.3671875298023224
+        }
+      },
+      "by_category": {
+        "near_threshold:ton_P80:0.01": {
+          "n": 300,
+          "exact_match": 300
+        },
+        "near_threshold:ton_P80:0.05": {
+          "n": 31,
+          "exact_match": 31
+        },
+        "near_threshold:ton_P80_pt:0.01": {
+          "n": 182,
+          "exact_match": 181
+        },
+        "near_threshold:ton_P80_pt:0.05": {
+          "n": 78,
+          "exact_match": 78
+        },
+        "near_threshold:ton_PQ80_int16:0.01": {
+          "n": 168,
+          "exact_match": 168
+        },
+        "near_threshold:ton_PQ80_int16:0.05": {
+          "n": 36,
+          "exact_match": 32
+        },
+        "near_threshold:ton_PQ80_minmax:0.01": {
+          "n": 93,
+          "exact_match": 91
+        },
+        "near_threshold:ton_PQ80_minmax:0.05": {
+          "n": 300,
+          "exact_match": 297
+        },
+        "near_threshold:ton_QC80:0.01": {
+          "n": 190,
+          "exact_match": 180
+        },
+        "near_threshold:ton_QC80:0.05": {
+          "n": 5,
+          "exact_match": 5
+        },
+        "near_threshold:ton_R80:0.01": {
+          "n": 80,
+          "exact_match": 80
+        },
+        "near_threshold:ton_R80:0.05": {
+          "n": 19,
+          "exact_match": 17
+        },
+        "near_threshold:ton_S80:0.01": {
+          "n": 122,
+          "exact_match": 115
+        },
+        "near_threshold:ton_S80:0.05": {
+          "n": 4,
+          "exact_match": 3
+        },
+        "near_threshold:ton_S80_pt:0.01": {
+          "n": 138,
+          "exact_match": 136
+        },
+        "near_threshold:ton_S80_pt:0.05": {
+          "n": 6,
+          "exact_match": 5
+        },
+        "out_of_range": {
+          "n": 800,
+          "exact_match": 724
+        },
+        "random": {
+          "n": 1500,
+          "exact_match": 1274
+        },
+        "synthetic_extreme": {
+          "n": 400,
+          "exact_match": 372
+        },
+        "zeros": {
+          "n": 10,
+          "exact_match": 10
+        }
+      }
+    }
+  }
+}
