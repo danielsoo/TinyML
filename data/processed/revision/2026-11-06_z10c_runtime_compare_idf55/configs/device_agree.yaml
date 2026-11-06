@@ -1,0 +1,8 @@
+# Second retry of the esp-tflite-micro half of z10: z10b got past pkg_resources but ESP-IDF 5.1.2's
+# component manager (1.2.x) could not read the esp-nn 1.4.2 manifest (repository_info); the project
+# now uses espressif32@6.12.0 (ESP-IDF 5.5, component manager 2.x). Same bundle, models, board as z10.
+bundle: data/processed/revision/2026-11-05_z7_device_bundle/device_bundle
+boards:
+  - {name: esp32_runtime_esp_tflite_micro, env: esp32dev, project: esp32_agreement_idf, vids: [0x10C4, 0x1A86, 0x0403]}
+limit: null
+models: [ton_S80, ton_S80_pt, ton_PQ80_int16]

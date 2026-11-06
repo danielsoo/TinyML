@@ -1,0 +1,53 @@
+{
+  "boards": {
+    "esp32_runtime_esp_tflite_micro": {
+      "status": "build/upload failed",
+      "log_tail": [
+        "Compiling .pio\\build\\esp32dev\\esp_hid\\src\\esp_hidd.c.o",
+        "Compiling .pio\\build\\esp32dev\\esp_hid\\src\\esp_hidh.c.o",
+        "Compiling .pio\\build\\esp32dev\\esp_hid\\src\\esp_hid_common.c.o",
+        "Compiling .pio\\build\\esp32dev\\esp_http_client\\esp_http_client.c.o",
+        "Compiling .pio\\build\\esp32dev\\esp_http_client\\lib\\http_auth.c.o",
+        "Compiling .pio\\build\\esp32dev\\esp_http_client\\lib\\http_header.c.o",
+        "Compiling .pio\\build\\esp32dev\\esp_http_client\\lib\\http_utils.c.o",
+        "Archiving .pio\\build\\esp32dev\\esp-idf\\esp_eth\\libesp_eth.a",
+        "Compiling .pio\\build\\esp32dev\\esp_http_server\\src\\httpd_main.c.o",
+        "Compiling .pio\\build\\esp32dev\\esp_http_server\\src\\httpd_parse.c.o",
+        "Compiling .pio\\build\\esp32dev\\esp_http_server\\src\\httpd_sess.c.o",
+        "Archiving .pio\\build\\esp32dev\\esp-idf\\esp_event\\libesp_event.a",
+        "Compiling .pio\\build\\esp32dev\\esp_http_server\\src\\httpd_txrx.c.o",
+        "Compiling .pio\\build\\esp32dev\\esp_http_server\\src\\httpd_uri.c.o",
+        "Compiling .pio\\build\\esp32dev\\esp_http_server\\src\\httpd_ws.c.o",
+        "Compiling .pio\\build\\esp32dev\\esp_http_server\\src\\util\\ctrl_sock.c.o",
+        "Compiling .pio\\build\\esp32dev\\esp_https_ota\\src\\esp_https_ota.c.o",
+        "Archiving .pio\\build\\esp32dev\\esp-idf\\esp_gdbstub\\libesp_gdbstub.a",
+        "src/main.cc:35:10: fatal error: tensorflow/lite/schema/schema_generated.h: No such file or directory",
+        "   35 | #include \"tensorflow/lite/schema/schema_generated.h\"",
+        "      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+        "compilation terminated.",
+        "Compiling .pio\\build\\esp32dev\\esp_https_server\\src\\https_server.c.o",
+        "*** [.pio\\build\\esp32dev\\src\\main.cc.o] Error 1",
+        "========================= [FAILED] Took 206.25 seconds =========================",
+        "",
+        "Environment    Status    Duration",
+        "-------------  --------  ------------",
+        "esp32dev       FAILED    00:03:26.247",
+        "==================== 1 failed, 0 succeeded in 00:03:26.247 ===================="
+      ]
+    }
+  },
+  "ports": [
+    {
+      "device": "COM3",
+      "vid": 4292,
+      "pid": 60000,
+      "description": "Silicon Labs CP210x USB to UART Bridge (COM3)"
+    },
+    {
+      "device": "COM1",
+      "vid": null,
+      "pid": null,
+      "description": "Communications Port (COM1)"
+    }
+  ]
+}
