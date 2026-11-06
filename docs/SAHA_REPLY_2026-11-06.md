@@ -1,3 +1,5 @@
+Subject: Completion table for your 2026-11-05 list, and runtime comparison results
+
 Dear Dr. Saha,
 
 Thank you for the list. Everything on it is now done. Nothing was retrained and every threshold stayed frozen. The full record is in `docs/SAHA_COMPLETION.md` on the branch. Here is the completion table:
@@ -39,6 +41,12 @@ What this shows:
 - Section 7 has a new Table 9 and a short "current runtime" paragraph.
 - The abstract, RQ3, recommendation 5, threats to validity and the conclusion now state the runtime scope: per-tensor models agree on both runtimes, per-channel models only on the current one, and the 16-bit model on neither.
 - The paper is still 9 pages.
+
+**One question.** One follow-up could pin down the 16-bit failure. We would re-export the same 16-bit model with per-tensor weight scales and run it on the current runtime.
+- If it then agrees with the host, the per-channel int16 path of the runtime is the cause.
+- If it still fails, int16 support itself is the cause.
+
+This needs one export and one board run (about an hour). It changes no other result. Without it, the paper keeps 16-bit activations as a host-only result, as it does now. Would you like us to run it, or should we leave the scope as it is?
 
 Best regards,
 Younsoo Park and Seokhyeon Bae
