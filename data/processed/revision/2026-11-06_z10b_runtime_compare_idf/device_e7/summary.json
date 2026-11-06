@@ -1,0 +1,53 @@
+{
+  "boards": {
+    "esp32_runtime_esp_tflite_micro": {
+      "status": "build/upload failed",
+      "log_tail": [
+        "",
+        "",
+        "  Invalid manifest format",
+        "",
+        "  Unknown keys: repository_info",
+        "",
+        "  ",
+        "",
+        "  SUGGESTION: This component may be using a newer version of the component",
+        "  manager.",
+        "",
+        "  You can try to update the component manager by running:",
+        "",
+        "      C:\\Users\\danie\\.platformio\\penv\\.espidf-5.1.2\\Scripts\\python.exe -m pip install --upgrade idf-component-manager",
+        "",
+        "  ",
+        "",
+        "Call Stack (most recent call first):",
+        "  C:/Users/danie/.platformio/packages/framework-espidf/tools/cmake/build.cmake:574 (__component_get_requirements)",
+        "  C:/Users/danie/.platformio/packages/framework-espidf/tools/cmake/project.cmake:547 (idf_build_process)",
+        "  CMakeLists.txt:3 (project)",
+        "",
+        "",
+        "",
+        "========================== [FAILED] Took 2.69 seconds ==========================",
+        "",
+        "Environment    Status    Duration",
+        "-------------  --------  ------------",
+        "esp32dev       FAILED    00:00:02.693",
+        "==================== 1 failed, 0 succeeded in 00:00:02.693 ===================="
+      ]
+    }
+  },
+  "ports": [
+    {
+      "device": "COM3",
+      "vid": 4292,
+      "pid": 60000,
+      "description": "Silicon Labs CP210x USB to UART Bridge (COM3)"
+    },
+    {
+      "device": "COM1",
+      "vid": null,
+      "pid": null,
+      "description": "Communications Port (COM1)"
+    }
+  ]
+}

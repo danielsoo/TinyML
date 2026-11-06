@@ -1,0 +1,8 @@
+# Retry of the esp-tflite-micro half of z10 (the ESP-IDF build failed on Windows Python 3.12:
+# espressif32@6.5.0's builder imports pkg_resources; run_e7_device.py now installs setuptools<81 first).
+# Same bundle, models and board as z10; the Arduino TFLM 1.0.0 half is in z10.
+bundle: data/processed/revision/2026-11-05_z7_device_bundle/device_bundle
+boards:
+  - {name: esp32_runtime_esp_tflite_micro, env: esp32dev, project: esp32_agreement_idf, vids: [0x10C4, 0x1A86, 0x0403]}
+limit: null
+models: [ton_S80, ton_S80_pt, ton_PQ80_int16]

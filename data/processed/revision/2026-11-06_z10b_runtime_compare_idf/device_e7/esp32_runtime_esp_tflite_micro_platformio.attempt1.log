@@ -1,0 +1,188 @@
+Processing esp32dev (board: esp32dev; platform: espressif32@6.5.0; framework: espidf)
+--------------------------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+[gen_model_data] 3 models from C:\Users\danie\Documents\Projects\TinyML\data/processed/revision/2026-11-05_z7_device_bundle/device_bundle
+CONFIGURATION: https://docs.platformio.org/page/boards/espressif32/esp32dev.html
+PLATFORM: Espressif 32 (6.5.0) > Espressif ESP32 Dev Module
+HARDWARE: ESP32 240MHz, 320KB RAM, 4MB Flash
+DEBUG: Current (cmsis-dap) External (cmsis-dap, esp-bridge, esp-prog, iot-bus-jtag, jlink, minimodule, olimex-arm-usb-ocd, olimex-arm-usb-ocd-h, olimex-arm-usb-tiny-h, olimex-jtag-tiny, tumpa)
+PACKAGES: 
+ - framework-espidf @ 3.50102.240122 (5.1.2) 
+ - tool-cmake @ 3.16.4 
+ - tool-esptoolpy @ 1.40501.0 (4.5.1) 
+ - tool-idf @ 1.0.1 
+ - tool-mconf @ 1.4060000.20190628 (406.0.0) 
+ - tool-mkfatfs @ 2.0.1 
+ - tool-mklittlefs @ 1.203.210628 (2.3) 
+ - tool-mkspiffs @ 2.230.0 (2.30) 
+ - tool-ninja @ 1.9.0 
+ - tool-riscv32-esp-elf-gdb @ 11.2.0+20220823 
+ - tool-xtensa-esp-elf-gdb @ 11.2.0+20230208 
+ - toolchain-esp32ulp @ 1.23500.220830 (2.35.0) 
+ - toolchain-xtensa-esp32 @ 12.2.0+20230208
+C:\Users\danie\.platformio\platforms\espressif32@6.5.0\builder\frameworks\espidf.py:29: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+Creating a new virtual environment for IDF Python dependencies
+Installing ESP-IDF's Python dependencies
+Collecting urllib3<2
+  Downloading urllib3-1.26.20-py2.py3-none-any.whl.metadata (50 kB)
+Collecting cryptography~=41.0.1
+  Downloading cryptography-41.0.7-cp37-abi3-win_amd64.whl.metadata (5.3 kB)
+Collecting future>=0.18.3
+  Downloading future-1.0.0-py3-none-any.whl.metadata (4.0 kB)
+Collecting pyparsing~=3.0.9
+  Downloading pyparsing-3.0.9-py3-none-any.whl.metadata (4.2 kB)
+Collecting kconfiglib~=14.1.0
+  Downloading kconfiglib-14.1.0-py2.py3-none-any.whl.metadata (39 kB)
+Collecting idf-component-manager~=1.2.3
+  Downloading idf_component_manager-1.2.3-py3-none-any.whl.metadata (9.7 kB)
+Collecting esp-idf-kconfig~=1.2.0
+  Downloading esp_idf_kconfig-1.2.0-py3-none-any.whl.metadata (1.7 kB)
+Collecting cffi>=1.12 (from cryptography~=41.0.1)
+  Using cached cffi-2.1.1-cp312-cp312-win_amd64.whl.metadata (2.6 kB)
+Collecting packaging (from idf-component-manager~=1.2.3)
+  Using cached packaging-26.3-py3-none-any.whl.metadata (3.5 kB)
+Collecting requests<3 (from idf-component-manager~=1.2.3)
+  Using cached requests-2.34.2-py3-none-any.whl.metadata (4.8 kB)
+Collecting requests-file (from idf-component-manager~=1.2.3)
+  Downloading requests_file-3.0.1-py2.py3-none-any.whl.metadata (1.7 kB)
+Collecting requests-toolbelt (from idf-component-manager~=1.2.3)
+  Downloading requests_toolbelt-1.0.0-py2.py3-none-any.whl.metadata (14 kB)
+Collecting schema (from idf-component-manager~=1.2.3)
+  Downloading schema-0.7.8-py2.py3-none-any.whl.metadata (34 kB)
+Collecting six (from idf-component-manager~=1.2.3)
+  Using cached six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+Collecting tqdm<5 (from idf-component-manager~=1.2.3)
+  Using cached tqdm-4.70.1-py3-none-any.whl.metadata (57 kB)
+Collecting colorama (from idf-component-manager~=1.2.3)
+  Using cached colorama-0.4.6-py2.py3-none-any.whl.metadata (17 kB)
+Collecting pyyaml>5.2 (from idf-component-manager~=1.2.3)
+  Using cached pyyaml-6.0.3-cp312-cp312-win_amd64.whl.metadata (2.4 kB)
+Collecting cachecontrol>0.12.6 (from cachecontrol[filecache]>0.12.6; python_version >= "3.6"->idf-component-manager~=1.2.3)
+  Downloading cachecontrol-0.14.4-py3-none-any.whl.metadata (3.1 kB)
+Collecting contextlib2>0.6.0 (from idf-component-manager~=1.2.3)
+  Downloading contextlib2-21.6.0-py2.py3-none-any.whl.metadata (4.1 kB)
+Collecting click (from idf-component-manager~=1.2.3)
+  Using cached click-8.5.0-py3-none-any.whl.metadata (2.6 kB)
+Collecting msgpack<2.0.0,>=0.5.2 (from cachecontrol>0.12.6->cachecontrol[filecache]>0.12.6; python_version >= "3.6"->idf-component-manager~=1.2.3)
+  Downloading msgpack-1.2.4-cp312-cp312-win_amd64.whl.metadata (8.5 kB)
+Collecting filelock>=3.8.0 (from cachecontrol[filecache]>0.12.6; python_version >= "3.6"->idf-component-manager~=1.2.3)
+  Downloading filelock-4.2.9-py3-none-any.whl.metadata (2.3 kB)
+Collecting pycparser (from cffi>=1.12->cryptography~=41.0.1)
+  Using cached pycparser-3.12-py3-none-any.whl.metadata (9.7 kB)
+Collecting charset_normalizer<4,>=2 (from requests<3->idf-component-manager~=1.2.3)
+  Using cached charset_normalizer-3.5.2-cp312-cp312-win_amd64.whl.metadata (47 kB)
+Collecting idna<4,>=2.5 (from requests<3->idf-component-manager~=1.2.3)
+  Using cached idna-3.20-py3-none-any.whl.metadata (7.2 kB)
+Collecting certifi>=2023.5.7 (from requests<3->idf-component-manager~=1.2.3)
+  Using cached certifi-2026.10.23-py3-none-any.whl.metadata (2.5 kB)
+Downloading urllib3-1.26.20-py2.py3-none-any.whl (144 kB)
+Downloading cryptography-41.0.7-cp37-abi3-win_amd64.whl (2.7 MB)
+   ---------------------------------------- 2.7/2.7 MB 22.1 MB/s eta 0:00:00
+Downloading future-1.0.0-py3-none-any.whl (491 kB)
+Downloading pyparsing-3.0.9-py3-none-any.whl (98 kB)
+Downloading kconfiglib-14.1.0-py2.py3-none-any.whl (145 kB)
+Downloading idf_component_manager-1.2.3-py3-none-any.whl (116 kB)
+Downloading esp_idf_kconfig-1.2.0-py3-none-any.whl (22 kB)
+Downloading cachecontrol-0.14.4-py3-none-any.whl (22 kB)
+Using cached cffi-2.1.1-cp312-cp312-win_amd64.whl (185 kB)
+Downloading contextlib2-21.6.0-py2.py3-none-any.whl (13 kB)
+Using cached pyyaml-6.0.3-cp312-cp312-win_amd64.whl (154 kB)
+Using cached requests-2.34.2-py3-none-any.whl (73 kB)
+Using cached tqdm-4.70.1-py3-none-any.whl (80 kB)
+Using cached click-8.5.0-py3-none-any.whl (125 kB)
+Using cached colorama-0.4.6-py2.py3-none-any.whl (25 kB)
+Using cached packaging-26.3-py3-none-any.whl (129 kB)
+Downloading requests_file-3.0.1-py2.py3-none-any.whl (4.5 kB)
+Downloading requests_toolbelt-1.0.0-py2.py3-none-any.whl (54 kB)
+Downloading schema-0.7.8-py2.py3-none-any.whl (19 kB)
+Using cached six-1.17.0-py2.py3-none-any.whl (11 kB)
+Using cached certifi-2026.10.23-py3-none-any.whl (135 kB)
+Using cached charset_normalizer-3.5.2-cp312-cp312-win_amd64.whl (207 kB)
+Downloading filelock-4.2.9-py3-none-any.whl (164 kB)
+Using cached idna-3.20-py3-none-any.whl (69 kB)
+Downloading msgpack-1.2.4-cp312-cp312-win_amd64.whl (77 kB)
+Using cached pycparser-3.12-py3-none-any.whl (62 kB)
+Installing collected packages: schema, urllib3, six, pyyaml, pyparsing, pycparser, packaging, msgpack, kconfiglib, idna, future, filelock, contextlib2, colorama, click, charset_normalizer, certifi, tqdm, requests, esp-idf-kconfig, cffi, requests-toolbelt, requests-file, cryptography, cachecontrol, idf-component-manager
+Successfully installed cachecontrol-0.14.4 certifi-2026.10.23 cffi-2.1.1 charset_normalizer-3.5.2 click-8.5.0 colorama-0.4.6 contextlib2-21.6.0 cryptography-41.0.7 esp-idf-kconfig-1.2.0 filelock-4.2.9 future-1.0.0 idf-component-manager-1.2.3 idna-3.20 kconfiglib-14.1.0 msgpack-1.2.4 packaging-26.3 pycparser-3.12 pyparsing-3.0.9 pyyaml-6.0.3 requests-2.34.2 requests-file-3.0.1 requests-toolbelt-1.0.0 schema-0.7.8 six-1.17.0 tqdm-4.70.1 urllib3-1.26.20
+
+[notice] A new release of pip is available: 25.0.1 -> 26.3
+[notice] To update, run: C:\Users\danie\.platformio\penv\.espidf-5.1.2\Scripts\python.exe -m pip install --upgrade pip
+Installing windows-curses package
+Collecting windows-curses
+  Downloading windows_curses-2.4.2-cp312-cp312-win_amd64.whl.metadata (3.0 kB)
+Downloading windows_curses-2.4.2-cp312-cp312-win_amd64.whl (82 kB)
+Installing collected packages: windows-curses
+Successfully installed windows-curses-2.4.2
+
+[notice] A new release of pip is available: 25.0.1 -> 26.3
+[notice] To update, run: C:\Users\danie\.platformio\penv\.espidf-5.1.2\Scripts\python.exe -m pip install --upgrade pip
+Reading CMake configuration...
+-- Found Git: C:/Program Files/Git/cmd/git.exe (found version "2.55.0.windows.3") 
+-- git rev-parse returned 'fatal: not a git repository (or any of the parent directories): .git'
+-- The C compiler identification is GNU 12.2.0
+-- The CXX compiler identification is GNU 12.2.0
+-- The ASM compiler identification is GNU
+-- Found assembler: C:/Users/danie/.platformio/packages/toolchain-xtensa-esp32/bin/xtensa-esp32-elf-gcc.exe
+-- Check for working C compiler: C:/Users/danie/.platformio/packages/toolchain-xtensa-esp32/bin/xtensa-esp32-elf-gcc.exe
+-- Check for working C compiler: C:/Users/danie/.platformio/packages/toolchain-xtensa-esp32/bin/xtensa-esp32-elf-gcc.exe -- works
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Check for working CXX compiler: C:/Users/danie/.platformio/packages/toolchain-xtensa-esp32/bin/xtensa-esp32-elf-g++.exe
+-- Check for working CXX compiler: C:/Users/danie/.platformio/packages/toolchain-xtensa-esp32/bin/xtensa-esp32-elf-g++.exe -- works
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Building ESP-IDF components for target esp32
+Solving dependencies requirements
+
+...................................................................................................................................................................................................................................................................Updating lock file at C:/Users/danie/Documents/Projects/TinyML/esp32_agreement_idf\dependencies.lock
+
+Processing 3 dependencies:
+
+[1/3] espressif/esp-nn (1.4.2)
+
+[2/3] espressif/esp-tflite-micro (1.4.2)
+
+[3/3] idf (5.1.2)
+
+-- Configuring incomplete, errors occurred!
+See also "C:/Users/danie/Documents/Projects/TinyML/esp32_agreement_idf/.pio/build/esp32dev/CMakeFiles/CMakeOutput.log".
+
+fatal: not a git repository (or any of the parent directories): .git
+CMake Error at C:/Users/danie/.platformio/packages/framework-espidf/tools/cmake/component.cmake:250 (message):
+  ERROR: 2 problems were found in the manifest file
+  C:\Users\danie\Documents\Projects\TinyML\esp32_agreement_idf\managed_components\espressif__esp-nn\idf_component.yml:
+
+
+  Invalid manifest format
+
+  Unknown keys: repository_info
+
+  
+
+  SUGGESTION: This component may be using a newer version of the component
+  manager.
+
+  You can try to update the component manager by running:
+
+      C:\Users\danie\.platformio\penv\.espidf-5.1.2\Scripts\python.exe -m pip install --upgrade idf-component-manager
+
+  
+
+Call Stack (most recent call first):
+  C:/Users/danie/.platformio/packages/framework-espidf/tools/cmake/build.cmake:574 (__component_get_requirements)
+  C:/Users/danie/.platformio/packages/framework-espidf/tools/cmake/project.cmake:547 (idf_build_process)
+  CMakeLists.txt:3 (project)
+
+
+
+========================= [FAILED] Took 22.84 seconds =========================
+
+Environment    Status    Duration
+-------------  --------  ------------
+esp32dev       FAILED    00:00:22.840
+==================== 1 failed, 0 succeeded in 00:00:22.840 ====================

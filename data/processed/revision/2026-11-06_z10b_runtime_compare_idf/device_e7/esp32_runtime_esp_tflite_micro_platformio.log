@@ -1,0 +1,72 @@
+Processing esp32dev (board: esp32dev; platform: espressif32@6.5.0; framework: espidf)
+--------------------------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+[gen_model_data] 3 models from C:\Users\danie\Documents\Projects\TinyML\data/processed/revision/2026-11-05_z7_device_bundle/device_bundle
+CONFIGURATION: https://docs.platformio.org/page/boards/espressif32/esp32dev.html
+PLATFORM: Espressif 32 (6.5.0) > Espressif ESP32 Dev Module
+HARDWARE: ESP32 240MHz, 320KB RAM, 4MB Flash
+DEBUG: Current (cmsis-dap) External (cmsis-dap, esp-bridge, esp-prog, iot-bus-jtag, jlink, minimodule, olimex-arm-usb-ocd, olimex-arm-usb-ocd-h, olimex-arm-usb-tiny-h, olimex-jtag-tiny, tumpa)
+PACKAGES: 
+ - framework-espidf @ 3.50102.240122 (5.1.2) 
+ - tool-cmake @ 3.16.4 
+ - tool-esptoolpy @ 1.40501.0 (4.5.1) 
+ - tool-idf @ 1.0.1 
+ - tool-mconf @ 1.4060000.20190628 (406.0.0) 
+ - tool-mkfatfs @ 2.0.1 
+ - tool-mklittlefs @ 1.203.210628 (2.3) 
+ - tool-mkspiffs @ 2.230.0 (2.30) 
+ - tool-ninja @ 1.9.0 
+ - tool-riscv32-esp-elf-gdb @ 11.2.0+20220823 
+ - tool-xtensa-esp-elf-gdb @ 11.2.0+20230208 
+ - toolchain-esp32ulp @ 1.23500.220830 (2.35.0) 
+ - toolchain-xtensa-esp32 @ 12.2.0+20230208
+C:\Users\danie\.platformio\platforms\espressif32@6.5.0\builder\frameworks\espidf.py:29: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+Reading CMake configuration...
+-- git rev-parse returned 'fatal: not a git repository (or any of the parent directories): .git'
+-- Building ESP-IDF components for target esp32
+Processing 3 dependencies:
+
+[1/3] espressif/esp-nn (1.4.2)
+
+[2/3] espressif/esp-tflite-micro (1.4.2)
+
+[3/3] idf (5.1.2)
+
+-- Configuring incomplete, errors occurred!
+See also "C:/Users/danie/Documents/Projects/TinyML/esp32_agreement_idf/.pio/build/esp32dev/CMakeFiles/CMakeOutput.log".
+
+fatal: not a git repository (or any of the parent directories): .git
+CMake Error at C:/Users/danie/.platformio/packages/framework-espidf/tools/cmake/component.cmake:250 (message):
+  ERROR: 2 problems were found in the manifest file
+  C:\Users\danie\Documents\Projects\TinyML\esp32_agreement_idf\managed_components\espressif__esp-nn\idf_component.yml:
+
+
+  Invalid manifest format
+
+  Unknown keys: repository_info
+
+  
+
+  SUGGESTION: This component may be using a newer version of the component
+  manager.
+
+  You can try to update the component manager by running:
+
+      C:\Users\danie\.platformio\penv\.espidf-5.1.2\Scripts\python.exe -m pip install --upgrade idf-component-manager
+
+  
+
+Call Stack (most recent call first):
+  C:/Users/danie/.platformio/packages/framework-espidf/tools/cmake/build.cmake:574 (__component_get_requirements)
+  C:/Users/danie/.platformio/packages/framework-espidf/tools/cmake/project.cmake:547 (idf_build_process)
+  CMakeLists.txt:3 (project)
+
+
+
+========================== [FAILED] Took 2.69 seconds ==========================
+
+Environment    Status    Duration
+-------------  --------  ------------
+esp32dev       FAILED    00:00:02.693
+==================== 1 failed, 0 succeeded in 00:00:02.693 ====================
