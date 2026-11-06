@@ -150,6 +150,10 @@ def run(bundle_dir: str, port: str, out_dir: str | None, limit: int | None, baud
         t_end = time.time() + seconds
         while time.time() < t_end:
             line = ser.readline().decode(errors="replace").strip()
+            for kw in ("DEVICE ", "RUNTIME ", "MEMORY ", "MODEL ", "READY"):
+                if kw in line:  # ROM boot output (115200 baud) can be glued to the first banner line
+                    line = line[line.index(kw):]
+                    break
             if line.startswith(("DEVICE", "RUNTIME", "MEMORY")):
                 device.update({(k if line.startswith("DEVICE") else f"{line.split()[0].lower()}_{k}"): v
                                for k, v in _kv(line).items()})
