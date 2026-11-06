@@ -1,0 +1,7 @@
+id: 2026-11-06_z10c_runtime_compare_idf55
+config_dir: config/jobs/2026-11-06_z10c_runtime_compare_idf55
+steps: device_agree
+flags: []
+why: 'Second retry of the esp-tflite-micro half of the z10 runtime comparison, now on
+  ESP-IDF 5.5 (espressif32@6.12.0) because IDF 5.1.2 could not read the current esp-nn
+  manifest. Classic ESP32 must be plugged in. First build downloads ESP-IDF 5.5, ~30 min.'
