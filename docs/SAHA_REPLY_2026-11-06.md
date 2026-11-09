@@ -40,7 +40,7 @@ What this shows:
 **Paper changes.**
 - Section 7 has a new Table 9 and a short "current runtime" paragraph.
 - The abstract, RQ3, recommendation 5, threats to validity and the conclusion now state the runtime scope: per-tensor models agree on both runtimes, per-channel models only on the current one, and the 16-bit model on neither.
-- The paper is still 9 pages.
+- The paper is 8 pages (a title-macro bug had left page 1 blank; fixed).
 
 **One question.** One follow-up could pin down the 16-bit failure. We would re-export the same 16-bit model with per-tensor weight scales and run it on the current runtime.
 - If it then agrees with the host, the per-channel int16 path of the runtime is the cause.
