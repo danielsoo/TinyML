@@ -39,20 +39,22 @@ Federated intrusion detectors are trained on server-class hardware but must run 
 with tens of kilobytes of memory. We ask when compressing such a detector to INT8 preserves its
 usefulness at a fixed false-alarm rate, why it fails when it does, and which remedies work when only
 client-held data are available. On \cic and \ton, with a data pipeline audited for client ownership
-and test isolation, thresholds chosen on client validation data, and three independent federated
-runs, 57--67\,KB INT8 models detect 98.5\% and 99.6\% of attacks at a 1\% false-alarm budget, at
-least as many as the float teacher, and a compact model trained federatively from scratch is as good as a
-pruned and distilled teacher. Failures have one dominant cause, the input quantization range: ten
-extreme records in a 2,000-record calibration draw drive recall to 0\%, and quantization-aware
-training (QAT) fails for the same reason because it learns that range from unclipped inputs.
-Bounding the input range removes both failures at no cost. Hidden-layer ranges and the 8-bit output
-grid matter little; the residual loss comes from coarse activations near the operating point and is
-recovered on the host by 16-bit activations. The ranking holds on hosts never seen in training. On an ESP32-S3 and an ESP32
-the per-tensor INT8 models reproduce the host decisions on all but at most one of 2,700 random and
-stress inputs per model, at 5.6--6.5\,ms per flow (13.2--15.4\,ms on an ESP32), with bit-identical
-outputs on both chips and bit-identical outputs on an older and the current TFLM runtime. Models with
-per-channel weight scales, the converter's default, silently disagree on half of their decisions on the
-older runtime but not on the current one, and the 16-bit-activation model runs correctly on neither.
+and test isolation, thresholds chosen for a 1\% false-alarm budget on client validation data, and
+three independent federated runs, the best 57--65\,KB INT8 models detect 98.5\% and 99.6\% of test
+attacks at an achieved test false-alarm rate of 1.16\% and 0.92\%. A compact model trained federatively
+from scratch matches the complete recovery recipe (distillation, clipped inputs, QAT) on \cic and on
+unseen hosts and trails it by 0.5--1.6 points on \ton. Failures have one dominant cause, the input
+quantization range: ten extreme records in a 2,000-record calibration draw drive recall to 0\%, and
+quantization-aware training (QAT) fails for the same reason because it learns that range from
+unclipped inputs. Bounding the input range removes both failures at no device cost, although clipping
+saturates features of 8--28\% of test records. On hosts never seen in training, the compact INT8 models
+lose 1.6--4.4 points of recall relative to the float teacher. The residual loss lies in coarse
+activations near the operating point and is recovered on the host by 16-bit activations. Finally, the
+exact exported file and runtime decide what the device does: on TFLM 1.0.0 the per-tensor INT8 models
+reproduce the host decisions on an ESP32-S3 and an ESP32 (5.6--6.5 and 13.2--15.4\,ms per flow), while
+the converter's default per-channel export silently disagrees on half of its decisions; the current
+Espressif runtime restores agreement for the per-channel model we tested, and the 16-bit model runs
+correctly on neither runtime.
 \end{abstract}
 
 \keywords{federated learning, TinyML, intrusion detection, quantization, microcontrollers}
@@ -80,23 +82,32 @@ rebuilding the pipeline we ask three questions:
 \item[RQ2] Why does it fail when it does?
 \item[RQ3] Which remedies work under memory and client-data constraints, and what do they cost on the device?
 \end{description}
-Our answers, on \cic and \ton with three federated runs per configuration:
+On \cic and \ton with three federated runs per configuration, the answers form three connected findings:
 \begin{itemize}
-\item \textbf{RQ1.} At 57--67\,KB, INT8 models match the float teacher at a 1\% FAR budget
-  (98.5\% / 99.6\% recall). A compact model trained federatively from scratch is a strong baseline
-  that compression must beat; fine-tuning with one client's 10k records suffices (\S\ref{sec:rq1}).
-\item \textbf{RQ2.} A controlled 2$\times$2 isolates the input range, not hidden ranges, as the cause of
-  collapses; the same mechanism explains why QAT fails; the remaining loss comes from tie groups of
-  coarse INT8 outputs at the operating point (\S\ref{sec:rq2}).
-\item \textbf{RQ3.} Bounding the input range (clipped or extreme-free calibration, QAT on clipped
-  inputs) removes the failures for free; distillation adds up to 2 points; 16-bit activations recover
-  the tie loss on the host but ran correctly on no microcontroller runtime we tried. On two ESP32 chips and
-  two TFLM runtimes, per-tensor INT8 models reproduce the host decisions; per-channel models silently do
-  not on the older runtime (\S\ref{sec:rq3}, \S\ref{sec:device}).
+\item \textbf{A compact model trained from scratch is often enough (RQ1, RQ3).} At 57--65\,KB, a model
+  trained federatively at the target size (S80) matches the complete teacher-based recovery recipe R
+  (pruning, distilled fine-tuning on clipped inputs, QAT on clipped inputs) on \cic and on unseen hosts;
+  R is better on the random \ton split by 0.5--1.6 points in every run, at a 0.1--0.2-point higher
+  achieved test FAR. Both have the same architecture, size and latency; they differ in training cost
+  (\S\ref{sec:rq1}, Table~\ref{tab:deploy}).
+\item \textbf{The input quantization range causes and prevents the failures (RQ2, RQ3).} A controlled
+  2$\times$2 isolates the input range, not hidden ranges, as the cause of collapses; the same mechanism
+  explains why QAT fails; bounding the range (clipped or extreme-free calibration, QAT on clipped inputs)
+  removes the failures at no device cost, with an accuracy trade-off for models that use extreme
+  inputs. The remaining loss comes from tie groups of coarse INT8 outputs and is recovered on the
+  host, not on the device, by 16-bit activations (\S\ref{sec:rq2}, \S\ref{sec:rq3}).
+\item \textbf{Detection must be verified for the exact exported model and runtime (\S\ref{sec:device}).}
+  On TFLM 1.0.0 the per-tensor INT8 models reproduce the host decisions on two ESP32 chips, while
+  per-channel exports of the same models silently do not. On the classic ESP32 the current Espressif
+  runtime ran the tested per-channel model correctly and gave bit-identical outputs for its per-tensor
+  counterpart; the 16-bit model ran correctly on neither runtime.
 \end{itemize}
 We also contribute the audited protocol itself: client-owned partitions before any fitted step,
-real per-client validation slices, FAR-budget thresholds applied once to a test split disjoint from
-everything used during development, and an unseen-host split.
+real per-client validation slices, FAR-budget thresholds applied once to a test split that was excluded
+from training, threshold selection and calibration of every reported model (its records had been in the
+training pool of our earlier, exploratory pipeline; \S\ref{sec:data}), and an unseen-host split. Per-run
+results, paired differences, device disagreement classes, resource breakdowns and stream-completeness
+records are in the supplementary material (S1--S8).
 
 %% =====================================================================
 \section{Background and Related Work}
@@ -148,12 +159,22 @@ results in this paper come from the rebuilt pipeline:
   \cic, 2,926 records with impossible negative values (overflowed header lengths down to
   $-3.2\cdot10^{10}$, negative durations and inter-arrival times) are dropped as data errors, while
   the defined $-1$ sentinel of \texttt{Init\_Win\_bytes} is kept;
-\item the test split (20\%) is drawn first, only from records that were never in the old test split;
+\item the test split (20\%) is drawn first, only from records that were not in the earlier test split;
 \item records are assigned to four clients (label-balanced) before any fitted step; each client holds
   out a real, stratified 10\% validation slice and undersamples its own training slice to at most 4:1;
 \item the scaler uses the mean and variance of the union of client training slices, which a
   federation can aggregate from per-client sums; validation and test are never used.
 \end{enumerate}
+\emph{Test isolation and freeze history.} All revised test records come from the training pool of our
+earlier, exploratory pipeline: models of that pipeline saw them in training and guided our hypotheses,
+but none of the records was in the earlier test split (Supplement S7a). They are excluded from training,
+threshold selection and calibration of every reported model, and the record ids and hashes of every
+partition are stored per run and checked before evaluation. The pipeline, arms, budgets, threshold rule
+and calibration candidates were committed before any revised result, and the rules that make the test
+split exclude the earlier test records before any revised test result. Added after test results, and
+marked as post hoc: the QC/SQC arms, the clipped-FP32 and 16-bit rows of E4, the unseen-host split, the
+per-tensor re-exports and the runtime comparison (time line in Supplement S7b).
+
 For a second test condition (E6) we split \ton by source host: all records of 15 of 51 source IPs form
 the test split, so no test host is seen in training. \cic carries no host field in its CSVs.
 
@@ -202,14 +223,16 @@ For each teacher seed and memory budget (80\,KB: structured pruning keeps 50\% o
 \emph{Strong PTQ} builds seven calibrations from 2,000 records of client 0 (TFLite min/max with and
 without $\pm$5\,SD input clipping, per-tensor 99.9 / 99.99th percentile, MSE~\cite{banner2019aciq},
 KL~\cite{wu2020integer}, clipped 99.99th percentile) and keeps the one with the best mean validation
-recall at the two FAR budgets; reported models are restricted to the per-tensor candidates, which run correctly on both device runtimes (\S\ref{sec:device}).
+recall at the two FAR budgets; reported F8, P and S80 models are restricted to the per-tensor candidates, the form that TFLM 1.0.0 executes correctly (\S\ref{sec:device}).
 Fine-tuning uses 10k records per client, either FedAvg over all four
 clients or one client alone (the client-data constraint).
 
 \subsection{Operating Points and Metrics}\label{sec:metrics}
 For every model and stage, the threshold is the smallest one whose FAR on the pooled client validation
 slices is at most the budget (1\% or 5\%). It is frozen and applied once to the test split; we report
-attack recall and test FAR, mean $\pm$ SD over the three teacher seeds. Decision transitions (E2)
+attack recall and the \emph{achieved} test FAR, mean $\pm$ SD over the three teacher seeds. The budget
+constrains validation FAR only; test FAR can exceed it (on \ton it reaches 1.27\% at the 1\% budget) and,
+on unseen hosts, differs from it by several points (\S\ref{sec:rq1}). Decision transitions (E2)
 compare each test attack's decision at consecutive stages (teacher, compact FP32, QAT float, INT8),
 each at its own frozen threshold. Thresholds are computed in float32: with NumPy 1.x a float64
 threshold is cast back to float32 in the comparison, which silently re-admits a whole tie group of
@@ -217,15 +240,17 @@ INT8 outputs and let validation FAR reach 44\% at a 5\% budget in our first run.
 
 %% =====================================================================
 \section{RQ1: When Compression Preserves Detection}\label{sec:rq1}
-Table~\ref{tab:e1} gives attack recall at a validation-chosen 1\% FAR. At 5\% every arm except the QAT
-arms Q and SQ lies within 0.2 points of the teacher (99.7--99.9\% on \ton, 99.8--99.98\% on \cic).
+Table~\ref{tab:e1} gives attack recall at a validation-chosen 1\% FAR budget with the achieved test FAR.
+At the 5\% budget every arm except the QAT arms Q and SQ lies within 0.2 points of the teacher
+(99.7--99.9\% on \ton, 99.8--99.97\% on \cic) at achieved test FARs of 3.5--4.4\% (\ton) and 3.2--5.1\% (\cic).
 
 \begin{table}[t]
 \caption{Attack recall (\%) at a 1\% FAR budget chosen on client validation data, mean $\pm$ SD over three
 federated runs; test FAR in brackets. 80\,KB budget; fine-tuning FedAvg over four clients (10k records each).
-1-cl.: fine-tuning on one client's 10k records. F8, P and S80 use strong PTQ restricted to per-tensor weight
-scales, the form both runtimes of \S\ref{sec:device} execute correctly; allowing per-channel exports changes their
-mean recall by at most 0.2 points ($^\dagger$: entries from that unrestricted selection).}
+1-cl.: fine-tuning on one client's 10k records (test FAR 0.91--1.31\%). F8, P and S80 use strong PTQ restricted
+to per-tensor weight scales, the form TFLM 1.0.0 executes correctly; allowing per-channel exports changes their
+mean recall by at most 0.2 points ($^\dagger$: mean includes per-channel exports). Per-run values, both budgets
+and the exported files with SHA-256: Supplement S1.}
 \label{tab:e1}
 \small\setlength{\tabcolsep}{2pt}
 \begin{adjustbox}{max width=\columnwidth}
@@ -235,7 +260,7 @@ arm & KB & \ton & \cic & 1-cl.\ \ton / \cic \\
 \midrule
 F (FP32) & -- & 96.68$\pm$1.38 [0.84] & 96.89$\pm$2.05 [0.98] & \\
 F8 & 188/206 & 98.35$\pm$0.06 [1.19] & 99.33$\pm$0.54 [0.90] & \\
-P & 57/65 & 96.57$\pm$1.89 [0.98] & 99.12$\pm$0.37 [0.92] & 96.92$^\dagger$ / 99.06$^\dagger$ \\
+P & 57/65 & 96.57$\pm$1.89 [0.98] & 99.12$\pm$0.37 [0.92] & 96.92 / 99.06 \\
 Q & 57/65 & 55.4$\pm$48.8 [0.61] & 81.9$\pm$9.2 [0.80] & 59.6 / 88.5 \\
 QC & 57/65 & 97.86$\pm$0.44 [1.01] & 99.57$\pm$0.10 [0.94] & \\
 R & 57/65 & \textbf{98.51}$\pm$0.11 [1.16] & \textbf{99.60}$\pm$0.15 [0.92] & 97.80 / 99.52 \\
@@ -243,16 +268,17 @@ S80 & 57/65 & 97.57$\pm$0.52 [1.01] & 99.57$\pm$0.24 [0.97] & \\
 SQ & 57/65 & 59.0$\pm$51.1 [0.55] & 84.8$\pm$5.4 [0.82] & \\
 SQC & 57/65 & 97.71$\pm$1.09 [1.01] & 99.59$\pm$0.07 [0.97] & \\
 \midrule
-\multicolumn{5}{l}{128\,KB budget: P$^\dagger$ 97.78 / 99.19, QC 98.24 / 99.56, R 98.72 / 99.64, S128$^\dagger$ 98.58 / 99.37} \\
+\multicolumn{5}{l}{128\,KB budget: P 97.78 / 99.19, QC 98.24 / 99.56, R 98.72 / 99.64, S128$^\dagger$ 98.58 / 99.37} \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
 \end{table}
 
 \paragraph{Compression preserves detection when the input range is bounded.} Every arm whose input
-range is bounded (P with strong PTQ, QC, R, S, SQC) matches the teacher's recall at 1\% FAR within
-one SD, and R, QC, S and SQC exceed it, on both datasets and at both budgets. The 128\,KB budget adds at most 1.4
-points over 80\,KB. The two QAT arms that learn their input range from unclipped data (Q, SQ) fail;
+range is bounded (P with strong PTQ, QC, R, S80, SQC) lies within one SD of the teacher's recall at the
+1\% budget or above it; the means of R, QC, S80 and SQC exceed the teacher's on both datasets, at achieved
+test FARs of 0.92--1.16\% against the teacher's 0.84--0.98\%. The 128\,KB budget adds at most 1.2 points
+over 80\,KB. The two QAT arms that learn their input range from unclipped data (Q, SQ) fail;
 \S\ref{sec:rq2} explains why.
 
 \paragraph{The float teacher's 1\% operating point is the least stable.} F has the largest SD (1.4 and
@@ -260,34 +286,74 @@ points over 80\,KB. The two QAT arms that learn their input range from unclipped
 compact or INT8 model recovers them (\S\ref{sec:e2}). This is an operating-point sensitivity of the
 teacher, not a benefit of compression (\S\ref{sec:e4}).
 
-\paragraph{A compact model trained from scratch is as good as compression.} S80 matches P and R on
-\cic and lies between them on \ton; at 128\,KB S128 matches R within 0.3 points. Under a memory budget
-known at training time, a second federated training of a compact model is a strong baseline.
+\paragraph{Choosing a deployable model.} Table~\ref{tab:deploy} consolidates the principal deployable
+models. Pruning half of the teacher's neurons gives P, QC and R the same 256-128-64 architecture as the
+from-scratch model S80, so all five have the same size and device latency; they differ in accuracy,
+achieved FAR and training cost. The compact model trained from scratch is sufficient on \cic (R $-$ S80
+between $-0.27$ and $+0.41$ points per run) and on unseen hosts ($-1.24$ to $+1.62$). The complete recovery
+recipe R is better only on the random \ton split, by 0.48--1.62 points in every run, and there its
+achieved test FAR is also 0.10--0.19 points higher. S80 needs its own 60-round federated training
+(2.7\,min per run on \ton, 25.9\,min on \cic, 64--79\% of the teacher's) but no teacher; R needs the
+trained teacher plus three distilled fine-tuning rounds, which pass every fine-tuning record through the
+teacher, and two QAT rounds. When a teacher already exists, R adds five rounds; when the deployment size
+is known before training, S80 avoids training the teacher at all. The plain pipeline P is below S80 in
+every run on \cic and on unseen hosts. Run-paired differences for all pairs: Supplement S2.
 
-\paragraph{The client-data constraint is not binding.} Fine-tuning P and R on one client's 10k records
-changes recall by at most 0.8 points relative to fine-tuning across all clients (Table~\ref{tab:e1});
-only the failing Q arm moves more, in both directions.
+\begin{table*}[t]
+\caption{Principal deployable models (80\,KB arms): attack recall (\%) at a 1\% validation FAR budget, mean
+$\pm$ SD over three runs, with the achieved test FAR (\%) in brackets; size of the INT8 export; median invoke
+latency on the ESP32-S3 / ESP32 (TFLM 1.0.0, seed-1 export; \ton / \cic); federated training cost. The
+teacher F is the float reference. Exported files, SHA-256 and conversion settings per run: Supplement S1, S8.}
+\label{tab:deploy}
+\small\setlength{\tabcolsep}{3pt}
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{llllllll}
+\toprule
+model & KB (\ton/\cic) & \ton random & \cic random & \ton unseen hosts & S3 ms & ESP32 ms & training cost \\
+\midrule
+F (FP32) & 730/800 & 96.68$\pm$1.38 [0.84] & 96.89$\pm$2.05 [0.98] & 98.20$\pm$0.11 [3.18] & -- & -- & 60 rounds (3.4 / 40.3\,min) \\
+P & 56--57/65 & 96.57$\pm$1.89 [0.98] & 99.12$\pm$0.37 [0.92] & 93.81$\pm$0.27 [0.00] & 5.55 / 6.47 & 13.18 / 15.36 & F + 3 fine-tuning rounds \\
+QC & 57/65 & 97.86$\pm$0.44 [1.01] & 99.57$\pm$0.10 [0.94] & 96.30$\pm$0.87 [0.00] & 5.55 / 6.48 & 13.20 / 15.27 & F + 3 fine-tuning + 2 QAT rounds \\
+R & 57/65 & 98.51$\pm$0.11 [1.16] & 99.60$\pm$0.15 [0.92] & 96.57$\pm$0.62 [0.00] & 5.56 / 6.48 & 13.19 / 15.38 & F + 3 distilled fine-tuning + 2 QAT rounds \\
+S80 & 56--57/65 & 97.57$\pm$0.52 [1.01] & 99.57$\pm$0.24 [0.97] & 96.48$\pm$0.94 [0.00] & 5.56 / 6.47 & 13.35 / 15.37 & 60 rounds (2.7 / 25.9\,min) \\
+SQC & 57/65 & 97.71$\pm$1.09 [1.01] & 99.59$\pm$0.07 [0.97] & 95.96$\pm$1.60 [0.00] & -- & -- & S80 + 2 QAT rounds \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table*}
 
-\paragraph{Unseen hosts (E6).} On the host-grouped \ton split (Table~\ref{tab:e6}) compression costs
-1.6--1.9 (R, S, QC) to 4.4 points (P) relative to the teacher, more than on the random split, with the same
-ranking; the QAT collapse and its repair reproduce. The FAR budget chosen on validation does not
-transfer to unseen hosts for the float models (test FAR 3.2\% at a 1\% budget), while the INT8 models
-stay below it; with 2,537 benign test records from few hosts this FAR estimate is noisy.
+\paragraph{One client's data sufficed in our partition.} In our label-balanced four-client partition,
+fine-tuning P and R on one client's 10k records changes mean recall by at most 0.8 points relative to
+fine-tuning across all clients (Table~\ref{tab:e1}); only the failing Q arm moves more, in both
+directions. We did not test skewed or non-IID partitions, where one client may not cover all attack
+families.
+
+\paragraph{Unseen hosts (E6).} On the host-grouped \ton split (Table~\ref{tab:e6}) the compact INT8
+models lose 1.6--1.9 points (R, S80, QC) to 4.4 points (P) of recall relative to the teacher, more than on
+the random split, while the over-budget F8 loses 0.06; the QAT collapse and its repair reproduce. The
+achieved test FAR departs from the 1\% validation budget in both directions: the teacher reaches 4.77\% in
+two runs and 0\% in one, because 121 benign flows of one host cluster (4.77\% of the 2,537 benign test
+flows) cross its threshold together, while every INT8 model with a bounded input range flags no benign
+test flow (0\% test FAR); the failing Q and SQ reach 4.77\% in two runs. At the 5\% budget the achieved test FAR ranges from 0.3\% to 5.8\% across models and runs.
+With so few benign test hosts, unseen-host FAR is decided by single clusters and is a qualitative result.
 
 \begin{table}[t]
-\caption{\ton, unseen source hosts (E6): recall (\%) at a 1\% validation FAR budget, 80\,KB, three runs
-(F8, P, S80 with per-tensor strong PTQ).}
+\caption{\ton, unseen source hosts (E6): recall (\%) at a 1\% validation FAR budget, 80\,KB, three runs,
+with the mean achieved test FAR (\%) in brackets (F, Q and SQ: 4.77 in two runs, 0 in one; every other model 0 in every run).
+F8, P, S80 with per-tensor strong PTQ. Per run and at 5\%: Supplement S1.}
 \label{tab:e6}
 \small\setlength{\tabcolsep}{3pt}
+\begin{adjustbox}{max width=\columnwidth}
 \begin{tabular}{lllll}
 \toprule
 F & F8 & R & S80 & QC \\
-98.20$\pm$0.11 & 98.14$\pm$0.17 & 96.57$\pm$0.62 & 96.48$\pm$0.94 & 96.30$\pm$0.87 \\
+98.20$\pm$0.11 [3.18] & 98.14$\pm$0.17 [0] & 96.57$\pm$0.62 [0] & 96.48$\pm$0.94 [0] & 96.30$\pm$0.87 [0] \\
 \midrule
 SQC & P & Q & SQ & \\
-95.96$\pm$1.60 & 93.81$\pm$0.27 & 52.9$\pm$45.8 & 56.9$\pm$49.2 & \\
+95.96$\pm$1.60 [0] & 93.81$\pm$0.27 [0] & 52.9$\pm$45.8 [3.18] & 56.9$\pm$49.2 [3.18] & \\
 \bottomrule
 \end{tabular}
+\end{adjustbox}
 \end{table}
 
 %% =====================================================================
@@ -383,9 +449,14 @@ per-channel exports). Totals: P 1,040, R 127, S80 369.}
 input range to $\pm$5\,SD. Values in Table~\ref{tab:e3}.}
 \label{fig:e3}
 \end{figure*}
-To isolate the cause we fix the compact FP32 model and the calibration draw and vary only the ranges,
-exporting per-tensor fake-quantized models: input range min/max or clipped to $\pm$5\,SD, crossed with
-hidden ranges min/max or 99.99th percentile. Each cell is calibrated with three random 2,000-record
+To isolate the cause we fix the compact FP32 model and the calibration draw and vary only the ranges:
+input range min/max or clipped to $\pm$5\,SD, crossed with hidden ranges min/max or 99.99th percentile.
+The ranges are written into the quantizers of the unchanged FP32 model (no training), and the TFLite
+converter turns every cell into an exported integer model: float32 input $\rightarrow$ QUANTIZE
+$\rightarrow$ four FULLY\_CONNECTED layers with int8 activations, per-tensor int8 weights and int32
+biases $\rightarrow$ LOGISTIC (int8) $\rightarrow$ DEQUANTIZE, executed by the TFLite interpreter
+(TensorFlow 2.21) on the host. All E3 and E4 INT8 and 16-bit results are exported models of this kind;
+the only fake-quantized simulation in the paper is the ``QAT float'' stage of E2. Each cell is calibrated with three random 2,000-record
 draws, the same draws with the client's ten most extreme records swapped in, and draws without any
 record beyond 10\,SD (Figure~\ref{fig:e3}, Table~\ref{tab:e3}).
 
@@ -428,8 +499,10 @@ however, produce few distinct outputs on the validation slices (23--35 for the p
 value just below the threshold. The 1\% budget can then only be met by jumping over the whole tie group
 (validation FAR 0.74\% instead of 1\%), which costs recall. Exporting the logit instead of the sigmoid
 gives identical decisions: the bottleneck is the INT8 logit and the activations before it. With 16-bit
-activations and INT8 weights the tie group shrinks to about 10 records and most of the loss returns
-(\cic: 462 lost attacks become 131). On \ton, where INT8 gains over FP32, clipping the FP32 inputs to
+activations (an exported int16x8 model: int16 activations, per-channel int8 weights, int64 biases, run by
+the host interpreter) the tie group shrinks to about 10 records and most of the loss returns (\cic: 462
+lost attacks become 131). This recovery is a host result: no device runtime we tested executed the
+16-bit model correctly (\S\ref{sec:device}). On \ton, where INT8 gains over FP32, clipping the FP32 inputs to
 $\pm$5\,SD gives the same gain: it is input saturation. On \cic the INT8 gain of F and S80 (+2.1--2.5 points,
 the PortScan cluster of \S\ref{sec:rq1}) disappears with 16-bit activations and is not reproduced by
 clipped FP32 inputs: INT8 rounding moves those flows across the teacher's threshold, an operating-point
@@ -437,7 +510,8 @@ effect rather than a robust improvement.
 
 \begin{table}[t]
 \caption{E4: recall (\%) at 1\% FAR, three runs. Clip: FP32 with inputs clipped to $\pm$5\,SD. Grid:
-FP32 with its output rounded to the INT8 grid. 16-bit: 16-bit activations, INT8 weights.}
+FP32 with its output rounded to the INT8 grid. INT8 and 16-bit: exported TFLite models run by the host
+interpreter; 16-bit (int16 activations, INT8 weights) is a host-only result.}
 \label{tab:e4}
 \small\setlength{\tabcolsep}{3pt}
 \begin{tabular}{llrrrrr}
@@ -460,15 +534,19 @@ FP32 with its output rounded to the INT8 grid. 16-bit: 16-bit activations, INT8 
 Table~\ref{tab:remedies} lists what worked, its effect and its cost. Bounding the input range is the
 remedy that matters: it is free on the device, needs no extra client data, and turns the two failure
 modes (min/max calibration with extreme records, QAT on unclipped inputs) into the best arms.
-Excluding extreme records from the calibration draw is the gentler variant for models that use the
-tails. Distillation helps on \ton at 80\,KB (+1.9 over P) and adds 0.5 on \cic. Training a compact
-model from scratch removes the compression step altogether at the price of a second federated
-training (26\,min vs.\ 40\,min for the \cic teacher). 16-bit activations remove the remaining tie loss
-but enlarge the arena and, as \S\ref{sec:device} shows, did not run correctly on either device runtime. Fine-tuning data were
-never the limiting resource: one client's 10k records suffice.
+Clipping is not free in accuracy: $\pm$5\,SD saturates at least one feature in 28\% of \cic and 7.6\% of
+\ton test records, and costs the \cic teacher 1.5 points against extreme-free min/max calibration, which is
+the gentler variant for models that use the tails. The complete recovery recipe R (distilled fine-tuning
+on clipped inputs, then QAT on clipped inputs) improves on P by 1.9 points on \ton and 0.5 on \cic. We did
+not isolate its components: QC, which has the clipped QAT but no distillation, is within 0.65 points of R
+on \ton and 0.03 on \cic, so we attribute the gain to the recipe as a whole. Training a compact model from
+scratch removes the compression step altogether at the price of a second federated training
+(Table~\ref{tab:deploy}). 16-bit activations remove most of the remaining tie loss on the host, but no
+tested device runtime executed the 16-bit model correctly, so their deployment cost is not established.
+In our label-balanced partition, one client's 10k records sufficed for fine-tuning.
 
 \begin{table}[t]
-\caption{Remedies, effect on recall at 1\% FAR (80\,KB) and cost on an ESP32-S3.}
+\caption{Remedies, effect on recall at a 1\% validation FAR budget (80\,KB), and cost.}
 \label{tab:remedies}
 \small\setlength{\tabcolsep}{2pt}
 \begin{adjustbox}{max width=\columnwidth}
@@ -476,12 +554,12 @@ never the limiting resource: one client's 10k records suffice.
 \toprule
 remedy & effect & cost \\
 \midrule
-clip calibration inputs $\pm$5\,SD, or drop records beyond 10\,SD & \cic 0.0$\rightarrow$98.9--99.0 with extreme records in the draw & none on device \\
-QAT on clipped inputs (QC, SQC) & \ton 55.4$\rightarrow$97.9, \cic 81.9$\rightarrow$99.6 & none \\
-distillation from F (R vs.\ P) & \ton +1.9, \cic +0.5 & teacher pass over client data \\
-compact model from scratch (S) & equal to P/R on \cic & second federated training \\
-16-bit activations & \cic lost attacks 462$\rightarrow$131 & arena 1.4$\rightarrow$1.8\,KB, +14\% latency; host only (\S\ref{sec:device}) \\
-per-tensor weight scales & device agreement (\S\ref{sec:device}) & none \\
+clip calibration inputs $\pm$5\,SD, or drop records beyond 10\,SD & \cic 0.0$\rightarrow$98.9--99.0 with extreme records in the draw & none on device; clipping saturates 8--28\% of test records, $-$1.5 for the \cic teacher \\
+QAT on clipped inputs (QC, SQC) & \ton 55.4$\rightarrow$97.9, \cic 81.9$\rightarrow$99.6 & 2 QAT rounds; as above \\
+complete recovery recipe (R vs.\ P) & \ton +1.9, \cic +0.5; components not isolated & teacher, 3 distilled fine-tuning + 2 QAT rounds \\
+compact model from scratch (S80) & equal to R on \cic and unseen hosts, $-$0.9 on \ton & second federated training \\
+16-bit activations & \cic lost attacks 462$\rightarrow$131 (host only) & not established: no tested runtime executed the model correctly \\
+per-tensor weight scales & device agreement on TFLM 1.0.0 (\S\ref{sec:device}) & none \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
@@ -523,24 +601,31 @@ model & weights & $\le$1 step & all inputs & random & S3 ms & ESP32 ms \\
 \end{table}
 
 Table~\ref{tab:e7} shows two classes of models. Per-tensor INT8 models reproduce the host: at least
-96\% of outputs are within one output step, all random, out-of-range and synthetic-extreme inputs get
-the same decision (one exception in 2,700 per model), and the few disagreements are inputs we chose to
-lie within two steps of the threshold. Models whose Dense weights carry per-channel scales, the
-TFLite converter's default and what strong PTQ selected for two \ton models, run without any error on
-this runtime but disagree with the host on half of the random records: the runtime ignores the
-per-channel scales. Re-exporting the same models with per-tensor scales restores agreement
-(4,462 / 4,462). The 16-bit-activation model is likewise not reproduced.
+96\% of outputs are within one output step, random, out-of-range and synthetic-extreme inputs get the
+same decision with at most two exceptions in 2,700 per model and budget, and the other disagreements are
+inputs we chose to lie within two steps of the threshold. Across all per-tensor models the device adds
+one missed attack in total (one \cic record, S80 at the 1\% budget); every other disagreement adds or
+avoids a false alarm, adds a detection, or concerns an unlabelled synthetic probe (classification per
+model, budget and input category in Supplement S3; stream completeness and resets in S5). Models whose
+Dense weights carry per-channel scales, the TFLite converter's default and what strong PTQ selected for
+two \ton models, run without any error on this runtime but disagree with the host on half of the random
+records, mostly as missed attacks; re-exporting the same models with per-tensor scales restores agreement
+(4,462 / 4,462), and the same per-channel file agrees under the current runtime (below). The
+16-bit-activation models are not reproduced either.
 
-\emph{Current runtime.} We ran the same files and inputs on the same ESP32 through the current
-Espressif port, esp-tflite-micro 1.4.2 on ESP-IDF 5.5, once with the esp-nn kernels and once with
-reference kernels (Table~\ref{tab:runtime}). It runs the per-channel S80 export with the host's
-decisions (three extra detections in 4,462), so the per-channel failure is the older runtime's. The
-per-tensor export gives bit-identical outputs on both runtimes, so the agreement of Table~\ref{tab:e7}
-for per-tensor models carries over. The 16-bit model returns one constant output, the sigmoid of its
-output-layer bias, for every input: all its hidden activations arrive at the last layer as zero.
-The two kernel settings give bit-identical outputs for all three models. Neither the export format nor
-a passing host evaluation tells which runtime will execute a model correctly, which is why we recommend
-this streaming check before reporting on-device accuracy.
+\emph{Current runtime.} For a targeted comparison we ran three of the files, with the same 4,462 \ton
+inputs, on the classic ESP32 through the current Espressif port, esp-tflite-micro 1.4.2 on ESP-IDF 5.5,
+once with the esp-nn kernels and once with reference kernels (Table~\ref{tab:runtime}; converter
+TensorFlow 2.21, all files declare QUANTIZE v1, FULLY\_CONNECTED v4, LOGISTIC v2, DEQUANTIZE v2). On
+this board and these inputs, the per-channel S80 export, which agreed on 2,209 decisions under TFLM
+1.0.0, agreed on 4,459 under the current runtime, with three additional detections and no additional
+misses. The per-tensor S80 export kept complete decision agreement and gave bit-identical outputs under
+both runtimes. The 16-bit model returned one constant output for every input, equal to the sigmoid of
+its output-layer bias; we did not diagnose the cause. The two kernel settings gave bit-identical outputs
+for all three files. We did not run the other models of Table~\ref{tab:e7} or the ESP32-S3 on the current
+runtime, so its agreement for those configurations is not established. Neither the export format nor a
+passing host evaluation tells which runtime will execute a model correctly, which is why we recommend
+this streaming check, on the exact exported file and runtime, before reporting on-device accuracy.
 
 \begin{table}[t]
 \caption{The same files and 4,462 \ton inputs on the same ESP32 through TFLM 1.0.0 (old) and
@@ -568,44 +653,79 @@ The ESP32 (Xtensa LX6) returns bit-identical outputs to the ESP32-S3 (LX7) for a
 whole stream without a reset, while the S3 restarted a few times at random inputs and resumed. A flow
 takes 5.6\,ms (\ton, 43 features) and 6.5\,ms (\cic, 78 features) on the ESP32-S3 and 13.2\,ms and
 15.4\,ms on the ESP32; input quantization takes 3--13\,$\mu$s and the arena 1.4\,KB. The current
-runtime is 22\% faster on the ESP32 (10.3--10.4\,ms) and uses 1.9\,KB of arena (5.5\,KB per-channel);
-neither build allocates heap after start-up.
+runtime ran the two S80 files 22\% faster on the ESP32 (10.3--10.4\,ms) with 1.9\,KB (per-tensor) and 5.5\,KB (per-channel) of arena;
+in both builds the free heap changes by at most 32 bytes across model selections (Supplement S4).
 
 %% =====================================================================
-\section{Recommendations}\label{sec:recs}
-\begin{enumerate}
-\item Choose thresholds at a FAR budget on real, client-held validation records, never on oversampled
-  ones, and compute them in the output's own precision (\S\ref{sec:metrics}).
-\item Bound the input range before PTQ and QAT: clip the calibration and QAT inputs or drop extreme
-  records from the calibration draw. Check the exported input step in standard deviations: in our models
-  a step of 0.15\,SD or more always collapsed recall at 1\% FAR, and 0.05\,SD never did.
-\item Report a compact model trained federatively from scratch at the same budget; it is the baseline a
-  compression pipeline has to beat.
-\item Report losses per attack family: small families are lost first and aggregate recall hides it.
-\item Export per-tensor weights unless the device runtime is known to support per-channel scales (the
-  current Espressif port does, TFLM 1.0.0 does not), treat 16-bit activations as unverified on device, and
-  verify on the device by streaming inputs near the threshold and beyond the input range.
-\end{enumerate}
+\section{Findings and Recommendations}\label{sec:recs}
+Table~\ref{tab:findings} links each principal finding to its evidence and to what a practitioner should do.
+
+\begin{table*}[t]
+\caption{Principal findings, the evidence in this paper and its supplement, and practical implications.}
+\label{tab:findings}
+\small\setlength{\tabcolsep}{3pt}
+\begin{tabular}{L{0.29\textwidth}L{0.29\textwidth}L{0.37\textwidth}}
+\toprule
+finding & evidence & implication \\
+\midrule
+A compact model trained federatively at the target size matches the complete recovery recipe on \cic
+and on unseen hosts; the recipe is 0.5--1.6 points better on the random \ton split, at a slightly
+higher test FAR. Same size and latency. &
+Tables~\ref{tab:e1}, \ref{tab:e6}, \ref{tab:deploy}; run-paired differences (S2); training times (S8). &
+If the memory budget is known before training, train the compact model and report it as the baseline a
+compression pipeline must beat; use the recipe when a teacher already exists and its gain on the target
+data is confirmed. \\
+The input quantization range causes the collapses of PTQ and QAT; bounding it prevents them. &
+E3 2$\times$2 with controlled calibration draws (Table~\ref{tab:e3}, Figure~\ref{fig:e3}); QC/SQC vs.\ Q/SQ
+(Table~\ref{tab:e1}). &
+Clip calibration and QAT inputs ($\pm$5\,SD) or drop records beyond 10\,SD from the calibration draw; check
+the exported input step in SD (0.15\,SD or more always collapsed recall at 1\% FAR here, 0.05\,SD never
+did); weigh the saturation clipping causes (8--28\% of records). \\
+Detection must be verified for the exact exported file and runtime. &
+E7 on two chips (Table~\ref{tab:e7}, S3, S5); runtime comparison on the classic ESP32
+(Table~\ref{tab:runtime}, S6). &
+Stream near-threshold and out-of-range inputs through the device and compare with the host on the same
+file; export per-tensor weights for TFLM 1.0.0; treat 16-bit activations as unverified on device. \\
+A validation FAR budget does not fix the achieved test FAR. &
+0.66--1.27\% at the 1\% budget on random splits, 0--4.77\% on unseen hosts (S1); float32 threshold
+pitfall (\S\ref{sec:metrics}). &
+Choose thresholds on real client-held validation records in the output's precision, and report the
+achieved test FAR next to the budget. \\
+Losses concentrate in small attack families. &
+E2 (Table~\ref{tab:e2}, Figure~\ref{fig:e2}). &
+Report losses per attack family; aggregate recall hides them. \\
+\bottomrule
+\end{tabular}
+\end{table*}
 
 \section{Threats to Validity}\label{sec:limits}
-\emph{Scope}: two datasets, binary detection, one model family (MLP) and four clients. \emph{Splits}:
-\cic has no host field, so the unseen-host test is \ton-only, and its benign test set comes from few
-hosts, making test FAR noisy. \emph{Seeds}: three federated runs per configuration; the float teacher's
-1\%-FAR recall varies by up to 2 points across runs, and claims about it are stated as sensitivity.
-\emph{Labels}: \cic contains labelling errors~\cite{engelen2021troubleshooting}; we drop impossible values
-and conflicting labels but do not relabel. \emph{Runtime}: TFLM 1.0.0 on two ESP32 chips and esp-tflite-micro 1.4.2 on the classic ESP32 only;
-esp-nn's optimized kernels, which target the ESP32-S3, were not tested on that chip, and we did not trace
-the 16-bit failure into the runtime source.
-\emph{Threat model}: no adversarial or poisoning study~\cite{nguyen2022flame}.
+\emph{Scope}: two datasets, binary detection, one model family (MLP) and four label-balanced clients; the
+one-client result holds for this partition only. \emph{Splits}: the revised test records were in the
+training pool of our earlier, exploratory pipeline, whose models guided our hypotheses; they were excluded
+from training, threshold selection and calibration of every reported model, and several analyses were
+added after test results (\S\ref{sec:data}). \cic has no host field, so the unseen-host test is \ton-only,
+and its benign test set comes from few hosts, making its test FAR depend on single clusters.
+\emph{Seeds}: three federated runs per configuration; the float teacher's 1\%-FAR recall varies by up to
+2 points across runs, and claims about it are stated as sensitivity. \emph{Attribution}: we did not
+isolate the components of the recovery recipe R. \emph{Labels}: \cic contains labelling
+errors~\cite{engelen2021troubleshooting}; we drop impossible values and conflicting labels but do not
+relabel. \emph{Runtime}: TFLM 1.0.0 on two ESP32 chips for all device models; the current esp-tflite-micro
+1.4.2 only for three files on the classic ESP32, so its behaviour on the other models and on the ESP32-S3
+(where esp-nn's optimized kernels apply) is not established, and the cause of the 16-bit failure is not
+diagnosed. \emph{Threat model}: no adversarial or poisoning study~\cite{nguyen2022flame}.
 
 \section{Conclusion}
-A federated intrusion detector can be compressed to 57--67\,KB INT8 and keep its detection at a 1\%
-false-alarm budget on two datasets, three runs and unseen hosts, using only client-held data, and a
-compact model trained federatively from scratch does as well. When compression fails, the input
-quantization range is the cause, for post-training quantization and QAT alike, and bounding it is
-free. The remaining loss sits in coarse activations at the operating point. Finally, a model that is
-correct on the host can be silently wrong on the microcontroller: per-tensor INT8 models agree with
-the host on both runtimes we tested, per-channel ones only on the current one, and the 16-bit model on neither.
+A federated intrusion detector can be compressed to 57--65\,KB INT8 and keep its detection at a 1\%
+validation false-alarm budget on two datasets and three runs, using only client-held data, at achieved
+test false-alarm rates of 0.9--1.2\%; on unseen hosts the compact models lose 1.6--4.4 points of recall
+relative to the float teacher. A compact model trained federatively from scratch is a sufficient choice on
+\cic and on unseen hosts, while the complete recovery recipe gives a consistent gain on the random \ton
+split. When compression fails, the input quantization range is the cause, for post-training quantization
+and QAT alike, and bounding it prevents the failure at no device cost. The remaining loss sits in coarse
+activations at the operating point; 16-bit activations recover it on the host only. Finally, the exact
+exported file and runtime decide what the device does: under TFLM 1.0.0 per-tensor INT8 models agree with
+the host on both chips and per-channel exports do not, the current Espressif runtime restored agreement for
+the per-channel model we tested on the classic ESP32, and the 16-bit model ran correctly on neither.
 
 \FloatBarrier
 \bibliographystyle{ACM-Reference-Format}
@@ -638,7 +758,7 @@ decisions on our layout.
 Six failures produced plausible numbers without any error: int8 weight exchange without scales in FL;
 QAT-wrapper stripping that copied no weights; BatchNorm folded on the wrong side; pruning that reset
 BatchNorm statistics; float64 thresholds compared with float32 INT8 outputs (\S\ref{sec:metrics}); and
-per-channel weight scales ignored by an older microcontroller runtime (\S\ref{sec:device}). The checks that
+per-channel exports executed incorrectly, without any error, by an older microcontroller runtime (\S\ref{sec:device}). The checks that
 catch them: dequantize-requantize equality at the receiver, copy-by-name with output comparison,
 equivalence assertions after folding, validation FAR asserted against the budget, and device streaming
 against the host.

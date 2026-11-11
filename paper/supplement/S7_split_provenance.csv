@@ -1,0 +1,10 @@
+split,partition,records,in_old_test,in_old_training_pool,dropped_by_old_dedup,manifest_test_hash
+ton_random,new_test,21032,0,21032,0,0bb6c30e9f3f20bf
+ton_random,new_client_train,75716,18927,56789,0,0bb6c30e9f3f20bf
+ton_random,new_client_val,8412,2105,6307,0,0bb6c30e9f3f20bf
+ton_hosts,new_test,22866,0,22866,0,81b92ea812f852d9
+ton_hosts,new_client_train,68937,13797,55140,0,81b92ea812f852d9
+ton_hosts,new_client_val,7660,1538,6122,0,81b92ea812f852d9
+cic_random,new_test,499038,0,499038,0,3094008a801be204
+cic_random,new_client_train,1529825,382551,1147274,0,3094008a801be204
+cic_random,new_client_val,199616,49739,149877,0,3094008a801be204

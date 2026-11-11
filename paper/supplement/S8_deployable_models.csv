@@ -1,0 +1,22 @@
+split,arm,recall_0.01_mean,recall_0.01_sd,test_far_0.01_mean,test_far_0.01_range,recall_0.05_mean,recall_0.05_sd,test_far_0.05_mean,test_far_0.05_range,training_cost,teacher_minutes,compact_minutes,exports,device_model,latency_ms_esp32s3,latency_ms_esp32
+TON,F,96.68,1.38,0.84,0.66-1.18,99.86,0.02,4.14,4.02-4.34,teacher (60 rounds),3.4,,"S1 rows with reported=1 (file, SHA-256)",,,
+TON,F8,98.35,0.06,1.19,1.12-1.27,99.85,0.02,4.17,4.02-4.38,teacher (60 rounds) + PTQ,3.4,,"S1 rows with reported=1 (file, SHA-256)",,,
+TON,P,96.57,1.89,0.98,0.95-1.00,99.74,0.05,4.08,4.00-4.13,teacher (60 rounds) + 3 fine-tuning rounds + PTQ,3.4,,"S1 rows with reported=1 (file, SHA-256)",ton_P80_pt,5.55,13.18
+TON,QC,97.86,0.44,1.01,0.91-1.06,99.83,0.03,4.15,4.11-4.23,teacher (60) + 3 fine-tuning + 2 QAT rounds,3.4,,"S1 rows with reported=1 (file, SHA-256)",ton_QC80,5.55,13.2
+TON,R,98.51,0.11,1.16,1.10-1.27,99.81,0.04,3.98,3.65-4.32,teacher (60) + 3 distilled fine-tuning (teacher pass) + 2 QAT rounds,3.4,,"S1 rows with reported=1 (file, SHA-256)",ton_R80,5.56,13.19
+TON,S80,97.57,0.52,1.01,0.93-1.16,99.83,0.03,4.23,4.09-4.38,compact model (60 rounds) + PTQ,3.4,2.7,"S1 rows with reported=1 (file, SHA-256)",ton_S80_pt,5.56,13.35
+TON,SQC,97.71,1.09,1.01,0.91-1.14,99.81,0.01,3.91,3.51-4.17,compact model (60) + 2 QAT rounds,3.4,2.7,"S1 rows with reported=1 (file, SHA-256)",,,
+CIC,F,96.89,2.05,0.98,0.98-0.99,99.89,0.15,5.07,5.03-5.11,teacher (60 rounds),40.3,,"S1 rows with reported=1 (file, SHA-256)",,,
+CIC,F8,99.33,0.54,0.9,0.83-0.94,99.97,0.01,4.94,4.77-5.04,teacher (60 rounds) + PTQ,40.3,,"S1 rows with reported=1 (file, SHA-256)",,,
+CIC,P,99.12,0.37,0.92,0.81-0.98,99.81,0.05,4.56,4.30-4.80,teacher (60 rounds) + 3 fine-tuning rounds + PTQ,40.3,,"S1 rows with reported=1 (file, SHA-256)",cic_P80,6.47,15.36
+CIC,QC,99.57,0.1,0.94,0.92-0.96,99.81,0.02,3.79,3.16-4.23,teacher (60) + 3 fine-tuning + 2 QAT rounds,40.3,,"S1 rows with reported=1 (file, SHA-256)",cic_QC80,6.48,15.27
+CIC,R,99.6,0.15,0.92,0.84-0.95,99.95,0.01,4.99,4.93-5.02,teacher (60) + 3 distilled fine-tuning (teacher pass) + 2 QAT rounds,40.3,,"S1 rows with reported=1 (file, SHA-256)",cic_R80,6.48,15.38
+CIC,S80,99.57,0.24,0.97,0.96-0.99,99.97,0.0,4.95,4.91-4.97,compact model (60 rounds) + PTQ,40.3,25.9,"S1 rows with reported=1 (file, SHA-256)",cic_S80,6.47,15.37
+CIC,SQC,99.59,0.07,0.97,0.95-0.98,99.83,0.02,3.84,3.33-4.76,compact model (60) + 2 QAT rounds,40.3,25.9,"S1 rows with reported=1 (file, SHA-256)",,,
+TON-hosts,F,98.2,0.11,3.18,0.00-4.77,99.91,0.03,4.05,0.91-5.64,teacher (60 rounds),3.2,,"S1 rows with reported=1 (file, SHA-256)",,,
+TON-hosts,F8,98.14,0.17,0.0,0.00-0.00,99.78,0.07,2.18,0.28-5.16,teacher (60 rounds) + PTQ,3.2,,"S1 rows with reported=1 (file, SHA-256)",,,
+TON-hosts,P,93.81,0.27,0.0,0.00-0.00,99.7,0.05,3.99,0.83-5.68,teacher (60 rounds) + 3 fine-tuning rounds + PTQ,3.2,,"S1 rows with reported=1 (file, SHA-256)",,,
+TON-hosts,QC,96.3,0.87,0.0,0.00-0.00,99.81,0.05,2.48,0.87-5.64,teacher (60) + 3 fine-tuning + 2 QAT rounds,3.2,,"S1 rows with reported=1 (file, SHA-256)",,,
+TON-hosts,R,96.57,0.62,0.0,0.00-0.00,99.81,0.02,2.14,0.91-4.61,teacher (60) + 3 distilled fine-tuning (teacher pass) + 2 QAT rounds,3.2,,"S1 rows with reported=1 (file, SHA-256)",,,
+TON-hosts,S80,96.48,0.94,0.0,0.00-0.00,99.81,0.07,3.88,0.75-5.75,compact model (60 rounds) + PTQ,3.2,2.6,"S1 rows with reported=1 (file, SHA-256)",,,
+TON-hosts,SQC,95.96,1.6,0.0,0.00-0.00,99.79,0.04,3.31,0.83-4.65,compact model (60) + 2 QAT rounds,3.2,2.6,"S1 rows with reported=1 (file, SHA-256)",,,

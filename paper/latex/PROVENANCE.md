@@ -34,12 +34,16 @@ version, TFLM header path, git-ignored sdkconfig file; no measurements).
 | Paper item | Source |
 |---|---|
 | Table 1 | `*_train_*/train_fl/models/F_s1_manifest.json` (dedup, invalid_records, test, clients) |
-| Table 2 | `compare_arms/compare_arms_summary.csv` of z1d, z2b (fed), z1e, z2c (1 client), z1g, z2e (QC, SQC) |
-| Table 3 | z3b `compare_arms_summary.csv` |
-| Table 4, Figure 1 | `compare_arms_transitions.csv` of z2b, z1d (FAR 0.01, budget 80, summed over seeds) |
-| Table 5, Figure 2 | z2d, z1f `range_mechanism/e3_summary.csv` (model PQ_80) |
-| Table 6 | z2f, z1h `range_mechanism/e4_summary.csv` |
-| Table 7 | Tables 2, 5, 6 and Table 8 |
-| Table 8 | `device_e7/<board>/device_agreement.json` and `device_*.npy` of z8, z8c (S3) and z8b (ESP32), compared with the host outputs of the z7 bundle |
-| Table 9, §7 current runtime | `docs/runtime_compare/runtime_compare.{md,csv}` from `scripts/runtime_compare.py` over z10 (TFLM 1.0.0), z10d (esp-tflite-micro 1.4.2, esp-nn), z10f (reference kernels); build provenance in each `device_e7/<board>/build_meta/` |
+| Table 3 (deployable models), Table 11 (findings) | `paper/supplement/S8_deployable_models.csv`, `S1`, `S2` from `scripts/build_supplement.py` (reported per-tensor exports; latency from z8 / z8b) |
+| Table 2 | `compare_arms/compare_arms_summary.csv` of z1d, z2b (fed), z1e, z2c (1 client), z1g, z2e (QC, SQC); F8 / P / S80 at 80 KB from the per-tensor exports of z9 (`saha_checks.json` -> exports); per run in `paper/supplement/S1_operating_points.csv` |
+| Table 4 (E6) | z3b `compare_arms_summary.csv` |
+| Table 5, Figure 1 | `compare_arms_transitions.csv` of z2b, z1d (FAR 0.01, budget 80, summed over seeds) |
+| Table 6, Figure 2 | z2d, z1f `range_mechanism/e3_summary.csv` (model PQ_80) |
+| Table 7 (E4) | z2f, z1h `range_mechanism/e4_summary.csv` |
+| Table 8 (remedies) | Tables 2, 3, 6, 7, 9 and 10 |
+| Table 9 (E7) | `device_e7/<board>/device_agreement.json` and `device_*.npy` of z8, z8c (S3) and z8b (ESP32), compared with the host outputs of the z7 bundle |
+| Table 10, §7 current runtime | `docs/runtime_compare/runtime_compare.{md,csv}` from `scripts/runtime_compare.py` over z10 (TFLM 1.0.0), z10d (esp-tflite-micro 1.4.2, esp-nn), z10f (reference kernels); build provenance in each `device_e7/<board>/build_meta/` |
 | §3.4 tie-group pitfall | z1b vs z1d (same models, float64 vs float32 thresholds) |
+
+## Supplement
+`scripts/build_supplement.py` writes `paper/supplement/S1-S8*.csv` and `supplement.tex/pdf` from existing records only: S1 per-run operating points (both budgets, export file and SHA-256), S2 run-paired differences and the z9 McNemar tests (with the export each used), S3 device disagreement classes, S4 memory/latency, S5 stream completeness, S6 runtime comparison, S7 split provenance and freeze history, S8 deployable models.

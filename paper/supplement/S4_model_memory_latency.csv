@@ -1,0 +1,35 @@
+board,runtime,model,model_bytes,arena_used_bytes,arena_static_bytes,quantize_input_us_median,quantize_input_us_p95,quantize_input_us_max,invoke_us_median,invoke_us_p95,invoke_us_max,dequantize_output_us_median,dequantize_output_us_p95,dequantize_output_us_max
+ESP32 (TFLM 1.0.0),"TFLM 1.0.0 (TensorFlowLite_ESP32), reference kernels",ton_R80,58056,1440,49152,11.0,11.0,19,13193.0,13209.0,13260,5.0,5.0,5
+ESP32-S3 (TFLM 1.0.0),"TFLM 1.0.0 (TensorFlowLite_ESP32), reference kernels",ton_R80,58056,1440,49152,3.0,3.0,11,5556.0,5561.0,5674,1.0,1.0,9
+ESP32 (TFLM 1.0.0),"TFLM 1.0.0 (TensorFlowLite_ESP32), reference kernels",ton_S80,67936,1440,49152,11.0,11.0,19,13206.0,13216.0,13257,4.0,5.0,11
+ESP32-S3 (TFLM 1.0.0),"TFLM 1.0.0 (TensorFlowLite_ESP32), reference kernels",ton_S80,67936,1440,49152,3.0,3.0,11,5558.0,5564.0,5684,1.0,1.0,9
+ESP32 (TFLM 1.0.0),"TFLM 1.0.0 (TensorFlowLite_ESP32), reference kernels",ton_P80,67936,1440,49152,11.0,11.0,23,13293.0,13307.0,13315,5.0,5.0,11
+ESP32-S3 (TFLM 1.0.0),"TFLM 1.0.0 (TensorFlowLite_ESP32), reference kernels",ton_P80,67936,1440,49152,3.0,4.0,11,5555.0,5564.0,5673,1.0,1.0,9
+ESP32 (TFLM 1.0.0),"TFLM 1.0.0 (TensorFlowLite_ESP32), reference kernels",ton_QC80,58040,1440,49152,11.0,11.0,19,13201.0,13212.0,13241,5.0,5.0,5
+ESP32-S3 (TFLM 1.0.0),"TFLM 1.0.0 (TensorFlowLite_ESP32), reference kernels",ton_QC80,58040,1440,49152,3.0,4.0,11,5554.0,5563.0,5676,1.0,1.0,9
+ESP32 (TFLM 1.0.0),"TFLM 1.0.0 (TensorFlowLite_ESP32), reference kernels",ton_PQ80_minmax,58056,1440,49152,11.0,11.0,19,13333.0,13345.0,13368,5.0,5.0,10
+ESP32-S3 (TFLM 1.0.0),"TFLM 1.0.0 (TensorFlowLite_ESP32), reference kernels",ton_PQ80_minmax,58056,1440,49152,3.0,4.0,11,5547.0,5557.0,5678,1.0,1.0,9
+ESP32 (TFLM 1.0.0),"TFLM 1.0.0 (TensorFlowLite_ESP32), reference kernels",ton_PQ80_int16,73456,1824,49152,11.0,11.0,19,13830.0,13873.0,13902,5.0,5.0,12
+ESP32-S3 (TFLM 1.0.0),"TFLM 1.0.0 (TensorFlowLite_ESP32), reference kernels",ton_PQ80_int16,73456,1824,49152,3.0,3.0,11,6344.0,6361.0,6432,1.0,1.0,9
+ESP32 (TFLM 1.0.0),"TFLM 1.0.0 (TensorFlowLite_ESP32), reference kernels",ton_S80_pt,57184,1440,49152,11.0,11.0,19,13353.0,13363.0,13372,4.0,5.0,12
+ESP32-S3 (TFLM 1.0.0),"TFLM 1.0.0 (TensorFlowLite_ESP32), reference kernels",ton_S80_pt,57184,1440,49152,3.0,3.0,11,5557.0,5564.0,5681,1.0,1.0,9
+ESP32 (TFLM 1.0.0),"TFLM 1.0.0 (TensorFlowLite_ESP32), reference kernels",ton_P80_pt,57200,1440,49152,11.0,11.0,19,13179.0,13190.0,13230,4.0,5.0,13
+ESP32-S3 (TFLM 1.0.0),"TFLM 1.0.0 (TensorFlowLite_ESP32), reference kernels",ton_P80_pt,57200,1440,49152,3.0,4.0,11,5549.0,5559.0,5665,1.0,1.0,9
+ESP32 (TFLM 1.0.0),"TFLM 1.0.0 (TensorFlowLite_ESP32), reference kernels",cic_R80,67016,1456,49152,13.0,13.0,21,15376.0,15391.0,15404,5.0,5.0,5
+ESP32-S3 (TFLM 1.0.0),"TFLM 1.0.0 (TensorFlowLite_ESP32), reference kernels",cic_R80,67016,1456,49152,4.0,5.0,12,6483.0,6490.0,6604,1.0,1.0,9
+ESP32 (TFLM 1.0.0),"TFLM 1.0.0 (TensorFlowLite_ESP32), reference kernels",cic_S80,67016,1456,49152,13.0,13.0,21,15366.0,15380.0,15411,4.0,5.0,5
+ESP32-S3 (TFLM 1.0.0),"TFLM 1.0.0 (TensorFlowLite_ESP32), reference kernels",cic_S80,67016,1456,49152,4.0,5.0,13,6472.0,6481.0,6595,1.0,1.0,9
+ESP32 (TFLM 1.0.0),"TFLM 1.0.0 (TensorFlowLite_ESP32), reference kernels",cic_P80,67008,1456,49152,13.0,13.0,21,15358.0,15371.0,15388,4.0,5.0,5
+ESP32-S3 (TFLM 1.0.0),"TFLM 1.0.0 (TensorFlowLite_ESP32), reference kernels",cic_P80,67008,1456,49152,5.0,5.0,13,6473.0,6485.0,6596,1.0,1.0,9
+ESP32 (TFLM 1.0.0),"TFLM 1.0.0 (TensorFlowLite_ESP32), reference kernels",cic_QC80,67000,1456,49152,13.0,13.0,21,15267.0,15276.0,15307,4.0,5.0,5
+ESP32-S3 (TFLM 1.0.0),"TFLM 1.0.0 (TensorFlowLite_ESP32), reference kernels",cic_QC80,67000,1456,49152,5.0,5.0,13,6476.0,6484.0,6594,1.0,1.0,9
+ESP32 (TFLM 1.0.0),"TFLM 1.0.0 (TensorFlowLite_ESP32), reference kernels",cic_PQ80_minmax,67016,1456,49152,13.0,13.0,21,15320.0,15343.0,15363,5.0,5.0,13
+ESP32-S3 (TFLM 1.0.0),"TFLM 1.0.0 (TensorFlowLite_ESP32), reference kernels",cic_PQ80_minmax,67016,1456,49152,5.0,5.0,13,6471.0,6487.0,6599,1.0,1.0,9
+ESP32 (TFLM 1.0.0),"TFLM 1.0.0 (TensorFlowLite_ESP32), reference kernels",cic_PQ80_int16,82416,1824,49152,13.0,13.0,21,16106.0,16134.0,16221,5.0,5.0,11
+ESP32-S3 (TFLM 1.0.0),"TFLM 1.0.0 (TensorFlowLite_ESP32), reference kernels",cic_PQ80_int16,82416,1824,49152,4.0,5.0,13,7389.5,7403.0,7492,1.0,1.0,9
+ESP32,"esp-tflite-micro 1.4.2 (ESP-IDF 5.5), esp-nn kernels",ton_S80,,5528,49152,,,,10425.5,,,,,
+ESP32,"esp-tflite-micro 1.4.2 (ESP-IDF 5.5), reference (ANSI C) kernels",ton_S80,,5528,49152,,,,10405.0,,,,,
+ESP32,"esp-tflite-micro 1.4.2 (ESP-IDF 5.5), esp-nn kernels",ton_S80_pt,,1944,49152,,,,10295.0,,,,,
+ESP32,"esp-tflite-micro 1.4.2 (ESP-IDF 5.5), reference (ANSI C) kernels",ton_S80_pt,,1944,49152,,,,10283.0,,,,,
+ESP32,"esp-tflite-micro 1.4.2 (ESP-IDF 5.5), esp-nn kernels",ton_PQ80_int16,,5912,49152,,,,12098.0,,,,,
+ESP32,"esp-tflite-micro 1.4.2 (ESP-IDF 5.5), reference (ANSI C) kernels",ton_PQ80_int16,,5912,49152,,,,12070.0,,,,,

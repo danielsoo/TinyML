@@ -1,0 +1,6 @@
+chip,runtime,models_embedded,static_ram_bytes,ram_total_bytes,flash_bytes,flash_partition_bytes,models_bytes,arena_static_bytes,heap_free_bytes,heap_min_free_bytes,build_log
+ESP32-S3,TFLM 1.0.0 (Arduino TensorFlowLite_ESP32),14,74828,327680,1409625,3145728,915336,49152,,,data/processed/revision/2026-11-05_z8_device_e7/device_e7/esp32s3_platformio.log
+ESP32,TFLM 1.0.0 (Arduino TensorFlowLite_ESP32),14,77612,327680,1418881,3145728,915336,49152,,,data/processed/revision/2026-11-05_z8b_device_e7/device_e7/esp32_platformio.log
+ESP32,"TFLM 1.0.0, rebuilt for z10 (heap logged)",14,77612,327680,1419293,3145728,915336,49152,291168,285568,data/processed/revision/2026-11-06_z10_runtime_compare/device_e7/esp32_runtime_arduino_tflm_1_0_0_platformio.log
+ESP32,"esp-tflite-micro 1.4.2 / ESP-IDF 5.5, esp-nn",3,61364,327680,440177,1048576,198576,49152,215024,215024,data/processed/revision/2026-11-06_z10d_runtime_compare_idf55/device_e7/esp32_runtime_esp_tflite_micro_platformio.log
+ESP32,"esp-tflite-micro 1.4.2 / ESP-IDF 5.5, reference kernels",3,61364,327680,440177,1048576,198576,49152,215024,215024,data/processed/revision/2026-11-06_z10f_runtime_kernels_ansi_c/device_e7/esp32_runtime_esp_tflite_micro_ansi_c_platformio.log

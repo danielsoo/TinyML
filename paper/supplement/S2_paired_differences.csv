@@ -1,0 +1,325 @@
+split,far_budget,pair,seed,recall_diff_pts,test_far_diff_pts,kind,attacks_only_first,attacks_only_second,mcnemar_p_attacks,false_alarms_only_first,false_alarms_only_second,mcnemar_p_benign,note
+TON,0.01,R - F,1,2.412,0.436,run-paired (reported exports),,,,,,,
+TON,0.01,R - F,2,2.726,0.436,run-paired (reported exports),,,,,,,
+TON,0.01,R - F,3,0.352,0.083,run-paired (reported exports),,,,,,,
+TON,0.01,S80 - F,1,1.678,0.249,run-paired (reported exports),,,,,,,
+TON,0.01,S80 - F,2,2.245,0.27,run-paired (reported exports),,,,,,,
+TON,0.01,S80 - F,3,-1.264,-0.021,run-paired (reported exports),,,,,,,
+TON,0.01,P - F,1,1.986,0.311,run-paired (reported exports),,,,,,,
+TON,0.01,P - F,2,-1.351,0.29,run-paired (reported exports),,,,,,,
+TON,0.01,P - F,3,-0.95,-0.187,run-paired (reported exports),,,,,,,
+TON,0.01,QC - F,1,2.369,0.228,run-paired (reported exports),,,,,,,
+TON,0.01,QC - F,2,1.906,0.394,run-paired (reported exports),,,,,,,
+TON,0.01,QC - F,3,-0.728,-0.124,run-paired (reported exports),,,,,,,
+TON,0.01,R - P,1,0.426,0.124,run-paired (reported exports),,,,,,,
+TON,0.01,R - P,2,4.077,0.145,run-paired (reported exports),,,,,,,
+TON,0.01,R - P,3,1.302,0.27,run-paired (reported exports),,,,,,,
+TON,0.01,S80 - P,1,-0.308,-0.062,run-paired (reported exports),,,,,,,
+TON,0.01,S80 - P,2,3.596,-0.021,run-paired (reported exports),,,,,,,
+TON,0.01,S80 - P,3,-0.315,0.166,run-paired (reported exports),,,,,,,
+TON,0.01,QC - P,1,0.382,-0.083,run-paired (reported exports),,,,,,,
+TON,0.01,QC - P,2,3.257,0.104,run-paired (reported exports),,,,,,,
+TON,0.01,QC - P,3,0.222,0.062,run-paired (reported exports),,,,,,,
+TON,0.01,R - S80,1,0.734,0.187,run-paired (reported exports),,,,,,,
+TON,0.01,R - S80,2,0.481,0.166,run-paired (reported exports),,,,,,,
+TON,0.01,R - S80,3,1.616,0.104,run-paired (reported exports),,,,,,,
+TON,0.01,R - QC,1,0.043,0.207,run-paired (reported exports),,,,,,,
+TON,0.01,R - QC,2,0.82,0.041,run-paired (reported exports),,,,,,,
+TON,0.01,R - QC,3,1.079,0.207,run-paired (reported exports),,,,,,,
+TON,0.01,SQC - S80,1,-1.215,-0.021,run-paired (reported exports),,,,,,,
+TON,0.01,SQC - S80,2,0.265,0.041,run-paired (reported exports),,,,,,,
+TON,0.01,SQC - S80,3,1.394,-0.021,run-paired (reported exports),,,,,,,
+TON,0.05,R - F,1,-0.025,-0.353,run-paired (reported exports),,,,,,,
+TON,0.05,R - F,2,-0.043,0.27,run-paired (reported exports),,,,,,,
+TON,0.05,R - F,3,-0.08,-0.373,run-paired (reported exports),,,,,,,
+TON,0.05,S80 - F,1,-0.037,-0.104,run-paired (reported exports),,,,,,,
+TON,0.05,S80 - F,2,-0.08,0.332,run-paired (reported exports),,,,,,,
+TON,0.05,S80 - F,3,0.006,0.062,run-paired (reported exports),,,,,,,
+TON,0.05,P - F,1,-0.086,-0.228,run-paired (reported exports),,,,,,,
+TON,0.05,P - F,2,-0.123,0.083,run-paired (reported exports),,,,,,,
+TON,0.05,P - F,3,-0.154,-0.021,run-paired (reported exports),,,,,,,
+TON,0.05,QC - F,1,-0.025,-0.228,run-paired (reported exports),,,,,,,
+TON,0.05,QC - F,2,-0.043,0.187,run-paired (reported exports),,,,,,,
+TON,0.05,QC - F,3,-0.049,0.083,run-paired (reported exports),,,,,,,
+TON,0.05,R - P,1,0.062,-0.124,run-paired (reported exports),,,,,,,
+TON,0.05,R - P,2,0.08,0.187,run-paired (reported exports),,,,,,,
+TON,0.05,R - P,3,0.074,-0.353,run-paired (reported exports),,,,,,,
+TON,0.05,S80 - P,1,0.049,0.124,run-paired (reported exports),,,,,,,
+TON,0.05,S80 - P,2,0.043,0.249,run-paired (reported exports),,,,,,,
+TON,0.05,S80 - P,3,0.16,0.083,run-paired (reported exports),,,,,,,
+TON,0.05,QC - P,1,0.062,0.0,run-paired (reported exports),,,,,,,
+TON,0.05,QC - P,2,0.08,0.104,run-paired (reported exports),,,,,,,
+TON,0.05,QC - P,3,0.105,0.104,run-paired (reported exports),,,,,,,
+TON,0.05,R - S80,1,0.012,-0.249,run-paired (reported exports),,,,,,,
+TON,0.05,R - S80,2,0.037,-0.062,run-paired (reported exports),,,,,,,
+TON,0.05,R - S80,3,-0.086,-0.436,run-paired (reported exports),,,,,,,
+TON,0.05,R - QC,1,0.0,-0.124,run-paired (reported exports),,,,,,,
+TON,0.05,R - QC,2,0.0,0.083,run-paired (reported exports),,,,,,,
+TON,0.05,R - QC,3,-0.031,-0.456,run-paired (reported exports),,,,,,,
+TON,0.05,SQC - S80,1,-0.037,-0.726,run-paired (reported exports),,,,,,,
+TON,0.05,SQC - S80,2,0.025,-0.332,run-paired (reported exports),,,,,,,
+TON,0.05,SQC - S80,3,-0.031,0.083,run-paired (reported exports),,,,,,,
+CIC,0.01,R - F,1,1.881,-0.027,run-paired (reported exports),,,,,,,
+CIC,0.01,R - F,2,4.891,-0.136,run-paired (reported exports),,,,,,,
+CIC,0.01,R - F,3,1.359,-0.046,run-paired (reported exports),,,,,,,
+CIC,0.01,S80 - F,1,1.471,-0.013,run-paired (reported exports),,,,,,,
+CIC,0.01,S80 - F,2,5.165,-0.018,run-paired (reported exports),,,,,,,
+CIC,0.01,S80 - F,3,1.39,-0.006,run-paired (reported exports),,,,,,,
+CIC,0.01,P - F,1,1.046,0.004,run-paired (reported exports),,,,,,,
+CIC,0.01,P - F,2,4.412,-0.169,run-paired (reported exports),,,,,,,
+CIC,0.01,P - F,3,1.234,-0.04,run-paired (reported exports),,,,,,,
+CIC,0.01,QC - F,1,1.798,-0.046,run-paired (reported exports),,,,,,,
+CIC,0.01,QC - F,2,4.914,-0.061,run-paired (reported exports),,,,,,,
+CIC,0.01,QC - F,3,1.31,-0.037,run-paired (reported exports),,,,,,,
+CIC,0.01,R - P,1,0.835,-0.03,run-paired (reported exports),,,,,,,
+CIC,0.01,R - P,2,0.479,0.033,run-paired (reported exports),,,,,,,
+CIC,0.01,R - P,3,0.125,-0.006,run-paired (reported exports),,,,,,,
+CIC,0.01,S80 - P,1,0.425,-0.016,run-paired (reported exports),,,,,,,
+CIC,0.01,S80 - P,2,0.753,0.151,run-paired (reported exports),,,,,,,
+CIC,0.01,S80 - P,3,0.155,0.034,run-paired (reported exports),,,,,,,
+CIC,0.01,QC - P,1,0.752,-0.049,run-paired (reported exports),,,,,,,
+CIC,0.01,QC - P,2,0.501,0.108,run-paired (reported exports),,,,,,,
+CIC,0.01,QC - P,3,0.075,0.003,run-paired (reported exports),,,,,,,
+CIC,0.01,R - S80,1,0.411,-0.014,run-paired (reported exports),,,,,,,
+CIC,0.01,R - S80,2,-0.274,-0.119,run-paired (reported exports),,,,,,,
+CIC,0.01,R - S80,3,-0.031,-0.04,run-paired (reported exports),,,,,,,
+CIC,0.01,R - QC,1,0.084,0.019,run-paired (reported exports),,,,,,,
+CIC,0.01,R - QC,2,-0.022,-0.075,run-paired (reported exports),,,,,,,
+CIC,0.01,R - QC,3,0.049,-0.009,run-paired (reported exports),,,,,,,
+CIC,0.01,SQC - S80,1,0.273,0.012,run-paired (reported exports),,,,,,,
+CIC,0.01,SQC - S80,2,-0.164,-0.01,run-paired (reported exports),,,,,,,
+CIC,0.01,SQC - S80,3,-0.039,-0.022,run-paired (reported exports),,,,,,,
+CIC,0.05,R - F,1,-0.022,-0.087,run-paired (reported exports),,,,,,,
+CIC,0.05,R - F,2,0.231,-0.054,run-paired (reported exports),,,,,,,
+CIC,0.05,R - F,3,-0.041,-0.096,run-paired (reported exports),,,,,,,
+CIC,0.05,S80 - F,1,-0.005,-0.143,run-paired (reported exports),,,,,,,
+CIC,0.05,S80 - F,2,0.258,-0.101,run-paired (reported exports),,,,,,,
+CIC,0.05,S80 - F,3,-0.008,-0.115,run-paired (reported exports),,,,,,,
+CIC,0.05,P - F,1,-0.134,-0.54,run-paired (reported exports),,,,,,,
+CIC,0.05,P - F,2,0.116,-0.267,run-paired (reported exports),,,,,,,
+CIC,0.05,P - F,3,-0.236,-0.73,run-paired (reported exports),,,,,,,
+CIC,0.05,QC - F,1,-0.178,-1.124,run-paired (reported exports),,,,,,,
+CIC,0.05,QC - F,2,0.104,-0.832,run-paired (reported exports),,,,,,,
+CIC,0.05,QC - F,3,-0.185,-1.866,run-paired (reported exports),,,,,,,
+CIC,0.05,R - P,1,0.112,0.453,run-paired (reported exports),,,,,,,
+CIC,0.05,R - P,2,0.114,0.214,run-paired (reported exports),,,,,,,
+CIC,0.05,R - P,3,0.195,0.634,run-paired (reported exports),,,,,,,
+CIC,0.05,S80 - P,1,0.129,0.397,run-paired (reported exports),,,,,,,
+CIC,0.05,S80 - P,2,0.141,0.166,run-paired (reported exports),,,,,,,
+CIC,0.05,S80 - P,3,0.228,0.615,run-paired (reported exports),,,,,,,
+CIC,0.05,QC - P,1,-0.044,-0.584,run-paired (reported exports),,,,,,,
+CIC,0.05,QC - P,2,-0.013,-0.565,run-paired (reported exports),,,,,,,
+CIC,0.05,QC - P,3,0.052,-1.136,run-paired (reported exports),,,,,,,
+CIC,0.05,R - S80,1,-0.018,0.056,run-paired (reported exports),,,,,,,
+CIC,0.05,R - S80,2,-0.027,0.047,run-paired (reported exports),,,,,,,
+CIC,0.05,R - S80,3,-0.033,0.019,run-paired (reported exports),,,,,,,
+CIC,0.05,R - QC,1,0.155,1.037,run-paired (reported exports),,,,,,,
+CIC,0.05,R - QC,2,0.127,0.778,run-paired (reported exports),,,,,,,
+CIC,0.05,R - QC,3,0.144,1.77,run-paired (reported exports),,,,,,,
+CIC,0.05,SQC - S80,1,-0.122,-0.207,run-paired (reported exports),,,,,,,
+CIC,0.05,SQC - S80,2,-0.172,-1.638,run-paired (reported exports),,,,,,,
+CIC,0.05,SQC - S80,3,-0.142,-1.475,run-paired (reported exports),,,,,,,
+TON-hosts,0.01,R - F,1,-1.323,-4.769,run-paired (reported exports),,,,,,,
+TON-hosts,0.01,R - F,2,-2.253,0.0,run-paired (reported exports),,,,,,,
+TON-hosts,0.01,R - F,3,-1.308,-4.769,run-paired (reported exports),,,,,,,
+TON-hosts,0.01,S80 - F,1,-1.225,-4.769,run-paired (reported exports),,,,,,,
+TON-hosts,0.01,S80 - F,2,-1.013,0.0,run-paired (reported exports),,,,,,,
+TON-hosts,0.01,S80 - F,3,-2.927,-4.769,run-paired (reported exports),,,,,,,
+TON-hosts,0.01,P - F,1,-4.181,-4.769,run-paired (reported exports),,,,,,,
+TON-hosts,0.01,P - F,2,-4.619,0.0,run-paired (reported exports),,,,,,,
+TON-hosts,0.01,P - F,3,-4.378,-4.769,run-paired (reported exports),,,,,,,
+TON-hosts,0.01,QC - F,1,-0.895,-4.769,run-paired (reported exports),,,,,,,
+TON-hosts,0.01,QC - F,2,-2.499,0.0,run-paired (reported exports),,,,,,,
+TON-hosts,0.01,QC - F,3,-2.322,-4.769,run-paired (reported exports),,,,,,,
+TON-hosts,0.01,R - P,1,2.858,0.0,run-paired (reported exports),,,,,,,
+TON-hosts,0.01,R - P,2,2.366,0.0,run-paired (reported exports),,,,,,,
+TON-hosts,0.01,R - P,3,3.07,0.0,run-paired (reported exports),,,,,,,
+TON-hosts,0.01,S80 - P,1,2.956,0.0,run-paired (reported exports),,,,,,,
+TON-hosts,0.01,S80 - P,2,3.606,0.0,run-paired (reported exports),,,,,,,
+TON-hosts,0.01,S80 - P,3,1.451,0.0,run-paired (reported exports),,,,,,,
+TON-hosts,0.01,QC - P,1,3.286,0.0,run-paired (reported exports),,,,,,,
+TON-hosts,0.01,QC - P,2,2.12,0.0,run-paired (reported exports),,,,,,,
+TON-hosts,0.01,QC - P,3,2.056,0.0,run-paired (reported exports),,,,,,,
+TON-hosts,0.01,R - S80,1,-0.098,0.0,run-paired (reported exports),,,,,,,
+TON-hosts,0.01,R - S80,2,-1.24,0.0,run-paired (reported exports),,,,,,,
+TON-hosts,0.01,R - S80,3,1.618,0.0,run-paired (reported exports),,,,,,,
+TON-hosts,0.01,R - QC,1,-0.428,0.0,run-paired (reported exports),,,,,,,
+TON-hosts,0.01,R - QC,2,0.246,0.0,run-paired (reported exports),,,,,,,
+TON-hosts,0.01,R - QC,3,1.013,0.0,run-paired (reported exports),,,,,,,
+TON-hosts,0.01,SQC - S80,1,-0.03,0.0,run-paired (reported exports),,,,,,,
+TON-hosts,0.01,SQC - S80,2,-0.251,0.0,run-paired (reported exports),,,,,,,
+TON-hosts,0.01,SQC - S80,3,-1.279,0.0,run-paired (reported exports),,,,,,,
+TON-hosts,0.05,R - F,1,-0.143,-1.025,run-paired (reported exports),,,,,,,
+TON-hosts,0.05,R - F,2,-0.034,0.0,run-paired (reported exports),,,,,,,
+TON-hosts,0.05,R - F,3,-0.123,-4.691,run-paired (reported exports),,,,,,,
+TON-hosts,0.05,S80 - F,1,-0.221,0.118,run-paired (reported exports),,,,,,,
+TON-hosts,0.05,S80 - F,2,-0.044,4.218,run-paired (reported exports),,,,,,,
+TON-hosts,0.05,S80 - F,3,-0.059,-4.848,run-paired (reported exports),,,,,,,
+TON-hosts,0.05,P - F,1,-0.271,-0.158,run-paired (reported exports),,,,,,,
+TON-hosts,0.05,P - F,2,-0.212,-0.079,run-paired (reported exports),,,,,,,
+TON-hosts,0.05,P - F,3,-0.167,0.079,run-paired (reported exports),,,,,,,
+TON-hosts,0.05,QC - F,1,-0.103,0.0,run-paired (reported exports),,,,,,,
+TON-hosts,0.05,QC - F,2,-0.034,-0.039,run-paired (reported exports),,,,,,,
+TON-hosts,0.05,QC - F,3,-0.167,-4.651,run-paired (reported exports),,,,,,,
+TON-hosts,0.05,R - P,1,0.128,-0.867,run-paired (reported exports),,,,,,,
+TON-hosts,0.05,R - P,2,0.177,0.079,run-paired (reported exports),,,,,,,
+TON-hosts,0.05,R - P,3,0.044,-4.769,run-paired (reported exports),,,,,,,
+TON-hosts,0.05,S80 - P,1,0.049,0.276,run-paired (reported exports),,,,,,,
+TON-hosts,0.05,S80 - P,2,0.167,4.296,run-paired (reported exports),,,,,,,
+TON-hosts,0.05,S80 - P,3,0.108,-4.927,run-paired (reported exports),,,,,,,
+TON-hosts,0.05,QC - P,1,0.167,0.158,run-paired (reported exports),,,,,,,
+TON-hosts,0.05,QC - P,2,0.177,0.039,run-paired (reported exports),,,,,,,
+TON-hosts,0.05,QC - P,3,0.0,-4.73,run-paired (reported exports),,,,,,,
+TON-hosts,0.05,R - S80,1,0.079,-1.143,run-paired (reported exports),,,,,,,
+TON-hosts,0.05,R - S80,2,0.01,-4.218,run-paired (reported exports),,,,,,,
+TON-hosts,0.05,R - S80,3,-0.064,0.158,run-paired (reported exports),,,,,,,
+TON-hosts,0.05,R - QC,1,-0.039,-1.025,run-paired (reported exports),,,,,,,
+TON-hosts,0.05,R - QC,2,0.0,0.039,run-paired (reported exports),,,,,,,
+TON-hosts,0.05,R - QC,3,0.044,-0.039,run-paired (reported exports),,,,,,,
+TON-hosts,0.05,SQC - S80,1,0.025,-1.104,run-paired (reported exports),,,,,,,
+TON-hosts,0.05,SQC - S80,2,-0.03,-0.67,run-paired (reported exports),,,,,,,
+TON-hosts,0.05,SQC - S80,3,-0.039,0.079,run-paired (reported exports),,,,,,,
+TON,0.01,R - F,1,2.412,0.456,"record-level McNemar (z9, saved scores)",404,13,9.35583456681063e-102,24,2,1.049041748046875e-05,first-selected and reported exports have the same test error counts
+TON,0.05,R - F,1,-0.025,-0.353,"record-level McNemar (z9, saved scores)",1,5,0.21875,7,24,0.003326892852783203,first-selected and reported exports have the same test error counts
+TON,0.01,S - F,1,2.171,0.187,"record-level McNemar (z9, saved scores)",378,26,3.303806244736811e-81,16,7,0.0931396484375,computed on the first-selected export of S; the reported per-tensor export has different test errors
+TON,0.05,S - F,1,-0.037,-0.145,"record-level McNemar (z9, saved scores)",1,7,0.0703125,17,24,0.34888887944907765,computed on the first-selected export of S; the reported per-tensor export has different test errors
+TON,0.01,P - F,1,0.419,0.249,"record-level McNemar (z9, saved scores)",288,220,0.0029156910985215887,15,3,0.007537841796875,computed on the first-selected export of P; the reported per-tensor export has different test errors
+TON,0.05,P - F,1,-0.105,-0.353,"record-level McNemar (z9, saved scores)",6,23,0.002315700054168701,34,51,0.08205429958748713,computed on the first-selected export of P; the reported per-tensor export has different test errors
+TON,0.01,R - P,1,1.992,0.207,"record-level McNemar (z9, saved scores)",352,29,1.178163623693537e-71,14,4,0.0308837890625,computed on the first-selected export of P; the reported per-tensor export has different test errors
+TON,0.05,R - P,1,0.08,0.0,"record-level McNemar (z9, saved scores)",18,5,0.010622024536132812,35,35,1.0,computed on the first-selected export of P; the reported per-tensor export has different test errors
+TON,0.01,S - P,1,1.752,-0.062,"record-level McNemar (z9, saved scores)",304,20,2.2986971649887157e-66,5,8,0.5810546875,"computed on the first-selected export of S, P; the reported per-tensor export has different test errors"
+TON,0.05,S - P,1,0.068,0.207,"record-level McNemar (z9, saved scores)",17,6,0.03468966484069824,33,23,0.22880554123435617,"computed on the first-selected export of S, P; the reported per-tensor export has different test errors"
+TON,0.01,QC - P,1,1.949,0.0,"record-level McNemar (z9, saved scores)",349,33,1.0040680264745608e-67,2,2,1.0,computed on the first-selected export of P; the reported per-tensor export has different test errors
+TON,0.05,QC - P,1,0.08,0.124,"record-level McNemar (z9, saved scores)",18,5,0.010622024536132812,35,29,0.5323087760278421,computed on the first-selected export of P; the reported per-tensor export has different test errors
+TON,0.01,R - S,1,0.241,0.27,"record-level McNemar (z9, saved scores)",151,112,0.018948763288162047,20,7,0.0191572904586792,computed on the first-selected export of S; the reported per-tensor export has different test errors
+TON,0.05,R - S,1,0.012,-0.207,"record-level McNemar (z9, saved scores)",5,3,0.7265625,14,24,0.14330665429588407,computed on the first-selected export of S; the reported per-tensor export has different test errors
+TON,0.01,F8 - F,1,2.282,0.456,"record-level McNemar (z9, saved scores)",390,20,3.685481430521518e-90,23,1,2.9802322387695312e-06,first-selected and reported exports have the same test error counts
+TON,0.05,F8 - F,1,-0.006,0.041,"record-level McNemar (z9, saved scores)",0,1,1.0,12,10,0.8318119049072266,first-selected and reported exports have the same test error counts
+TON,0.01,R - F,2,2.733,0.456,"record-level McNemar (z9, saved scores)",449,6,2.5975185350945877e-124,23,1,2.9802322387695312e-06,first-selected and reported exports have the same test error counts
+TON,0.05,R - F,2,-0.043,0.083,"record-level McNemar (z9, saved scores)",1,8,0.0390625,26,22,0.6654658120766186,first-selected and reported exports have the same test error counts
+TON,0.01,S - F,2,2.258,0.29,"record-level McNemar (z9, saved scores)",375,9,2.3670262988994107e-98,15,1,0.000518798828125,computed on the first-selected export of S; the reported per-tensor export has different test errors
+TON,0.05,S - F,2,-0.08,0.124,"record-level McNemar (z9, saved scores)",1,14,0.0009765625,25,19,0.4513808323961257,computed on the first-selected export of S; the reported per-tensor export has different test errors
+TON,0.01,P - F,2,-0.296,0.311,"record-level McNemar (z9, saved scores)",321,369,0.07349642462867405,18,3,0.0014896392822265625,computed on the first-selected export of P; the reported per-tensor export has different test errors
+TON,0.05,P - F,2,-0.074,-0.27,"record-level McNemar (z9, saved scores)",5,17,0.01690053939819336,24,37,0.12373144253809217,computed on the first-selected export of P; the reported per-tensor export has different test errors
+TON,0.01,R - P,2,3.029,0.145,"record-level McNemar (z9, saved scores)",514,23,6.872344746609891e-122,14,7,0.18924713134765625,computed on the first-selected export of P; the reported per-tensor export has different test errors
+TON,0.05,R - P,2,0.031,0.353,"record-level McNemar (z9, saved scores)",10,5,0.3017578125,42,25,0.049800114294728665,computed on the first-selected export of P; the reported per-tensor export has different test errors
+TON,0.01,S - P,2,2.554,-0.021,"record-level McNemar (z9, saved scores)",440,26,3.245036835543713e-98,7,8,1.0,"computed on the first-selected export of S, P; the reported per-tensor export has different test errors"
+TON,0.05,S - P,2,-0.006,0.394,"record-level McNemar (z9, saved scores)",14,15,1.0,43,24,0.027119992403126347,"computed on the first-selected export of S, P; the reported per-tensor export has different test errors"
+TON,0.01,QC - P,2,2.208,0.104,"record-level McNemar (z9, saved scores)",360,2,1.3988249666394777e-104,8,3,0.2265625,computed on the first-selected export of P; the reported per-tensor export has different test errors
+TON,0.05,QC - P,2,0.031,0.27,"record-level McNemar (z9, saved scores)",11,6,0.332305908203125,37,24,0.12373144253809217,computed on the first-selected export of P; the reported per-tensor export has different test errors
+TON,0.01,R - S,2,0.475,0.166,"record-level McNemar (z9, saved scores)",119,42,1.0113525726969983e-09,12,4,0.076812744140625,computed on the first-selected export of S; the reported per-tensor export has different test errors
+TON,0.05,R - S,2,0.037,-0.041,"record-level McNemar (z9, saved scores)",11,5,0.210113525390625,11,13,0.8388197422027588,computed on the first-selected export of S; the reported per-tensor export has different test errors
+TON,0.01,F8 - F,2,2.671,0.602,"record-level McNemar (z9, saved scores)",451,18,1.8486901144117891e-109,30,1,2.9802322387695312e-08,computed on the first-selected export of F8; the reported per-tensor export has different test errors
+TON,0.05,F8 - F,2,0.025,-0.207,"record-level McNemar (z9, saved scores)",5,1,0.21875,3,13,0.021270751953125,computed on the first-selected export of F8; the reported per-tensor export has different test errors
+TON,0.01,R - F,3,0.352,0.083,"record-level McNemar (z9, saved scores)",63,6,4.4735298364989573e-13,5,1,0.21875,first-selected and reported exports have the same test error counts
+TON,0.05,R - F,3,-0.08,-0.519,"record-level McNemar (z9, saved scores)",1,14,0.0009765625,24,49,0.004626293921895511,first-selected and reported exports have the same test error counts
+TON,0.01,S - F,3,-1.264,-0.021,"record-level McNemar (z9, saved scores)",60,265,6.997531767131781e-32,8,9,1.0,first-selected and reported exports have the same test error counts
+TON,0.05,S - F,3,0.006,-0.083,"record-level McNemar (z9, saved scores)",5,4,1.0,30,34,0.707980754134764,first-selected and reported exports have the same test error counts
+TON,0.01,P - F,3,-0.95,-0.187,"record-level McNemar (z9, saved scores)",62,216,3.912645877016485e-21,11,20,0.14961278438568115,first-selected and reported exports have the same test error counts
+TON,0.05,P - F,3,-0.154,-0.166,"record-level McNemar (z9, saved scores)",0,25,5.960464477539063e-08,17,25,0.27995623852893914,first-selected and reported exports have the same test error counts
+TON,0.01,R - P,3,1.302,0.27,"record-level McNemar (z9, saved scores)",219,8,1.4850667398112657e-54,20,7,0.0191572904586792,first-selected and reported exports have the same test error counts
+TON,0.05,R - P,3,0.074,-0.353,"record-level McNemar (z9, saved scores)",21,9,0.04277394525706768,11,28,0.009475304279476404,first-selected and reported exports have the same test error counts
+TON,0.01,S - P,3,-0.315,0.166,"record-level McNemar (z9, saved scores)",260,311,0.03630731797918336,21,13,0.22948101302608848,first-selected and reported exports have the same test error counts
+TON,0.05,S - P,3,0.16,0.083,"record-level McNemar (z9, saved scores)",26,0,2.9802322387695312e-08,31,27,0.6940040940761316,first-selected and reported exports have the same test error counts
+TON,0.01,QC - P,3,0.222,0.062,"record-level McNemar (z9, saved scores)",83,47,0.0020237797357403877,7,4,0.548828125,first-selected and reported exports have the same test error counts
+TON,0.05,QC - P,3,0.105,0.104,"record-level McNemar (z9, saved scores)",27,10,0.007632078602910042,26,21,0.5600646295802107,first-selected and reported exports have the same test error counts
+TON,0.01,R - S,3,1.616,0.104,"record-level McNemar (z9, saved scores)",313,51,4.2790123413729807e-47,11,6,0.332305908203125,first-selected and reported exports have the same test error counts
+TON,0.05,R - S,3,-0.086,-0.436,"record-level McNemar (z9, saved scores)",0,14,0.0001220703125,23,44,0.013933875024287792,first-selected and reported exports have the same test error counts
+TON,0.01,F8 - F,3,0.111,0.0,"record-level McNemar (z9, saved scores)",33,15,0.013283281562245008,1,1,1.0,first-selected and reported exports have the same test error counts
+TON,0.05,F8 - F,3,-0.025,-0.145,"record-level McNemar (z9, saved scores)",0,4,0.125,3,10,0.09228515625,first-selected and reported exports have the same test error counts
+CIC,0.01,R - F,1,1.873,-0.028,"record-level McNemar (z9, saved scores)",1667,75,0.0,1044,1159,0.0151287085278801,first-selected and reported exports have the same test error counts
+CIC,0.05,R - F,1,-0.022,-0.088,"record-level McNemar (z9, saved scores)",6,25,0.0008779102936387062,2170,2533,1.2837809131758823e-07,first-selected and reported exports have the same test error counts
+CIC,0.01,S - F,1,1.463,-0.014,"record-level McNemar (z9, saved scores)",1478,235,4.03256017352887e-220,953,1011,0.19836535867956603,first-selected and reported exports have the same test error counts
+CIC,0.05,S - F,1,-0.005,-0.143,"record-level McNemar (z9, saved scores)",9,13,0.5234670639038086,1999,2593,1.9012861662568584e-18,first-selected and reported exports have the same test error counts
+CIC,0.01,P - F,1,1.038,0.002,"record-level McNemar (z9, saved scores)",1595,713,5.332771026306749e-77,2703,2693,0.9024887842848097,first-selected and reported exports have the same test error counts
+CIC,0.05,P - F,1,-0.134,-0.541,"record-level McNemar (z9, saved scores)",2,116,4.2262125217147407e-32,5734,7972,9.584780605518242e-82,first-selected and reported exports have the same test error counts
+CIC,0.01,R - P,1,0.835,-0.03,"record-level McNemar (z9, saved scores)",712,2,5.9236453716581704e-210,2027,2152,0.055077359070857784,first-selected and reported exports have the same test error counts
+CIC,0.05,R - P,1,0.112,0.453,"record-level McNemar (z9, saved scores)",96,1,1.2369338993865465e-27,7142,5267,9.634813266985006e-64,first-selected and reported exports have the same test error counts
+CIC,0.01,S - P,1,0.425,-0.016,"record-level McNemar (z9, saved scores)",673,312,3.941660031083452e-31,2591,2659,0.3551294104986979,first-selected and reported exports have the same test error counts
+CIC,0.05,S - P,1,0.129,0.397,"record-level McNemar (z9, saved scores)",115,5,2.9954333738275177e-28,7196,5552,4.2354675373876076e-48,first-selected and reported exports have the same test error counts
+CIC,0.01,QC - P,1,0.752,-0.049,"record-level McNemar (z9, saved scores)",640,1,1.4071416020633948e-190,1885,2089,0.0012782092070264153,first-selected and reported exports have the same test error counts
+CIC,0.05,QC - P,1,-0.044,-0.584,"record-level McNemar (z9, saved scores)",35,72,0.00044530244806265524,4619,7039,5.767691643849369e-112,first-selected and reported exports have the same test error counts
+CIC,0.01,R - S,1,0.411,-0.014,"record-level McNemar (z9, saved scores)",384,35,2.185747351810774e-75,1108,1165,0.24015007377030484,first-selected and reported exports have the same test error counts
+CIC,0.05,R - S,1,-0.018,0.056,"record-level McNemar (z9, saved scores)",7,22,0.008130058646202087,3189,2958,0.003347631992472609,first-selected and reported exports have the same test error counts
+CIC,0.01,F8 - F,1,1.501,-0.007,"record-level McNemar (z9, saved scores)",1474,198,4.6476151166115166e-241,867,894,0.5355497449349158,computed on the first-selected export of F8; the reported per-tensor export has different test errors
+CIC,0.05,F8 - F,1,0.004,-0.127,"record-level McNemar (z9, saved scores)",6,3,0.5078125,1214,1738,4.861195434456727e-22,computed on the first-selected export of F8; the reported per-tensor export has different test errors
+CIC,0.01,R - F,2,4.891,-0.136,"record-level McNemar (z9, saved scores)",4361,204,0.0,713,1278,4.21763892229558e-37,first-selected and reported exports have the same test error counts
+CIC,0.05,R - F,2,0.227,-0.054,"record-level McNemar (z9, saved scores)",227,34,3.321273957199166e-36,4013,4238,0.013657947839530823,first-selected and reported exports have the same test error counts
+CIC,0.01,S - F,2,5.086,-0.079,"record-level McNemar (z9, saved scores)",4452,129,0.0,927,1253,3.0923135969847916e-12,computed on the first-selected export of S; the reported per-tensor export has different test errors
+CIC,0.05,S - F,2,0.253,-0.034,"record-level McNemar (z9, saved scores)",225,10,4.4172193513798663e-54,2439,2580,0.04812723829712606,computed on the first-selected export of S; the reported per-tensor export has different test errors
+CIC,0.01,P - F,2,4.502,-0.129,"record-level McNemar (z9, saved scores)",4470,644,0.0,2102,2637,8.15281008646447e-15,computed on the first-selected export of P; the reported per-tensor export has different test errors
+CIC,0.05,P - F,2,0.076,-0.393,"record-level McNemar (z9, saved scores)",228,163,0.001181873246134208,8470,10096,7.911236623876886e-33,computed on the first-selected export of P; the reported per-tensor export has different test errors
+CIC,0.01,R - P,2,0.389,-0.007,"record-level McNemar (z9, saved scores)",521,190,1.7247282869567098e-36,1602,1632,0.6100929835791863,computed on the first-selected export of P; the reported per-tensor export has different test errors
+CIC,0.05,R - P,2,0.151,0.338,"record-level McNemar (z9, saved scores)",130,2,3.2248952830840194e-36,7986,6585,3.8018339814643966e-31,computed on the first-selected export of P; the reported per-tensor export has different test errors
+CIC,0.01,S - P,2,0.585,0.05,"record-level McNemar (z9, saved scores)",590,93,2.8675372865247625e-89,1955,1746,0.0006265318233122167,"computed on the first-selected export of S, P; the reported per-tensor export has different test errors"
+CIC,0.05,S - P,2,0.176,0.359,"record-level McNemar (z9, saved scores)",156,6,8.129417816936699e-39,9732,8247,1.6813888211075426e-28,"computed on the first-selected export of S, P; the reported per-tensor export has different test errors"
+CIC,0.01,QC - P,2,0.412,0.068,"record-level McNemar (z9, saved scores)",402,52,4.306576220056194e-68,1442,1160,3.508793889944714e-08,computed on the first-selected export of P; the reported per-tensor export has different test errors
+CIC,0.05,QC - P,2,0.024,-0.44,"record-level McNemar (z9, saved scores)",34,14,0.005515201485501109,3579,5401,7.4547924355054e-83,computed on the first-selected export of P; the reported per-tensor export has different test errors
+CIC,0.01,R - S,2,-0.195,-0.058,"record-level McNemar (z9, saved scores)",99,265,1.2903722607686966e-18,543,782,5.536872089941968e-11,computed on the first-selected export of S; the reported per-tensor export has different test errors
+CIC,0.05,R - S,2,-0.026,-0.02,"record-level McNemar (z9, saved scores)",6,28,0.00019512558355927467,4199,4283,0.3674742987397926,computed on the first-selected export of S; the reported per-tensor export has different test errors
+CIC,0.01,F8 - F,2,5.071,-0.045,"record-level McNemar (z9, saved scores)",4448,138,0.0,975,1163,5.1950267224015196e-05,computed on the first-selected export of F8; the reported per-tensor export has different test errors
+CIC,0.05,F8 - F,2,0.244,-0.287,"record-level McNemar (z9, saved scores)",224,17,3.013624992500785e-47,531,1718,3.723022539496871e-145,computed on the first-selected export of F8; the reported per-tensor export has different test errors
+CIC,0.01,R - F,3,1.367,-0.042,"record-level McNemar (z9, saved scores)",1250,88,1.3927084590824356e-263,1262,1434,0.0009865284721267183,first-selected and reported exports have the same test error counts
+CIC,0.05,R - F,3,-0.041,-0.098,"record-level McNemar (z9, saved scores)",5,40,7.878384167270269e-08,3340,3745,1.57941377071181e-06,first-selected and reported exports have the same test error counts
+CIC,0.01,S - F,3,1.385,-0.108,"record-level McNemar (z9, saved scores)",1238,61,7.72815090585029e-286,954,1403,2.1299133217689024e-20,computed on the first-selected export of S; the reported per-tensor export has different test errors
+CIC,0.05,S - F,3,-0.011,-0.094,"record-level McNemar (z9, saved scores)",7,16,0.0931396484375,2652,3040,2.8752585138994773e-07,computed on the first-selected export of S; the reported per-tensor export has different test errors
+CIC,0.01,P - F,3,1.041,-0.01,"record-level McNemar (z9, saved scores)",1227,342,6.264070150094271e-117,1410,1451,0.4545703940829506,computed on the first-selected export of P; the reported per-tensor export has different test errors
+CIC,0.05,P - F,3,-0.153,-0.935,"record-level McNemar (z9, saved scores)",3,133,9.62796454058168e-36,4743,8615,1.808973708332946e-249,computed on the first-selected export of P; the reported per-tensor export has different test errors
+CIC,0.01,R - P,3,0.326,-0.032,"record-level McNemar (z9, saved scores)",298,21,7.638276583776765e-64,926,1057,0.0034975491942034675,computed on the first-selected export of P; the reported per-tensor export has different test errors
+CIC,0.05,R - P,3,0.112,0.837,"record-level McNemar (z9, saved scores)",98,3,1.3552788123878027e-25,7293,3826,6.605278649084901e-241,computed on the first-selected export of P; the reported per-tensor export has different test errors
+CIC,0.01,S - P,3,0.344,-0.099,"record-level McNemar (z9, saved scores)",316,24,3.8612000391846683e-66,773,1181,2.4485072663837302e-20,"computed on the first-selected export of S, P; the reported per-tensor export has different test errors"
+CIC,0.05,S - P,3,0.142,0.841,"record-level McNemar (z9, saved scores)",129,8,3.0554882002890587e-29,8670,5186,1.8100166307201775e-194,"computed on the first-selected export of S, P; the reported per-tensor export has different test errors"
+CIC,0.01,QC - P,3,0.277,-0.023,"record-level McNemar (z9, saved scores)",275,40,2.7644493054709727e-44,938,1033,0.034207054187213114,computed on the first-selected export of P; the reported per-tensor export has different test errors
+CIC,0.05,QC - P,3,-0.032,-0.933,"record-level McNemar (z9, saved scores)",1,28,1.1175870895385742e-07,1567,5428,0.0,computed on the first-selected export of P; the reported per-tensor export has different test errors
+CIC,0.01,R - S,3,-0.018,0.067,"record-level McNemar (z9, saved scores)",31,46,0.11001559898513336,756,479,3.1084356820574645e-15,computed on the first-selected export of S; the reported per-tensor export has different test errors
+CIC,0.05,R - S,3,-0.031,-0.004,"record-level McNemar (z9, saved scores)",8,34,6.877111491121468e-05,3944,3961,0.8571876695172209,computed on the first-selected export of S; the reported per-tensor export has different test errors
+CIC,0.01,F8 - F,3,1.137,-0.089,"record-level McNemar (z9, saved scores)",1203,237,1.0774886118767075e-155,895,1265,1.7368572414999708e-15,computed on the first-selected export of F8; the reported per-tensor export has different test errors
+CIC,0.05,F8 - F,3,-0.016,-0.239,"record-level McNemar (z9, saved scores)",1,15,0.000518798828125,708,1699,3.1452678703304206e-93,computed on the first-selected export of F8; the reported per-tensor export has different test errors
+TON-hosts,0.01,R - F,1,-1.328,-4.769,"record-level McNemar (z9, saved scores)",59,329,1.4662009651567376e-46,0,121,7.52316384526264e-37,first-selected and reported exports have the same test error counts
+TON-hosts,0.05,R - F,1,-0.143,-1.025,"record-level McNemar (z9, saved scores)",1,30,2.9802322387695312e-08,2,28,8.67992639541626e-07,first-selected and reported exports have the same test error counts
+TON-hosts,0.01,S - F,1,-1.451,-4.769,"record-level McNemar (z9, saved scores)",73,368,1.9633295387474717e-48,0,121,7.52316384526264e-37,computed on the first-selected export of S; the reported per-tensor export has different test errors
+TON-hosts,0.05,S - F,1,-0.182,-0.236,"record-level McNemar (z9, saved scores)",3,40,3.0213413992896676e-09,7,13,0.26317596435546875,computed on the first-selected export of S; the reported per-tensor export has different test errors
+TON-hosts,0.01,P - F,1,-4.186,-4.769,"record-level McNemar (z9, saved scores)",100,951,1.105795061981461e-174,0,121,7.52316384526264e-37,first-selected and reported exports have the same test error counts
+TON-hosts,0.05,P - F,1,-0.271,-0.158,"record-level McNemar (z9, saved scores)",0,55,5.551115123125783e-17,0,4,0.125,first-selected and reported exports have the same test error counts
+TON-hosts,0.01,R - P,1,2.858,0.0,"record-level McNemar (z9, saved scores)",661,80,1.265515766402372e-114,0,0,1.0,first-selected and reported exports have the same test error counts
+TON-hosts,0.05,R - P,1,0.128,-0.867,"record-level McNemar (z9, saved scores)",26,0,2.9802322387695312e-08,4,26,5.947612226009369e-05,first-selected and reported exports have the same test error counts
+TON-hosts,0.01,S - P,1,2.735,0.0,"record-level McNemar (z9, saved scores)",648,92,8.220714182473379e-104,0,0,1.0,computed on the first-selected export of S; the reported per-tensor export has different test errors
+TON-hosts,0.05,S - P,1,0.089,-0.079,"record-level McNemar (z9, saved scores)",21,3,0.0002771615982055664,9,11,0.8238029479980469,computed on the first-selected export of S; the reported per-tensor export has different test errors
+TON-hosts,0.01,QC - P,1,3.286,0.0,"record-level McNemar (z9, saved scores)",679,11,1.5445239513031376e-184,0,0,1.0,first-selected and reported exports have the same test error counts
+TON-hosts,0.05,QC - P,1,0.167,0.158,"record-level McNemar (z9, saved scores)",34,0,1.1641532182693481e-10,5,1,0.21875,first-selected and reported exports have the same test error counts
+TON-hosts,0.01,R - S,1,0.123,0.0,"record-level McNemar (z9, saved scores)",88,63,0.05044785478187975,0,0,1.0,computed on the first-selected export of S; the reported per-tensor export has different test errors
+TON-hosts,0.05,R - S,1,0.039,-0.788,"record-level McNemar (z9, saved scores)",15,7,0.13380050659179688,2,22,3.5881996154785156e-05,computed on the first-selected export of S; the reported per-tensor export has different test errors
+TON-hosts,0.01,F8 - F,1,0.005,-4.769,"record-level McNemar (z9, saved scores)",57,56,1.0,0,121,7.52316384526264e-37,first-selected and reported exports have the same test error counts
+TON-hosts,0.05,F8 - F,1,-0.246,-5.361,"record-level McNemar (z9, saved scores)",1,51,2.353672812205332e-14,2,138,1.4164190352742676e-38,first-selected and reported exports have the same test error counts
+TON-hosts,0.01,R - F,2,-2.258,0.0,"record-level McNemar (z9, saved scores)",24,483,3.874210813445689e-112,0,0,1.0,first-selected and reported exports have the same test error counts
+TON-hosts,0.05,R - F,2,-0.034,0.0,"record-level McNemar (z9, saved scores)",13,20,0.296206368599087,2,2,1.0,first-selected and reported exports have the same test error counts
+TON-hosts,0.01,S - F,2,-0.954,0.0,"record-level McNemar (z9, saved scores)",77,271,1.8733077677306937e-26,0,0,1.0,computed on the first-selected export of S; the reported per-tensor export has different test errors
+TON-hosts,0.05,S - F,2,-0.182,3.666,"record-level McNemar (z9, saved scores)",12,49,1.969878418086636e-06,98,5,1.8172343385355978e-23,computed on the first-selected export of S; the reported per-tensor export has different test errors
+TON-hosts,0.01,P - F,2,-1.697,0.0,"record-level McNemar (z9, saved scores)",74,419,1.6631071931171775e-59,0,0,1.0,computed on the first-selected export of P; the reported per-tensor export has different test errors
+TON-hosts,0.05,P - F,2,-0.207,-0.079,"record-level McNemar (z9, saved scores)",12,54,1.6944941229476377e-07,0,2,0.5,computed on the first-selected export of P; the reported per-tensor export has different test errors
+TON-hosts,0.01,R - P,2,-0.561,0.0,"record-level McNemar (z9, saved scores)",116,230,8.810548515980833e-10,0,0,1.0,computed on the first-selected export of P; the reported per-tensor export has different test errors
+TON-hosts,0.05,R - P,2,0.172,0.079,"record-level McNemar (z9, saved scores)",36,1,5.529727786779404e-10,2,0,0.5,computed on the first-selected export of P; the reported per-tensor export has different test errors
+TON-hosts,0.01,S - P,2,0.743,0.0,"record-level McNemar (z9, saved scores)",184,33,1.2966048025229523e-26,0,0,1.0,"computed on the first-selected export of S, P; the reported per-tensor export has different test errors"
+TON-hosts,0.05,S - P,2,0.025,3.745,"record-level McNemar (z9, saved scores)",15,10,0.42435622215270996,98,3,1.3552788123878027e-25,"computed on the first-selected export of S, P; the reported per-tensor export has different test errors"
+TON-hosts,0.01,QC - P,2,-0.807,0.0,"record-level McNemar (z9, saved scores)",126,290,5.567497676067504e-16,0,0,1.0,computed on the first-selected export of P; the reported per-tensor export has different test errors
+TON-hosts,0.05,QC - P,2,0.172,0.039,"record-level McNemar (z9, saved scores)",35,0,5.820766091346741e-11,1,0,1.0,computed on the first-selected export of P; the reported per-tensor export has different test errors
+TON-hosts,0.01,R - S,2,-1.304,0.0,"record-level McNemar (z9, saved scores)",30,295,7.008318000255471e-56,0,0,1.0,computed on the first-selected export of S; the reported per-tensor export has different test errors
+TON-hosts,0.05,R - S,2,0.148,-3.666,"record-level McNemar (z9, saved scores)",30,0,1.862645149230957e-09,5,98,1.8172343385355978e-23,computed on the first-selected export of S; the reported per-tensor export has different test errors
+TON-hosts,0.01,F8 - F,2,-0.246,0.0,"record-level McNemar (z9, saved scores)",24,74,4.2159207369916043e-07,0,0,1.0,computed on the first-selected export of F8; the reported per-tensor export has different test errors
+TON-hosts,0.05,F8 - F,2,-0.079,0.158,"record-level McNemar (z9, saved scores)",12,28,0.01658900337497471,8,4,0.3876953125,computed on the first-selected export of F8; the reported per-tensor export has different test errors
+TON-hosts,0.01,R - F,3,-1.308,-4.769,"record-level McNemar (z9, saved scores)",30,296,3.8578590170569084e-56,0,121,7.52316384526264e-37,first-selected and reported exports have the same test error counts
+TON-hosts,0.05,R - F,3,-0.123,-4.691,"record-level McNemar (z9, saved scores)",3,28,4.649162292480469e-06,2,121,1.4344792661954539e-33,first-selected and reported exports have the same test error counts
+TON-hosts,0.01,S - F,3,-2.927,-4.769,"record-level McNemar (z9, saved scores)",126,721,4.970191090338566e-102,0,121,7.52316384526264e-37,first-selected and reported exports have the same test error counts
+TON-hosts,0.05,S - F,3,-0.059,-4.848,"record-level McNemar (z9, saved scores)",3,15,0.007537841796875,0,123,1.88079096131566e-37,first-selected and reported exports have the same test error counts
+TON-hosts,0.01,P - F,3,-4.378,-4.769,"record-level McNemar (z9, saved scores)",87,977,3.1297345764374815e-191,0,121,7.52316384526264e-37,first-selected and reported exports have the same test error counts
+TON-hosts,0.05,P - F,3,-0.167,0.079,"record-level McNemar (z9, saved scores)",4,38,5.65314621780999e-08,3,1,0.625,first-selected and reported exports have the same test error counts
+TON-hosts,0.01,R - P,3,3.07,0.0,"record-level McNemar (z9, saved scores)",714,90,2.4204805319896134e-121,0,0,1.0,first-selected and reported exports have the same test error counts
+TON-hosts,0.05,R - P,3,0.044,-4.769,"record-level McNemar (z9, saved scores)",31,22,0.27167916606550335,3,124,4.014360227832145e-33,first-selected and reported exports have the same test error counts
+TON-hosts,0.01,S - P,3,1.451,0.0,"record-level McNemar (z9, saved scores)",738,443,7.997497211969833e-18,0,0,1.0,first-selected and reported exports have the same test error counts
+TON-hosts,0.05,S - P,3,0.108,-4.927,"record-level McNemar (z9, saved scores)",31,9,0.0006795482549932785,0,125,4.70197740328915e-38,first-selected and reported exports have the same test error counts
+TON-hosts,0.01,QC - P,3,2.056,0.0,"record-level McNemar (z9, saved scores)",459,41,1.688555912377973e-90,0,0,1.0,first-selected and reported exports have the same test error counts
+TON-hosts,0.05,QC - P,3,0.0,-4.73,"record-level McNemar (z9, saved scores)",23,23,1.0,3,123,7.84059433975869e-33,first-selected and reported exports have the same test error counts
+TON-hosts,0.01,R - S,3,1.618,0.0,"record-level McNemar (z9, saved scores)",487,158,6.602523353177523e-40,0,0,1.0,first-selected and reported exports have the same test error counts
+TON-hosts,0.05,R - S,3,-0.064,0.158,"record-level McNemar (z9, saved scores)",8,21,0.0241195447742939,4,0,0.125,first-selected and reported exports have the same test error counts
+TON-hosts,0.01,F8 - F,3,-0.138,-4.769,"record-level McNemar (z9, saved scores)",17,45,0.0004970915863810334,0,121,7.52316384526264e-37,computed on the first-selected export of F8; the reported per-tensor export has different test errors
+TON-hosts,0.05,F8 - F,3,-0.128,-0.394,"record-level McNemar (z9, saved scores)",1,27,2.1606683731079102e-07,5,15,0.04138946533203125,computed on the first-selected export of F8; the reported per-tensor export has different test errors

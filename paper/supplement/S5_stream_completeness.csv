@@ -1,0 +1,29 @@
+board,model,inputs_in_bundle,final_job,outputs_present,missing_outputs,device_resets_final_run,inputs_skipped_final_run,earlier_runs,duplicates_possible,bit_identical_to
+ESP32 (TFLM 1.0.0),ton_R80,4462,2026-11-05_z8b_device_e7,4462,0,0,0,,"no (lockstep protocol: one reply per input index, written once)",ESP32-S3 (TFLM 1.0.0): 4462/4462
+ESP32-S3 (TFLM 1.0.0),ton_R80,4462,2026-11-05_z8_device_e7,4462,0,not logged (z8 host loop),0,,"no (lockstep protocol: one reply per input index, written once)",ESP32 (TFLM 1.0.0): 4462/4462
+ESP32 (TFLM 1.0.0),ton_S80,4462,2026-11-05_z8b_device_e7,4462,0,0,0,,"no (lockstep protocol: one reply per input index, written once)",ESP32-S3 (TFLM 1.0.0): 4462/4462
+ESP32-S3 (TFLM 1.0.0),ton_S80,4462,2026-11-05_z8_device_e7,4462,0,not logged (z8 host loop),0,,"no (lockstep protocol: one reply per input index, written once)",ESP32 (TFLM 1.0.0): 4462/4462
+ESP32 (TFLM 1.0.0),ton_P80,4462,2026-11-05_z8b_device_e7,4462,0,0,0,,"no (lockstep protocol: one reply per input index, written once)",ESP32-S3 (TFLM 1.0.0): 4462/4462
+ESP32-S3 (TFLM 1.0.0),ton_P80,4462,2026-11-05_z8_device_e7,4462,0,not logged (z8 host loop),0,,"no (lockstep protocol: one reply per input index, written once)",ESP32 (TFLM 1.0.0): 4462/4462
+ESP32 (TFLM 1.0.0),ton_QC80,4462,2026-11-05_z8b_device_e7,4462,0,0,0,,"no (lockstep protocol: one reply per input index, written once)",ESP32-S3 (TFLM 1.0.0): 4462/4462
+ESP32-S3 (TFLM 1.0.0),ton_QC80,4462,2026-11-05_z8c_device_e7_s3_fill,4462,0,0,0,"2026-11-05_z8_device_e7: n=None, crash at None, error=ERROR no reply to model selection (device reset?)","no (lockstep protocol: one reply per input index, written once)",ESP32 (TFLM 1.0.0): 4462/4462
+ESP32 (TFLM 1.0.0),ton_PQ80_minmax,4462,2026-11-05_z8b_device_e7,4462,0,0,0,,"no (lockstep protocol: one reply per input index, written once)",ESP32-S3 (TFLM 1.0.0): 4462/4462
+ESP32-S3 (TFLM 1.0.0),ton_PQ80_minmax,4462,2026-11-05_z8_device_e7,4462,0,not logged (z8 host loop),0,,"no (lockstep protocol: one reply per input index, written once)",ESP32 (TFLM 1.0.0): 4462/4462
+ESP32 (TFLM 1.0.0),ton_PQ80_int16,4462,2026-11-05_z8b_device_e7,4462,0,0,0,,"no (lockstep protocol: one reply per input index, written once)",ESP32-S3 (TFLM 1.0.0): 4462/4462
+ESP32-S3 (TFLM 1.0.0),ton_PQ80_int16,4462,2026-11-05_z8_device_e7,4462,0,not logged (z8 host loop),0,,"no (lockstep protocol: one reply per input index, written once)",ESP32 (TFLM 1.0.0): 4462/4462
+ESP32 (TFLM 1.0.0),ton_S80_pt,4462,2026-11-05_z8b_device_e7,4462,0,0,0,,"no (lockstep protocol: one reply per input index, written once)",ESP32-S3 (TFLM 1.0.0): 4462/4462
+ESP32-S3 (TFLM 1.0.0),ton_S80_pt,4462,2026-11-05_z8c_device_e7_s3_fill,4462,0,0,0,"2026-11-05_z8_device_e7: n=601, crash at 601, error=None","no (lockstep protocol: one reply per input index, written once)",ESP32 (TFLM 1.0.0): 4462/4462
+ESP32 (TFLM 1.0.0),ton_P80_pt,4462,2026-11-05_z8b_device_e7,4462,0,0,0,,"no (lockstep protocol: one reply per input index, written once)",ESP32-S3 (TFLM 1.0.0): 4462/4462
+ESP32-S3 (TFLM 1.0.0),ton_P80_pt,4462,2026-11-05_z8c_device_e7_s3_fill,4462,0,0,0,"2026-11-05_z8_device_e7: n=None, crash at None, error=ERROR no reply to model selection (device reset?)","no (lockstep protocol: one reply per input index, written once)",ESP32 (TFLM 1.0.0): 4462/4462
+ESP32 (TFLM 1.0.0),cic_R80,5902,2026-11-05_z8b_device_e7,5902,0,0,0,,"no (lockstep protocol: one reply per input index, written once)",ESP32-S3 (TFLM 1.0.0): 5902/5902
+ESP32-S3 (TFLM 1.0.0),cic_R80,5902,2026-11-05_z8c_device_e7_s3_fill,5902,0,1,0,"2026-11-05_z8_device_e7: n=None, crash at None, error=ERROR no reply to model selection (device reset?)","no (lockstep protocol: one reply per input index, written once)",ESP32 (TFLM 1.0.0): 5902/5902
+ESP32 (TFLM 1.0.0),cic_S80,5902,2026-11-05_z8b_device_e7,5902,0,0,0,,"no (lockstep protocol: one reply per input index, written once)",ESP32-S3 (TFLM 1.0.0): 5902/5902
+ESP32-S3 (TFLM 1.0.0),cic_S80,5902,2026-11-05_z8_device_e7,5902,0,not logged (z8 host loop),0,,"no (lockstep protocol: one reply per input index, written once)",ESP32 (TFLM 1.0.0): 5902/5902
+ESP32 (TFLM 1.0.0),cic_P80,5902,2026-11-05_z8b_device_e7,5902,0,0,0,,"no (lockstep protocol: one reply per input index, written once)",ESP32-S3 (TFLM 1.0.0): 5902/5902
+ESP32-S3 (TFLM 1.0.0),cic_P80,5902,2026-11-05_z8c_device_e7_s3_fill,5902,0,1,0,"2026-11-05_z8_device_e7: n=2559, crash at 2559, error=None","no (lockstep protocol: one reply per input index, written once)",ESP32 (TFLM 1.0.0): 5902/5902
+ESP32 (TFLM 1.0.0),cic_QC80,5902,2026-11-05_z8b_device_e7,5902,0,0,0,,"no (lockstep protocol: one reply per input index, written once)",ESP32-S3 (TFLM 1.0.0): 5902/5902
+ESP32-S3 (TFLM 1.0.0),cic_QC80,5902,2026-11-05_z8_device_e7,5902,0,not logged (z8 host loop),0,,"no (lockstep protocol: one reply per input index, written once)",ESP32 (TFLM 1.0.0): 5902/5902
+ESP32 (TFLM 1.0.0),cic_PQ80_minmax,5902,2026-11-05_z8b_device_e7,5902,0,0,0,,"no (lockstep protocol: one reply per input index, written once)",ESP32-S3 (TFLM 1.0.0): 5902/5902
+ESP32-S3 (TFLM 1.0.0),cic_PQ80_minmax,5902,2026-11-05_z8_device_e7,5902,0,not logged (z8 host loop),0,,"no (lockstep protocol: one reply per input index, written once)",ESP32 (TFLM 1.0.0): 5902/5902
+ESP32 (TFLM 1.0.0),cic_PQ80_int16,5902,2026-11-05_z8b_device_e7,5902,0,0,0,,"no (lockstep protocol: one reply per input index, written once)",ESP32-S3 (TFLM 1.0.0): 5902/5902
+ESP32-S3 (TFLM 1.0.0),cic_PQ80_int16,5902,2026-11-05_z8c_device_e7_s3_fill,5902,0,1,0,"2026-11-05_z8_device_e7: n=4137, crash at 4137, error=None","no (lockstep protocol: one reply per input index, written once)",ESP32 (TFLM 1.0.0): 5902/5902
