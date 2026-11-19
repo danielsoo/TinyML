@@ -300,8 +300,38 @@ ESP32 & esp-tflite-micro 1.4.2 / ESP-IDF 5.5, esp-nn & 3 & 61364 & 49152 & 44017
 ESP32 & esp-tflite-micro 1.4.2 / ESP-IDF 5.5, reference kernels & 3 & 61364 & 49152 & 440177 & 198576 & 215024 & 215024 \\
 \end{longtable}}
 
-\section*{S6: runtime comparison}
-See \texttt{docs/runtime\_compare/runtime\_compare.\{md,csv\}} (same three files and 4,462 TON\_IoT inputs on the same classic ESP32; runtime-comparison table of the paper). Build provenance (component hashes, \texttt{dependencies.lock}, \texttt{sdkconfig}) is in each \texttt{device\_e7/<board>/build\_meta/} of jobs z10, z10d, z10f.
+{\tiny
+\begin{longtable}{llrrrrrrrrrrr}
+\caption{S6 (\texttt{S6\_runtime\_comparison.csv}): the same three files and 4,462 TON\_IoT inputs on the same classic ESP32 (240\,MHz) through TFLM 1.0.0 and esp-tflite-micro 1.4.2 / ESP-IDF 5.5 (esp-nn and reference kernels), compared with the host TFLite interpreter on the same file at the frozen thresholds. Converter TensorFlow 2.21; all three files declare QUANTIZE v1, FULLY\_CONNECTED v4, LOGISTIC v2, DEQUANTIZE v2; ton\_S80 and ton\_PQ80\_int16 have per-channel weight scales, ton\_S80\_pt per-tensor. The esp-nn and reference builds give bit-identical outputs for all three files; ton\_S80\_pt outputs are bit-identical across all three builds. Build provenance (component hashes, dependencies.lock, sdkconfig) is kept with the device results of jobs z10, z10d, z10f.}\\
+\toprule
+model & runtime & FAR & outputs = host & max diff & decisions = host & add.\ misses & add.\ detections & added FA & avoided FA & arena B & heap free B & invoke ms \\
+\midrule
+\endfirsthead
+\toprule
+model & runtime & FAR & outputs = host & max diff & decisions = host & add.\ misses & add.\ detections & added FA & avoided FA & arena B & heap free B & invoke ms \\
+\midrule
+\endhead
+\bottomrule
+\endlastfoot
+ton\_S80 & TFLM 1.0.0 (Arduino TensorFlowLite\_ESP32), reference kernels & 0.01 & 170/4462 & 0.6641 & 2209/4462 & 2069 & 0 & 0 & 23 & 1440 & 291168 & 13.27 \\
+ton\_S80 & TFLM 1.0.0 (Arduino TensorFlowLite\_ESP32), reference kernels & 0.05 & 170/4462 & 0.6641 & 4269/4462 & 49 & 0 & 0 & 89 & 1440 & 291168 & 13.27 \\
+ton\_S80 & esp-tflite-micro 1.4.2 (ESP-IDF 5.5), esp-nn kernels & 0.01 & 4377/4462 & 0.0117 & 4459/4462 & 0 & 3 & 0 & 0 & 5528 & 215024 & 10.43 \\
+ton\_S80 & esp-tflite-micro 1.4.2 (ESP-IDF 5.5), esp-nn kernels & 0.05 & 4377/4462 & 0.0117 & 4462/4462 & 0 & 0 & 0 & 0 & 5528 & 215024 & 10.43 \\
+ton\_S80 & esp-tflite-micro 1.4.2 (ESP-IDF 5.5), reference (ANSI C) kernels & 0.01 & 4377/4462 & 0.0117 & 4459/4462 & 0 & 3 & 0 & 0 & 5528 & 215024 & 10.40 \\
+ton\_S80 & esp-tflite-micro 1.4.2 (ESP-IDF 5.5), reference (ANSI C) kernels & 0.05 & 4377/4462 & 0.0117 & 4462/4462 & 0 & 0 & 0 & 0 & 5528 & 215024 & 10.40 \\
+ton\_S80\_pt & TFLM 1.0.0 (Arduino TensorFlowLite\_ESP32), reference kernels & 0.01 & 4099/4462 & 0.0156 & 4462/4462 & 0 & 0 & 0 & 0 & 1440 & 291136 & 13.39 \\
+ton\_S80\_pt & TFLM 1.0.0 (Arduino TensorFlowLite\_ESP32), reference kernels & 0.05 & 4099/4462 & 0.0156 & 4458/4462 & 0 & 0 & 0 & 4 & 1440 & 291136 & 13.39 \\
+ton\_S80\_pt & esp-tflite-micro 1.4.2 (ESP-IDF 5.5), esp-nn kernels & 0.01 & 4099/4462 & 0.0156 & 4462/4462 & 0 & 0 & 0 & 0 & 1944 & 215004 & 10.29 \\
+ton\_S80\_pt & esp-tflite-micro 1.4.2 (ESP-IDF 5.5), esp-nn kernels & 0.05 & 4099/4462 & 0.0156 & 4458/4462 & 0 & 0 & 0 & 4 & 1944 & 215004 & 10.29 \\
+ton\_S80\_pt & esp-tflite-micro 1.4.2 (ESP-IDF 5.5), reference (ANSI C) kernels & 0.01 & 4099/4462 & 0.0156 & 4462/4462 & 0 & 0 & 0 & 0 & 1944 & 215004 & 10.28 \\
+ton\_S80\_pt & esp-tflite-micro 1.4.2 (ESP-IDF 5.5), reference (ANSI C) kernels & 0.05 & 4099/4462 & 0.0156 & 4458/4462 & 0 & 0 & 0 & 4 & 1944 & 215004 & 10.28 \\
+ton\_PQ80\_int16 & TFLM 1.0.0 (Arduino TensorFlowLite\_ESP32), reference kernels & 0.01 & 425/4462 & 0.9962 & 3379/4462 & 933 & 4 & 0 & 12 & 1824 & 291136 & 13.87 \\
+ton\_PQ80\_int16 & TFLM 1.0.0 (Arduino TensorFlowLite\_ESP32), reference kernels & 0.05 & 425/4462 & 0.9962 & 4346/4462 & 23 & 0 & 0 & 26 & 1824 & 291136 & 13.87 \\
+ton\_PQ80\_int16 & esp-tflite-micro 1.4.2 (ESP-IDF 5.5), esp-nn kernels & 0.01 & 0/4462 & 0.5545 & 1894/4462 & 2278 & 0 & 0 & 23 & 5912 & 215004 & 12.10 \\
+ton\_PQ80\_int16 & esp-tflite-micro 1.4.2 (ESP-IDF 5.5), esp-nn kernels & 0.05 & 0/4462 & 0.5545 & 3149/4462 & 0 & 37 & 1211 & 0 & 5912 & 215004 & 12.10 \\
+ton\_PQ80\_int16 & esp-tflite-micro 1.4.2 (ESP-IDF 5.5), reference (ANSI C) kernels & 0.01 & 0/4462 & 0.5545 & 1894/4462 & 2278 & 0 & 0 & 23 & 5912 & 215004 & 12.07 \\
+ton\_PQ80\_int16 & esp-tflite-micro 1.4.2 (ESP-IDF 5.5), reference (ANSI C) kernels & 0.05 & 0/4462 & 0.5545 & 3149/4462 & 0 & 37 & 1211 & 0 & 5912 & 215004 & 12.07 \\
+\end{longtable}}
 
 {\scriptsize
 \begin{longtable}{llrrr}

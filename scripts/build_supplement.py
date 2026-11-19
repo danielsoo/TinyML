@@ -542,12 +542,26 @@ kept in S1 and marked as superseded.
                            ["chip", "runtime", "models", "static RAM", "arena", "flash", "models", "heap free", "min free"],
                            rows, "llrrrrrrr"))
     # S6
-    rc = ROOT / "docs/runtime_compare/runtime_compare.md"
+    rc = ROOT / "docs/runtime_compare/runtime_compare.csv"
     if rc.exists():
-        parts.append("\\section*{S6: runtime comparison}\nSee \\texttt{docs/runtime\\_compare/runtime\\_compare.\\{md,csv\\}} "
-                     "(same three files and 4,462 TON\\_IoT inputs on the same classic ESP32; runtime-comparison table of the paper). Build "
-                     "provenance (component hashes, \\texttt{dependencies.lock}, \\texttt{sdkconfig}) is in each "
-                     "\\texttt{device\\_e7/<board>/build\\_meta/} of jobs z10, z10d, z10f.\n")
+        import shutil
+        shutil.copyfile(rc, OUT / "S6_runtime_comparison.csv")
+        with open(rc, encoding="utf-8") as f:
+            rcrows = list(csv.DictReader(f))
+        rows = [[r["model"], r["runtime"], r["far"], f"{r['exact']}/{r['n']}", f"{float(r['max_abs_diff']):.4f}",
+                 f"{r['agree']}/{r['n']}", r["extra_miss"], r["extra_detect"], r["extra_fa"], r["fewer_fa"],
+                 r["arena_used"], r["free_heap"], f"{float(r['invoke_us_median']) / 1000:.2f}"] for r in rcrows]
+        parts.append(tex_table(
+            "S6 (\\texttt{S6\\_runtime\\_comparison.csv}): the same three files and 4,462 TON\\_IoT inputs on the same classic "
+            "ESP32 (240\\,MHz) through TFLM 1.0.0 and esp-tflite-micro 1.4.2 / ESP-IDF 5.5 (esp-nn and reference kernels), "
+            "compared with the host TFLite interpreter on the same file at the frozen thresholds. Converter TensorFlow 2.21; "
+            "all three files declare QUANTIZE v1, FULLY\\_CONNECTED v4, LOGISTIC v2, DEQUANTIZE v2; ton\\_S80 and "
+            "ton\\_PQ80\\_int16 have per-channel weight scales, ton\\_S80\\_pt per-tensor. The esp-nn and reference builds give "
+            "bit-identical outputs for all three files; ton\\_S80\\_pt outputs are bit-identical across all three builds. "
+            "Build provenance (component hashes, dependencies.lock, sdkconfig) is kept with the device results of jobs z10, z10d, z10f.",
+            ["model", "runtime", "FAR", "outputs = host", "max diff", "decisions = host", "add.\\ misses",
+             "add.\\ detections", "added FA", "avoided FA", "arena B", "heap free B", "invoke ms"],
+            rows, "llrrrrrrrrrrr", "\\tiny"))
     # S7
     rows = [[r["split"], r["partition"], r["records"], r["in_old_test"], r["in_old_training_pool"]] for r in s7]
     parts.append(tex_table("S7a (\\texttt{S7\\_split\\_provenance.csv}): overlap of the revised splits with the earlier (exploratory) "
