@@ -1,0 +1,56 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Reply to Dr. Saha</title><style>body{font-family:Calibri,Arial,sans-serif;font-size:11pt;color:#000;max-width:900px}
+table{border-collapse:collapse;margin:8px 0}th,td{border:1px solid #999;padding:4px 8px;vertical-align:top;text-align:left}
+th{background:#f0f0f0}</style></head><body>
+<p>Dear Dr. Saha,</p>
+<p>Thank you for your patience. Following your email of November 11, we revised the manuscript using existing results only. There are no new experiments, no retraining and no new statistical tests, the thresholds remain frozen, and the 16-bit recovery is reported as host-only.</p>
+<ul>
+<li><strong>Model comparison.</strong> A new Table 3 compares the principal deployable models: recall, achieved test FAR, size, latency and training cost, with each result linked to its exported file in the supplement.</li>
+<li><strong>Supporting results.</strong> A supplement (S1–S8, PDF and CSV files) contains the records below, and the paper cites it where each record applies:<ul>
+<li>per-run results at both budgets</li>
+<li>paired differences</li>
+<li>device disagreement classes (additional misses, additional detections, false-alarm changes)</li>
+<li>resource breakdown</li>
+<li>stream completeness</li>
+<li>the runtime comparison</li>
+<li>split provenance with the freeze history</li>
+</ul>
+</li>
+<li><strong>Narrowed claims.</strong> We limited the conclusions to what the records support, including the test-set history, the runtime scope, the E3 execution path and the int16 observation, and we now separate the validation FAR budget from the achieved test FAR.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Finding</th>
+<th>Evidence</th>
+<th>Practical implication</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A compact model trained at the target size matches the complete recovery recipe on CIC-IDS2017 and unseen hosts. With the recipe, recall was 0.5–1.6 percentage points higher on random TON_IoT, at a slightly higher test FAR.</td>
+<td>Tables 2–4; S2, S8</td>
+<td>If the memory budget is known before training, start with the compact model.</td>
+</tr>
+<tr>
+<td>The input quantization range causes the PTQ/QAT collapses, and bounding it prevents them.</td>
+<td>Table 6, Figure 2; Table 2</td>
+<td>Clip or exclude extreme inputs before PTQ and QAT, and weigh the saturation that clipping causes.</td>
+</tr>
+<tr>
+<td>Device agreement depends on the exact exported file and runtime.</td>
+<td>Tables 9–10; S3, S5, S6</td>
+<td>Verify the exact file on the target runtime with near-threshold and out-of-range inputs.</td>
+</tr>
+<tr>
+<td>A validation FAR budget does not fix the achieved test FAR.</td>
+<td>S1</td>
+<td>Report the achieved test FAR next to the budget.</td>
+</tr>
+</tbody>
+</table>
+<p>Because of the new table, the tables you referred to as Tables 3, 7, 8 and 9 are now Tables 4, 8, 9 and 10. While reviewing the records, we also corrected two minor statements: the count of E7 exceptions and two unnecessary † marks in Table 2. Neither changes a principal conclusion.</p>
+<p>We'd appreciate your feedback on the revised manuscript and supplement, especially on how we frame the main contribution.</p>
+<p>Attached: the revised manuscript, the supplement (PDF), and the supplement CSV files (ZIP).</p>
+<p>Best regards,<br />
+Younsoo Park and Seokhyeon Bae</p>
+</body></html>
