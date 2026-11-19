@@ -13,15 +13,7 @@ Thank you for your patience. Following your email of November 11, we revised the
   - split provenance with the freeze history
 
   The paper cites the supplement where each record applies.
-- **Narrowed claims.** We narrowed the conclusions to what was verified:
-  - test-set independence and earlier exploratory use
-  - runtime results limited to the tested files and board
-  - E3 execution path
-  - the int16 observation
-  - validation budget vs. achieved test FAR
-  - unseen hosts and the clipping trade-off
-  - R attributed to the complete recipe
-  - the one-client scope
+- **Narrowed claims.** We limited the conclusions to what the records support, including the test-set history, the runtime scope, the E3 execution path and the int16 observation, and we now separate the validation FAR budget from the achieved test FAR.
 
 | Finding | Evidence | Practical implication |
 |---|---|---|
@@ -30,7 +22,9 @@ Thank you for your patience. Following your email of November 11, we revised the
 | Device agreement depends on the exact exported file and runtime. | Tables 9–10; S3, S5, S6 | Verify the exact file on the target runtime with near-threshold and out-of-range inputs. |
 | A validation FAR budget does not fix the achieved test FAR. | S1 | Report the achieved test FAR next to the budget. |
 
-Because of the new table, the tables you referred to as Tables 3, 7, 8 and 9 are now Tables 4, 8, 9 and 10. While reviewing the records, we also corrected two minor statements: the count of E7 exceptions and two unnecessary † marks in Table 2. Neither changes a principal conclusion. We consider the experimental work closed unless you see a problem in these records.
+Because of the new table, the tables you referred to as Tables 3, 7, 8 and 9 are now Tables 4, 8, 9 and 10. While reviewing the records, we also corrected two minor statements: the count of E7 exceptions and two unnecessary † marks in Table 2. Neither changes a principal conclusion.
+
+We'd appreciate your feedback on the revised manuscript and supplement, especially on how we frame the main contribution.
 
 Attached: the revised manuscript, the supplement (PDF), and the supplement CSV files (ZIP).
 
