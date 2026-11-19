@@ -5,7 +5,7 @@ Attachments: TinyML_Federated_IDS_LCTES.pdf (manuscript), TinyML_Federated_IDS_L
 
 Dear Dr. Saha,
 
-Thank you for the clear plan. We revised the manuscript using existing results only: no new experiments, no retraining, no new statistical tests, and all thresholds stayed frozen. The 16-bit recovery remains a host-only result. The manuscript is now 8 pages of body text plus references and appendix (10 pages in total), and the table numbers have shifted (the runtime comparison is now Table 10).
+Thank you for the clear plan. We revised the manuscript using existing results only: no new experiments, no retraining, no new statistical tests, and all thresholds stayed frozen. The 16-bit recovery remains a host-only result. The manuscript is now 8 pages of body text plus references and appendix (10 pages in total), and the table numbers have shifted because of the new deployable-model table: the tables you referred to as Table 3 (unseen hosts), Table 7 (remedies), Table 8 (E7) and Table 9 (runtime comparison) are now Tables 4, 8, 9 and 10.
 
 **Principal findings, evidence and implications** (Table 11 in the paper)
 
